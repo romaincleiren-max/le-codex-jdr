@@ -1069,18 +1069,26 @@ const PageAccueilTab = ({ themes, setThemes }) => {
   const [editedThemes, setEditedThemes] = useState(themes);
   const [saving, setSaving] = useState(false);
 
+  // Synchroniser editedThemes avec themes quand themes change
+  useEffect(() => {
+    setEditedThemes(themes);
+  }, [themes]);
+
   const handleSave = async (themeId) => {
     setSaving(true);
     try {
       const theme = editedThemes.find(t => t.id === themeId);
-      await supabaseService.updateTheme(themeId, { backgroundImage: theme.backgroundImage });
+      await supabaseService.updateTheme(themeId, { backgroundImage: theme.background_image || theme.backgroundImage });
       
-      // Mettre à jour les thèmes localement
-      setThemes(editedThemes);
+      // Recharger les thèmes depuis Supabase pour avoir les données à jour
+      const updatedThemes = await supabaseService.getThemes();
+      setThemes(updatedThemes);
+      setEditedThemes(updatedThemes);
+      
       alert('✅ Image d\'arrière-plan sauvegardée !');
     } catch (error) {
       console.error('Erreur sauvegarde:', error);
-      alert('❌ Erreur lors de la sauvegarde');
+      alert('❌ Erreur lors de la sauvegarde: ' + error.message);
     } finally {
       setSaving(false);
     }
@@ -1088,7 +1096,7 @@ const PageAccueilTab = ({ themes, setThemes }) => {
 
   const handleChange = (themeId, newUrl) => {
     setEditedThemes(prev => prev.map(t => 
-      t.id === themeId ? { ...t, backgroundImage: newUrl } : t
+      t.id === themeId ? { ...t, backgroundImage: newUrl, background_image: newUrl } : t
     ));
   };
 
