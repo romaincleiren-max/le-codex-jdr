@@ -19,9 +19,22 @@ export const getThemes = async () => {
 };
 
 export const updateTheme = async (themeId, updates) => {
+  // Convertir les clés camelCase en snake_case et nettoyer les valeurs
+  const cleanedUpdates = {};
+  
+  if (updates.backgroundImage !== undefined) {
+    cleanedUpdates.background_image = updates.backgroundImage || null;
+  }
+  if (updates.background_image !== undefined) {
+    cleanedUpdates.background_image = updates.background_image || null;
+  }
+  if (updates.name !== undefined) {
+    cleanedUpdates.name = updates.name;
+  }
+  
   const { data, error } = await supabase
     .from('themes')
-    .update(updates)
+    .update(cleanedUpdates)
     .eq('id', themeId)
     .select()
     .single();
