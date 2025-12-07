@@ -1078,7 +1078,26 @@ const PageAccueilTab = ({ themes, setThemes }) => {
     setSaving(true);
     try {
       const theme = editedThemes.find(t => t.id === themeId);
-      await supabaseService.updateTheme(themeId, { backgroundImage: theme.background_image || theme.backgroundImage });
+      
+      // S'assurer que la valeur est soit une string, soit null
+      let imageUrl = theme.backgroundImage || theme.background_image || '';
+      
+      // Nettoyer la valeur : convertir en string et trim
+      if (typeof imageUrl === 'object') {
+        console.error('imageUrl est un objet:', imageUrl);
+        imageUrl = '';
+      }
+      
+      imageUrl = String(imageUrl).trim();
+      
+      // Si vide, mettre null
+      if (imageUrl === '') {
+        imageUrl = null;
+      }
+      
+      console.log('Sauvegarde de l\'image pour', themeId, ':', imageUrl);
+      
+      await supabaseService.updateTheme(themeId, { backgroundImage: imageUrl });
       
       // Recharger les thèmes depuis Supabase pour avoir les données à jour
       const updatedThemes = await supabaseService.getThemes();
