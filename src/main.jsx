@@ -1511,27 +1511,83 @@ export default function App() {
               </div>
               
               <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/50 rounded-2xl p-8 shadow-2xl">
-                <form className="space-y-6">
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  const formData = {
+                    scenarioName: e.target.scenarioName.value,
+                    author: e.target.author.value,
+                    email: e.target.email.value,
+                    summary: e.target.summary.value,
+                    fileName: e.target.pdfFile.files[0]?.name || 'Aucun fichier',
+                    submittedAt: new Date().toISOString()
+                  };
+                  
+                  // Récupérer les soumissions existantes
+                  const existingSubmissions = JSON.parse(localStorage.getItem('le-codex-submissions') || '[]');
+                  existingSubmissions.push(formData);
+                  localStorage.setItem('le-codex-submissions', JSON.stringify(existingSubmissions));
+                  
+                  alert('✅ Votre scénario a été soumis avec succès !\n\nNous reviendrons vers vous par email sous 48h.');
+                  e.target.reset();
+                }} className="space-y-6">
                   <div>
                     <label className="block text-amber-300 font-bold mb-2">Nom du scénario *</label>
-                    <input type="text" required className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" placeholder="Le titre de votre scénario"/>
+                    <input 
+                      type="text" 
+                      name="scenarioName"
+                      required 
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
+                      placeholder="Le titre de votre scénario"
+                    />
                   </div>
                   <div>
                     <label className="block text-amber-300 font-bold mb-2">Auteur *</label>
-                    <input type="text" required className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" placeholder="Votre nom"/>
+                    <input 
+                      type="text" 
+                      name="author"
+                      required 
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
+                      placeholder="Votre nom"
+                    />
                   </div>
                   <div>
                     <label className="block text-amber-300 font-bold mb-2">Email *</label>
-                    <input type="email" required className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" placeholder="email@exemple.com"/>
+                    <input 
+                      type="email" 
+                      name="email"
+                      required 
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
+                      placeholder="email@exemple.com"
+                    />
                   </div>
                   <div>
                     <label className="block text-amber-300 font-bold mb-2">Résumé *</label>
-                    <textarea rows="5" required className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" placeholder="Décrivez votre scénario..."></textarea>
+                    <textarea 
+                      rows="5" 
+                      name="summary"
+                      required 
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
+                      placeholder="Décrivez votre scénario..."
+                    ></textarea>
                   </div>
                   <div>
-                    <label className="block text-amber-300 font-bold mb-2">Fichier PDF *</label>
+                    <label className="block text-amber-300 font-bold mb-2">Fichier PDF * (PDF uniquement)</label>
                     <div className="border-2 border-dashed border-amber-500/30 rounded-lg p-6 text-center bg-slate-700/30 hover:bg-slate-700/50 transition-colors">
-                      <input type="file" accept=".pdf" required className="w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-700 file:text-white file:cursor-pointer file:hover:bg-amber-600 file:transition-colors"/>
+                      <input 
+                        type="file" 
+                        name="pdfFile"
+                        accept=".pdf,application/pdf" 
+                        required 
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file && file.type !== 'application/pdf') {
+                            alert('❌ Erreur : Seuls les fichiers PDF sont acceptés !');
+                            e.target.value = '';
+                          }
+                        }}
+                        className="w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-700 file:text-white file:cursor-pointer file:hover:bg-amber-600 file:transition-colors"
+                      />
+                      <p className="text-xs text-amber-300 mt-2">📄 Format accepté : PDF uniquement</p>
                     </div>
                   </div>
                   <button type="submit" className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white px-8 py-4 rounded-lg hover:from-amber-500 hover:to-amber-600 font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
@@ -1889,12 +1945,107 @@ export default function App() {
                 {/* ONGLET SOUMISSIONS */}
                 {adminTab === 'soumissions' && (
                   <div>
-                    <h2 className="text-3xl font-bold mb-6 text-amber-900">📥 Soumissions en Attente</h2>
-                    <div className="bg-amber-50 p-8 rounded-lg border-2 border-amber-700 text-center">
-                      <div className="text-6xl mb-4">📭</div>
-                      <p className="text-xl text-amber-900 font-bold mb-2">Aucune soumission</p>
-                      <p className="text-amber-700">Les propositions apparaîtront ici</p>
+                    <div className="flex justify-between items-center mb-6">
+                      <div>
+                        <h2 className="text-3xl font-bold text-amber-900">📥 Soumissions en Attente</h2>
+                        <p className="text-amber-700 mt-2">Gérez les propositions de scénarios</p>
+                      </div>
+                      {(() => {
+                        const submissions = JSON.parse(localStorage.getItem('le-codex-submissions') || '[]');
+                        return submissions.length > 0 && (
+                          <button 
+                            onClick={() => {
+                              if (confirm('Voulez-vous supprimer toutes les soumissions ?')) {
+                                localStorage.removeItem('le-codex-submissions');
+                                window.location.reload();
+                              }
+                            }}
+                            className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-bold">
+                            🗑️ Tout supprimer
+                          </button>
+                        );
+                      })()}
                     </div>
+                    
+                    {(() => {
+                      const submissions = JSON.parse(localStorage.getItem('le-codex-submissions') || '[]');
+                      
+                      if (submissions.length === 0) {
+                        return (
+                          <div className="bg-amber-50 p-8 rounded-lg border-2 border-amber-700 text-center">
+                            <div className="text-6xl mb-4">📭</div>
+                            <p className="text-xl text-amber-900 font-bold mb-2">Aucune soumission</p>
+                            <p className="text-amber-700">Les propositions apparaîtront ici</p>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <div className="space-y-4">
+                          {submissions.map((submission, index) => (
+                            <div key={index} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6">
+                              <div className="flex justify-between items-start mb-4">
+                                <div className="flex-1">
+                                  <h3 className="text-2xl font-bold text-amber-900 mb-2">
+                                    {submission.scenarioName}
+                                  </h3>
+                                  <div className="grid grid-cols-2 gap-3 mb-3">
+                                    <div>
+                                      <span className="text-sm text-amber-700 font-bold">👤 Auteur :</span>
+                                      <span className="text-amber-900 ml-2">{submission.author}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-amber-700 font-bold">📧 Email :</span>
+                                      <span className="text-amber-900 ml-2">{submission.email}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-amber-700 font-bold">📄 Fichier :</span>
+                                      <span className="text-amber-900 ml-2">{submission.fileName}</span>
+                                    </div>
+                                    <div>
+                                      <span className="text-sm text-amber-700 font-bold">📅 Date :</span>
+                                      <span className="text-amber-900 ml-2">
+                                        {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <div className="bg-white border border-amber-700 rounded p-3">
+                                    <span className="text-sm text-amber-700 font-bold">📝 Résumé :</span>
+                                    <p className="text-amber-900 mt-1">{submission.summary}</p>
+                                  </div>
+                                </div>
+                                <button 
+                                  onClick={() => {
+                                    if (confirm('Supprimer cette soumission ?')) {
+                                      const newSubmissions = submissions.filter((_, i) => i !== index);
+                                      localStorage.setItem('le-codex-submissions', JSON.stringify(newSubmissions));
+                                      window.location.reload();
+                                    }
+                                  }}
+                                  className="ml-4 bg-red-700 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2">
+                                  <Trash2 size={16} />
+                                </button>
+                              </div>
+                              
+                              <div className="flex gap-2 pt-4 border-t border-amber-700">
+                                <a 
+                                  href={`mailto:${submission.email}?subject=Re: ${submission.scenarioName}`}
+                                  className="flex-1 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 text-center font-bold">
+                                  📧 Répondre par email
+                                </a>
+                                <button 
+                                  onClick={() => {
+                                    alert('💡 Pour valider cette soumission :\n\n1. Contactez l\'auteur par email\n2. Demandez le PDF complet\n3. Créez la campagne/scénario dans l\'onglet Admin');
+                                  }}
+                                  className="flex-1 bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 font-bold">
+                                  ✅ Valider
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      );
+                    })()}
                   </div>
                 )}
 
