@@ -1409,6 +1409,23 @@ export default function App() {
                   </span>
                 )}
               </button>
+              
+              {/* Bouton de déconnexion si authentifié */}
+              {localStorage.getItem('le-codex-admin-auth') === 'true' && (
+                <button 
+                  onClick={() => {
+                    if (confirm('Voulez-vous vous déconnecter ?')) {
+                      localStorage.removeItem('le-codex-admin-auth');
+                      setCurrentPage('home');
+                      window.location.reload();
+                    }
+                  }}
+                  className="px-4 py-2 rounded bg-red-800 hover:bg-red-700 text-white flex items-center gap-2"
+                  title="Se déconnecter de l'administration">
+                  <Lock size={18} />
+                  Déconnexion
+                </button>
+              )}
             </div>
           </div>
         </nav>
