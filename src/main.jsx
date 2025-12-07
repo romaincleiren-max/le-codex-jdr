@@ -1381,7 +1381,16 @@ export default function App() {
               </div>
             </button>
             <div className="flex gap-4 items-center">
-              {['home', 'submit', 'admin', 'stats', 'about'].map(page => (
+              {['home', 'submit', 'admin', 'stats', 'about']
+                .filter(page => {
+                  // Masquer Admin et Stats si non connecté
+                  const isAuth = localStorage.getItem('le-codex-admin-auth') === 'true';
+                  if ((page === 'admin' || page === 'stats') && !isAuth) {
+                    return false;
+                  }
+                  return true;
+                })
+                .map(page => (
                 <button key={page} onClick={() => setCurrentPage(page)} 
                   className={`px-4 py-2 rounded transition-all ${currentPage === page ? 'bg-amber-900 text-amber-100 shadow-lg' : 'hover:bg-slate-800 text-amber-200'}`}>
                   {page === 'home' && 'Accueil'}
