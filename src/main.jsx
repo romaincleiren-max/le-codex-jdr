@@ -1054,15 +1054,6 @@ const LoginPage = () => {
           </button>
         </form>
 
-        <div className="mt-6 bg-blue-50 border-2 border-blue-700 rounded-lg p-4">
-          <p className="text-sm text-blue-900">
-            <strong>💡 Mot de passe par défaut :</strong> admin123
-          </p>
-          <p className="text-xs text-blue-700 mt-2">
-            Vous pouvez le changer dans Admin &gt; Paramètres après connexion
-          </p>
-        </div>
-
         <button
           onClick={() => navigate('/')}
           className="w-full mt-4 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 font-bold">
@@ -1885,6 +1876,87 @@ export default function App() {
                 {adminTab === 'parametres' && (
                   <div>
                     <h2 className="text-3xl font-bold mb-6 text-amber-900">⚙️ Paramètres du Site</h2>
+                    
+                    <div className="bg-purple-50 border-2 border-purple-700 rounded-lg p-6 mb-6">
+                      <h3 className="text-xl font-bold text-purple-900 mb-4">🔒 Sécurité - Mot de passe Admin</h3>
+                      
+                      <form onSubmit={(e) => {
+                        e.preventDefault();
+                        const currentPass = e.target.currentPassword.value;
+                        const newPass = e.target.newPassword.value;
+                        const confirmPass = e.target.confirmPassword.value;
+                        
+                        const adminPassword = localStorage.getItem('le-codex-admin-password') || 'admin123';
+                        
+                        if (currentPass !== adminPassword) {
+                          alert('❌ Mot de passe actuel incorrect');
+                          return;
+                        }
+                        
+                        if (newPass.length < 6) {
+                          alert('❌ Le nouveau mot de passe doit contenir au moins 6 caractères');
+                          return;
+                        }
+                        
+                        if (newPass !== confirmPass) {
+                          alert('❌ Les nouveaux mots de passe ne correspondent pas');
+                          return;
+                        }
+                        
+                        localStorage.setItem('le-codex-admin-password', newPass);
+                        alert('✅ Mot de passe changé avec succès !');
+                        e.target.reset();
+                      }}>
+                        <div className="space-y-4">
+                          <div>
+                            <label className="block text-purple-900 font-bold mb-2">Mot de passe actuel *</label>
+                            <input 
+                              type="password" 
+                              name="currentPassword"
+                              required
+                              className="w-full px-4 py-3 border-2 border-purple-700 rounded-lg focus:outline-none focus:border-purple-900"
+                              placeholder="Entrez votre mot de passe actuel"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-purple-900 font-bold mb-2">Nouveau mot de passe *</label>
+                            <input 
+                              type="password" 
+                              name="newPassword"
+                              required
+                              minLength="6"
+                              className="w-full px-4 py-3 border-2 border-purple-700 rounded-lg focus:outline-none focus:border-purple-900"
+                              placeholder="Minimum 6 caractères"
+                            />
+                          </div>
+                          
+                          <div>
+                            <label className="block text-purple-900 font-bold mb-2">Confirmer le nouveau mot de passe *</label>
+                            <input 
+                              type="password" 
+                              name="confirmPassword"
+                              required
+                              minLength="6"
+                              className="w-full px-4 py-3 border-2 border-purple-700 rounded-lg focus:outline-none focus:border-purple-900"
+                              placeholder="Retapez le nouveau mot de passe"
+                            />
+                          </div>
+                          
+                          <button 
+                            type="submit"
+                            className="w-full bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-purple-600 font-bold text-lg">
+                            🔒 Changer le mot de passe
+                          </button>
+                        </div>
+                      </form>
+                      
+                      <div className="mt-4 bg-purple-100 border border-purple-700 rounded-lg p-3">
+                        <p className="text-sm text-purple-900">
+                          <strong>💡 Note :</strong> Le mot de passe par défaut est "admin123". Changez-le dès maintenant pour sécuriser votre site.
+                        </p>
+                      </div>
+                    </div>
                     
                     <div className="bg-blue-50 border-2 border-blue-700 rounded-lg p-6 mb-6">
                       <h3 className="text-xl font-bold text-blue-900 mb-4">🏷️ Identité du Site</h3>
