@@ -84,6 +84,21 @@ CREATE TABLE IF NOT EXISTS order_items (
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- 7. Table des soumissions de scénarios
+CREATE TABLE IF NOT EXISTS submissions (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  scenario_name TEXT NOT NULL,
+  author TEXT NOT NULL,
+  email TEXT NOT NULL,
+  summary TEXT NOT NULL,
+  pdf_filename TEXT NOT NULL,
+  pdf_url TEXT NOT NULL,
+  status TEXT DEFAULT 'pending' CHECK (status IN ('pending', 'approved', 'rejected')),
+  admin_notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
 -- ============================================================================
 -- INDEXES POUR OPTIMISER LES PERFORMANCES
 -- ============================================================================
@@ -93,6 +108,8 @@ CREATE INDEX IF NOT EXISTS idx_scenarios_campaign ON scenarios(campaign_id);
 CREATE INDEX IF NOT EXISTS idx_orders_email ON orders(customer_email);
 CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_order_items_order ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
+CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(email);
 
 -- ============================================================================
 -- FONCTION DE MISE À JOUR AUTOMATIQUE DU TIMESTAMP
@@ -120,6 +137,9 @@ CREATE TRIGGER update_site_settings_updated_at BEFORE UPDATE ON site_settings
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 CREATE TRIGGER update_orders_updated_at BEFORE UPDATE ON orders
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_submissions_updated_at BEFORE UPDATE ON submissions
     FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- ============================================================================
@@ -152,6 +172,7 @@ ALTER TABLE scenarios ENABLE ROW LEVEL SECURITY;
 ALTER TABLE site_settings ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE submissions ENABLE ROW LEVEL SECURITY;
 
 -- Politiques publiques en lecture pour le contenu
 CREATE POLICY "Lecture publique des thèmes" ON themes FOR SELECT USING (true);
@@ -178,6 +199,23 @@ CREATE POLICY "Lecture des propres items" ON order_items FOR SELECT
 
 CREATE POLICY "Création d'items de commande" ON order_items FOR INSERT 
   WITH CHECK (true);
+
+-- Politiques pour les soumissions
+-- Tout le monde peut soumettre un scénario
+CREATE POLICY "Création de soumissions" ON submissions FOR INSERT 
+  WITH CHECK (true);
+
+-- Tout le monde peut lire les soumissions (à restreindre aux admins plus tard)
+CREATE POLICY "Lecture des soumissions" ON submissions FOR SELECT 
+  USING (true);
+
+-- Tout le monde peut modifier les soumissions (à restreindre aux admins plus tard)
+CREATE POLICY "Modification des soumissions" ON submissions FOR UPDATE 
+  USING (true);
+
+-- Tout le monde peut supprimer les soumissions (à restreindre aux admins plus tard)
+CREATE POLICY "Suppression des soumissions" ON submissions FOR DELETE 
+  USING (true);
 
 -- ============================================================================
 -- NOTES D'UTILISATION

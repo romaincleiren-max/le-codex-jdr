@@ -1064,10 +1064,340 @@ const LoginPage = () => {
   );
 };
 
+// Composant pour la page d'accueil dans l'admin
+const PageAccueilTab = ({ themes, setThemes }) => {
+  const [editedThemes, setEditedThemes] = useState(themes);
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (themeId) => {
+    setSaving(true);
+    try {
+      const theme = editedThemes.find(t => t.id === themeId);
+      await supabaseService.updateTheme(themeId, { backgroundImage: theme.backgroundImage });
+      
+      // Mettre à jour les thèmes localement
+      setThemes(editedThemes);
+      alert('✅ Image d\'arrière-plan sauvegardée !');
+    } catch (error) {
+      console.error('Erreur sauvegarde:', error);
+      alert('❌ Erreur lors de la sauvegarde');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleChange = (themeId, newUrl) => {
+    setEditedThemes(prev => prev.map(t => 
+      t.id === themeId ? { ...t, backgroundImage: newUrl } : t
+    ));
+  };
+
+  return (
+    <div>
+      <div className="mb-6">
+        <h2 className="text-3xl font-bold text-amber-900">🏠 Configuration de la Page d'Accueil</h2>
+        <p className="text-amber-700 mt-2">Personnalisez les images d'arrière-plan des sections de thèmes</p>
+      </div>
+
+      <div className="space-y-6">
+        {editedThemes.map((theme) => (
+          <div key={theme.id} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6">
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-4xl">
+                {theme.id === 'medieval' && '⚔️'}
+                {theme.id === 'lovecraft' && '👁️'}
+                {theme.id === 'scifi' && '🚀'}
+              </span>
+              <h3 className="text-2xl font-bold text-amber-900">{theme.name}</h3>
+            </div>
+
+            <div className="mb-4">
+              <label className="block text-amber-900 font-bold mb-2">URL de l'image d'arrière-plan</label>
+              <input 
+                type="text"
+                value={theme.backgroundImage}
+                onChange={(e) => handleChange(theme.id, e.target.value)}
+                className="w-full px-4 py-3 border-2 border-amber-700 rounded-lg focus:outline-none focus:border-amber-900"
+                placeholder="https://i.imgur.com/XXXXX.jpg"
+              />
+              <p className="text-sm text-amber-700 mt-1">
+                Cette image sera affichée en arrière-plan (flou sombre) sur la page d'accueil
+              </p>
+            </div>
+
+            <button
+              onClick={() => handleSave(theme.id)}
+              disabled={saving}
+              className="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-600 font-bold mb-4 disabled:opacity-50">
+              {saving ? '⏳ Sauvegarde...' : '💾 Sauvegarder cette image'}
+            </button>
+
+            {theme.backgroundImage && (
+              <div className="relative">
+                <p className="text-sm font-bold text-amber-900 mb-2">Aperçu :</p>
+                <div className="relative h-48 rounded-lg overflow-hidden border-2 border-amber-700">
+                  <img 
+                    src={theme.backgroundImage} 
+                    alt={`Fond ${theme.name}`}
+                    className="w-full h-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
+                    <div className="text-center">
+                      <h4 className={`text-3xl font-bold mb-2 ${
+                        theme.id === 'medieval' ? 'text-amber-300' : 
+                        theme.id === 'lovecraft' ? 'text-emerald-400' : 
+                        'text-cyan-400'
+                      }`}>
+                        {theme.name}
+                      </h4>
+                      <p className={`text-lg ${
+                        theme.id === 'medieval' ? 'text-amber-200' : 
+                        theme.id === 'lovecraft' ? 'text-emerald-300' : 
+                        'text-cyan-300'
+                      }`}>
+                        Cliquez pour explorer
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <div className="bg-blue-50 border-2 border-blue-700 rounded-lg p-6 mt-6">
+        <h3 className="text-lg font-bold text-blue-900 mb-2">💡 Conseils :</h3>
+        <ul className="list-disc list-inside text-blue-800 space-y-1">
+          <li>Les images seront affichées avec un effet de flou et d'assombrissement</li>
+          <li>Au survol, l'image devient plus nette avec un léger effet de zoom</li>
+          <li>Utilisez des images de haute qualité (minimum 1920x1080)</li>
+          <li>Uploadez vos images sur <a href="https://imgur.com" target="_blank" rel="noopener noreferrer" className="underline font-bold">Imgur.com</a> pour obtenir des URLs stables</li>
+        </ul>
+      </div>
+    </div>
+  );
+};
+
 // Composant pour protéger les routes admin
 const ProtectedRoute = ({ children }) => {
   const isAuth = localStorage.getItem('le-codex-admin-auth') === 'true';
   return isAuth ? children : <Navigate to="/login" replace />;
+};
+
+// Composant pour afficher les soumissions depuis Supabase
+const SubmissionsTab = () => {
+  const [submissions, setSubmissions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Charger les soumissions au montage
+  useEffect(() => {
+    loadSubmissions();
+  }, []);
+
+  const loadSubmissions = async () => {
+    try {
+      setLoading(true);
+      const data = await supabaseService.getSubmissions();
+      setSubmissions(data || []);
+      setError(null);
+    } catch (err) {
+      console.error('Erreur chargement soumissions:', err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!confirm('Supprimer cette soumission ?')) return;
+    
+    try {
+      await supabaseService.deleteSubmission(id);
+      await loadSubmissions(); // Recharger la liste
+      alert('✅ Soumission supprimée avec succès');
+    } catch (err) {
+      console.error('Erreur suppression:', err);
+      alert('❌ Erreur lors de la suppression de la soumission');
+    }
+  };
+
+  const handleUpdateStatus = async (id, newStatus) => {
+    try {
+      await supabaseService.updateSubmissionStatus(id, newStatus);
+      await loadSubmissions(); // Recharger la liste
+      alert(`✅ Statut mis à jour : ${newStatus}`);
+    } catch (err) {
+      console.error('Erreur mise à jour statut:', err);
+      alert('❌ Erreur lors de la mise à jour du statut');
+    }
+  };
+
+  const handleDownload = async (pdfUrl) => {
+    try {
+      // Télécharger le PDF
+      const blob = await supabaseService.downloadSubmissionPDF(pdfUrl);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = pdfUrl.split('/').pop() || 'submission.pdf';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Erreur téléchargement:', err);
+      alert('❌ Erreur lors du téléchargement du PDF');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="text-center py-12">
+        <div className="text-6xl mb-4">⏳</div>
+        <p className="text-xl text-amber-900 font-bold">Chargement des soumissions...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-50 border-2 border-red-700 rounded-lg p-8 text-center">
+        <div className="text-6xl mb-4">❌</div>
+        <p className="text-xl text-red-900 font-bold mb-2">Erreur de chargement</p>
+        <p className="text-red-700">{error}</p>
+        <button 
+          onClick={loadSubmissions}
+          className="mt-4 bg-red-700 text-white px-6 py-3 rounded-lg hover:bg-red-600 font-bold">
+          🔄 Réessayer
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h2 className="text-3xl font-bold text-amber-900">📥 Soumissions en Attente</h2>
+          <p className="text-amber-700 mt-2">
+            Gérez les propositions de scénarios ({submissions.length} soumission{submissions.length > 1 ? 's' : ''})
+          </p>
+        </div>
+        <button 
+          onClick={loadSubmissions}
+          className="bg-blue-700 text-white px-4 py-2 rounded-lg hover:bg-blue-600 font-bold flex items-center gap-2">
+          🔄 Actualiser
+        </button>
+      </div>
+      
+      {submissions.length === 0 ? (
+        <div className="bg-amber-50 p-8 rounded-lg border-2 border-amber-700 text-center">
+          <div className="text-6xl mb-4">📭</div>
+          <p className="text-xl text-amber-900 font-bold mb-2">Aucune soumission</p>
+          <p className="text-amber-700">Les propositions apparaîtront ici</p>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {submissions.map((submission) => (
+            <div key={submission.id} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6">
+              <div className="flex justify-between items-start mb-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="text-2xl font-bold text-amber-900">
+                      {submission.scenario_name}
+                    </h3>
+                    <span className={`px-3 py-1 rounded-full text-sm font-bold ${
+                      submission.status === 'pending' ? 'bg-yellow-200 text-yellow-900' :
+                      submission.status === 'approved' ? 'bg-green-200 text-green-900' :
+                      'bg-red-200 text-red-900'
+                    }`}>
+                      {submission.status === 'pending' && '⏳ En attente'}
+                      {submission.status === 'approved' && '✅ Approuvé'}
+                      {submission.status === 'rejected' && '❌ Rejeté'}
+                    </span>
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div>
+                      <span className="text-sm text-amber-700 font-bold">👤 Auteur :</span>
+                      <span className="text-amber-900 ml-2">{submission.author}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm text-amber-700 font-bold">📧 Email :</span>
+                      <span className="text-amber-900 ml-2">{submission.email}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm text-amber-700 font-bold">📄 Fichier :</span>
+                      <span className="text-amber-900 ml-2">{submission.pdf_filename}</span>
+                    </div>
+                    <div>
+                      <span className="text-sm text-amber-700 font-bold">📅 Date :</span>
+                      <span className="text-amber-900 ml-2">
+                        {new Date(submission.created_at).toLocaleDateString('fr-FR', {
+                          year: 'numeric',
+                          month: 'long',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="bg-white border border-amber-700 rounded p-3 mb-3">
+                    <span className="text-sm text-amber-700 font-bold">📝 Résumé :</span>
+                    <p className="text-amber-900 mt-1">{submission.summary}</p>
+                  </div>
+
+                  {submission.admin_notes && (
+                    <div className="bg-blue-50 border border-blue-700 rounded p-3">
+                      <span className="text-sm text-blue-700 font-bold">💬 Notes admin :</span>
+                      <p className="text-blue-900 mt-1">{submission.admin_notes}</p>
+                    </div>
+                  )}
+                </div>
+                
+                <button 
+                  onClick={() => handleDelete(submission.id)}
+                  className="ml-4 bg-red-700 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2">
+                  <Trash2 size={16} />
+                </button>
+              </div>
+              
+              <div className="flex gap-2 pt-4 border-t border-amber-700">
+                <button 
+                  onClick={() => handleDownload(submission.pdf_url)}
+                  className="flex-1 bg-purple-700 text-white px-4 py-2 rounded hover:bg-purple-600 font-bold flex items-center justify-center gap-2">
+                  <Download size={18} />Télécharger PDF
+                </button>
+                <a 
+                  href={`mailto:${submission.email}?subject=Re: ${submission.scenario_name}`}
+                  className="flex-1 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 text-center font-bold">
+                  📧 Répondre
+                </a>
+                {submission.status === 'pending' && (
+                  <>
+                    <button 
+                      onClick={() => handleUpdateStatus(submission.id, 'approved')}
+                      className="flex-1 bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 font-bold">
+                      ✅ Approuver
+                    </button>
+                    <button 
+                      onClick={() => handleUpdateStatus(submission.id, 'rejected')}
+                      className="flex-1 bg-red-700 text-white px-4 py-2 rounded hover:bg-red-600 font-bold">
+                      ❌ Rejeter
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
 };
 
 export default function App() {
@@ -1511,24 +1841,46 @@ export default function App() {
               </div>
               
               <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/50 rounded-2xl p-8 shadow-2xl">
-                <form onSubmit={(e) => {
+                <form onSubmit={async (e) => {
                   e.preventDefault();
-                  const formData = {
-                    scenarioName: e.target.scenarioName.value,
-                    author: e.target.author.value,
-                    email: e.target.email.value,
-                    summary: e.target.summary.value,
-                    fileName: e.target.pdfFile.files[0]?.name || 'Aucun fichier',
-                    submittedAt: new Date().toISOString()
-                  };
                   
-                  // Récupérer les soumissions existantes
-                  const existingSubmissions = JSON.parse(localStorage.getItem('le-codex-submissions') || '[]');
-                  existingSubmissions.push(formData);
-                  localStorage.setItem('le-codex-submissions', JSON.stringify(existingSubmissions));
+                  const pdfFile = e.target.pdfFile.files[0];
+                  if (!pdfFile) {
+                    alert('❌ Veuillez sélectionner un fichier PDF');
+                    return;
+                  }
                   
-                  alert('✅ Votre scénario a été soumis avec succès !\n\nNous reviendrons vers vous par email sous 48h.');
-                  e.target.reset();
+                  if (pdfFile.type !== 'application/pdf') {
+                    alert('❌ Seuls les fichiers PDF sont acceptés');
+                    return;
+                  }
+                  
+                  // Afficher un indicateur de chargement
+                  const submitButton = e.target.querySelector('button[type="submit"]');
+                  const originalButtonText = submitButton.innerHTML;
+                  submitButton.disabled = true;
+                  submitButton.innerHTML = '⏳ Envoi en cours...';
+                  
+                  try {
+                    const submissionData = {
+                      scenarioName: e.target.scenarioName.value,
+                      author: e.target.author.value,
+                      email: e.target.email.value,
+                      summary: e.target.summary.value
+                    };
+                    
+                    // Uploader vers Supabase (Storage + Database)
+                    await supabaseService.createSubmission(submissionData, pdfFile);
+                    
+                    alert('✅ Votre scénario a été soumis avec succès !\n\n📧 Nous reviendrons vers vous par email sous 48h.\n🔒 Votre PDF est stocké en sécurité sur nos serveurs.');
+                    e.target.reset();
+                  } catch (error) {
+                    console.error('Erreur soumission:', error);
+                    alert('❌ Erreur lors de l\'envoi de votre soumission.\n\nVeuillez réessayer ou nous contacter si le problème persiste.');
+                  } finally {
+                    submitButton.disabled = false;
+                    submitButton.innerHTML = originalButtonText;
+                  }
                 }} className="space-y-6">
                   <div>
                     <label className="block text-amber-300 font-bold mb-2">Nom du scénario *</label>
@@ -1803,82 +2155,7 @@ export default function App() {
 
                 {/* ONGLET PAGE ACCUEIL */}
                 {adminTab === 'pageaccueil' && (
-                  <div>
-                    <div className="mb-6">
-                      <h2 className="text-3xl font-bold text-amber-900">🏠 Configuration de la Page d'Accueil</h2>
-                      <p className="text-amber-700 mt-2">Personnalisez les images d'arrière-plan des sections de thèmes</p>
-                    </div>
-
-                    <div className="space-y-6">
-                      {themes.map((theme, index) => (
-                        <div key={theme.id} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6">
-                          <div className="flex items-center gap-3 mb-4">
-                            <span className="text-4xl">
-                              {theme.id === 'medieval' && '⚔️'}
-                              {theme.id === 'lovecraft' && '👁️'}
-                              {theme.id === 'scifi' && '🚀'}
-                            </span>
-                            <h3 className="text-2xl font-bold text-amber-900">{theme.name}</h3>
-                          </div>
-
-                          <div className="mb-4">
-                            <label className="block text-amber-900 font-bold mb-2">URL de l'image d'arrière-plan</label>
-                            <input 
-                              type="text"
-                              value={theme.backgroundImage}
-                              onChange={(e) => saveThemeBackgroundImage(theme.id, e.target.value)}
-                              className="w-full px-4 py-3 border-2 border-amber-700 rounded-lg focus:outline-none focus:border-amber-900"
-                              placeholder="https://i.imgur.com/XXXXX.jpg"
-                            />
-                            <p className="text-sm text-amber-700 mt-1">
-                              Cette image sera affichée en arrière-plan (flou sombre) sur la page d'accueil
-                            </p>
-                          </div>
-
-                          {theme.backgroundImage && (
-                            <div className="relative">
-                              <p className="text-sm font-bold text-amber-900 mb-2">Aperçu :</p>
-                              <div className="relative h-48 rounded-lg overflow-hidden border-2 border-amber-700">
-                                <img 
-                                  src={theme.backgroundImage} 
-                                  alt={`Fond ${theme.name}`}
-                                  className="w-full h-full object-cover"
-                                />
-                                <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center">
-                                  <div className="text-center">
-                                    <h4 className={`text-3xl font-bold mb-2 ${
-                                      theme.id === 'medieval' ? 'text-amber-300' : 
-                                      theme.id === 'lovecraft' ? 'text-emerald-400' : 
-                                      'text-cyan-400'
-                                    }`}>
-                                      {theme.name}
-                                    </h4>
-                                    <p className={`text-lg ${
-                                      theme.id === 'medieval' ? 'text-amber-200' : 
-                                      theme.id === 'lovecraft' ? 'text-emerald-300' : 
-                                      'text-cyan-300'
-                                    }`}>
-                                      Cliquez pour explorer
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-
-                    <div className="bg-blue-50 border-2 border-blue-700 rounded-lg p-6 mt-6">
-                      <h3 className="text-lg font-bold text-blue-900 mb-2">💡 Conseils :</h3>
-                      <ul className="list-disc list-inside text-blue-800 space-y-1">
-                        <li>Les images seront affichées avec un effet de flou et d'assombrissement</li>
-                        <li>Au survol, l'image devient plus nette avec un léger effet de zoom</li>
-                        <li>Utilisez des images de haute qualité (minimum 1920x1080)</li>
-                        <li>Uploadez vos images sur <a href="https://imgur.com" target="_blank" rel="noopener noreferrer" className="underline font-bold">Imgur.com</a> pour obtenir des URLs stables</li>
-                      </ul>
-                    </div>
-                  </div>
+                  <PageAccueilTab themes={themes} setThemes={setThemes} />
                 )}
 
                 {/* ONGLET VISUEL */}
@@ -1944,109 +2221,7 @@ export default function App() {
 
                 {/* ONGLET SOUMISSIONS */}
                 {adminTab === 'soumissions' && (
-                  <div>
-                    <div className="flex justify-between items-center mb-6">
-                      <div>
-                        <h2 className="text-3xl font-bold text-amber-900">📥 Soumissions en Attente</h2>
-                        <p className="text-amber-700 mt-2">Gérez les propositions de scénarios</p>
-                      </div>
-                      {(() => {
-                        const submissions = JSON.parse(localStorage.getItem('le-codex-submissions') || '[]');
-                        return submissions.length > 0 && (
-                          <button 
-                            onClick={() => {
-                              if (confirm('Voulez-vous supprimer toutes les soumissions ?')) {
-                                localStorage.removeItem('le-codex-submissions');
-                                window.location.reload();
-                              }
-                            }}
-                            className="bg-red-700 text-white px-4 py-2 rounded-lg hover:bg-red-600 font-bold">
-                            🗑️ Tout supprimer
-                          </button>
-                        );
-                      })()}
-                    </div>
-                    
-                    {(() => {
-                      const submissions = JSON.parse(localStorage.getItem('le-codex-submissions') || '[]');
-                      
-                      if (submissions.length === 0) {
-                        return (
-                          <div className="bg-amber-50 p-8 rounded-lg border-2 border-amber-700 text-center">
-                            <div className="text-6xl mb-4">📭</div>
-                            <p className="text-xl text-amber-900 font-bold mb-2">Aucune soumission</p>
-                            <p className="text-amber-700">Les propositions apparaîtront ici</p>
-                          </div>
-                        );
-                      }
-                      
-                      return (
-                        <div className="space-y-4">
-                          {submissions.map((submission, index) => (
-                            <div key={index} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6">
-                              <div className="flex justify-between items-start mb-4">
-                                <div className="flex-1">
-                                  <h3 className="text-2xl font-bold text-amber-900 mb-2">
-                                    {submission.scenarioName}
-                                  </h3>
-                                  <div className="grid grid-cols-2 gap-3 mb-3">
-                                    <div>
-                                      <span className="text-sm text-amber-700 font-bold">👤 Auteur :</span>
-                                      <span className="text-amber-900 ml-2">{submission.author}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-sm text-amber-700 font-bold">📧 Email :</span>
-                                      <span className="text-amber-900 ml-2">{submission.email}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-sm text-amber-700 font-bold">📄 Fichier :</span>
-                                      <span className="text-amber-900 ml-2">{submission.fileName}</span>
-                                    </div>
-                                    <div>
-                                      <span className="text-sm text-amber-700 font-bold">📅 Date :</span>
-                                      <span className="text-amber-900 ml-2">
-                                        {new Date(submission.submittedAt).toLocaleDateString('fr-FR')}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <div className="bg-white border border-amber-700 rounded p-3">
-                                    <span className="text-sm text-amber-700 font-bold">📝 Résumé :</span>
-                                    <p className="text-amber-900 mt-1">{submission.summary}</p>
-                                  </div>
-                                </div>
-                                <button 
-                                  onClick={() => {
-                                    if (confirm('Supprimer cette soumission ?')) {
-                                      const newSubmissions = submissions.filter((_, i) => i !== index);
-                                      localStorage.setItem('le-codex-submissions', JSON.stringify(newSubmissions));
-                                      window.location.reload();
-                                    }
-                                  }}
-                                  className="ml-4 bg-red-700 text-white px-4 py-2 rounded hover:bg-red-600 flex items-center gap-2">
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                              
-                              <div className="flex gap-2 pt-4 border-t border-amber-700">
-                                <a 
-                                  href={`mailto:${submission.email}?subject=Re: ${submission.scenarioName}`}
-                                  className="flex-1 bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 text-center font-bold">
-                                  📧 Répondre par email
-                                </a>
-                                <button 
-                                  onClick={() => {
-                                    alert('💡 Pour valider cette soumission :\n\n1. Contactez l\'auteur par email\n2. Demandez le PDF complet\n3. Créez la campagne/scénario dans l\'onglet Admin');
-                                  }}
-                                  className="flex-1 bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 font-bold">
-                                  ✅ Valider
-                                </button>
-                              </div>
-                            </div>
-                          ))}
-                        </div>
-                      );
-                    })()}
-                  </div>
+                  <SubmissionsTab />
                 )}
 
                 {/* ONGLET PARAMETRES */}

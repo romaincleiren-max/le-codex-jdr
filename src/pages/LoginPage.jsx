@@ -9,7 +9,11 @@ export const LoginPage = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    const adminPassword = localStorage.getItem('le-codex-admin-password') || 'admin123';
+    // Utilise la variable d'environnement pour le mot de passe admin
+    // Fallback sur localStorage pour permettre le changement de mot de passe
+    const envPassword = import.meta.env.VITE_ADMIN_PASSWORD;
+    const customPassword = localStorage.getItem('le-codex-admin-password');
+    const adminPassword = customPassword || envPassword || 'admin123';
     
     if (password === adminPassword) {
       localStorage.setItem('le-codex-admin-auth', 'true');
@@ -50,12 +54,12 @@ export const LoginPage = () => {
           </button>
         </form>
 
-        <div className="mt-6 bg-blue-50 border-2 border-blue-700 rounded-lg p-4">
-          <p className="text-sm text-blue-900">
-            <strong>💡 Mot de passe par défaut :</strong> admin123
+        <div className="mt-6 bg-amber-50 border-2 border-amber-700 rounded-lg p-4">
+          <p className="text-sm text-amber-900">
+            <strong>🔐 Accès Sécurisé</strong>
           </p>
-          <p className="text-xs text-blue-700 mt-2">
-            Vous pouvez le changer dans Admin &gt; Paramètres après connexion
+          <p className="text-xs text-amber-700 mt-2">
+            Contactez l'administrateur pour obtenir le mot de passe
           </p>
         </div>
 

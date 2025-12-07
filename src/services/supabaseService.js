@@ -287,6 +287,135 @@ export const getOrdersByEmail = async (email) => {
 };
 
 // ============================================================================
+// SOUMISSIONS DE SCÉNARIOS
+// ============================================================================
+
+// Upload d'un PDF dans le Storage Supabase
+export const uploadSubmissionPDF = async (file) => {
+  // Générer un nom de fichier unique
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  const filePath = `${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('submissions')
+    .upload(filePath, file, {
+      cacheControl: '3600',
+      upsert: false
+    });
+
+  if (error) throw error;
+
+  // Obtenir l'URL publique du fichier
+  const { data: { publicUrl } } = supabase.storage
+    .from('submissions')
+    .getPublicUrl(filePath);
+
+  return {
+    path: filePath,
+    url: publicUrl
+  };
+};
+
+// Créer une nouvelle soumission
+export const createSubmission = async (submissionData, pdfFile) => {
+  // 1. Upload du PDF
+  const { path, url } = await uploadSubmissionPDF(pdfFile);
+
+  // 2. Créer l'entrée dans la base de données
+  const { data, error } = await supabase
+    .from('submissions')
+    .insert([{
+      scenario_name: submissionData.scenarioName,
+      author: submissionData.author,
+      email: submissionData.email,
+      summary: submissionData.summary,
+      pdf_filename: pdfFile.name,
+      pdf_url: url,
+      status: 'pending'
+    }])
+    .select()
+    .single();
+
+  if (error) {
+    // Si erreur, supprimer le fichier uploadé
+    await supabase.storage.from('submissions').remove([path]);
+    throw error;
+  }
+
+  return data;
+};
+
+// Récupérer toutes les soumissions
+export const getSubmissions = async () => {
+  const { data, error } = await supabase
+    .from('submissions')
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (error) throw error;
+  return data;
+};
+
+// Mettre à jour le statut d'une soumission
+export const updateSubmissionStatus = async (id, status, adminNotes = null) => {
+  const updates = {
+    status,
+    ...(adminNotes && { admin_notes: adminNotes })
+  };
+
+  const { data, error } = await supabase
+    .from('submissions')
+    .update(updates)
+    .eq('id', id)
+    .select()
+    .single();
+
+  if (error) throw error;
+  return data;
+};
+
+// Supprimer une soumission
+export const deleteSubmission = async (id) => {
+  // 1. Récupérer la soumission pour obtenir le chemin du fichier
+  const { data: submission, error: fetchError } = await supabase
+    .from('submissions')
+    .select('pdf_url')
+    .eq('id', id)
+    .single();
+
+  if (fetchError) throw fetchError;
+
+  // 2. Extraire le nom du fichier de l'URL
+  const fileName = submission.pdf_url.split('/').pop();
+
+  // 3. Supprimer le fichier du Storage
+  await supabase.storage
+    .from('submissions')
+    .remove([fileName]);
+
+  // 4. Supprimer l'entrée de la base de données
+  const { error } = await supabase
+    .from('submissions')
+    .delete()
+    .eq('id', id);
+
+  if (error) throw error;
+};
+
+// Télécharger un PDF de soumission
+export const downloadSubmissionPDF = async (pdfUrl) => {
+  const fileName = pdfUrl.split('/').pop();
+  
+  const { data, error } = await supabase.storage
+    .from('submissions')
+    .download(fileName);
+
+  if (error) throw error;
+  return data;
+};
+
+// ============================================================================
 // EXPORT PAR DÉFAUT - Objet regroupant tous les services
 // ============================================================================
 
@@ -317,5 +446,13 @@ export const supabaseService = {
   createOrder,
   createOrderItems,
   updateOrderStatus,
-  getOrdersByEmail
+  getOrdersByEmail,
+  
+  // Soumissions
+  createSubmission,
+  getSubmissions,
+  updateSubmissionStatus,
+  deleteSubmission,
+  uploadSubmissionPDF,
+  downloadSubmissionPDF
 };
