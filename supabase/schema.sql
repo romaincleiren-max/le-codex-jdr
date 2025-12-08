@@ -146,12 +146,12 @@ CREATE TRIGGER update_submissions_updated_at BEFORE UPDATE ON submissions
 -- DONNÉES INITIALES
 -- ============================================================================
 
--- Insertion des thèmes par défaut
+-- Insertion des thèmes par défaut (couleurs corrigées - medieval et lovecraft échangées)
 INSERT INTO themes (id, name, background_image, colors) VALUES
   ('medieval', 'Médiéval Fantasy', 'https://i.imgur.com/VQM3KJm.jpeg', 
-   '{"bg": "bg-amber-50", "primary": "bg-amber-800", "text": "text-amber-900", "textLight": "text-amber-700", "card": "bg-amber-100", "hover": "hover:bg-amber-700", "starFilled": "text-yellow-600", "starEmpty": "text-gray-400", "tag": "bg-amber-200 text-amber-800"}'),
-  ('lovecraft', 'Horreur Lovecraftienne', 'https://i.imgur.com/8yZqQJ7.jpeg',
    '{"bg": "bg-slate-900", "primary": "bg-emerald-900", "text": "text-emerald-100", "textLight": "text-emerald-300", "card": "bg-slate-800", "hover": "hover:bg-emerald-800", "starFilled": "text-emerald-400", "starEmpty": "text-slate-600", "tag": "bg-emerald-900 text-emerald-300"}'),
+  ('lovecraft', 'Horreur Lovecraftienne', 'https://i.imgur.com/8yZqQJ7.jpeg',
+   '{"bg": "bg-amber-50", "primary": "bg-amber-800", "text": "text-amber-900", "textLight": "text-amber-700", "card": "bg-amber-100", "hover": "hover:bg-amber-700", "starFilled": "text-yellow-600", "starEmpty": "text-gray-400", "tag": "bg-amber-200 text-amber-800"}'),
   ('scifi', 'Science-Fiction', 'https://i.imgur.com/m3rWsXP.jpeg',
    '{"bg": "bg-slate-950", "primary": "bg-cyan-900", "text": "text-cyan-100", "textLight": "text-cyan-300", "card": "bg-slate-900", "hover": "hover:bg-cyan-800", "starFilled": "text-cyan-400", "starEmpty": "text-slate-700", "tag": "bg-cyan-900 text-cyan-300"}')
 ON CONFLICT (id) DO NOTHING;
