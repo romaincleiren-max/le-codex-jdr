@@ -1,28 +1,41 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Lock } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { Lock, AlertCircle } from 'lucide-react';
+import { authenticateUser } from '../utils/authUtils';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Utilise la variable d'environnement pour le mot de passe admin
-    // Fallback sur localStorage pour permettre le changement de mot de passe
-    const envPassword = import.meta.env.VITE_ADMIN_PASSWORD;
-    const customPassword = localStorage.getItem('le-codex-admin-password');
-    const adminPassword = customPassword || envPassword || 'admin123';
-    
-    if (password === adminPassword) {
-      localStorage.setItem('le-codex-admin-auth', 'true');
-      navigate('/admin');
-    } else {
-      setError('Mot de passe incorrect');
+    setError('');
+    setIsLoading(true);
+
+    try {
+      // Utilise le système d'authentification sécurisé avec bcrypt
+      const isAuthenticated = await authenticateUser(password);
+      
+      if (isAuthenticated) {
+        // Redirige vers la page d'origine ou vers /admin par défaut
+        const from = location.state?.from?.pathname || '/admin';
+        navigate(from, { replace: true });
+      } else {
+        setError('Mot de passe incorrect');
+        setPassword('');
+      }
+    } catch (err) {
+      console.error('Erreur d\'authentification:', err);
+      setError('Erreur lors de la connexion. Veuillez réessayer.');
       setPassword('');
+    } finally {
+      setIsLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-8">
@@ -49,8 +62,9 @@ export const LoginPage = () => {
 
           <button
             type="submit"
-            className="w-full bg-amber-800 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold text-lg">
-            🔓 Se connecter
+            disabled={isLoading}
+            className="w-full bg-amber-800 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold text-lg disabled:opacity-50 disabled:cursor-not-allowed">
+            {isLoading ? '⏳ Connexion...' : '🔓 Se connecter'}
           </button>
         </form>
 

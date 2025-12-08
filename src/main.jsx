@@ -1811,7 +1811,7 @@ export default function App() {
                 {/* Image d'arrière-plan avec effets */}
                 <div className="absolute inset-0 transition-all duration-700">
                   <img 
-                    src={theme.backgroundImage} 
+                    src={theme.background_image || theme.backgroundImage}
                     alt={theme.name}
                     className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                     style={{

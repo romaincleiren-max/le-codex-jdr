@@ -32,15 +32,38 @@ export const updateTheme = async (themeId, updates) => {
     cleanedUpdates.name = updates.name;
   }
   
+  console.log('updateTheme - themeId:', themeId);
+  console.log('updateTheme - cleanedUpdates:', cleanedUpdates);
+  
+  // D'abord vérifier si le thème existe
+  const { data: existingTheme, error: checkError } = await supabase
+    .from('themes')
+    .select('*')
+    .eq('id', themeId);
+  
+  console.log('updateTheme - existingTheme:', existingTheme);
+  console.log('updateTheme - checkError:', checkError);
+  
+  if (checkError) throw checkError;
+  
+  if (!existingTheme || existingTheme.length === 0) {
+    throw new Error(`Le thème "${themeId}" n'existe pas dans la base de données`);
+  }
+  
+  // Maintenant faire la mise à jour
   const { data, error } = await supabase
     .from('themes')
     .update(cleanedUpdates)
     .eq('id', themeId)
-    .select()
-    .single();
+    .select();
+  
+  console.log('updateTheme - résultat:', data);
+  console.log('updateTheme - error:', error);
   
   if (error) throw error;
-  return data;
+  
+  // Retourner le premier élément si c'est un tableau
+  return Array.isArray(data) ? data[0] : data;
 };
 
 // ============================================================================
