@@ -37,9 +37,9 @@ const initialThemesData = [
     name: "Médiéval Fantasy",
     backgroundImage: "https://i.imgur.com/VQM3KJm.jpeg",
     colors: {
-      bg: "bg-amber-50", primary: "bg-amber-800", text: "text-amber-900",
-      textLight: "text-amber-700", card: "bg-amber-100", hover: "hover:bg-amber-700",
-      starFilled: "text-yellow-600", starEmpty: "text-gray-400", tag: "bg-amber-200 text-amber-800"
+      bg: "bg-slate-900", primary: "bg-emerald-900", text: "text-emerald-100",
+      textLight: "text-emerald-300", card: "bg-slate-800", hover: "hover:bg-emerald-800",
+      starFilled: "text-emerald-400", starEmpty: "text-slate-600", tag: "bg-emerald-900 text-emerald-300"
     }
   },
   {
@@ -47,9 +47,9 @@ const initialThemesData = [
     name: "Horreur Lovecraftienne",
     backgroundImage: "https://i.imgur.com/8yZqQJ7.jpeg",
     colors: {
-      bg: "bg-slate-900", primary: "bg-emerald-900", text: "text-emerald-100",
-      textLight: "text-emerald-300", card: "bg-slate-800", hover: "hover:bg-emerald-800",
-      starFilled: "text-emerald-400", starEmpty: "text-slate-600", tag: "bg-emerald-900 text-emerald-300"
+      bg: "bg-amber-50", primary: "bg-amber-800", text: "text-amber-900",
+      textLight: "text-amber-700", card: "bg-amber-100", hover: "hover:bg-amber-700",
+      starFilled: "text-yellow-600", starEmpty: "text-gray-400", tag: "bg-amber-200 text-amber-800"
     }
   },
   {
