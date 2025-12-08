@@ -323,6 +323,78 @@ export const getOrdersByEmail = async (email) => {
 };
 
 // ============================================================================
+// UPLOAD D'IMAGES
+// ============================================================================
+
+// Upload d'une image dans le Storage Supabase
+export const uploadImage = async (file, folder = 'general') => {
+  // Vérifier que c'est bien une image
+  if (!file.type.startsWith('image/')) {
+    throw new Error('Le fichier doit être une image (JPG, PNG, GIF, WEBP)');
+  }
+
+  // Limiter la taille à 5MB
+  const maxSize = 5 * 1024 * 1024; // 5MB
+  if (file.size > maxSize) {
+    throw new Error('L\'image ne doit pas dépasser 5MB');
+  }
+
+  // Générer un nom de fichier unique
+  const fileExt = file.name.split('.').pop().toLowerCase();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  const filePath = `${folder}/${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('images')
+    .upload(filePath, file, {
+      cacheControl: '31536000', // 1 an
+      upsert: false,
+      contentType: file.type
+    });
+
+  if (error) throw error;
+
+  // Obtenir l'URL publique du fichier
+  const { data: { publicUrl } } = supabase.storage
+    .from('images')
+    .getPublicUrl(filePath);
+
+  return {
+    path: filePath,
+    url: publicUrl,
+    fileName: fileName
+  };
+};
+
+// Supprimer une image du Storage
+export const deleteImage = async (imagePath) => {
+  const { error } = await supabase.storage
+    .from('images')
+    .remove([imagePath]);
+
+  if (error) throw error;
+};
+
+// Liste toutes les images d'un dossier
+export const listImages = async (folder = 'general') => {
+  const { data, error } = await supabase.storage
+    .from('images')
+    .list(folder, {
+      limit: 100,
+      offset: 0,
+      sortBy: { column: 'created_at', order: 'desc' }
+    });
+
+  if (error) throw error;
+
+  // Ajouter les URLs publiques
+  return data.map(file => ({
+    ...file,
+    url: supabase.storage.from('images').getPublicUrl(`${folder}/${file.name}`).data.publicUrl
+  }));
+};
+
+// ============================================================================
 // SOUMISSIONS DE SCÉNARIOS
 // ============================================================================
 
