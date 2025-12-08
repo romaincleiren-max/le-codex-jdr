@@ -326,22 +326,23 @@ export const getOrdersByEmail = async (email) => {
 // UPLOAD D'IMAGES
 // ============================================================================
 
+import { sanitizeFileName, validateImageFile } from '../utils/validation';
+
 // Upload d'une image dans le Storage Supabase
 export const uploadImage = async (file, folder = 'general') => {
-  // Vérifier que c'est bien une image
-  if (!file.type.startsWith('image/')) {
-    throw new Error('Le fichier doit être une image (JPG, PNG, GIF, WEBP)');
+  // Validation complète du fichier
+  const validation = validateImageFile(file);
+  if (!validation.valid) {
+    throw new Error(validation.error);
   }
 
-  // Limiter la taille à 5MB
-  const maxSize = 5 * 1024 * 1024; // 5MB
-  if (file.size > maxSize) {
-    throw new Error('L\'image ne doit pas dépasser 5MB');
-  }
-
-  // Générer un nom de fichier unique
-  const fileExt = file.name.split('.').pop().toLowerCase();
-  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  // Sanitizer le nom de fichier (enlève accents, espaces, caractères spéciaux)
+  const sanitizedName = sanitizeFileName(file.name);
+  
+  // Générer un nom unique avec timestamp
+  const fileExt = sanitizedName.split('.').pop();
+  const baseName = sanitizedName.replace(`.${fileExt}`, '');
+  const fileName = `${Date.now()}-${baseName}.${fileExt}`;
   const filePath = `${folder}/${fileName}`;
 
   const { data, error } = await supabase.storage

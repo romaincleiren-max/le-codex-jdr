@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Lock, AlertCircle } from 'lucide-react';
+import { Lock, AlertCircle, Shield } from 'lucide-react';
 import { authenticateUser } from '../utils/authUtils';
+import { loginRateLimiter } from '../utils/rateLimiter';
+import RateLimiter from '../utils/rateLimiter';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -9,22 +11,44 @@ export const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [rateLimitInfo, setRateLimitInfo] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    
+    // Vérifier le rate limiting AVANT la tentative
+    const rateLimitCheck = loginRateLimiter.check();
+    
+    if (!rateLimitCheck.allowed) {
+      const timeRemaining = RateLimiter.formatTime(rateLimitCheck.resetIn);
+      setError(`Trop de tentatives de connexion. Veuillez réessayer dans ${timeRemaining}.`);
+      setRateLimitInfo(rateLimitCheck);
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
+      // Enregistrer la tentative
+      const attemptResult = loginRateLimiter.attempt();
+      setRateLimitInfo(attemptResult);
+      
       // Utilise le système d'authentification sécurisé avec bcrypt
       const isAuthenticated = await authenticateUser(password);
       
       if (isAuthenticated) {
+        // Réinitialiser le rate limiter en cas de succès
+        loginRateLimiter.reset();
+        
         // Redirige vers la page d'origine ou vers /admin par défaut
         const from = location.state?.from?.pathname || '/admin';
         navigate(from, { replace: true });
       } else {
-        setError('Mot de passe incorrect');
+        const remaining = attemptResult.remaining;
+        setError(
+          `Mot de passe incorrect. ${remaining > 0 ? `${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.` : 'Limite atteinte.'}`
+        );
         setPassword('');
       }
     } catch (err) {
