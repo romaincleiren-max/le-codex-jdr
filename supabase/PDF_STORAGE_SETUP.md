@@ -119,7 +119,7 @@ Ajoutez dans votre fichier `.env` :
 
 ```env
 # Service Role Key (BACKEND ONLY - Ne jamais exposer côté client!)
-SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzZ25keWFwY295bWt5bmJ2Y2tnIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2NTExNjc2MywiZXhwIjoyMDgwNjkyNzYzfQ.rjyOCs5zv8Z8x5uFnkbqRoPMQmdQuBUFDuT_q6OaqzE
+SUPABASE_SERVICE_ROLE_KEY=votre_service_role_key_ici
 ```
 
 **IMPORTANT** :
