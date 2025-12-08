@@ -1586,16 +1586,20 @@ export default function App() {
     
     const validCampaign = {
       ...campaignData,
-      themeId: finalThemeId,
-      id: campaignData.id || Date.now() // S'assurer qu'il y a un ID unique
+      themeId: finalThemeId
     };
+    
+    // Ne PAS inclure l'ID pour une nouvelle campagne (Supabase le génère automatiquement)
+    if (editingSaga) {
+      validCampaign.id = campaignData.id; // Garder l'ID existant pour la modification
+    }
     
     try {
       if (editingSaga) {
         // Modifier dans Supabase
         await supabaseService.updateCampaign(validCampaign.id, validCampaign);
       } else {
-        // Créer dans Supabase
+        // Créer dans Supabase (sans ID, Supabase le génère)
         await supabaseService.createCampaign(validCampaign);
       }
       
