@@ -9,6 +9,7 @@ import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
 import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock } from 'lucide-react';
 import TestSupabase from './pages/TestSupabase';
+import { LoginPage } from './pages/LoginPage';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 
@@ -998,66 +999,6 @@ const OrderConfirmationPage = ({ orderData, cart, onBackToHome }) => {
 
         <button onClick={onBackToHome} className="bg-amber-800 text-white px-8 py-4 rounded-lg hover:bg-amber-700 font-bold text-lg">
           Retour à l'accueil
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Page de Login pour l'admin
-const LoginPage = () => {
-  const navigate = useNavigate();
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Mot de passe par défaut : "admin123" - peut être changé dans le localStorage
-    const adminPassword = localStorage.getItem('le-codex-admin-password') || 'admin123';
-    
-    if (password === adminPassword) {
-      localStorage.setItem('le-codex-admin-auth', 'true');
-      navigate('/admin');
-    } else {
-      setError('Mot de passe incorrect');
-      setPassword('');
-    }
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-8">
-      <div className="max-w-md w-full bg-amber-100 border-4 border-amber-900 rounded-lg p-8 shadow-2xl">
-        <div className="text-center mb-6">
-          <Lock size={64} className="mx-auto text-amber-800 mb-4" />
-          <h1 className="text-3xl font-bold text-amber-900">Accès Admin</h1>
-          <p className="text-amber-700 mt-2">Entrez le mot de passe</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-amber-900 font-bold mb-2">Mot de passe</label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(''); }}
-              className="w-full px-4 py-3 border-2 border-amber-700 rounded-lg focus:outline-none focus:border-amber-900"
-              placeholder="Entrez le mot de passe..."
-              autoFocus
-            />
-            {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-amber-800 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold text-lg">
-            🔓 Se connecter
-          </button>
-        </form>
-
-        <button
-          onClick={() => navigate('/')}
-          className="w-full mt-4 bg-gray-500 text-white px-6 py-3 rounded-lg hover:bg-gray-600 font-bold">
-          ← Retour à l'accueil
         </button>
       </div>
     </div>
