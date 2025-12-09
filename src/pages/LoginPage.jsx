@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Lock, AlertCircle, Shield } from 'lucide-react';
-import { authenticateUser } from '../utils/authUtils';
+import { Lock, Mail } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 import { loginRateLimiter } from '../utils/rateLimiter';
 import RateLimiter from '../utils/rateLimiter';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -34,23 +35,45 @@ export const LoginPage = () => {
       const attemptResult = loginRateLimiter.attempt();
       setRateLimitInfo(attemptResult);
       
-      // Utilise le système d'authentification sécurisé avec bcrypt
-      const isAuthenticated = await authenticateUser(password);
+      // Authentification avec Supabase Auth
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
       
-      if (isAuthenticated) {
-        // Réinitialiser le rate limiter en cas de succès
-        loginRateLimiter.reset();
-        
-        // Redirige vers la page d'origine ou vers /admin par défaut
-        const from = location.state?.from?.pathname || '/admin';
-        navigate(from, { replace: true });
-      } else {
+      if (authError) {
         const remaining = attemptResult.remaining;
         setError(
-          `Mot de passe incorrect. ${remaining > 0 ? `${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.` : 'Limite atteinte.'}`
+          `Email ou mot de passe incorrect. ${remaining > 0 ? `${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.` : 'Limite atteinte.'}`
         );
         setPassword('');
+        setIsLoading(false);
+        return;
       }
+      
+      // Vérifier si l'utilisateur est admin
+      const { data: adminCheck, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', data.user.email)
+        .single();
+      
+      if (adminError || !adminCheck) {
+        // Pas un admin, déconnecter
+        await supabase.auth.signOut();
+        setError('Accès non autorisé. Cet utilisateur n\'est pas administrateur.');
+        setPassword('');
+        setIsLoading(false);
+        return;
+      }
+      
+      // Succès : réinitialiser le rate limiter et rediriger
+      loginRateLimiter.reset();
+      
+      // Redirige vers la page d'origine ou vers /admin par défaut
+      const from = location.state?.from?.pathname || '/admin';
+      navigate(from, { replace: true });
+      
     } catch (err) {
       console.error('Erreur d\'authentification:', err);
       setError('Erreur lors de la connexion. Veuillez réessayer.');
@@ -72,17 +95,37 @@ export const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-amber-900 font-bold mb-2">Mot de passe</label>
+            <label className="block text-amber-900 font-bold mb-2">
+              <Mail className="inline mr-2" size={16} />
+              Email
+            </label>
+            <input
+              type="email"
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(''); }}
+              className="w-full px-4 py-3 border-2 border-amber-700 rounded-lg focus:outline-none focus:border-amber-900"
+              placeholder="admin@exemple.com"
+              autoFocus
+              required
+            />
+          </div>
+          
+          <div>
+            <label className="block text-amber-900 font-bold mb-2">
+              <Lock className="inline mr-2" size={16} />
+              Mot de passe
+            </label>
             <input
               type="password"
               value={password}
               onChange={(e) => { setPassword(e.target.value); setError(''); }}
               className="w-full px-4 py-3 border-2 border-amber-700 rounded-lg focus:outline-none focus:border-amber-900"
               placeholder="Entrez le mot de passe..."
-              autoFocus
+              required
             />
-            {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
           </div>
+          
+          {error && <p className="text-red-600 text-sm mt-2">{error}</p>}
 
           <button
             type="submit"
@@ -94,10 +137,10 @@ export const LoginPage = () => {
 
         <div className="mt-6 bg-amber-50 border-2 border-amber-700 rounded-lg p-4">
           <p className="text-sm text-amber-900">
-            <strong>🔐 Accès Sécurisé</strong>
+            <strong>🔐 Authentification Supabase</strong>
           </p>
           <p className="text-xs text-amber-700 mt-2">
-            Contactez l'administrateur pour obtenir le mot de passe
+            Seuls les administrateurs autorisés peuvent accéder à cette page
           </p>
         </div>
 
