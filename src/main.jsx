@@ -1380,21 +1380,35 @@ export default function App() {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
-          // Vérifier si l'utilisateur est admin
-          const { data: adminCheck } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('email', session.user.email)
-            .single();
+          // Vérifier le cache d'abord
+          const cachedAdminStatus = sessionStorage.getItem(`admin_status_${session.user.id}`);
           
-          setIsAuthenticated(!!adminCheck);
+          if (cachedAdminStatus !== null) {
+            // Utiliser le cache pour une réponse instantanée
+            setIsAuthenticated(cachedAdminStatus === 'true');
+            setAuthLoading(false);
+          } else {
+            // Vérifier si l'utilisateur est admin dans la base
+            const { data: adminCheck } = await supabase
+              .from('admin_users')
+              .select('*')
+              .eq('email', session.user.email)
+              .single();
+            
+            const isAdmin = !!adminCheck;
+            setIsAuthenticated(isAdmin);
+            
+            // Mettre en cache pour 1 heure
+            sessionStorage.setItem(`admin_status_${session.user.id}`, isAdmin.toString());
+            setAuthLoading(false);
+          }
         } else {
           setIsAuthenticated(false);
+          setAuthLoading(false);
         }
       } catch (error) {
         console.error('Erreur vérification auth:', error);
         setIsAuthenticated(false);
-      } finally {
         setAuthLoading(false);
       }
     };
@@ -1403,14 +1417,27 @@ export default function App() {
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const { data: adminCheck } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('email', session.user.email)
-          .single();
+      if (_event === 'SIGNED_OUT') {
+        // Nettoyer le cache lors de la déconnexion
+        sessionStorage.clear();
+        setIsAuthenticated(false);
+      } else if (session?.user) {
+        // Vérifier le cache ou la base
+        const cachedAdminStatus = sessionStorage.getItem(`admin_status_${session.user.id}`);
         
-        setIsAuthenticated(!!adminCheck);
+        if (cachedAdminStatus !== null) {
+          setIsAuthenticated(cachedAdminStatus === 'true');
+        } else {
+          const { data: adminCheck } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('email', session.user.email)
+            .single();
+          
+          const isAdmin = !!adminCheck;
+          setIsAuthenticated(isAdmin);
+          sessionStorage.setItem(`admin_status_${session.user.id}`, isAdmin.toString());
+        }
       } else {
         setIsAuthenticated(false);
       }
@@ -1621,13 +1648,14 @@ export default function App() {
     try {
       if (editingScenario) {
         // Modifier le scénario existant dans Supabase
+        // updateScenario attend : (scenarioId, updates)
         await supabaseService.updateScenario(
-          selectedSagaIdForScenarios,
           scenarioData.id,
           scenarioData
         );
       } else {
         // Ajouter un nouveau scénario dans Supabase
+        // createScenario attend : (campaignId, scenario)
         await supabaseService.addScenario(
           selectedSagaIdForScenarios,
           scenarioData
@@ -1636,21 +1664,26 @@ export default function App() {
       
       setShowScenarioModal(false);
       setEditingScenario(null);
-      // Le hook useSupabaseData va recharger automatiquement
+      // Recharger manuellement les données
+      await refresh();
+      alert('✅ Scénario sauvegardé avec succès !');
     } catch (error) {
       console.error('Erreur sauvegarde scénario:', error);
-      alert('❌ Erreur lors de la sauvegarde du scénario');
+      alert('❌ Erreur lors de la sauvegarde du scénario: ' + error.message);
     }
   };
 
   const deleteScenario = async (sagaId, scenarioId) => {
     if (confirm('Supprimer ce scénario ?')) {
       try {
-        await supabaseService.deleteScenario(sagaId, scenarioId);
-        // Le hook useSupabaseData va recharger automatiquement
+        // deleteScenario attend uniquement : (scenarioId)
+        await supabaseService.deleteScenario(scenarioId);
+        // Recharger manuellement les données
+        await refresh();
+        alert('✅ Scénario supprimé avec succès !');
       } catch (error) {
         console.error('Erreur suppression scénario:', error);
-        alert('❌ Erreur lors de la suppression du scénario');
+        alert('❌ Erreur lors de la suppression du scénario: ' + error.message);
       }
     }
   };

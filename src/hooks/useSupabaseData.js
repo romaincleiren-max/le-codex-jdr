@@ -105,9 +105,9 @@ export const useSupabaseData = () => {
     }
   };
 
-  // Fonction pour rafraîchir les données
-  const refresh = () => {
-    loadAllData();
+  // Fonction pour rafraîchir les données (retourne une promesse)
+  const refresh = async () => {
+    await loadAllData();
   };
 
   return {
