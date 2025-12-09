@@ -1832,7 +1832,7 @@ export default function App() {
             {themes.map((theme, idx) => (
               <div key={theme.id} onClick={() => { setCurrentTheme(theme); openBook(theme); }}
                 className="flex-1 flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out hover:flex-[1.5] group relative overflow-hidden"
-                style={{backgroundColor: idx === 0 ? '#78350f' : '#020617'}}>
+                style={{backgroundColor: theme.id === 'medieval' ? '#78350f' : '#020617'}}>
                 {/* Image d'arrière-plan avec effets */}
                 <div className="absolute inset-0 transition-all duration-700">
                   <img 
@@ -1865,12 +1865,12 @@ export default function App() {
                 {/* Contenu */}
                 <div className="relative z-10 text-center p-8 transform transition-all duration-500 group-hover:scale-110">
                   <h2 className={`text-6xl font-bold mb-4 drop-shadow-2xl transition-all duration-500 ${
-                    idx === 0 ? 'text-amber-300' : idx === 1 ? 'text-emerald-400' : 'text-cyan-400'
+                    theme.id === 'medieval' ? 'text-amber-300' : theme.id === 'lovecraft' ? 'text-emerald-400' : 'text-cyan-400'
                   }`} style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5), 3px 3px 6px rgba(0,0,0,1)'}}>
                     {theme.name}
                   </h2>
                   <p className={`text-xl opacity-0 group-hover:opacity-100 transition-all duration-500 ${
-                    idx === 0 ? 'text-amber-200' : idx === 1 ? 'text-emerald-300' : 'text-cyan-300'
+                    theme.id === 'medieval' ? 'text-amber-200' : theme.id === 'lovecraft' ? 'text-emerald-300' : 'text-cyan-300'
                   }`}>Cliquez pour explorer</p>
                 </div>
               </div>
