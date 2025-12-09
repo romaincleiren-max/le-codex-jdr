@@ -18,6 +18,8 @@ export const LoginPage = () => {
     e.preventDefault();
     setError('');
     
+    console.log('🔐 Tentative de connexion avec:', { email, passwordLength: password.length });
+    
     // Vérifier le rate limiting AVANT la tentative
     const rateLimitCheck = loginRateLimiter.check();
     
@@ -35,13 +37,18 @@ export const LoginPage = () => {
       const attemptResult = loginRateLimiter.attempt();
       setRateLimitInfo(attemptResult);
       
+      console.log('📡 Envoi de la requête à Supabase...');
+      
       // Authentification avec Supabase Auth
       const { data, error: authError } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
       
+      console.log('📨 Réponse Supabase:', { data, error: authError });
+      
       if (authError) {
+        console.error('❌ Erreur d\'authentification:', authError);
         const remaining = attemptResult.remaining;
         setError(
           `Email ou mot de passe incorrect. ${remaining > 0 ? `${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.` : 'Limite atteinte.'}`
@@ -51,15 +58,22 @@ export const LoginPage = () => {
         return;
       }
       
+      console.log('✅ Authentification réussie, vérification du statut admin...');
+      
       // Vérifier si l'utilisateur est admin
+      console.log('🔍 Vérification dans admin_users pour:', data.user.email);
+      
       const { data: adminCheck, error: adminError } = await supabase
         .from('admin_users')
         .select('*')
         .eq('email', data.user.email)
         .single();
       
+      console.log('👤 Résultat admin_users:', { adminCheck, adminError });
+      
       if (adminError || !adminCheck) {
         // Pas un admin, déconnecter
+        console.warn('⚠️ Utilisateur non admin, déconnexion...');
         await supabase.auth.signOut();
         setError('Accès non autorisé. Cet utilisateur n\'est pas administrateur.');
         setPassword('');
@@ -67,12 +81,21 @@ export const LoginPage = () => {
         return;
       }
       
+      console.log('🎉 Utilisateur admin confirmé ! Redirection...');
+      
       // Succès : réinitialiser le rate limiter et rediriger
       loginRateLimiter.reset();
       
       // Redirige vers la page d'origine ou vers /admin par défaut
       const from = location.state?.from?.pathname || '/admin';
-      navigate(from, { replace: true });
+      console.log('🚀 Navigation vers:', from);
+      
+      try {
+        navigate(from, { replace: true });
+        console.log('✅ Navigation appelée avec succès');
+      } catch (navError) {
+        console.error('❌ Erreur de navigation:', navError);
+      }
       
     } catch (err) {
       console.error('Erreur d\'authentification:', err);

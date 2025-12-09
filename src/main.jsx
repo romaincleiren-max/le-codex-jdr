@@ -10,6 +10,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock } from 'lucide-react';
 import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
+import { ProtectedRoute } from './components/ProtectedRoute';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 
@@ -1147,11 +1148,6 @@ const PageAccueilTab = ({ themes, setThemes }) => {
   );
 };
 
-// Composant pour protéger les routes admin
-const ProtectedRoute = ({ children }) => {
-  const isAuth = localStorage.getItem('le-codex-admin-auth') === 'true';
-  return isAuth ? children : <Navigate to="/login" replace />;
-};
 
 // Composant pour afficher les soumissions depuis Supabase
 const SubmissionsTab = () => {
