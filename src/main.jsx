@@ -1429,7 +1429,7 @@ const SubmissionsTab = () => {
 
 export default function App() {
   // Charger les données depuis Supabase
-  const { campaigns, themes: supabaseThemes, siteSettings: supabaseSiteSettings, loading, error } = useSupabaseData();
+  const { campaigns, themes: supabaseThemes, siteSettings: supabaseSiteSettings, loading, error, refresh } = useSupabaseData();
   
   // Utiliser les données Supabase avec fallback
   const [sagas, setSagas] = useState([]);
@@ -1603,12 +1603,15 @@ export default function App() {
         await supabaseService.createCampaign(validCampaign);
       }
       
-      // Le hook useSupabaseData va recharger automatiquement
+      // Recharger les données depuis Supabase
+      await refresh();
+      
       setShowCampaignModal(false);
       setEditingSaga(null);
+      alert('✅ Campagne sauvegardée avec succès !');
     } catch (error) {
       console.error('Erreur sauvegarde campagne:', error);
-      alert('❌ Erreur lors de la sauvegarde de la campagne');
+      alert('❌ Erreur lors de la sauvegarde de la campagne: ' + error.message);
     }
   };
 
