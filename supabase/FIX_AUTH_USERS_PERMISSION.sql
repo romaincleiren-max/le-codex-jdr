@@ -1,38 +1,18 @@
 -- ============================================================================
--- CONFIGURATION AUTHENTIFICATION ADMIN SÉCURISÉE
+-- CORRECTION : Permission denied for table users
 -- ============================================================================
 
--- 1. Créer une table pour gérer les administrateurs autorisés
-CREATE TABLE IF NOT EXISTS admin_users (
-  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  email TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
-);
-
--- Activer RLS sur admin_users
-ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
-
--- Permettre la lecture de admin_users pour les utilisateurs authentifiés
--- (nécessaire pour vérifier le statut admin sans créer de récursion)
-CREATE POLICY "Lecture admin_users par authentifiés" ON admin_users FOR SELECT 
-  USING (auth.uid() IS NOT NULL);
-
--- 2. Ajouter votre email admin
--- ⚠️ IMPORTANT : Remplacez par votre vrai email que vous utiliserez pour vous connecter
-INSERT INTO admin_users (email) VALUES ('romain.cleiren@gmail.com')
-ON CONFLICT (email) DO NOTHING;
+-- Le problème : Les politiques RLS essaient d'accéder à auth.users
+-- Solution : Utiliser auth.jwt() pour obtenir l'email directement du JWT
 
 -- ============================================================================
--- POLITIQUES RLS SÉCURISÉES POUR LES CAMPAGNES
+-- CAMPAGNES
 -- ============================================================================
 
--- Supprimer les anciennes politiques
-DROP POLICY IF EXISTS "Modification des campagnes par admins uniquement" ON campaigns;
-DROP POLICY IF EXISTS "Autoriser insertion campagnes" ON campaigns;
-DROP POLICY IF EXISTS "Autoriser modification campagnes" ON campaigns;
-DROP POLICY IF EXISTS "Autoriser suppression campagnes" ON campaigns;
+DROP POLICY IF EXISTS "Insertion campagnes par admins" ON campaigns;
+DROP POLICY IF EXISTS "Modification campagnes par admins" ON campaigns;
+DROP POLICY IF EXISTS "Suppression campagnes par admins" ON campaigns;
 
--- Créer les nouvelles politiques restreintes aux admins
 CREATE POLICY "Insertion campagnes par admins" ON campaigns FOR INSERT 
   WITH CHECK (
     auth.uid() IS NOT NULL 
@@ -61,13 +41,12 @@ CREATE POLICY "Suppression campagnes par admins" ON campaigns FOR DELETE
   );
 
 -- ============================================================================
--- POLITIQUES RLS POUR LES SCÉNARIOS
+-- SCÉNARIOS
 -- ============================================================================
 
-DROP POLICY IF EXISTS "Modification des scénarios par admins uniquement" ON scenarios;
-DROP POLICY IF EXISTS "Autoriser insertion scénarios" ON scenarios;
-DROP POLICY IF EXISTS "Autoriser modification scénarios" ON scenarios;
-DROP POLICY IF EXISTS "Autoriser suppression scénarios" ON scenarios;
+DROP POLICY IF EXISTS "Insertion scénarios par admins" ON scenarios;
+DROP POLICY IF EXISTS "Modification scénarios par admins" ON scenarios;
+DROP POLICY IF EXISTS "Suppression scénarios par admins" ON scenarios;
 
 CREATE POLICY "Insertion scénarios par admins" ON scenarios FOR INSERT 
   WITH CHECK (
@@ -97,13 +76,12 @@ CREATE POLICY "Suppression scénarios par admins" ON scenarios FOR DELETE
   );
 
 -- ============================================================================
--- POLITIQUES RLS POUR LES THÈMES
+-- THÈMES
 -- ============================================================================
 
-DROP POLICY IF EXISTS "Modification des thèmes" ON themes;
-DROP POLICY IF EXISTS "Autoriser insertion thèmes" ON themes;
-DROP POLICY IF EXISTS "Autoriser modification thèmes" ON themes;
-DROP POLICY IF EXISTS "Autoriser suppression thèmes" ON themes;
+DROP POLICY IF EXISTS "Insertion thèmes par admins" ON themes;
+DROP POLICY IF EXISTS "Modification thèmes par admins" ON themes;
+DROP POLICY IF EXISTS "Suppression thèmes par admins" ON themes;
 
 CREATE POLICY "Insertion thèmes par admins" ON themes FOR INSERT 
   WITH CHECK (
@@ -133,10 +111,10 @@ CREATE POLICY "Suppression thèmes par admins" ON themes FOR DELETE
   );
 
 -- ============================================================================
--- POLITIQUES RLS POUR LES PARAMÈTRES DU SITE
+-- PARAMÈTRES DU SITE
 -- ============================================================================
 
-DROP POLICY IF EXISTS "Autoriser modification paramètres" ON site_settings;
+DROP POLICY IF EXISTS "Modification paramètres par admins" ON site_settings;
 
 CREATE POLICY "Modification paramètres par admins" ON site_settings FOR UPDATE 
   USING (
@@ -148,27 +126,23 @@ CREATE POLICY "Modification paramètres par admins" ON site_settings FOR UPDATE
   );
 
 -- ============================================================================
--- INSTRUCTIONS
+-- EXPLICATION
 -- ============================================================================
 
 /*
-APRÈS AVOIR EXÉCUTÉ CE SCRIPT :
+✅ CORRECTION APPLIQUÉE :
 
-1. Modifiez la ligne 26 pour mettre VOTRE email admin
+Au lieu de :
+  SELECT email FROM auth.users WHERE id = auth.uid()  ❌ Permission denied
 
-2. Dans Supabase Dashboard, allez dans :
-   Authentication → Users → Add user
-   
-3. Créez votre compte admin avec :
-   - Email : le même que celui dans admin_users
-   - Password : votre mot de passe sécurisé
-   - Email confirmation : Décochez "Send confirmation email" pour activer immédiatement
+On utilise :
+  auth.jwt()->>'email'  ✅ Accès direct depuis le JWT
 
-4. Ensuite, modifiez le code frontend (LoginPage.jsx) pour utiliser Supabase Auth
+Le JWT (JSON Web Token) contient déjà l'email de l'utilisateur connecté,
+donc pas besoin d'interroger la table auth.users.
 
 SÉCURITÉ :
-✅ Seuls les utilisateurs authentifiés ET présents dans admin_users peuvent modifier
-✅ Lecture publique pour tous (visiteurs du site)
-✅ Logs d'authentification dans Supabase
-✅ Gestion native des sessions
+✅ auth.jwt() est automatiquement géré par Supabase
+✅ Ne peut pas être falsifié côté client
+✅ Contient les informations de l'utilisateur authentifié
 */
