@@ -2753,13 +2753,17 @@ export default function App() {
             </div>
 
             {/* Image de fond spécifique à la campagne si définie */}
-            {selectedSaga && selectedSaga.backgroundImageUrl && (
+            {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url) && (
               <div className="fixed inset-0 z-0 opacity-20">
                 <img 
-                  src={selectedSaga.backgroundImageUrl} 
+                  src={selectedSaga.backgroundImageUrl || selectedSaga.background_image_url} 
                   alt="" 
                   className="w-full h-full object-cover"
                   style={{ filter: 'blur(20px)' }}
+                  onError={(e) => {
+                    console.error('Erreur chargement image campagne:', selectedSaga);
+                    e.target.style.display = 'none';
+                  }}
                 />
               </div>
             )}
