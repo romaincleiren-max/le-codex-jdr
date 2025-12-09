@@ -13,6 +13,7 @@ import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
+import { supabase } from './lib/supabase';
 
 const adminConfig = {
   titleFont: "font-serif",
@@ -1368,6 +1369,56 @@ export default function App() {
   // Charger les données depuis Supabase
   const { campaigns, themes: supabaseThemes, siteSettings: supabaseSiteSettings, loading, error, refresh } = useSupabaseData();
   
+  // État pour l'authentification
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [authLoading, setAuthLoading] = useState(true);
+  
+  // Vérifier l'authentification Supabase au chargement
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        
+        if (session?.user) {
+          // Vérifier si l'utilisateur est admin
+          const { data: adminCheck } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('email', session.user.email)
+            .single();
+          
+          setIsAuthenticated(!!adminCheck);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error('Erreur vérification auth:', error);
+        setIsAuthenticated(false);
+      } finally {
+        setAuthLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    // Écouter les changements d'authentification
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const { data: adminCheck } = await supabase
+          .from('admin_users')
+          .select('*')
+          .eq('email', session.user.email)
+          .single();
+        
+        setIsAuthenticated(!!adminCheck);
+      } else {
+        setIsAuthenticated(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+  
   // Utiliser les données Supabase avec fallback
   const [sagas, setSagas] = useState([]);
   const [themes, setThemes] = useState(initialThemesData);
@@ -1685,8 +1736,7 @@ export default function App() {
               {['home', 'submit', 'admin', 'stats', 'about']
                 .filter(page => {
                   // Masquer Admin et Stats si non connecté
-                  const isAuth = localStorage.getItem('le-codex-admin-auth') === 'true';
-                  if ((page === 'admin' || page === 'stats') && !isAuth) {
+                  if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
                     return false;
                   }
                   return true;
@@ -1712,13 +1762,13 @@ export default function App() {
               </button>
               
               {/* Bouton de déconnexion si authentifié */}
-              {localStorage.getItem('le-codex-admin-auth') === 'true' && (
+              {isAuthenticated && (
                 <button 
-                  onClick={() => {
+                  onClick={async () => {
                     if (confirm('Voulez-vous vous déconnecter ?')) {
-                      localStorage.removeItem('le-codex-admin-auth');
+                      await supabase.auth.signOut();
+                      setIsAuthenticated(false);
                       setCurrentPage('home');
-                      window.location.reload();
                     }
                   }}
                   className="px-4 py-2 rounded bg-red-800 hover:bg-red-700 text-white flex items-center gap-2"
