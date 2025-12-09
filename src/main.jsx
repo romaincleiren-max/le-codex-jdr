@@ -1008,7 +1008,7 @@ const OrderConfirmationPage = ({ orderData, cart, onBackToHome }) => {
 };
 
 // Composant pour la page d'accueil dans l'admin
-const PageAccueilTab = ({ themes, setThemes }) => {
+const PageAccueilTab = ({ themes, setThemes, refresh }) => {
   const [editedThemes, setEditedThemes] = useState(themes);
   const [saving, setSaving] = useState(false);
 
@@ -1042,10 +1042,8 @@ const PageAccueilTab = ({ themes, setThemes }) => {
       
       await supabaseService.updateTheme(themeId, { backgroundImage: imageUrl });
       
-      // Recharger les thèmes depuis Supabase pour avoir les données à jour
-      const updatedThemes = await supabaseService.getThemes();
-      setThemes(updatedThemes);
-      setEditedThemes(updatedThemes);
+      // Recharger TOUTES les données depuis Supabase
+      await refresh();
       
       alert('✅ Image d\'arrière-plan sauvegardée !');
     } catch (error) {
@@ -2209,7 +2207,7 @@ export default function App() {
 
                 {/* ONGLET PAGE ACCUEIL */}
                 {adminTab === 'pageaccueil' && (
-                  <PageAccueilTab themes={themes} setThemes={setThemes} />
+                  <PageAccueilTab themes={themes} setThemes={setThemes} refresh={refresh} />
                 )}
 
                 {/* ONGLET VISUEL */}
