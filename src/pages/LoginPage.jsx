@@ -90,7 +90,7 @@ export const LoginPage = () => {
         <div className="text-center mb-6">
           <Lock size={64} className="mx-auto text-amber-800 mb-4" />
           <h1 className="text-3xl font-bold text-amber-900">Accès Admin</h1>
-          <p className="text-amber-700 mt-2">Entrez le mot de passe</p>
+          <p className="text-amber-700 mt-2">Connectez-vous avec votre email</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
