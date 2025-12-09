@@ -12,19 +12,14 @@ CREATE TABLE IF NOT EXISTS admin_users (
 -- Activer RLS sur admin_users
 ALTER TABLE admin_users ENABLE ROW LEVEL SECURITY;
 
--- Seuls les admins peuvent voir la liste des admins
-CREATE POLICY "Lecture admin_users par admins" ON admin_users FOR SELECT 
-  USING (
-    auth.uid() IS NOT NULL 
-    AND EXISTS (
-      SELECT 1 FROM admin_users 
-      WHERE email = (SELECT email FROM auth.users WHERE id = auth.uid())
-    )
-  );
+-- Permettre la lecture de admin_users pour les utilisateurs authentifiés
+-- (nécessaire pour vérifier le statut admin sans créer de récursion)
+CREATE POLICY "Lecture admin_users par authentifiés" ON admin_users FOR SELECT 
+  USING (auth.uid() IS NOT NULL);
 
 -- 2. Ajouter votre email admin
 -- ⚠️ IMPORTANT : Remplacez par votre vrai email que vous utiliserez pour vous connecter
-INSERT INTO admin_users (email) VALUES ('votre-email@exemple.com')
+INSERT INTO admin_users (email) VALUES ('romain.cleiren@gmail.com')
 ON CONFLICT (email) DO NOTHING;
 
 -- ============================================================================
