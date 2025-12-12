@@ -2630,19 +2630,31 @@ export default function App() {
 
         {/* PAGE SCENARIOS */}
         {showBook && (
-          <div className={`min-h-screen relative overflow-hidden ${
-            currentTheme.id === 'medieval' ? 'bg-gradient-to-b from-amber-950 via-amber-900 to-stone-900' :
-            currentTheme.id === 'lovecraft' ? 'bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950' :
-            'bg-gradient-to-b from-slate-950 via-cyan-950 to-slate-950'
-          }`}>
-            {/* Texture d'arrière-plan selon le thème */}
-            <div className="absolute inset-0 opacity-5" style={{
-              backgroundImage: currentTheme.id === 'medieval' 
-                ? 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")'
-                : currentTheme.id === 'lovecraft'
-                ? 'radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.1) 0%, transparent 50%)'
-                : 'linear-gradient(45deg, rgba(6, 182, 212, 0.05) 25%, transparent 25%, transparent 75%, rgba(6, 182, 212, 0.05) 75%)'
-            }}></div>
+          <div className="min-h-screen relative overflow-hidden bg-slate-950">
+            {/* Image de fond de la campagne - Visible et esthétique */}
+            {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url) ? (
+              <div className="fixed inset-0 z-0">
+                <img 
+                  src={selectedSaga.backgroundImageUrl || selectedSaga.background_image_url} 
+                  alt="" 
+                  className="w-full h-full object-cover"
+                  style={{ filter: 'blur(3px) brightness(0.5)' }}
+                  onError={(e) => {
+                    console.error('Erreur chargement image campagne:', selectedSaga);
+                    e.target.style.display = 'none';
+                  }}
+                />
+                {/* Overlay gradient pour lisibilité */}
+                <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/40 to-slate-950/70"></div>
+              </div>
+            ) : (
+              /* Fallback : gradient selon le thème si pas d'image */
+              <div className={`fixed inset-0 z-0 ${
+                currentTheme.id === 'medieval' ? 'bg-gradient-to-b from-amber-950 via-amber-900 to-stone-900' :
+                currentTheme.id === 'lovecraft' ? 'bg-gradient-to-b from-slate-950 via-emerald-950 to-slate-950' :
+                'bg-gradient-to-b from-slate-950 via-cyan-950 to-slate-950'
+              }`}></div>
+            )}
 
             {/* Bouton retour flottant selon le thème */}
             <button 
@@ -2755,22 +2767,6 @@ export default function App() {
                 return null;
               })()}
             </div>
-
-            {/* Image de fond spécifique à la campagne si définie */}
-            {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url) && (
-              <div className="fixed inset-0 z-0 opacity-20">
-                <img 
-                  src={selectedSaga.backgroundImageUrl || selectedSaga.background_image_url} 
-                  alt="" 
-                  className="w-full h-full object-cover"
-                  style={{ filter: 'blur(20px)' }}
-                  onError={(e) => {
-                    console.error('Erreur chargement image campagne:', selectedSaga);
-                    e.target.style.display = 'none';
-                  }}
-                />
-              </div>
-            )}
 
             <div className="px-6 pb-12 relative z-10">
               {selectedSaga ? (
