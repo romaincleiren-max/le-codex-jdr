@@ -74,14 +74,20 @@ const ScenarioCarousel = ({
     if (!isDragging) return;
     setIsDragging(false);
     
-    // Si le drag est suffisant, changer de slide
-    if (Math.abs(dragOffset) > 80) {
-      if (dragOffset > 0 && currentIndex < scenarios.length - 1) {
-        goToNext();
-      } else if (dragOffset < 0 && currentIndex > 0) {
-        goToPrevious();
-      }
+    // Système de snap intelligent - se raccroche au scénario le plus proche
+    const cardWidth = 470; // Largeur + gap
+    const threshold = cardWidth * 0.3; // 30% de la largeur d'une carte
+    
+    if (Math.abs(dragOffset) > threshold) {
+      // Calculer combien de cartes on a "traversé"
+      const cardsToMove = Math.round(dragOffset / cardWidth);
+      const newIndex = currentIndex + cardsToMove;
+      
+      // S'assurer qu'on reste dans les limites
+      const targetIndex = Math.max(0, Math.min(scenarios.length - 1, newIndex));
+      setCurrentIndex(targetIndex);
     }
+    // Sinon, on revient à la position actuelle (snap back)
     
     setDragOffset(0);
   };
@@ -152,15 +158,15 @@ const ScenarioCarousel = ({
         ref={trackRef}
         className="scenario-carousel-track centered"
         style={{
-          transform: `translateX(calc(50% - ${currentIndex * 520}px - 260px - ${dragOffset}px))`,
+          transform: `translateX(calc(50% - ${currentIndex * 470}px - 235px - ${dragOffset}px))`,
           transition: isDragging ? 'none' : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
         {scenarios.map((scenario, index) => {
           const distance = Math.abs(currentIndex - index);
           const isActive = currentIndex === index;
-          const scale = isActive ? 1 : 0.85;
-          const opacity = distance > 1 ? 0.3 : (isActive ? 1 : 0.6);
+          const scale = isActive ? 1.15 : 0.8;
+          const opacity = distance > 1 ? 0.3 : (isActive ? 1 : 0.5);
           
           return (
             <div 
