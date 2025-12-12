@@ -37,13 +37,13 @@
   padding: 0;
 }
 
-/* Slide - Style carte de tarot étroite - Format 9:16 */
+/* Slide - Style carte de tarot étroite - Format portrait */
 .scenario-slide {
   position: relative;
   min-width: 660px;
   max-width: 660px;
   height: 100%;
-  min-height: 1173px;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
   align-items: center;

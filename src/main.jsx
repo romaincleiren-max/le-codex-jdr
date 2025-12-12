@@ -2670,9 +2670,24 @@ export default function App() {
               <span className="font-bold">Retour</span>
             </button>
 
-            {/* En-tête avec titre du thème - Stylisé selon le thème */}
-            <div className="pt-24 pb-8 text-center relative">
-              <h1 className={`text-6xl font-bold mb-3 drop-shadow-2xl ${
+            {/* En-tête avec titre du thème + Motifs thématiques */}
+            <div className="pt-24 pb-8 text-center relative overflow-hidden">
+              {/* Motifs d'arrière-plan selon le thème */}
+              <div className="absolute inset-0 pointer-events-none opacity-10" style={{
+                backgroundImage: currentTheme.id === 'medieval' 
+                  ? `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(217, 119, 6, 0.3) 35px, rgba(217, 119, 6, 0.3) 70px),
+                     repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(217, 119, 6, 0.3) 35px, rgba(217, 119, 6, 0.3) 70px)`
+                  : currentTheme.id === 'lovecraft'
+                  ? `radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.4) 0%, transparent 50%),
+                     radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.3) 0%, transparent 50%),
+                     repeating-radial-gradient(circle at 50% 50%, transparent 0, rgba(16, 185, 129, 0.15) 10px, transparent 20px)`
+                  : `linear-gradient(90deg, transparent 49%, rgba(6, 182, 212, 0.4) 49%, rgba(6, 182, 212, 0.4) 51%, transparent 51%),
+                     linear-gradient(0deg, transparent 49%, rgba(6, 182, 212, 0.4) 49%, rgba(6, 182, 212, 0.4) 51%, transparent 51%)`,
+                backgroundSize: currentTheme.id === 'medieval' ? '70px 70px' :
+                  currentTheme.id === 'lovecraft' ? '200px 200px' : '50px 50px'
+              }}></div>
+              
+              <h1 className={`text-6xl font-bold mb-3 drop-shadow-2xl relative z-10 ${
                 currentTheme.id === 'medieval' 
                   ? 'text-amber-300 font-serif' :
                 currentTheme.id === 'lovecraft'
@@ -2690,7 +2705,7 @@ export default function App() {
                 {currentTheme.id === 'scifi' && '🚀 '}
                 {currentTheme.name}
               </h1>
-              <p className={`text-xl ${
+              <p className={`text-xl relative z-10 ${
                 currentTheme.id === 'medieval' ? 'text-amber-400 font-serif italic' :
                 currentTheme.id === 'lovecraft' ? 'text-emerald-400 font-mono' :
                 'text-cyan-400 tracking-wide'
