@@ -2670,50 +2670,60 @@ export default function App() {
               <span className="font-bold">Retour</span>
             </button>
 
-            {/* En-tête avec titre du thème + Motifs thématiques */}
-            <div className="pt-24 pb-8 text-center relative overflow-hidden">
-              {/* Motifs d'arrière-plan selon le thème */}
-              <div className="absolute inset-0 pointer-events-none opacity-10" style={{
-                backgroundImage: currentTheme.id === 'medieval' 
-                  ? `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(217, 119, 6, 0.3) 35px, rgba(217, 119, 6, 0.3) 70px),
-                     repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(217, 119, 6, 0.3) 35px, rgba(217, 119, 6, 0.3) 70px)`
-                  : currentTheme.id === 'lovecraft'
-                  ? `radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.4) 0%, transparent 50%),
-                     radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.3) 0%, transparent 50%),
-                     repeating-radial-gradient(circle at 50% 50%, transparent 0, rgba(16, 185, 129, 0.15) 10px, transparent 20px)`
-                  : `linear-gradient(90deg, transparent 49%, rgba(6, 182, 212, 0.4) 49%, rgba(6, 182, 212, 0.4) 51%, transparent 51%),
-                     linear-gradient(0deg, transparent 49%, rgba(6, 182, 212, 0.4) 49%, rgba(6, 182, 212, 0.4) 51%, transparent 51%)`,
-                backgroundSize: currentTheme.id === 'medieval' ? '70px 70px' :
-                  currentTheme.id === 'lovecraft' ? '200px 200px' : '50px 50px'
-              }}></div>
-              
-              <h1 className={`text-6xl font-bold mb-3 drop-shadow-2xl relative z-10 ${
+            {/* Bannière distincte avec fond propre + Motifs thématiques */}
+            <div className="relative z-20 mb-8">
+              <div className={`mx-6 rounded-2xl overflow-hidden shadow-2xl border-4 ${
                 currentTheme.id === 'medieval' 
-                  ? 'text-amber-300 font-serif' :
+                  ? 'bg-gradient-to-br from-amber-950 via-amber-900 to-amber-950 border-amber-700' :
                 currentTheme.id === 'lovecraft'
-                  ? 'text-emerald-300 font-mono tracking-wider' :
-                  'text-cyan-300 font-sans tracking-widest'
-              }`} style={{
-                textShadow: currentTheme.id === 'medieval' 
-                  ? '0 0 40px rgba(251, 191, 36, 0.6), 4px 4px 8px rgba(0,0,0,0.8)' :
-                currentTheme.id === 'lovecraft'
-                  ? '0 0 40px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.4)' :
-                  '0 0 40px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.5)'
-              }}>
-                {currentTheme.id === 'medieval' && '⚔️ '}
-                {currentTheme.id === 'lovecraft' && '👁️ '}
-                {currentTheme.id === 'scifi' && '🚀 '}
-                {currentTheme.name}
-              </h1>
-              <p className={`text-xl relative z-10 ${
-                currentTheme.id === 'medieval' ? 'text-amber-400 font-serif italic' :
-                currentTheme.id === 'lovecraft' ? 'text-emerald-400 font-mono' :
-                'text-cyan-400 tracking-wide'
+                  ? 'bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 border-emerald-700' :
+                  'bg-gradient-to-br from-cyan-950 via-cyan-900 to-cyan-950 border-cyan-700'
               }`}>
-                {currentTheme.id === 'medieval' && '« Sélectionnez votre épopée »'}
-                {currentTheme.id === 'lovecraft' && '[ Choisissez votre cauchemar ]'}
-                {currentTheme.id === 'scifi' && '// SÉLECTIONNEZ VOTRE MISSION //'}
-              </p>
+                <div className="pt-16 pb-12 text-center relative overflow-hidden">
+                  {/* Motifs d'arrière-plan selon le thème */}
+                  <div className="absolute inset-0 pointer-events-none opacity-15" style={{
+                    backgroundImage: currentTheme.id === 'medieval' 
+                      ? `repeating-linear-gradient(45deg, transparent, transparent 35px, rgba(217, 119, 6, 0.3) 35px, rgba(217, 119, 6, 0.3) 70px),
+                         repeating-linear-gradient(-45deg, transparent, transparent 35px, rgba(217, 119, 6, 0.3) 35px, rgba(217, 119, 6, 0.3) 70px)`
+                      : currentTheme.id === 'lovecraft'
+                      ? `radial-gradient(circle at 20% 30%, rgba(16, 185, 129, 0.4) 0%, transparent 50%),
+                         radial-gradient(circle at 80% 70%, rgba(16, 185, 129, 0.3) 0%, transparent 50%),
+                         repeating-radial-gradient(circle at 50% 50%, transparent 0, rgba(16, 185, 129, 0.15) 10px, transparent 20px)`
+                      : `linear-gradient(90deg, transparent 49%, rgba(6, 182, 212, 0.4) 49%, rgba(6, 182, 212, 0.4) 51%, transparent 51%),
+                         linear-gradient(0deg, transparent 49%, rgba(6, 182, 212, 0.4) 49%, rgba(6, 182, 212, 0.4) 51%, transparent 51%)`,
+                    backgroundSize: currentTheme.id === 'medieval' ? '70px 70px' :
+                      currentTheme.id === 'lovecraft' ? '200px 200px' : '50px 50px'
+                  }}></div>
+                  
+                  <h1 className={`text-6xl font-bold mb-3 drop-shadow-2xl relative z-10 ${
+                    currentTheme.id === 'medieval' 
+                      ? 'text-amber-300 font-serif' :
+                    currentTheme.id === 'lovecraft'
+                      ? 'text-emerald-300 font-mono tracking-wider' :
+                      'text-cyan-300 font-sans tracking-widest'
+                  }`} style={{
+                    textShadow: currentTheme.id === 'medieval' 
+                      ? '0 0 40px rgba(251, 191, 36, 0.6), 4px 4px 8px rgba(0,0,0,0.8)' :
+                    currentTheme.id === 'lovecraft'
+                      ? '0 0 40px rgba(16, 185, 129, 0.6), 0 0 20px rgba(16, 185, 129, 0.4)' :
+                      '0 0 40px rgba(6, 182, 212, 0.8), 0 0 20px rgba(6, 182, 212, 0.5)'
+                  }}>
+                    {currentTheme.id === 'medieval' && '⚔️ '}
+                    {currentTheme.id === 'lovecraft' && '👁️ '}
+                    {currentTheme.id === 'scifi' && '🚀 '}
+                    {currentTheme.name}
+                  </h1>
+                  <p className={`text-xl relative z-10 ${
+                    currentTheme.id === 'medieval' ? 'text-amber-400 font-serif italic' :
+                    currentTheme.id === 'lovecraft' ? 'text-emerald-400 font-mono' :
+                    'text-cyan-400 tracking-wide'
+                  }`}>
+                    {currentTheme.id === 'medieval' && '« Sélectionnez votre épopée »'}
+                    {currentTheme.id === 'lovecraft' && '[ Choisissez votre cauchemar ]'}
+                    {currentTheme.id === 'scifi' && '// SÉLECTIONNEZ VOTRE MISSION //'}
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Menu horizontal des campagnes - Thématique selon section */}
