@@ -14,6 +14,7 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
+import ScenarioCarousel from './components/carousel/ScenarioCarousel';
 
 const adminConfig = {
   titleFont: "font-serif",
@@ -2841,109 +2842,17 @@ export default function App() {
                 />
               )}
 
-              {/* Grille de scénarios */}
+              {/* Carousel de scénarios */}
               {selectedSaga && selectedSaga.scenarios && selectedSaga.scenarios.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {selectedSaga.scenarios.map((scenario, index) => {
-                    const sagaForCart = selectedSaga; // Capturer la saga pour le panier
-                    return (
-                    <div 
-                      key={scenario.id} 
-                      onClick={() => setViewingScenario(scenario)}
-                      className="bg-amber-100 border-4 border-amber-900 rounded-lg overflow-hidden shadow-xl hover:shadow-2xl transition-all cursor-pointer hover:scale-[1.02] relative">
-                    {/* Image */}
-                    <div className="relative h-80">
-                      <img src={scenario.imageUrl} alt={scenario.displayName} className="w-full h-full object-cover" />
-                      <div className="absolute top-2 left-2 bg-amber-800 text-white px-3 py-1 rounded-full font-bold">
-                        #{index + 1}
-                      </div>
-                      {scenario.isFree && (
-                        <div className="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded-full font-bold text-sm">
-                          GRATUIT
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Contenu avec image de fond optionnelle */}
-                    <div className="p-4 relative">
-                      {/* Image de fond si définie */}
-                      {scenario.backgroundImageUrl && (
-                        <>
-                          <div className="absolute inset-0 z-0">
-                            <img 
-                              src={scenario.backgroundImageUrl} 
-                              alt=""
-                              className="w-full h-full object-cover"
-                              style={{ filter: 'blur(8px) brightness(0.4)' }}
-                            />
-                          </div>
-                          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/70 to-black/80 z-0"></div>
-                        </>
-                      )}
-                      
-                      {/* Contenu par-dessus l'image de fond */}
-                      <div className="relative z-10">
-                      <h3 className="text-xl font-bold text-amber-900 mb-2">{scenario.displayName}</h3>
-                      <p className="text-sm text-amber-700 mb-3 line-clamp-2">{scenario.description}</p>
-
-                      {/* Infos */}
-                      <div className="flex items-center gap-2 text-sm text-amber-700 mb-3">
-                        <Clock size={16} />
-                        <span>{scenario.duration}</span>
-                      </div>
-
-                      {/* Tags */}
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {scenario.tags.slice(0, 3).map((tag, i) => (
-                          <span key={i} className="bg-amber-200 text-amber-900 px-2 py-1 rounded-full text-xs">
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-
-                      {/* Notations */}
-                      <div className="grid grid-cols-2 gap-2 mb-4 text-xs">
-                        <div className="flex items-center gap-1">
-                          <span>🌙</span>
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(s => <Star key={s} size={10} className={s <= scenario.ratings.ambiance ? 'text-yellow-600' : 'text-gray-400'} fill={s <= scenario.ratings.ambiance ? "currentColor" : "none"} />)}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>🧩</span>
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(s => <Star key={s} size={10} className={s <= scenario.ratings.complexite ? 'text-yellow-600' : 'text-gray-400'} fill={s <= scenario.ratings.complexite ? "currentColor" : "none"} />)}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>⚔️</span>
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(s => <Star key={s} size={10} className={s <= scenario.ratings.combat ? 'text-yellow-600' : 'text-gray-400'} fill={s <= scenario.ratings.combat ? "currentColor" : "none"} />)}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <span>🔍</span>
-                          <div className="flex gap-0.5">
-                            {[1,2,3,4,5].map(s => <Star key={s} size={10} className={s <= scenario.ratings.enquete ? 'text-yellow-600' : 'text-gray-400'} fill={s <= scenario.ratings.enquete ? "currentColor" : "none"} />)}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Bouton d'action */}
-                      {scenario.isFree && (
-                        <button 
-                          onClick={() => handleDownloadFree(scenario.pdfUrl, scenario.displayName)}
-                          className="w-full bg-green-700 text-white px-4 py-2 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 font-bold">
-                          <Download size={18} />Télécharger
-                        </button>
-                      )}
-                      </div>
-                    </div>
-                  </div>
-                  );
-                })}
-              </div>
-            )}
+                <ScenarioCarousel 
+                  scenarios={selectedSaga.scenarios}
+                  saga={selectedSaga}
+                  onDownloadFree={handleDownloadFree}
+                  onAddToCart={addToCart}
+                  onScenarioClick={setViewingScenario}
+                  theme={currentTheme}
+                />
+              )}
           </div>
         )}
       </div>
