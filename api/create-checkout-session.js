@@ -57,26 +57,31 @@ module.exports = async (req, res) => {
       };
     });
 
-    // Créer la session Stripe Checkout
-    const session = await stripe.checkout.sessions.create({
+    // Construire les options de session - Ne pas envoyer les champs vides
+    const sessionOptions = {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      customer_email: customerEmail,
-      metadata: {
-        customerName: customerName,
-        orderType: 'pdf_scenarios'
-      },
       success_url: `${req.headers.origin || 'http://localhost:5173'}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin || 'http://localhost:5173'}/?canceled=true`,
-      // Permet de télécharger les PDFs après paiement
-      payment_intent_data: {
-        metadata: {
-          customerEmail: customerEmail,
-          customerName: customerName
-        }
-      }
-    });
+    };
+
+    // Ajouter customer_email seulement s'il est fourni
+    if (customerEmail) {
+      sessionOptions.customer_email = customerEmail;
+    }
+
+    // Ajouter metadata seulement si on a des données
+    if (customerName || customerEmail) {
+      sessionOptions.metadata = {
+        orderType: 'pdf_scenarios'
+      };
+      if (customerName) sessionOptions.metadata.customerName = customerName;
+      if (customerEmail) sessionOptions.metadata.customerEmail = customerEmail;
+    }
+
+    // Créer la session Stripe Checkout
+    const session = await stripe.checkout.sessions.create(sessionOptions);
 
     res.status(200).json({ 
       sessionId: session.id,
