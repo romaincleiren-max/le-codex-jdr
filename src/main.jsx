@@ -194,7 +194,15 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
 };
 
 const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
-  const [editedSaga, setEditedSaga] = useState(saga || {
+  const [editedSaga, setEditedSaga] = useState(saga ? {
+    ...saga,
+    // Mapper les champs snake_case vers camelCase
+    themeId: saga.themeId || saga.theme_id || 'medieval',
+    pdfUrl: saga.pdfUrl || saga.pdf_url || '',
+    backgroundImageUrl: saga.backgroundImageUrl || saga.background_image_url || '',
+    backgroundVideoUrl: saga.backgroundVideoUrl || saga.background_video_url || '',
+    isFree: saga.isFree ?? saga.is_free ?? false
+  } : {
     id: Date.now(),
     name: '',
     themeId: 'medieval',
