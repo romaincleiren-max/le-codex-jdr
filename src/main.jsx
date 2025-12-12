@@ -2668,7 +2668,7 @@ export default function App() {
             {/* Bouton retour flottant selon le thème */}
             <button 
               onClick={closeBook} 
-              className={`fixed top-4 left-4 z-50 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
+              className={`fixed top-24 left-4 z-50 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
                 currentTheme.id === 'medieval' 
                   ? 'bg-amber-800/90 hover:bg-amber-700 text-amber-100 border-amber-600 hover:border-amber-400' :
                 currentTheme.id === 'lovecraft'
@@ -2736,11 +2736,7 @@ export default function App() {
             </div>
 
             {/* Menu horizontal des campagnes - Thématique selon section */}
-            <div className={`sticky top-0 z-40 py-6 mb-8 ${
-              currentTheme.id === 'medieval' ? 'bg-gradient-to-b from-amber-950/95 via-amber-900/90 to-transparent' :
-              currentTheme.id === 'lovecraft' ? 'bg-gradient-to-b from-slate-950/95 via-emerald-950/90 to-transparent' :
-              'bg-gradient-to-b from-slate-950/95 via-cyan-950/90 to-transparent'
-            }`}>
+            <div className="sticky top-0 z-40 py-6 mb-8">
               {(() => {
                 const themeCampaigns = sagas.filter(s => {
                   const sagaThemeId = String(s.themeId || '').trim().toLowerCase();
