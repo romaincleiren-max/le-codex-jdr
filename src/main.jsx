@@ -15,6 +15,7 @@ import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
 import ScenarioCarousel from './components/carousel/ScenarioCarousel';
+import { processCheckout } from './services/stripeService';
 
 const adminConfig = {
   titleFont: "font-serif",
@@ -880,16 +881,25 @@ const CheckoutPage = ({ cart, onBack, onOrderComplete }) => {
     return Object.keys(errors).length === 0;
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (validateForm()) {
-      setIsProcessing(true);
-      setTimeout(() => {
-        setIsProcessing(false);
-        onOrderComplete(formData);
-      }, 2000);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (validateForm()) {
+    setIsProcessing(true);
+    try {
+      // Utiliser le vrai système de paiement Stripe
+      await processCheckout(cart, {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email
+      });
+      // La redirection vers Stripe Checkout se fait automatiquement
+    } catch (error) {
+      console.error('❌ Erreur lors du paiement:', error);
+      alert('❌ Erreur lors de la création de la session de paiement.');
+      setIsProcessing(false);
     }
-  };
+  }
+};
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -2668,7 +2678,16 @@ export default function App() {
         {showBook && (
           <div className="min-h-screen relative overflow-hidden bg-slate-950">
             {/* Image de fond de la campagne - Visible et esthétique */}
-            {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url || selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url) ? (
+            {selectedSaga && (() => {
+              console.log('🎬 DEBUG VIDÉO:', {
+                saga: selectedSaga.name,
+                backgroundVideoUrl: selectedSaga.backgroundVideoUrl,
+                background_video_url: selectedSaga.background_video_url,
+                backgroundImageUrl: selectedSaga.backgroundImageUrl,
+                background_image_url: selectedSaga.background_image_url
+              });
+              return (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url || selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url);
+            })() ? (
               <div className="fixed inset-0 z-0">
                 {/* Si une vidéo est définie, l'utiliser */}
                 {(selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url) ? (
