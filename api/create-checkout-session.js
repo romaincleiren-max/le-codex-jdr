@@ -30,9 +30,7 @@ module.exports = async (req, res) => {
       return res.status(400).json({ error: 'Panier vide ou invalide' });
     }
 
-    if (!customerEmail || !customerName) {
-      return res.status(400).json({ error: 'Email et nom requis' });
-    }
+    // customerEmail et customerName sont optionnels - Stripe les demandera si non fournis
 
     // Construire les line_items pour Stripe
     const lineItems = cartItems.map(item => {
