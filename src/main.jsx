@@ -212,6 +212,8 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
     try {
       await onSave(editedSaga);
       console.log('✅ Campagne sauvegardée avec succès');
+      // Fermer le modal après succès
+      onClose();
     } catch (error) {
       console.error('❌ Erreur lors de la sauvegarde:', error);
       alert('❌ Erreur: ' + error.message);
@@ -1627,9 +1629,7 @@ export default function App() {
       // Recharger les données depuis Supabase
       await refresh();
       
-      setShowCampaignModal(false);
-      setEditingSaga(null);
-      alert('✅ Campagne sauvegardée avec succès !');
+      // Le modal sera fermé par handleSubmit après ce succès
     } catch (error) {
       console.error('Erreur sauvegarde campagne:', error);
       alert('❌ Erreur lors de la sauvegarde de la campagne: ' + error.message);
