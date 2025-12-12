@@ -7,6 +7,9 @@
   cursor: grab;
   user-select: none;
   margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .scenario-carousel:active {
@@ -25,20 +28,29 @@
 /* Track */
 .scenario-carousel-track {
   display: flex;
-  height: 100%;
+  height: 85%;
+  max-height: 800px;
   transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 calc(50% - 225px);
 }
 
-/* Slide */
+/* Slide - Style carte de tarot étroite */
 .scenario-slide {
   position: relative;
-  min-width: 100%;
+  min-width: 450px;
+  max-width: 450px;
   height: 100%;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   overflow: hidden;
+  border-radius: 20px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  flex-shrink: 0;
 }
 
 /* Image avec parallax */
@@ -78,28 +90,28 @@
 /* Badges */
 .scenario-number {
   position: absolute;
-  top: 2rem;
-  left: 2rem;
+  top: 1rem;
+  left: 1rem;
   background: var(--theme-primary, #d97706);
   color: white;
-  padding: 0.5rem 1.5rem;
+  padding: 0.4rem 1rem;
   border-radius: 50px;
   font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 0.9rem;
   z-index: 3;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .scenario-free-badge {
   position: absolute;
-  top: 2rem;
-  right: 2rem;
+  top: 1rem;
+  right: 1rem;
   background: #10b981;
   color: white;
-  padding: 0.5rem 1.5rem;
+  padding: 0.4rem 1rem;
   border-radius: 50px;
   font-weight: bold;
-  font-size: 1rem;
+  font-size: 0.85rem;
   z-index: 3;
   box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
   animation: pulse-badge 2s ease-in-out infinite;
@@ -118,11 +130,15 @@
 .scenario-content {
   position: relative;
   z-index: 2;
-  max-width: 900px;
-  padding: 2rem;
+  width: 100%;
+  padding: 1.5rem;
   text-align: center;
   color: var(--theme-text, #fef3c7);
   animation: slide-content-in 0.8s ease-out;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-top: auto;
 }
 
 @keyframes slide-content-in {
@@ -137,23 +153,22 @@
 }
 
 .scenario-title {
-  font-size: 3.5rem;
+  font-size: 2.5rem;
   font-weight: bold;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
   text-shadow: 
     3px 3px 15px rgba(0, 0, 0, 0.9),
     0 0 40px var(--theme-primary, rgba(217, 119, 6, 0.4));
-  line-height: 1.2;
+  line-height: 1.1;
   font-family: serif;
 }
 
 .scenario-meta {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
   justify-content: center;
   align-items: center;
-  margin-bottom: 1.5rem;
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   color: rgba(255, 255, 255, 0.9);
 }
 
@@ -161,27 +176,26 @@
 .scenario-duration {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .scenario-description {
-  font-size: 1.2rem;
-  line-height: 1.8;
-  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+  line-height: 1.5;
   color: rgba(255, 255, 255, 0.85);
-  max-width: 700px;
-  margin-left: auto;
-  margin-right: auto;
   text-shadow: 1px 1px 8px rgba(0, 0, 0, 0.8);
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
 }
 
 /* Tags */
 .scenario-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.5rem;
   justify-content: center;
-  margin-bottom: 1.5rem;
 }
 
 .scenario-tag {
@@ -189,9 +203,9 @@
   backdrop-filter: blur(10px);
   border: 1px solid rgba(255, 255, 255, 0.25);
   color: white;
-  padding: 0.4rem 1rem;
+  padding: 0.3rem 0.8rem;
   border-radius: 20px;
-  font-size: 0.9rem;
+  font-size: 0.8rem;
   font-weight: 500;
 }
 
@@ -199,13 +213,11 @@
 .scenario-ratings {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1rem;
-  max-width: 500px;
-  margin: 0 auto 2rem;
-  padding: 1.5rem;
+  gap: 0.6rem;
+  padding: 1rem;
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
-  border-radius: 15px;
+  border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 

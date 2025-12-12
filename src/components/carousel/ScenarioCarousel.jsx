@@ -16,7 +16,7 @@ const ScenarioCarousel = ({
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   
   const carouselRef = useRef(null);
-  const slideWidth = 100;
+  const slideWidth = 450 + 32; // 450px de largeur + 2rem de gap (32px)
 
   // Parallax à la souris
   useEffect(() => {
@@ -43,11 +43,11 @@ const ScenarioCarousel = ({
   }, []);
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => prev === 0 ? scenarios.length - 1 : prev - 1);
+    setCurrentIndex((prev) => (prev - 1 + scenarios.length) % scenarios.length);
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => prev === scenarios.length - 1 ? 0 : prev + 1);
+    setCurrentIndex((prev) => (prev + 1) % scenarios.length);
   };
 
   const goToSlide = (index) => {
@@ -136,7 +136,7 @@ const ScenarioCarousel = ({
       <div 
         className="scenario-carousel-track"
         style={{
-          transform: `translateX(-${currentIndex * slideWidth}%)`
+          transform: `translateX(-${currentIndex * slideWidth}px)`
         }}
       >
         {scenarios.map((scenario, index) => (
