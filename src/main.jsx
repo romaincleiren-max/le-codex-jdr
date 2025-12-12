@@ -1799,7 +1799,10 @@ export default function App() {
                     if (confirm('Voulez-vous vous déconnecter ?')) {
                       await supabase.auth.signOut();
                       setIsAuthenticated(false);
+                      // Rediriger vers la page d'accueil (pas la page de login)
                       setCurrentPage('home');
+                      // Force le rechargement pour nettoyer tout l'état
+                      window.location.href = '/';
                     }
                   }}
                   className="px-4 py-2 rounded bg-red-800 hover:bg-red-700 text-white flex items-center gap-2"
