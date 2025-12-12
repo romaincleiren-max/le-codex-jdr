@@ -209,15 +209,7 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('🔧 CampaignEditModal - handleSubmit appelé avec:', editedSaga);
-    try {
-      await onSave(editedSaga);
-      console.log('✅ Campagne sauvegardée avec succès');
-      // Fermer le modal après succès
-      onClose();
-    } catch (error) {
-      console.error('❌ Erreur lors de la sauvegarde:', error);
-      alert('❌ Erreur: ' + error.message);
-    }
+    await onSave(editedSaga);
   };
 
   return (
@@ -1629,10 +1621,14 @@ export default function App() {
       // Recharger les données depuis Supabase
       await refresh();
       
-      // Le modal sera fermé par handleSubmit après ce succès
+      // Fermer le modal et réinitialiser l'état
+      setShowCampaignModal(false);
+      setEditingSaga(null);
+      alert('✅ Campagne sauvegardée avec succès !');
     } catch (error) {
       console.error('Erreur sauvegarde campagne:', error);
       alert('❌ Erreur lors de la sauvegarde de la campagne: ' + error.message);
+      throw error; // Relancer l'erreur pour que handleSubmit sache qu'il y a eu un problème
     }
   };
 
