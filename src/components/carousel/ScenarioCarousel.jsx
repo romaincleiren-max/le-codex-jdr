@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Star, Clock, Download, ShoppingCart } from 'lucide-react';
 import './ScenarioCarousel.css';
 
