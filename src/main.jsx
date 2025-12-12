@@ -799,6 +799,38 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose }) => {
 
 const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
   const total = cart.reduce((sum, item) => sum + (item.type === 'saga' ? item.item.price : item.item.price), 0);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  const handleDirectCheckout = async () => {
+    setIsProcessing(true);
+    try {
+      // Demander l'email rapidement
+      const email = prompt('Entrez votre email pour recevoir la confirmation :');
+      if (!email || !/\S+@\S+\.\S+/.test(email)) {
+        alert('Email invalide');
+        setIsProcessing(false);
+        return;
+      }
+
+      const name = prompt('Votre nom complet :');
+      if (!name) {
+        alert('Nom requis');
+        setIsProcessing(false);
+        return;
+      }
+
+      // Redirection directe vers Stripe
+      await processCheckout(cart, {
+        firstName: name.split(' ')[0] || name,
+        lastName: name.split(' ').slice(1).join(' ') || name,
+        email: email
+      });
+    } catch (error) {
+      console.error('❌ Erreur:', error);
+      alert('❌ Erreur lors du paiement');
+      setIsProcessing(false);
+    }
+  };
 
   return (
     <div className="fixed right-0 top-0 h-full w-96 bg-amber-100 border-l-4 border-amber-900 shadow-2xl z-50 flex flex-col">
@@ -847,9 +879,10 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
             <span className="text-3xl font-bold text-amber-800">{total.toFixed(2)} €</span>
           </div>
           <button 
-            onClick={onGoToCheckout}
-            className="w-full bg-amber-800 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold text-lg flex items-center justify-center gap-2">
-            <CreditCard size={20} />Procéder au paiement
+            onClick={handleDirectCheckout}
+            disabled={isProcessing}
+            className="w-full bg-amber-800 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50">
+            {isProcessing ? <>⏳ Redirection...</> : <><CreditCard size={20} />Procéder au paiement Stripe</>}
           </button>
         </div>
       )}
