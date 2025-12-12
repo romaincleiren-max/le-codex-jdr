@@ -15,7 +15,6 @@ import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
 import ScenarioCarousel from './components/carousel/ScenarioCarousel';
-import ParticleBackground from './components/ParticleBackground';
 
 const adminConfig = {
   titleFont: "font-serif",
@@ -2661,10 +2660,10 @@ export default function App() {
         {showBook && (
           <div className="min-h-screen relative overflow-hidden bg-slate-950">
             {/* Image de fond de la campagne - Visible et esthétique */}
-            {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url) ? (
+            {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url || selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url) ? (
               <div className="fixed inset-0 z-0">
-                {/* Si une vidéo est définie, l'utiliser à la place de l'effet de particules */}
-                {selectedSaga.backgroundVideoUrl ? (
+                {/* Si une vidéo est définie, l'utiliser */}
+                {(selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url) ? (
                   <video 
                     autoPlay 
                     loop 
@@ -2673,23 +2672,20 @@ export default function App() {
                     className="w-full h-full object-cover"
                     style={{ filter: 'blur(2px) brightness(0.4)' }}
                   >
-                    <source src={selectedSaga.backgroundVideoUrl} type="video/mp4" />
+                    <source src={selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url} type="video/mp4" />
                   </video>
                 ) : (
-                  <>
-                    {/* Effet de particules de brouillard si pas de vidéo */}
-                    <ParticleBackground theme={currentTheme} intensity="medium" />
-                    <img 
-                      src={selectedSaga.backgroundImageUrl || selectedSaga.background_image_url} 
-                      alt="" 
-                      className="w-full h-full object-cover"
-                      style={{ filter: 'blur(3px) brightness(0.5)' }}
-                      onError={(e) => {
-                        console.error('Erreur chargement image campagne:', selectedSaga);
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  </>
+                  /* Sinon afficher l'image */
+                  <img 
+                    src={selectedSaga.backgroundImageUrl || selectedSaga.background_image_url} 
+                    alt="" 
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'blur(3px) brightness(0.5)' }}
+                    onError={(e) => {
+                      console.error('Erreur chargement image campagne:', selectedSaga);
+                      e.target.style.display = 'none';
+                    }}
+                  />
                 )}
                 {/* Overlay gradient pour lisibilité */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/40 to-slate-950/70"></div>

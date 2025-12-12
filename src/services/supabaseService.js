@@ -107,7 +107,8 @@ export const createCampaign = async (campaign) => {
       price: campaign.price || 0,
       is_free: campaign.isFree || false,
       pdf_url: campaign.pdfUrl || null,
-      background_image_url: campaign.backgroundImageUrl || null
+      background_image_url: campaign.backgroundImageUrl || null,
+      background_video_url: campaign.backgroundVideoUrl || null
     }])
     .select()
     .single();
@@ -126,7 +127,8 @@ export const updateCampaign = async (id, updates) => {
       price: updates.price || 0,
       is_free: updates.isFree || false,
       pdf_url: updates.pdfUrl || null,
-      background_image_url: updates.backgroundImageUrl || null
+      background_image_url: updates.backgroundImageUrl || null,
+      background_video_url: updates.backgroundVideoUrl || null
     })
     .eq('id', id)
     .select()
