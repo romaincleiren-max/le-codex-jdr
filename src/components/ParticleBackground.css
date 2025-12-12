@@ -1,0 +1,44 @@
+/* Styles pour le composant de particules de brouillard */
+
+.particle-background {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* Animation subtile pour le canvas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.particle-background {
+  animation: fadeIn 2s ease-in;
+}
+
+/* Optimisations pour les performances */
+.particle-background {
+  will-change: auto;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Styles pour désactiver les particules sur mobile si nécessaire */
+@media (max-width: 768px) {
+  .particle-background.mobile-hidden {
+    display: none;
+  }
+}
+
+/* Effet de lueur pour certains thèmes */
+.particle-background.glow-effect {
+  filter: blur(0.5px);
+}

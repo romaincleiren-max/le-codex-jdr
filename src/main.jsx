@@ -15,6 +15,7 @@ import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
 import ScenarioCarousel from './components/carousel/ScenarioCarousel';
+import ParticleBackground from './components/ParticleBackground';
 
 const adminConfig = {
   titleFont: "font-serif",
@@ -203,6 +204,7 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
     isFree: false,
     pdfUrl: '',
     backgroundImageUrl: '',
+    backgroundVideoUrl: '',
     scenarios: []
   });
 
@@ -300,6 +302,24 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
                 className="mt-2 w-full h-32 object-cover rounded border-2 border-amber-700" 
               />
             )}
+          </div>
+
+          <div className="bg-purple-50 border-2 border-purple-700 rounded-lg p-4">
+            <label className="block text-purple-900 font-bold mb-2">🎬 Vidéo d'arrière-plan (optionnel - remplace l'effet de brouillard)</label>
+            <input 
+              type="text"
+              value={editedSaga.backgroundVideoUrl || ''}
+              onChange={(e) => setEditedSaga({...editedSaga, backgroundVideoUrl: e.target.value})}
+              className="w-full px-4 py-2 border-2 border-purple-700 rounded focus:outline-none focus:border-purple-900"
+              placeholder="/videos/ma-video.mp4"
+            />
+            <p className="text-sm text-purple-700 mt-2">
+              💡 <strong>Vidéo en boucle :</strong> Placez votre fichier MP4 dans le dossier <code className="bg-purple-200 px-1 rounded">public/videos/</code><br/>
+              Ou utilisez une URL complète : <code className="bg-purple-200 px-1 rounded">https://...</code>
+            </p>
+            <p className="text-xs text-purple-600 mt-1">
+              ⚠️ Si une vidéo est définie, elle remplacera l'effet de particules de brouillard
+            </p>
           </div>
 
           <div className="bg-amber-200 border-2 border-amber-700 rounded-lg p-4">
@@ -2643,16 +2663,34 @@ export default function App() {
             {/* Image de fond de la campagne - Visible et esthétique */}
             {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url) ? (
               <div className="fixed inset-0 z-0">
-                <img 
-                  src={selectedSaga.backgroundImageUrl || selectedSaga.background_image_url} 
-                  alt="" 
-                  className="w-full h-full object-cover"
-                  style={{ filter: 'blur(3px) brightness(0.5)' }}
-                  onError={(e) => {
-                    console.error('Erreur chargement image campagne:', selectedSaga);
-                    e.target.style.display = 'none';
-                  }}
-                />
+                {/* Si une vidéo est définie, l'utiliser à la place de l'effet de particules */}
+                {selectedSaga.backgroundVideoUrl ? (
+                  <video 
+                    autoPlay 
+                    loop 
+                    muted 
+                    playsInline
+                    className="w-full h-full object-cover"
+                    style={{ filter: 'blur(2px) brightness(0.4)' }}
+                  >
+                    <source src={selectedSaga.backgroundVideoUrl} type="video/mp4" />
+                  </video>
+                ) : (
+                  <>
+                    {/* Effet de particules de brouillard si pas de vidéo */}
+                    <ParticleBackground theme={currentTheme} intensity="medium" />
+                    <img 
+                      src={selectedSaga.backgroundImageUrl || selectedSaga.background_image_url} 
+                      alt="" 
+                      className="w-full h-full object-cover"
+                      style={{ filter: 'blur(3px) brightness(0.5)' }}
+                      onError={(e) => {
+                        console.error('Erreur chargement image campagne:', selectedSaga);
+                        e.target.style.display = 'none';
+                      }}
+                    />
+                  </>
+                )}
                 {/* Overlay gradient pour lisibilité */}
                 <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/40 to-slate-950/70"></div>
               </div>

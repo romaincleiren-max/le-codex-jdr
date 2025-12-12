@@ -396,6 +396,89 @@ export const listImages = async (folder = 'general') => {
 };
 
 // ============================================================================
+// UPLOAD DE VIDÉOS
+// ============================================================================
+
+// Valider un fichier vidéo
+export const validateVideoFile = (file) => {
+  const allowedTypes = ['video/mp4', 'video/webm', 'video/ogg'];
+  const maxSize = 100 * 1024 * 1024; // 100 MB
+
+  if (!allowedTypes.includes(file.type)) {
+    return { valid: false, error: 'Format vidéo non supporté. Utilisez MP4, WebM ou OGG.' };
+  }
+
+  if (file.size > maxSize) {
+    return { valid: false, error: `La vidéo est trop volumineuse (max ${maxSize / (1024 * 1024)} MB)` };
+  }
+
+  return { valid: true };
+};
+
+// Upload d'une vidéo dans le Storage Supabase
+export const uploadVideo = async (file, folder = 'backgrounds') => {
+  // Validation du fichier
+  const validation = validateVideoFile(file);
+  if (!validation.valid) {
+    throw new Error(validation.error);
+  }
+
+  // Générer un nom unique
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+  const filePath = `${folder}/${fileName}`;
+
+  const { data, error } = await supabase.storage
+    .from('videos')
+    .upload(filePath, file, {
+      cacheControl: '31536000', // 1 an
+      upsert: false,
+      contentType: file.type
+    });
+
+  if (error) throw error;
+
+  // Obtenir l'URL publique du fichier
+  const { data: { publicUrl } } = supabase.storage
+    .from('videos')
+    .getPublicUrl(filePath);
+
+  return {
+    path: filePath,
+    url: publicUrl,
+    fileName: fileName
+  };
+};
+
+// Supprimer une vidéo du Storage
+export const deleteVideo = async (videoPath) => {
+  const { error } = await supabase.storage
+    .from('videos')
+    .remove([videoPath]);
+
+  if (error) throw error;
+};
+
+// Liste toutes les vidéos d'un dossier
+export const listVideos = async (folder = 'backgrounds') => {
+  const { data, error } = await supabase.storage
+    .from('videos')
+    .list(folder, {
+      limit: 100,
+      offset: 0,
+      sortBy: { column: 'created_at', order: 'desc' }
+    });
+
+  if (error) throw error;
+
+  // Ajouter les URLs publiques
+  return data.map(file => ({
+    ...file,
+    url: supabase.storage.from('videos').getPublicUrl(`${folder}/${file.name}`).data.publicUrl
+  }));
+};
+
+// ============================================================================
 // SOUMISSIONS DE SCÉNARIOS
 // ============================================================================
 
@@ -563,5 +646,15 @@ export const supabaseService = {
   updateSubmissionStatus,
   deleteSubmission,
   uploadSubmissionPDF,
-  downloadSubmissionPDF
+  downloadSubmissionPDF,
+  
+  // Images
+  uploadImage,
+  deleteImage,
+  listImages,
+  
+  // Vidéos
+  uploadVideo,
+  deleteVideo,
+  listVideos
 };
