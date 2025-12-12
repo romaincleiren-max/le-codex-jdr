@@ -2662,7 +2662,7 @@ export default function App() {
             {/* Bouton retour flottant selon le thème */}
             <button 
               onClick={closeBook} 
-              className={`fixed top-6 left-6 z-50 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
+              className={`fixed top-4 left-4 z-50 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
                 currentTheme.id === 'medieval' 
                   ? 'bg-amber-800/90 hover:bg-amber-700 text-amber-100 border-amber-600 hover:border-amber-400' :
                 currentTheme.id === 'lovecraft'
@@ -2674,7 +2674,7 @@ export default function App() {
             </button>
 
             {/* Bannière distincte avec fond propre + Motifs thématiques */}
-            <div className="relative z-20 mb-8">
+            <div className="relative z-20 mb-8 pt-4">
               <div className={`mx-6 rounded-2xl overflow-hidden shadow-2xl border-4 ${
                 currentTheme.id === 'medieval' 
                   ? 'bg-gradient-to-br from-amber-950 via-amber-900 to-amber-950 border-amber-700' :
@@ -2682,7 +2682,7 @@ export default function App() {
                   ? 'bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 border-emerald-700' :
                   'bg-gradient-to-br from-cyan-950 via-cyan-900 to-cyan-950 border-cyan-700'
               }`}>
-                <div className="pt-16 pb-12 text-center relative overflow-hidden">
+                <div className="pt-8 pb-8 text-center relative overflow-hidden">
                   {/* Motifs d'arrière-plan selon le thème */}
                   <div className="absolute inset-0 pointer-events-none opacity-15" style={{
                     backgroundImage: currentTheme.id === 'medieval' 
