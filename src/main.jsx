@@ -804,30 +804,15 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
   const handleDirectCheckout = async () => {
     setIsProcessing(true);
     try {
-      // Demander l'email rapidement
-      const email = prompt('Entrez votre email pour recevoir la confirmation :');
-      if (!email || !/\S+@\S+\.\S+/.test(email)) {
-        alert('Email invalide');
-        setIsProcessing(false);
-        return;
-      }
-
-      const name = prompt('Votre nom complet :');
-      if (!name) {
-        alert('Nom requis');
-        setIsProcessing(false);
-        return;
-      }
-
-      // Redirection directe vers Stripe
+      // Redirection directe vers Stripe - Stripe demandera l'email lui-même
       await processCheckout(cart, {
-        firstName: name.split(' ')[0] || name,
-        lastName: name.split(' ').slice(1).join(' ') || name,
-        email: email
+        firstName: '',
+        lastName: '',
+        email: '' // Stripe demandera l'email sur sa page
       });
     } catch (error) {
       console.error('❌ Erreur:', error);
-      alert('❌ Erreur lors du paiement');
+      alert('❌ Erreur lors du paiement. Veuillez réessayer.');
       setIsProcessing(false);
     }
   };
