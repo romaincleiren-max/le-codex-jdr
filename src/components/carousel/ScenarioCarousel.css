@@ -33,8 +33,8 @@
   transition: transform 0.7s cubic-bezier(0.65, 0, 0.35, 1);
   will-change: transform;
   align-items: center;
-  gap: 2rem;
-  padding: 0 calc(50% - 225px);
+  gap: 1rem;
+  padding: 0 calc(50% - 275px);
 }
 
 /* Slide - Style carte de tarot étroite */
