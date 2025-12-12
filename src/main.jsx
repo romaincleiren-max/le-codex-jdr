@@ -209,7 +209,13 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('🔧 CampaignEditModal - handleSubmit appelé avec:', editedSaga);
-    await onSave(editedSaga);
+    try {
+      await onSave(editedSaga);
+      // onSave (saveCampaign) fermera le modal en cas de succès
+    } catch (error) {
+      // L'erreur est déjà affichée par saveCampaign, pas besoin de la réafficher
+      console.error('❌ Erreur capturée dans handleSubmit:', error);
+    }
   };
 
   return (
