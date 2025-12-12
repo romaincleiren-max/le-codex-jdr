@@ -40,8 +40,8 @@
 /* Slide - Style carte de tarot étroite */
 .scenario-slide {
   position: relative;
-  min-width: 550px;
-  max-width: 550px;
+  min-width: 660px;
+  max-width: 660px;
   height: 100%;
   display: flex;
   flex-direction: column;
