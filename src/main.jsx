@@ -2668,7 +2668,7 @@ export default function App() {
             {/* Bouton retour flottant selon le thème */}
             <button 
               onClick={closeBook} 
-              className={`fixed top-24 left-4 z-50 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
+              className={`fixed top-24 right-4 z-50 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
                 currentTheme.id === 'medieval' 
                   ? 'bg-amber-800/90 hover:bg-amber-700 text-amber-100 border-amber-600 hover:border-amber-400' :
                 currentTheme.id === 'lovecraft'
