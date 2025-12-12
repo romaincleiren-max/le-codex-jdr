@@ -34,7 +34,7 @@
   will-change: transform;
   align-items: center;
   gap: 1rem;
-  padding: 0 calc(50% - 275px);
+  padding: 0;
 }
 
 /* Slide - Style carte de tarot étroite */
