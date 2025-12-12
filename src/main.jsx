@@ -206,9 +206,16 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
     scenarios: []
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(editedSaga);
+    console.log('🔧 CampaignEditModal - handleSubmit appelé avec:', editedSaga);
+    try {
+      await onSave(editedSaga);
+      console.log('✅ Campagne sauvegardée avec succès');
+    } catch (error) {
+      console.error('❌ Erreur lors de la sauvegarde:', error);
+      alert('❌ Erreur: ' + error.message);
+    }
   };
 
   return (
