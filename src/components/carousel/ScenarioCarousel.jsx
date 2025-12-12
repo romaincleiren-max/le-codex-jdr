@@ -75,7 +75,7 @@ const ScenarioCarousel = ({
     setIsDragging(false);
     
     // Système de snap intelligent - se raccroche au scénario le plus proche
-    const cardWidth = 380; // Largeur + gap réduit
+    const cardWidth = 582; // 550px (largeur carte) + 32px (gap 2rem)
     const threshold = cardWidth * 0.25; // 25% de la largeur d'une carte (plus sensible)
     
     if (Math.abs(dragOffset) > threshold) {
@@ -158,7 +158,7 @@ const ScenarioCarousel = ({
         ref={trackRef}
         className="scenario-carousel-track centered"
         style={{
-          transform: `translateX(calc(50% - ${currentIndex * 380}px - 190px - ${dragOffset}px))`,
+          transform: `translateX(calc(50% - ${currentIndex * 582}px - 275px - ${dragOffset}px))`,
           transition: isDragging ? 'none' : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
