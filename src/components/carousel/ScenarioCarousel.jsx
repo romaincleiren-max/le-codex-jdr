@@ -10,7 +10,7 @@ const ScenarioCarousel = ({
   onScenarioClick,
   theme
 }) => {
-  const [currentIndex, setCurrentIndex] = useState(scenarios.length);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
@@ -18,43 +18,6 @@ const ScenarioCarousel = ({
   
   const carouselRef = useRef(null);
   const trackRef = useRef(null);
-  const slideWidth = 450 + 32; // 450px + gap
-  
-  // Créer un tableau infini avec des clones (avant, milieu, après)
-  const extendedScenarios = [
-    ...scenarios,
-    ...scenarios,
-    ...scenarios
-  ];
-
-  // Réinitialiser position sans animation quand on atteint les extrêmes
-  useEffect(() => {
-    if (currentIndex <= 0) {
-      setTimeout(() => {
-        if (trackRef.current) {
-          trackRef.current.style.transition = 'none';
-          setCurrentIndex(scenarios.length);
-          requestAnimationFrame(() => {
-            if (trackRef.current) {
-              trackRef.current.style.transition = '';
-            }
-          });
-        }
-      }, 300);
-    } else if (currentIndex >= scenarios.length * 2) {
-      setTimeout(() => {
-        if (trackRef.current) {
-          trackRef.current.style.transition = 'none';
-          setCurrentIndex(scenarios.length);
-          requestAnimationFrame(() => {
-            if (trackRef.current) {
-              trackRef.current.style.transition = '';
-            }
-          });
-        }
-      }, 300);
-    }
-  }, [currentIndex, scenarios.length]);
 
   // Parallax à la souris
   useEffect(() => {
@@ -81,15 +44,15 @@ const ScenarioCarousel = ({
   }, [isDragging]);
 
   const goToPrevious = () => {
-    setCurrentIndex((prev) => prev - 1);
+    setCurrentIndex((prev) => Math.max(0, prev - 1));
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => prev + 1);
+    setCurrentIndex((prev) => Math.min(scenarios.length - 1, prev + 1));
   };
 
   const goToSlide = (index) => {
-    setCurrentIndex(scenarios.length + index);
+    setCurrentIndex(index);
   };
 
   const handleMouseDown = (e) => {
@@ -112,10 +75,10 @@ const ScenarioCarousel = ({
     setIsDragging(false);
     
     // Si le drag est suffisant, changer de slide
-    if (Math.abs(dragOffset) > 50) {
-      if (dragOffset > 0) {
+    if (Math.abs(dragOffset) > 80) {
+      if (dragOffset > 0 && currentIndex < scenarios.length - 1) {
         goToNext();
-      } else {
+      } else if (dragOffset < 0 && currentIndex > 0) {
         goToPrevious();
       }
     }
@@ -123,9 +86,13 @@ const ScenarioCarousel = ({
     setDragOffset(0);
   };
 
-  const handleCardClick = (scenario) => {
+  const handleCardClick = (scenario, index) => {
     if (!isDragging && Math.abs(dragOffset) < 10) {
-      onScenarioClick(scenario);
+      if (index === currentIndex) {
+        onScenarioClick(scenario);
+      } else {
+        setCurrentIndex(index);
+      }
     }
   };
 
@@ -158,7 +125,6 @@ const ScenarioCarousel = ({
   };
 
   const colors = getThemeColors();
-  const realIndex = ((currentIndex - scenarios.length) % scenarios.length + scenarios.length) % scenarios.length;
 
   if (!scenarios || scenarios.length === 0) {
     return (
@@ -171,7 +137,7 @@ const ScenarioCarousel = ({
   return (
     <div 
       ref={carouselRef}
-      className="scenario-carousel"
+      className="scenario-carousel centered"
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
@@ -184,32 +150,42 @@ const ScenarioCarousel = ({
     >
       <div 
         ref={trackRef}
-        className="scenario-carousel-track"
+        className="scenario-carousel-track centered"
         style={{
-          transform: `translateX(-${currentIndex * slideWidth + dragOffset}px)`,
-          transition: isDragging ? 'none' : 'transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+          transform: `translateX(calc(50% - ${currentIndex * 520}px - 260px - ${dragOffset}px))`,
+          transition: isDragging ? 'none' : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
-        {extendedScenarios.map((scenario, index) => {
-          const originalIndex = index % scenarios.length;
+        {scenarios.map((scenario, index) => {
+          const distance = Math.abs(currentIndex - index);
+          const isActive = currentIndex === index;
+          const scale = isActive ? 1 : 0.85;
+          const opacity = distance > 1 ? 0.3 : (isActive ? 1 : 0.6);
+          
           return (
             <div 
-              key={`${scenario.id}-${index}`}
-              className="scenario-slide"
-              onClick={() => handleCardClick(scenario)}
-              style={{ cursor: 'pointer' }}
+              key={scenario.id}
+              className={`scenario-slide centered ${isActive ? 'active' : ''}`}
+              onClick={() => handleCardClick(scenario, index)}
+              style={{ 
+                cursor: 'pointer',
+                transform: `scale(${scale})`,
+                opacity: opacity,
+                transition: isDragging ? 'none' : 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                zIndex: isActive ? 10 : 5 - distance
+              }}
             >
               {/* Image avec parallax */}
               <div 
                 className="scenario-image-container"
                 style={{
-                  transform: `
+                  transform: isActive ? `
                     translate(
                       ${mousePosition.x * 0.3 * 20}px,
                       ${mousePosition.y * 0.3 * 20}px
                     )
                     scale(1.1)
-                  `
+                  ` : 'scale(1.1)'
                 }}
               >
                 <img 
@@ -224,7 +200,7 @@ const ScenarioCarousel = ({
               <div className="scenario-overlay"></div>
 
               {/* Badge numéro */}
-              <div className="scenario-number">#{originalIndex + 1}</div>
+              <div className="scenario-number">#{index + 1}</div>
 
               {/* Badge gratuit */}
               {scenario.isFree && (
@@ -345,32 +321,36 @@ const ScenarioCarousel = ({
       {/* Navigation */}
       {scenarios.length > 1 && (
         <>
-          <button 
-            className="carousel-nav prev"
-            onClick={goToPrevious}
-            aria-label="Scénario précédent"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M15 18l-6-6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          {currentIndex > 0 && (
+            <button 
+              className="carousel-nav prev"
+              onClick={goToPrevious}
+              aria-label="Scénario précédent"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M15 18l-6-6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )}
 
-          <button 
-            className="carousel-nav next"
-            onClick={goToNext}
-            aria-label="Scénario suivant"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
-              <path d="M9 18l6-6-6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
-          </button>
+          {currentIndex < scenarios.length - 1 && (
+            <button 
+              className="carousel-nav next"
+              onClick={goToNext}
+              aria-label="Scénario suivant"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M9 18l6-6-6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
+          )}
 
           {/* Indicateurs */}
           <div className="carousel-indicators">
             {scenarios.map((_, index) => (
               <button
                 key={index}
-                className={`indicator ${index === realIndex ? 'active' : ''}`}
+                className={`indicator ${index === currentIndex ? 'active' : ''}`}
                 onClick={() => goToSlide(index)}
                 aria-label={`Aller au scénario ${index + 1}`}
               />
@@ -379,7 +359,7 @@ const ScenarioCarousel = ({
 
           {/* Compteur */}
           <div className="carousel-counter">
-            <span className="current">{String(realIndex + 1).padStart(2, '0')}</span>
+            <span className="current">{String(currentIndex + 1).padStart(2, '0')}</span>
             <span className="separator">/</span>
             <span className="total">{String(scenarios.length).padStart(2, '0')}</span>
           </div>
