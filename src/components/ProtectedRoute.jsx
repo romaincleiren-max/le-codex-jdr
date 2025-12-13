@@ -15,32 +15,77 @@ export const ProtectedRoute = ({ children }) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let mounted = true;
+    
+    // Timeout de sécurité : débloquer après 5 secondes max
+    const timeoutId = setTimeout(() => {
+      console.warn('⚠️ Timeout vérification authentification - déblocage forcé');
+      if (mounted) {
+        setLoading(false);
+      }
+    }, 5000);
+
     // Vérifier la session au chargement
     const checkSession = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('🔍 Vérification session...');
+        const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+        
+        if (sessionError) {
+          console.error('❌ Erreur récupération session:', sessionError);
+          throw sessionError;
+        }
         
         if (session?.user) {
-          setUser(session.user);
+          console.log('✅ Utilisateur authentifié:', session.user.email);
+          
+          if (mounted) {
+            setUser(session.user);
+          }
           
           // Vérifier si l'utilisateur est admin
-          const { data: adminCheck } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('email', session.user.email)
-            .single();
-          
-          setIsAdmin(!!adminCheck);
+          try {
+            const { data: adminCheck, error: adminError } = await supabase
+              .from('admin_users')
+              .select('*')
+              .eq('email', session.user.email)
+              .maybeSingle(); // maybeSingle au lieu de single pour éviter les erreurs si pas trouvé
+            
+            if (adminError) {
+              console.error('❌ Erreur vérification admin:', adminError);
+            }
+            
+            const userIsAdmin = !!adminCheck;
+            console.log(userIsAdmin ? '✅ Utilisateur admin confirmé' : '⚠️ Utilisateur non admin');
+            
+            if (mounted) {
+              setIsAdmin(userIsAdmin);
+            }
+          } catch (adminCheckError) {
+            console.error('❌ Erreur critique vérification admin:', adminCheckError);
+            if (mounted) {
+              setIsAdmin(false);
+            }
+          }
         } else {
+          console.log('ℹ️ Pas de session active');
+          if (mounted) {
+            setUser(null);
+            setIsAdmin(false);
+          }
+        }
+      } catch (error) {
+        console.error('❌ Erreur vérification session:', error);
+        if (mounted) {
           setUser(null);
           setIsAdmin(false);
         }
-      } catch (error) {
-        console.error('Erreur vérification session:', error);
-        setUser(null);
-        setIsAdmin(false);
       } finally {
-        setLoading(false);
+        clearTimeout(timeoutId);
+        if (mounted) {
+          setLoading(false);
+          console.log('✅ Vérification terminée');
+        }
       }
     };
 
@@ -48,24 +93,35 @@ export const ProtectedRoute = ({ children }) => {
 
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
+      console.log('🔄 Changement d\'authentification:', _event);
+      
+      if (session?.user && mounted) {
         setUser(session.user);
         
-        // Vérifier si l'utilisateur est admin
-        const { data: adminCheck } = await supabase
-          .from('admin_users')
-          .select('*')
-          .eq('email', session.user.email)
-          .single();
-        
-        setIsAdmin(!!adminCheck);
-      } else {
+        try {
+          // Vérifier si l'utilisateur est admin
+          const { data: adminCheck } = await supabase
+            .from('admin_users')
+            .select('*')
+            .eq('email', session.user.email)
+            .maybeSingle();
+          
+          setIsAdmin(!!adminCheck);
+        } catch (error) {
+          console.error('❌ Erreur vérification admin (onChange):', error);
+          setIsAdmin(false);
+        }
+      } else if (mounted) {
         setUser(null);
         setIsAdmin(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      clearTimeout(timeoutId);
+      subscription.unsubscribe();
+    };
   }, []);
 
   // Affiche un écran de chargement pendant la vérification
