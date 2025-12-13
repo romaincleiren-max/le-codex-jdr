@@ -1968,43 +1968,19 @@ export default function App() {
       {/* PRELOADER - Apparaît au premier chargement */}
       {showPreloader && (
         <div 
-          className="fixed inset-0 z-[9999] flex items-center justify-center"
+          className="fixed inset-0 z-[9999]"
           style={{
             backgroundColor: '#1b191a'
           }}
         >
-          {/* Fond avec le GIF flouté et masque radial */}
-          <div 
-            className="absolute inset-0"
-            style={{
-              backgroundImage: 'url(https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif)',
-              backgroundPosition: 'center',
-              backgroundSize: 'cover',
-              backgroundRepeat: 'no-repeat',
-              filter: 'blur(60px)',
-              maskImage: 'radial-gradient(circle, transparent 35%, black 60%)',
-              WebkitMaskImage: 'radial-gradient(circle, transparent 35%, black 60%)',
-              opacity: 0.8
-            }}
+          {/* Logo GIF plein écran */}
+          <img 
+            src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.gif"
+            alt="Le Codex"
+            className={`w-full h-full object-cover transition-opacity duration-1000 ${
+              preloaderFading ? 'opacity-0' : 'opacity-100'
+            }`}
           />
-          
-          {/* Logo GIF animé avec dégradé d'intégration */}
-          <div className="relative">
-            <img 
-              src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif"
-              alt="Le Codex"
-              className={`relative z-10 w-[500px] h-[500px] object-contain transition-opacity duration-1000 ${
-                preloaderFading ? 'opacity-0' : 'opacity-100'
-              }`}
-            />
-            {/* Dégradé radial pour fondre les bords du GIF avec le fond */}
-            <div 
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                background: 'radial-gradient(circle, transparent 40%, #1b191a 100%)'
-              }}
-            />
-          </div>
         </div>
       )}
       
