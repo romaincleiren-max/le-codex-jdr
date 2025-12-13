@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fond global pour éliminer le flash blanc */
+html, body {
+  background-color: #2596be !important;
+  margin: 0;
+  padding: 0;
+}
+
 @layer components {
   .book-shadow {
     @apply shadow-2xl;
