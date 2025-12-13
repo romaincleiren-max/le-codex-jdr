@@ -1970,7 +1970,7 @@ export default function App() {
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center"
           style={{
-            backgroundColor: '#1b191a'
+            backgroundColor: '#2596be'
           }}
         >
           {/* Logo GIF animé - Taille normale avec fade out */}
@@ -1987,7 +1987,7 @@ export default function App() {
       {/* CONTENU PRINCIPAL - Masqué tant que le preloader est actif */}
       <div className={`min-h-screen transition-opacity duration-500 ${
         showPreloader ? 'opacity-0' : 'opacity-100'
-      }`} style={{ backgroundColor: '#1b191a' }}>
+      }`} style={{ backgroundColor: '#2596be' }}>
       {showCampaignModal && (
         <CampaignEditModal saga={editingSaga} themes={themes} onSave={saveCampaign}
           onClose={() => { setShowCampaignModal(false); setEditingSaga(null); }} />
