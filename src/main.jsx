@@ -1970,7 +1970,10 @@ export default function App() {
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center"
           style={{
-            backgroundColor: '#1b1518'
+            backgroundImage: 'url(https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Background_logo.png)',
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundRepeat: 'no-repeat'
           }}
         >
           {/* Logo GIF animé - Taille normale avec fade out */}
