@@ -833,59 +833,150 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
   };
 
   return (
-    <div className="fixed right-0 top-0 h-full w-96 bg-amber-100 border-l-4 border-amber-900 shadow-2xl z-50 flex flex-col">
-      <div className="p-6 border-b-2 border-amber-700 flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-amber-900">🛒 Panier</h2>
-        <button onClick={onClose} className="text-amber-900 hover:text-amber-700 text-2xl">✕</button>
+    <div className="fixed right-0 top-0 h-full w-[450px] shadow-2xl z-50 flex flex-col"
+      style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+      }}>
+      {/* Header élégant */}
+      <div className="relative overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-amber-800/20"></div>
+        <div className="relative p-6 border-b border-amber-700/30 flex justify-between items-center">
+          <div>
+            <h2 className="text-3xl font-bold text-amber-300 mb-1">Votre Panier</h2>
+            <p className="text-amber-500 text-sm">{cart.length} article{cart.length > 1 ? 's' : ''}</p>
+          </div>
+          <button 
+            onClick={onClose} 
+            className="text-amber-300 hover:text-amber-100 transition-colors p-2 rounded-full hover:bg-amber-900/20">
+            <X size={28} />
+          </button>
+        </div>
       </div>
       
-      <div className="flex-1 overflow-y-auto p-6">
+      {/* Contenu scrollable */}
+      <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
         {cart.length === 0 ? (
-          <div className="text-center py-12">
-            <ShoppingCart size={64} className="mx-auto text-amber-400 mb-4" />
-            <p className="text-amber-700 text-lg">Votre panier est vide</p>
+          <div className="flex flex-col items-center justify-center h-full">
+            <div className="bg-gradient-to-br from-amber-900/30 to-amber-800/20 rounded-full p-8 mb-6 border border-amber-700/30">
+              <ShoppingCart size={64} className="text-amber-600" />
+            </div>
+            <p className="text-amber-400 text-xl font-semibold mb-2">Panier vide</p>
+            <p className="text-amber-600 text-center">Ajoutez des scénarios pour commencer</p>
           </div>
         ) : (
           <div className="space-y-4">
             {cart.map((cartItem, index) => (
-              <div key={index} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-4">
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-amber-900">
-                      {cartItem.type === 'saga' ? cartItem.item.name : cartItem.item.displayName}
-                    </h3>
-                    {cartItem.type === 'scenario' && <p className="text-sm text-amber-700">De : {cartItem.saga.name}</p>}
-                    {cartItem.type === 'saga' && <p className="text-sm text-amber-700">{cartItem.item.scenarios.length} scénarios</p>}
-                  </div>
-                  <button onClick={() => onRemoveItem(index)} className="text-red-700 hover:text-red-900">
-                    <Trash2 size={20} />
-                  </button>
-                </div>
-                <div className="text-right">
-                  <span className="text-xl font-bold text-amber-800">
-                    {(cartItem.type === 'saga' ? cartItem.item.price : cartItem.item.price).toFixed(2)} €
-                  </span>
+              <div key={index} 
+                className="group bg-gradient-to-br from-slate-800/80 to-slate-900/80 backdrop-blur-sm border border-amber-700/30 rounded-xl p-5 transition-all hover:border-amber-600/50 hover:shadow-lg hover:shadow-amber-900/20">
+                <div className="flex gap-4">
+                  {/* Icône type */}
+                  <div className="flex-shrink-0">
+                    <div className={`w-14 h-14 rounded-lg flex items-center justify-center text-2xl ${
+                      cartItem.type === 'saga' 
+                        ? 'bg-gradient-to-br from-purple-600/20 to-purple-800/20 border border-purple-600/30' 
+                        : 'bg-gradient-to-br from-blue-600/20 to-blue-800/20 border border-blue-600/30'
+                    }`}>
+                      {cartItem.type === 'saga' ? '📚' : '📖'}
                     </div>
                   </div>
-                  ))}
+                  
+                  {/* Détails */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-start justify-between gap-2 mb-2">
+                      <h3 className="font-bold text-amber-200 text-lg leading-tight">
+                        {cartItem.type === 'saga' ? cartItem.item.name : cartItem.item.displayName}
+                      </h3>
+                      <button 
+                        onClick={() => onRemoveItem(index)} 
+                        className="flex-shrink-0 text-red-400 hover:text-red-300 transition-colors opacity-0 group-hover:opacity-100 p-1 hover:bg-red-900/20 rounded">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                    
+                    {cartItem.type === 'scenario' && (
+                      <p className="text-amber-500 text-sm mb-2 flex items-center gap-1">
+                        <span className="opacity-60">De:</span> {cartItem.saga.name}
+                      </p>
+                    )}
+                    {cartItem.type === 'saga' && (
+                      <p className="text-amber-500 text-sm mb-2 flex items-center gap-1">
+                        <span className="text-amber-400">📦</span> {cartItem.item.scenarios.length} scénarios inclus
+                      </p>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+                        cartItem.type === 'saga'
+                          ? 'bg-purple-600/20 text-purple-300 border border-purple-600/30'
+                          : 'bg-blue-600/20 text-blue-300 border border-blue-600/30'
+                      }`}>
+                        {cartItem.type === 'saga' ? 'Campagne complète' : 'Scénario unique'}
+                      </span>
+                      <span className="text-2xl font-bold text-amber-300">
+                        {(cartItem.type === 'saga' ? cartItem.item.price : cartItem.item.price).toFixed(2)} €
+                      </span>
+                    </div>
+                  </div>
                 </div>
-              )}
-            </div>
-      
-      {cart.length > 0 && (
-        <div className="border-t-2 border-amber-700 p-6 bg-amber-200">
-          <div className="flex justify-between items-center mb-4">
-            <span className="text-xl font-bold text-amber-900">Total</span>
-            <span className="text-3xl font-bold text-amber-800">{total.toFixed(2)} €</span>
+              </div>
+            ))}
           </div>
+        )}
+      </div>
+      
+      {/* Footer avec total et bouton paiement */}
+      {cart.length > 0 && (
+        <div className="border-t border-amber-700/30 p-6 bg-gradient-to-b from-slate-900 to-slate-950">
+          <div className="bg-gradient-to-br from-amber-900/20 to-amber-800/20 rounded-xl p-5 mb-4 border border-amber-700/30">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-amber-400 text-lg font-semibold">Total</span>
+              <span className="text-4xl font-bold bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
+                {total.toFixed(2)} €
+              </span>
+            </div>
+            <p className="text-amber-600 text-xs text-right">TVA incluse</p>
+          </div>
+          
           <button 
             onClick={handleDirectCheckout}
             disabled={isProcessing}
-            className="w-full bg-amber-800 text-white px-6 py-3 rounded-lg hover:bg-amber-700 font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50">
-            {isProcessing ? <>⏳ Redirection...</> : <><CreditCard size={20} />Procéder au paiement Stripe</>}
+            className="w-full bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white px-6 py-4 rounded-xl font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:shadow-amber-900/50 transform hover:scale-[1.02] active:scale-[0.98]">
+            {isProcessing ? (
+              <>
+                <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
+                Redirection...
+              </>
+            ) : (
+              <>
+                <CreditCard size={24} />
+                Payer avec Stripe
+              </>
+            )}
           </button>
+          
+          <p className="text-center text-amber-700 text-xs mt-3">
+            🔒 Paiement sécurisé par Stripe
+          </p>
         </div>
       )}
+
+      {/* Styles CSS pour le scrollbar personnalisé */}
+      <style>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 8px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: rgba(15, 23, 42, 0.5);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: rgba(217, 119, 6, 0.5);
+          border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+          background: rgba(217, 119, 6, 0.7);
+        }
+      `}</style>
     </div>
   );
 };
