@@ -1970,14 +1970,29 @@ export default function App() {
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center"
           style={{
-            backgroundColor: '#2596be'
+            backgroundColor: '#1b191a'
           }}
         >
+          {/* Fond avec le GIF flouté et masque radial */}
+          <div 
+            className="absolute inset-0"
+            style={{
+              backgroundImage: 'url(https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif)',
+              backgroundPosition: 'center',
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+              filter: 'blur(60px)',
+              maskImage: 'radial-gradient(circle, transparent 35%, black 60%)',
+              WebkitMaskImage: 'radial-gradient(circle, transparent 35%, black 60%)',
+              opacity: 0.8
+            }}
+          />
+          
           {/* Logo GIF animé - Taille normale avec fade out */}
           <img 
             src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif"
             alt="Le Codex"
-            className={`w-[500px] h-[500px] object-contain transition-opacity duration-1000 ${
+            className={`relative z-10 w-[500px] h-[500px] object-contain transition-opacity duration-1000 ${
               preloaderFading ? 'opacity-0' : 'opacity-100'
             }`}
           />
@@ -1987,7 +2002,7 @@ export default function App() {
       {/* CONTENU PRINCIPAL - Masqué tant que le preloader est actif */}
       <div className={`min-h-screen transition-opacity duration-500 ${
         showPreloader ? 'opacity-0' : 'opacity-100'
-      }`} style={{ backgroundColor: '#2596be' }}>
+      }`} style={{ backgroundColor: '#1b191a' }}>
       {showCampaignModal && (
         <CampaignEditModal saga={editingSaga} themes={themes} onSave={saveCampaign}
           onClose={() => { setShowCampaignModal(false); setEditingSaga(null); }} />
