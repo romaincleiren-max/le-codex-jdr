@@ -1968,18 +1968,19 @@ export default function App() {
       {/* PRELOADER - Apparaît au premier chargement */}
       {showPreloader && (
         <div 
-          className="fixed inset-0 z-[9999]"
+          className="fixed inset-0 z-[9999] flex items-center justify-center"
           style={{
             backgroundColor: '#1b191a'
           }}
         >
-          {/* Logo GIF plein écran */}
+          {/* Logo GIF centré sans pixellisation */}
           <img 
             src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.gif"
             alt="Le Codex"
-            className={`w-full h-full object-cover transition-opacity duration-1000 ${
+            className={`w-full h-full object-contain transition-opacity duration-1000 ${
               preloaderFading ? 'opacity-0' : 'opacity-100'
             }`}
+            style={{ imageRendering: 'auto' }}
           />
         </div>
       )}
