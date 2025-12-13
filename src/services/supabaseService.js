@@ -601,12 +601,19 @@ export const deleteSubmission = async (id) => {
 export const downloadSubmissionPDF = async (pdfUrl) => {
   const fileName = pdfUrl.split('/').pop();
   
+  // Créer une URL signée temporaire (valide 5 minutes)
   const { data, error } = await supabase.storage
     .from('submissions')
-    .download(fileName);
+    .createSignedUrl(fileName, 300); // 300 secondes = 5 minutes
 
   if (error) throw error;
-  return data;
+  
+  // Télécharger le fichier depuis l'URL signée
+  const response = await fetch(data.signedUrl);
+  if (!response.ok) throw new Error('Erreur lors du téléchargement du fichier');
+  
+  const blob = await response.blob();
+  return blob;
 };
 
 // ============================================================================
