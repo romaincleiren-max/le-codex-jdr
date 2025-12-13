@@ -52,6 +52,34 @@
   border-radius: 20px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
+  border: 2px solid rgba(255, 255, 255, 0.2); /* Bordure grise par défaut */
+  transition: all 0.3s ease;
+}
+
+/* Ligne dorée en haut qui s'anime */
+.scenario-slide::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px; /* Ligne fine dorée */
+  background: linear-gradient(90deg, #fbbf24, #f59e0b, transparent);
+  transform: scaleX(0); /* Cachée par défaut */
+  transform-origin: left; /* Animation de gauche à droite */
+  transition: transform 0.3s ease;
+  z-index: 10;
+}
+
+/* Au survol de la carte */
+.scenario-slide:hover {
+  border-color: #fbbf24; /* Toute la bordure devient dorée */
+  transform: translateY(-8px); /* La carte se soulève */
+  box-shadow: 0 25px 70px rgba(251, 191, 36, 0.4), 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.scenario-slide:hover::before {
+  transform: scaleX(1); /* La ligne dorée du haut s'étend */
 }
 
 /* Image avec parallax */
