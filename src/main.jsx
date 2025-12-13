@@ -2110,7 +2110,7 @@ export default function App() {
         <ShoppingCartPanel cart={cart} onRemoveItem={removeFromCart} onClose={() => setShowCart(false)} onGoToCheckout={goToCheckout} />
       )}
 
-      <div className={!showBook && currentPage !== 'checkout' && currentPage !== 'confirmation' ? 'pt-20' : ''}>
+      <div className={!showBook && currentPage !== 'checkout' && currentPage !== 'confirmation' && currentPage !== 'home' ? 'pt-20' : ''}>
         {currentPage === 'confirmation' && orderData && (
           <OrderConfirmationPage orderData={orderData} cart={cart} onBackToHome={backToHome} />
         )}
@@ -2121,7 +2121,7 @@ export default function App() {
 
         {/* PAGE ACCUEIL */}
         {!showBook && currentPage === 'home' && (
-          <div className="min-h-screen flex">
+          <div className="h-screen pt-32 flex">
             {themes.map((theme, idx) => (
               <div key={theme.id} onClick={() => { setCurrentTheme(theme); openBook(theme); }}
                 className="flex-1 flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out hover:flex-[1.5] group relative overflow-hidden"
