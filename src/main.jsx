@@ -2134,9 +2134,7 @@ export default function App() {
                   {id: 'campagnes', icon: '📚', label: 'Campagnes'},
                   {id: 'scenarios', icon: '📖', label: 'Scénarios'},
                   {id: 'pageaccueil', icon: '🏠', label: 'Page Accueil'},
-                  {id: 'visuel', icon: '🎨', label: 'Visuel'},
                   {id: 'notations', icon: '⭐', label: 'Notations'},
-                  {id: 'images', icon: '🖼️', label: 'Images'},
                   {id: 'soumissions', icon: '📥', label: 'Soumissions'},
                   {id: 'parametres', icon: '⚙️', label: 'Paramètres'}
                 ].map(tab => (
@@ -2683,17 +2681,8 @@ export default function App() {
         {/* PAGE SCENARIOS */}
         {showBook && (
           <div className="min-h-screen relative overflow-hidden bg-slate-950">
-            {/* Image de fond de la campagne - Visible et esthétique */}
-            {selectedSaga && (() => {
-              console.log('🎬 DEBUG VIDÉO:', {
-                saga: selectedSaga.name,
-                backgroundVideoUrl: selectedSaga.backgroundVideoUrl,
-                background_video_url: selectedSaga.background_video_url,
-                backgroundImageUrl: selectedSaga.backgroundImageUrl,
-                background_image_url: selectedSaga.background_image_url
-              });
-              return (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url || selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url);
-            })() ? (
+            {/* Image/Vidéo de fond de la campagne - Visible et esthétique */}
+            {selectedSaga && (selectedSaga.backgroundImageUrl || selectedSaga.background_image_url || selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url) ? (
               <div className="fixed inset-0 z-0">
                 {/* Si une vidéo est définie, l'utiliser */}
                 {(selectedSaga.backgroundVideoUrl || selectedSaga.background_video_url) ? (
