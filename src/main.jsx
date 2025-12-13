@@ -1534,12 +1534,42 @@ const SubmissionsTab = () => {
 };
 
 export default function App() {
+  // État pour le preloader
+  const [showPreloader, setShowPreloader] = useState(true);
+  const [preloaderFading, setPreloaderFading] = useState(false);
+  
   // Charger les données depuis Supabase
   const { campaigns, themes: supabaseThemes, siteSettings: supabaseSiteSettings, loading, error, refresh } = useSupabaseData();
   
   // État pour l'authentification
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
+  
+  // Gérer le preloader au chargement initial
+  useEffect(() => {
+    // Vérifier si on a déjà vu le preloader dans cette session
+    const hasSeenPreloader = sessionStorage.getItem('hasSeenPreloader');
+    
+    if (hasSeenPreloader) {
+      // Si déjà vu, ne pas afficher le preloader
+      setShowPreloader(false);
+    } else {
+      // Sinon, afficher le preloader pendant 3 secondes
+      const fadeTimer = setTimeout(() => {
+        setPreloaderFading(true);
+      }, 2500); // Commence à disparaître après 2.5s
+      
+      const hideTimer = setTimeout(() => {
+        setShowPreloader(false);
+        sessionStorage.setItem('hasSeenPreloader', 'true');
+      }, 3500); // Disparaît complètement après 3.5s
+      
+      return () => {
+        clearTimeout(fadeTimer);
+        clearTimeout(hideTimer);
+      };
+    }
+  }, []);
   
   // Vérifier l'authentification Supabase au chargement
   useEffect(() => {
@@ -1934,7 +1964,46 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900">
+    <>
+      {/* PRELOADER - Apparaît au premier chargement */}
+      {showPreloader && (
+        <div 
+          className={`fixed inset-0 z-[9999] flex items-center justify-center transition-opacity duration-1000 ${
+            preloaderFading ? 'opacity-0' : 'opacity-100'
+          }`}
+          style={{
+            background: 'radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%)'
+          }}
+        >
+          {/* Logo animé GIF en plein écran */}
+          <div className="relative animate-pulse">
+            {/* Effet de glow derrière le logo */}
+            <div className="absolute inset-0 bg-amber-500/30 rounded-full blur-[100px] animate-pulse"></div>
+            
+            {/* Logo GIF animé */}
+            <img 
+              src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif"
+              alt="Le Codex"
+              className="relative w-[400px] h-[400px] object-contain drop-shadow-2xl"
+              style={{
+                filter: 'drop-shadow(0 0 40px rgba(251, 191, 36, 0.8))'
+              }}
+            />
+          </div>
+          
+          {/* Texte de chargement optionnel */}
+          <div className="absolute bottom-20 text-center">
+            <p className="text-amber-300 text-xl font-bold animate-pulse">
+              Chargement du Codex...
+            </p>
+          </div>
+        </div>
+      )}
+      
+      {/* CONTENU PRINCIPAL - Masqué tant que le preloader est actif */}
+      <div className={`min-h-screen bg-slate-900 transition-opacity duration-500 ${
+        showPreloader ? 'opacity-0' : 'opacity-100'
+      }`}>
       {showCampaignModal && (
         <CampaignEditModal saga={editingSaga} themes={themes} onSave={saveCampaign}
           onClose={() => { setShowCampaignModal(false); setEditingSaga(null); }} />
@@ -1979,26 +2048,17 @@ export default function App() {
               <button 
                 onClick={() => setCurrentPage('home')} 
                 className="group flex items-center gap-4 hover:scale-105 transition-all duration-300 py-1">
-                {/* Container du logo avec effet glow */}
+                {/* Container du logo avec bordure */}
                 <div className="relative">
                   {siteSettings.logoUrl ? (
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-amber-500/40 rounded-full blur-3xl group-hover:bg-amber-400/50 transition-all duration-300"></div>
-                      <img 
-                        src={siteSettings.logoUrl} 
-                        alt={siteSettings.siteName}
-                        className="relative h-28 w-28 object-contain drop-shadow-2xl"
-                        style={{
-                          filter: 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.6))'
-                        }}
-                        onError={(e) => { e.target.style.display = 'none'; }}
-                      />
-                    </div>
+                    <img 
+                      src={siteSettings.logoUrl} 
+                      alt={siteSettings.siteName}
+                      className="h-28 w-28 object-contain rounded-xl border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50 p-2"
+                      onError={(e) => { e.target.style.display = 'none'; }}
+                    />
                   ) : (
-                    <div className="relative">
-                      <div className="absolute inset-0 bg-amber-500/30 rounded-xl blur-lg group-hover:bg-amber-400/40 transition-all duration-300"></div>
-                      <div className="relative text-6xl">📚</div>
-                    </div>
+                    <div className="text-6xl p-2 rounded-xl border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
                   )}
                 </div>
                 
@@ -3198,7 +3258,8 @@ export default function App() {
           </div>
         )}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
 
