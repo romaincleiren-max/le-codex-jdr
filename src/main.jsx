@@ -3034,7 +3034,6 @@ function AppRouter() {
     <Routes>
       <Route path="/test-supabase" element={<TestSupabase />} />
       <Route path="/login" element={<LoginPage />} />
-      <Route path="/admin" element={<ProtectedRoute><App /></ProtectedRoute>} />
       <Route path="/*" element={<App />} />
     </Routes>
   );
