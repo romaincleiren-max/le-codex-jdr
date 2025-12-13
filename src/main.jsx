@@ -1970,10 +1970,7 @@ export default function App() {
         <div 
           className="fixed inset-0 z-[9999] flex items-center justify-center"
           style={{
-            backgroundImage: 'url(https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Background_logo.png)',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat'
+            backgroundColor: '#1b191a'
           }}
         >
           {/* Logo GIF animé - Taille normale avec fade out */}
@@ -1988,9 +1985,9 @@ export default function App() {
       )}
       
       {/* CONTENU PRINCIPAL - Masqué tant que le preloader est actif */}
-      <div className={`min-h-screen bg-slate-900 transition-opacity duration-500 ${
+      <div className={`min-h-screen transition-opacity duration-500 ${
         showPreloader ? 'opacity-0' : 'opacity-100'
-      }`}>
+      }`} style={{ backgroundColor: '#1b191a' }}>
       {showCampaignModal && (
         <CampaignEditModal saga={editingSaga} themes={themes} onSave={saveCampaign}
           onClose={() => { setShowCampaignModal(false); setEditingSaga(null); }} />
