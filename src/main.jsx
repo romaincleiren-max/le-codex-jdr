@@ -1973,14 +1973,16 @@ export default function App() {
             backgroundColor: '#1b191a'
           }}
         >
-          {/* Logo GIF centré sans pixellisation */}
-          <img 
-            src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.gif"
-            alt="Le Codex"
+          {/* Logo vidéo centré */}
+          <video 
+            src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
+            autoPlay
+            loop
+            muted
+            playsInline
             className={`w-full h-full object-contain transition-opacity duration-1000 ${
               preloaderFading ? 'opacity-0' : 'opacity-100'
             }`}
-            style={{ imageRendering: 'auto' }}
           />
         </div>
       )}
@@ -2224,6 +2226,26 @@ export default function App() {
           }}>
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
+                {/* Logo rappel */}
+                <div className="flex justify-center mb-8">
+                  <div className="relative group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-700 rounded-2xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                    <div className="relative h-20 w-20 rounded-2xl overflow-hidden">
+                      {/* Masque gradient pour fondre avec le fond */}
+                      <div className="absolute inset-0 pointer-events-none z-10" style={{
+                        background: 'radial-gradient(circle at center, transparent 40%, rgba(27, 25, 26, 0.3) 60%, rgba(27, 25, 26, 0.8) 85%, #1b191a 100%)'
+                      }}></div>
+                      <video 
+                        src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        className="w-full h-full object-contain border-4 border-amber-500 bg-slate-900/80 p-2 backdrop-blur-sm transform group-hover:scale-105 transition-transform"
+                      />
+                    </div>
+                  </div>
+                </div>
                 <div className="inline-block bg-gradient-to-r from-amber-500 to-amber-700 text-transparent bg-clip-text mb-4">
                   <h1 className="text-6xl font-bold">✨ Proposer un Scénario</h1>
                 </div>
@@ -2346,6 +2368,23 @@ export default function App() {
         {!showBook && currentPage === 'admin' && (
           <div className="min-h-screen p-8">
             <div className="max-w-7xl mx-auto">
+              {/* Logo rappel - version sans bordure, style minimaliste */}
+              <div className="flex justify-center mb-6">
+                <div className="relative h-17 w-17 rounded-xl overflow-hidden">
+                  {/* Masque gradient pour fondre avec le fond */}
+                  <div className="absolute inset-0 pointer-events-none z-10" style={{
+                    background: 'radial-gradient(circle at center, transparent 40%, rgba(27, 25, 26, 0.3) 60%, rgba(27, 25, 26, 0.8) 85%, #1b191a 100%)'
+                  }}></div>
+                  <video 
+                    src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity"
+                  />
+                </div>
+              </div>
               <h1 className="text-5xl font-bold mb-8 text-amber-300 text-center">🛠️ Administration</h1>
               
               <div className="flex flex-wrap justify-center gap-4 mb-8">
