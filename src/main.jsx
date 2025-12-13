@@ -1953,42 +1953,51 @@ export default function App() {
         <nav className="fixed top-0 left-0 right-0 z-50 shadow-2xl relative overflow-hidden">
           {/* Image de fond avec texture */}
           <div 
-            className="absolute inset-0 opacity-90"
+            className="absolute inset-0"
             style={{
               backgroundImage: "url('https://cdn.midjourney.com/84d84b34-eb75-4cb1-badf-b1627effd26d/0_3.png')",
               backgroundSize: 'cover',
-              backgroundPosition: 'center'
+              backgroundPosition: 'center',
+              filter: 'brightness(0.3) contrast(1.2)'
             }}
           ></div>
           
-          {/* Overlay pour assombrir légèrement */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-950/50 to-slate-950/70"></div>
+          {/* Overlay gradient optimisé pour intégration logo */}
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/60 to-slate-950/80"></div>
+          
+          {/* Effet de vignette pour fondre les bords */}
+          <div className="absolute inset-0" style={{
+            background: 'radial-gradient(ellipse at center, transparent 0%, rgba(15, 23, 42, 0.4) 70%)'
+          }}></div>
           
           {/* Barre lumineuse animée en haut */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-60"></div>
           
-          <div className="max-w-7xl mx-auto px-6 py-3 relative z-10">
+          <div className="max-w-7xl mx-auto px-6 py-2 relative z-10">
             <div className="flex items-center justify-between">
               {/* Logo et titre */}
               <button 
                 onClick={() => setCurrentPage('home')} 
-                className="group flex items-center gap-4 hover:scale-105 transition-all duration-300 py-2">
+                className="group flex items-center gap-4 hover:scale-105 transition-all duration-300 py-1">
                 {/* Container du logo avec effet glow */}
                 <div className="relative">
                   {siteSettings.logoUrl ? (
                     <div className="relative">
-                      <div className="absolute inset-0 bg-amber-500/30 rounded-xl blur-2xl group-hover:bg-amber-400/40 transition-all duration-300"></div>
+                      <div className="absolute inset-0 bg-amber-500/40 rounded-full blur-3xl group-hover:bg-amber-400/50 transition-all duration-300"></div>
                       <img 
                         src={siteSettings.logoUrl} 
                         alt={siteSettings.siteName}
-                        className="relative h-20 w-20 object-contain"
+                        className="relative h-28 w-28 object-contain drop-shadow-2xl"
+                        style={{
+                          filter: 'drop-shadow(0 0 20px rgba(251, 191, 36, 0.6))'
+                        }}
                         onError={(e) => { e.target.style.display = 'none'; }}
                       />
                     </div>
                   ) : (
                     <div className="relative">
-                      <div className="absolute inset-0 bg-amber-500/20 rounded-xl blur-lg group-hover:bg-amber-400/30 transition-all duration-300"></div>
-                      <div className="relative text-5xl">📚</div>
+                      <div className="absolute inset-0 bg-amber-500/30 rounded-xl blur-lg group-hover:bg-amber-400/40 transition-all duration-300"></div>
+                      <div className="relative text-6xl">📚</div>
                     </div>
                   )}
                 </div>
