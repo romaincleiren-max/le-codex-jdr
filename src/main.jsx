@@ -2007,7 +2007,7 @@ export default function App() {
               </button>
 
               {/* Navigation centrale */}
-              <div className="flex gap-2 items-center">
+              <div className="flex gap-6 items-center">
                 {['home', 'submit', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
@@ -2036,28 +2036,21 @@ export default function App() {
                       <button 
                         key={page} 
                         onClick={() => setCurrentPage(page)}
-                        className={`
-                          relative px-5 py-2.5 rounded-xl font-semibold text-sm
-                          transition-all duration-300 transform hover:scale-105
-                          ${isActive 
-                            ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg shadow-amber-900/50' 
-                            : 'text-amber-300/90 hover:text-amber-100 hover:bg-slate-800/50'
-                          }
-                        `}>
-                        {/* Effet de brillance au hover */}
-                        {!isActive && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
-                        )}
-                        
-                        <span className="relative flex items-center gap-2">
-                          <span>{icons[page]}</span>
+                        className="nav-button group relative px-3 py-2.5 font-semibold text-sm transition-colors duration-300"
+                        data-active={isActive}>
+                        <span className={`flex items-center gap-2 transition-colors duration-300 ${
+                          isActive ? 'text-amber-300' : 'text-amber-300/70 group-hover:text-amber-200'
+                        }`}>
+                          <span className="text-base">{icons[page]}</span>
                           <span>{labels[page]}</span>
                         </span>
                         
-                        {/* Indicateur actif */}
-                        {isActive && (
-                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
-                        )}
+                        {/* Ligne élégante qui s'élargit depuis le centre */}
+                        <span className={`
+                          absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-amber-400
+                          transition-all duration-300 ease-out
+                          ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}
+                        `}></span>
                       </button>
                     );
                   })}
