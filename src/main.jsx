@@ -1975,25 +1975,25 @@ export default function App() {
             background: 'radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%)'
           }}
         >
-          {/* Logo animé GIF en plein écran */}
-          <div className="relative animate-pulse">
+          {/* Logo animé GIF en plein écran - TRÈS GRAND */}
+          <div className="relative w-full h-full flex items-center justify-center p-8">
             {/* Effet de glow derrière le logo */}
-            <div className="absolute inset-0 bg-amber-500/30 rounded-full blur-[100px] animate-pulse"></div>
+            <div className="absolute inset-0 bg-amber-500/20 blur-[150px] animate-pulse"></div>
             
-            {/* Logo GIF animé */}
+            {/* Logo GIF animé - Occupe 80% de l'écran */}
             <img 
               src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif"
               alt="Le Codex"
-              className="relative w-[400px] h-[400px] object-contain drop-shadow-2xl"
+              className="relative max-w-[80vw] max-h-[80vh] w-auto h-auto object-contain drop-shadow-2xl animate-pulse"
               style={{
-                filter: 'drop-shadow(0 0 40px rgba(251, 191, 36, 0.8))'
+                filter: 'drop-shadow(0 0 60px rgba(251, 191, 36, 0.9))'
               }}
             />
           </div>
           
           {/* Texte de chargement optionnel */}
-          <div className="absolute bottom-20 text-center">
-            <p className="text-amber-300 text-xl font-bold animate-pulse">
+          <div className="absolute bottom-16 text-center w-full">
+            <p className="text-amber-300 text-2xl font-bold animate-pulse">
               Chargement du Codex...
             </p>
           </div>
