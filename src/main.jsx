@@ -16,6 +16,7 @@ import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
 import ScenarioCarousel from './components/carousel/ScenarioCarousel';
 import { processCheckout } from './services/stripeService';
+import StatsDisplay from './components/StatsDisplay';
 
 const adminConfig = {
   titleFont: "font-serif",
@@ -2585,78 +2586,14 @@ export default function App() {
           </div>
         )}
 
-        {/* PAGE STATS - COMPLETE */}
+        {/* PAGE STATS - AVEC VRAIES DONNEES */}
         {!showBook && currentPage === 'stats' && (
           <div className="min-h-screen p-8">
             <div className="max-w-7xl mx-auto">
               <h1 className="text-5xl font-bold mb-8 text-amber-300 text-center">📊 Statistiques</h1>
-              
-              <div className="flex justify-center gap-4 mb-8">
-                {['general', 'medieval', 'lovecraft', 'scifi'].map(tab => (
-                  <button key={tab} onClick={() => setStatsTab(tab)}
-                    className={`px-6 py-3 rounded-xl font-bold text-lg transition-all ${
-                      statsTab === tab ? 'bg-amber-800 text-white shadow-xl' : 'bg-amber-200 text-amber-900'
-                    }`}>
-                    {tab === 'general' && '📊 Général'}
-                    {tab === 'medieval' && '⚔️ Médiéval'}
-                    {tab === 'lovecraft' && '👁️ Lovecraft'}
-                    {tab === 'scifi' && '🚀 Sci-Fi'}
-                  </button>
-                ))}
+              <div className="bg-amber-100 border-4 border-amber-900 rounded-2xl p-8 shadow-2xl">
+                <StatsDisplay />
               </div>
-
-              {statsTab === 'general' && (
-                <div>
-                  <div className="grid grid-cols-3 gap-6 mb-8">
-                    <div className="bg-blue-100 border-4 border-blue-700 rounded-lg p-6 text-center shadow-xl">
-                      <div className="text-5xl mb-3">👁️</div>
-                      <h3 className="text-xl font-bold text-blue-900 mb-2">Visites</h3>
-                      <p className="text-4xl font-bold text-blue-800">1,247</p>
-                      <p className="text-sm text-blue-600 mt-2">+12% vs hier</p>
-                    </div>
-                    <div className="bg-purple-100 border-4 border-purple-700 rounded-lg p-6 text-center shadow-xl">
-                      <div className="text-5xl mb-3">📖</div>
-                      <h3 className="text-xl font-bold text-purple-900 mb-2">Consultations</h3>
-                      <p className="text-4xl font-bold text-purple-800">3,892</p>
-                      <p className="text-sm text-purple-600 mt-2">Cette semaine</p>
-                    </div>
-                    <div className="bg-green-100 border-4 border-green-700 rounded-lg p-6 text-center shadow-xl">
-                      <div className="text-5xl mb-3">⬇️</div>
-                      <h3 className="text-xl font-bold text-green-900 mb-2">Téléchargements</h3>
-                      <p className="text-4xl font-bold text-green-800">856</p>
-                      <p className="text-sm text-green-600 mt-2">Ce mois</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-6">
-                    <div className="bg-amber-100 border-4 border-amber-900 rounded-lg p-6 shadow-xl">
-                      <h2 className="text-2xl font-bold mb-4 text-amber-900">🌍 Répartition</h2>
-                      <div className="space-y-3">
-                        <div className="flex justify-between"><span>🇫🇷 France</span><span className="font-bold">68%</span></div>
-                        <div className="flex justify-between"><span>🇧🇪 Belgique</span><span className="font-bold">15%</span></div>
-                        <div className="flex justify-between"><span>🇨🇭 Suisse</span><span className="font-bold">8%</span></div>
-                        <div className="flex justify-between"><span>🇨🇦 Canada</span><span className="font-bold">6%</span></div>
-                      </div>
-                    </div>
-                    <div className="bg-amber-100 border-4 border-amber-900 rounded-lg p-6 shadow-xl">
-                      <h2 className="text-2xl font-bold mb-4 text-amber-900">⏰ Heures de Pointe</h2>
-                      <div className="space-y-3">
-                        <div className="flex justify-between"><span>20h - 22h</span><span className="font-bold">32%</span></div>
-                        <div className="flex justify-between"><span>18h - 20h</span><span className="font-bold">24%</span></div>
-                        <div className="flex justify-between"><span>14h - 16h</span><span className="font-bold">18%</span></div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {statsTab !== 'general' && (
-                <div className="bg-amber-100 border-4 border-amber-900 rounded-lg p-8 text-center shadow-xl">
-                  <div className="text-6xl mb-4">📊</div>
-                  <h2 className="text-2xl font-bold text-amber-900 mb-2">Statistiques {statsTab}</h2>
-                  <p className="text-amber-700">Données à venir...</p>
-                </div>
-              )}
             </div>
           </div>
         )}
