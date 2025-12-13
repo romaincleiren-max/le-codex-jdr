@@ -2121,7 +2121,7 @@ export default function App() {
 
         {/* PAGE ACCUEIL */}
         {!showBook && currentPage === 'home' && (
-          <div className="h-screen pt-32 flex">
+          <div className="h-screen flex">
             {themes.map((theme, idx) => (
               <div key={theme.id} onClick={() => { setCurrentTheme(theme); openBook(theme); }}
                 className="flex-1 flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out hover:flex-[1.5] group relative overflow-hidden"
