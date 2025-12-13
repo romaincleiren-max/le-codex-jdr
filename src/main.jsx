@@ -1972,24 +1972,15 @@ export default function App() {
             preloaderFading ? 'opacity-0' : 'opacity-100'
           }`}
           style={{
-            background: 'radial-gradient(ellipse at center, #1e293b 0%, #0f172a 100%)'
+            backgroundColor: '#292525'
           }}
         >
-          {/* Logo animé GIF en plein écran - IMMENSE */}
-          <div className="relative w-full h-full flex items-center justify-center">
-            {/* Effet de glow subtil derrière le logo */}
-            <div className="absolute inset-0 bg-amber-500/10 blur-[200px]"></div>
-            
-            {/* Logo GIF animé - TRÈS GRAND, presque plein écran */}
-            <img 
-              src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif"
-              alt="Le Codex"
-              className="relative w-[95vw] h-[95vh] object-contain"
-              style={{
-                filter: 'drop-shadow(0 0 80px rgba(251, 191, 36, 0.6))'
-              }}
-            />
-          </div>
+          {/* Logo GIF animé - Taille normale */}
+          <img 
+            src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif"
+            alt="Le Codex"
+            className="w-[500px] h-[500px] object-contain"
+          />
         </div>
       )}
       
