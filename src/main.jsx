@@ -40,7 +40,7 @@ const initialThemesData = [
   {
     id: "medieval",
     name: "Médiéval Fantasy",
-    backgroundImage: "https://i.imgur.com/VQM3KJm.jpeg",
+    backgroundImage: "",
     colors: {
       bg: "bg-slate-900", primary: "bg-emerald-900", text: "text-emerald-100",
       textLight: "text-emerald-300", card: "bg-slate-800", hover: "hover:bg-emerald-800",
@@ -50,7 +50,7 @@ const initialThemesData = [
   {
     id: "lovecraft",
     name: "Horreur Lovecraftienne",
-    backgroundImage: "https://i.imgur.com/8yZqQJ7.jpeg",
+    backgroundImage: "",
     colors: {
       bg: "bg-amber-50", primary: "bg-amber-800", text: "text-amber-900",
       textLight: "text-amber-700", card: "bg-amber-100", hover: "hover:bg-amber-700",
@@ -60,7 +60,7 @@ const initialThemesData = [
   {
     id: "scifi",
     name: "Science-Fiction",
-    backgroundImage: "https://i.imgur.com/m3rWsXP.jpeg",
+    backgroundImage: "",
     colors: {
       bg: "bg-slate-950", primary: "bg-cyan-900", text: "text-cyan-100",
       textLight: "text-cyan-300", card: "bg-slate-900", hover: "hover:bg-cyan-800",
@@ -716,14 +716,22 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose }) => {
                 type="text"
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addTag();
+                  }
+                }}
                 className="flex-1 px-4 py-2 border-2 border-amber-700 rounded focus:outline-none focus:border-amber-900"
                 placeholder="Ajouter un tag..."
               />
               <button 
                 type="button"
-                onClick={addTag}
-                className="bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-700">
+                onClick={(e) => {
+                  e.preventDefault();
+                  addTag();
+                }}
+                className="bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-700 font-bold">
                 Ajouter
               </button>
             </div>
@@ -731,7 +739,13 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose }) => {
               {editedScenario.tags.map((tag, i) => (
                 <span key={i} className="bg-amber-200 text-amber-900 px-3 py-1 rounded-full text-sm flex items-center gap-2">
                   {tag}
-                  <button type="button" onClick={() => removeTag(tag)} className="hover:text-red-700">×</button>
+                  <button 
+                    type="button" 
+                    onClick={(e) => {
+                      e.preventDefault();
+                      removeTag(tag);
+                    }} 
+                    className="hover:text-red-700 text-lg font-bold">×</button>
                 </span>
               ))}
             </div>
@@ -1561,6 +1575,43 @@ export default function App() {
   const [selectedSagaIdForScenarios, setSelectedSagaIdForScenarios] = useState(null);
   const [clickedButtons, setClickedButtons] = useState({});
   const [viewingScenario, setViewingScenario] = useState(null);
+  const [searchTag, setSearchTag] = useState('');
+  
+  // Fonction pour obtenir tous les scénarios d'un thème avec leur campagne d'origine
+  const getAllScenariosForTheme = (themeId) => {
+    const themeCampaigns = sagas.filter(s => {
+      const sagaThemeId = String(s.themeId || '').trim().toLowerCase();
+      const targetThemeId = String(themeId || '').trim().toLowerCase();
+      return sagaThemeId === targetThemeId;
+    });
+    
+    const allScenarios = [];
+    themeCampaigns.forEach(campaign => {
+      if (campaign.scenarios && campaign.scenarios.length > 0) {
+        campaign.scenarios.forEach(scenario => {
+          allScenarios.push({
+            ...scenario,
+            campaignName: campaign.name,
+            campaignId: campaign.id,
+            saga: campaign
+          });
+        });
+      }
+    });
+    
+    return allScenarios;
+  };
+  
+  // Fonction pour filtrer les scénarios par tag
+  const filterScenariosByTag = (scenarios, tag) => {
+    if (!tag || tag.trim() === '') return scenarios;
+    
+    const searchTerm = tag.trim().toLowerCase();
+    return scenarios.filter(scenario => {
+      if (!scenario.tags || scenario.tags.length === 0) return false;
+      return scenario.tags.some(t => t.toLowerCase().includes(searchTerm));
+    });
+  };
   
   // Sauvegarder les sagas dans localStorage à chaque modification
   useEffect(() => {
@@ -2801,7 +2852,7 @@ export default function App() {
                     {currentTheme.id === 'scifi' && '🚀 '}
                     {currentTheme.name}
                   </h1>
-                  <p className={`text-xl relative z-10 ${
+                  <p className={`text-xl relative z-10 mb-4 ${
                     currentTheme.id === 'medieval' ? 'text-amber-400 font-serif italic' :
                     currentTheme.id === 'lovecraft' ? 'text-emerald-400 font-mono' :
                     'text-cyan-400 tracking-wide'
@@ -2810,6 +2861,37 @@ export default function App() {
                     {currentTheme.id === 'lovecraft' && '[ Choisissez votre cauchemar ]'}
                     {currentTheme.id === 'scifi' && '// SÉLECTIONNEZ VOTRE MISSION //'}
                   </p>
+                  
+                  {/* Champ de recherche par tags */}
+                  <div className="max-w-md mx-auto relative z-10">
+                    <input
+                      type="text"
+                      value={searchTag}
+                      onChange={(e) => setSearchTag(e.target.value)}
+                      placeholder="🔍 Rechercher par tag (horreur, enquête, combat...)"
+                      className={`w-full px-6 py-3 rounded-full text-center font-semibold transition-all focus:outline-none focus:ring-4 ${
+                        currentTheme.id === 'medieval'
+                          ? 'bg-amber-900/80 text-amber-100 placeholder-amber-400/70 focus:ring-amber-500/50 border-2 border-amber-600'
+                          : currentTheme.id === 'lovecraft'
+                          ? 'bg-emerald-900/80 text-emerald-100 placeholder-emerald-400/70 focus:ring-emerald-500/50 border-2 border-emerald-600'
+                          : 'bg-cyan-900/80 text-cyan-100 placeholder-cyan-400/70 focus:ring-cyan-500/50 border-2 border-cyan-600'
+                      }`}
+                    />
+                    {searchTag && (
+                      <button
+                        onClick={() => setSearchTag('')}
+                        className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors ${
+                          currentTheme.id === 'medieval'
+                            ? 'hover:bg-amber-700 text-amber-300'
+                            : currentTheme.id === 'lovecraft'
+                            ? 'hover:bg-emerald-700 text-emerald-300'
+                            : 'hover:bg-cyan-700 text-cyan-300'
+                        }`}
+                      >
+                        <X size={20} />
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -2921,16 +3003,10 @@ export default function App() {
                     <div className="max-w-2xl mx-auto bg-amber-100 border-4 border-amber-900 rounded-lg p-12 shadow-2xl">
                       <div className="text-8xl mb-6">📚</div>
                       <h3 className="text-3xl font-bold text-amber-900 mb-4">Aucune campagne disponible</h3>
-                      <p className="text-xl text-amber-700 mb-8">
+                      <p className="text-xl text-amber-700">
                         Cette section ne contient pas encore de campagne.<br/>
-                        Revenez plus tard ou ajoutez-en une depuis l'administration.
+                        Revenez plus tard !
                       </p>
-                      <button 
-                        onClick={() => setCurrentPage('admin')}
-                        className="bg-amber-800 text-white px-8 py-4 rounded-lg hover:bg-amber-700 font-bold text-lg inline-flex items-center gap-2">
-                        <Plus size={24} />
-                        Ajouter une campagne
-                      </button>
                     </div>
                   </div>
                 )}
@@ -2948,16 +3024,77 @@ export default function App() {
               )}
 
               {/* Carousel de scénarios */}
-              {selectedSaga && selectedSaga.scenarios && selectedSaga.scenarios.length > 0 && (
-                <ScenarioCarousel 
-                  scenarios={selectedSaga.scenarios}
-                  saga={selectedSaga}
-                  onDownloadFree={handleDownloadFree}
-                  onAddToCart={addToCart}
-                  onScenarioClick={setViewingScenario}
-                  theme={currentTheme}
-                />
-              )}
+              {(() => {
+                // Si une recherche est active, afficher tous les scénarios filtrés du thème
+                if (searchTag && searchTag.trim() !== '') {
+                  const allThemeScenarios = getAllScenariosForTheme(currentTheme.id);
+                  const filteredScenarios = filterScenariosByTag(allThemeScenarios, searchTag);
+                  
+                  if (filteredScenarios.length === 0) {
+                    return (
+                      <div className="max-w-4xl mx-auto text-center py-12">
+                        <div className={`text-8xl mb-6 ${
+                          currentTheme.id === 'medieval' ? 'text-amber-400' :
+                          currentTheme.id === 'lovecraft' ? 'text-emerald-400' :
+                          'text-cyan-400'
+                        }`}>🔍</div>
+                        <h3 className={`text-3xl font-bold mb-4 ${
+                          currentTheme.id === 'medieval' ? 'text-amber-300' :
+                          currentTheme.id === 'lovecraft' ? 'text-emerald-300' :
+                          'text-cyan-300'
+                        }`}>
+                          Aucun résultat pour "{searchTag}"
+                        </h3>
+                        <p className={`text-xl ${
+                          currentTheme.id === 'medieval' ? 'text-amber-400/80' :
+                          currentTheme.id === 'lovecraft' ? 'text-emerald-400/80' :
+                          'text-cyan-400/80'
+                        }`}>
+                          Essayez avec un autre tag ou effacez la recherche pour voir tous les scénarios
+                        </p>
+                      </div>
+                    );
+                  }
+                  
+                  return (
+                    <>
+                      <div className="max-w-4xl mx-auto mb-6 text-center">
+                        <p className={`text-xl font-bold ${
+                          currentTheme.id === 'medieval' ? 'text-amber-300' :
+                          currentTheme.id === 'lovecraft' ? 'text-emerald-300' :
+                          'text-cyan-300'
+                        }`}>
+                          🔍 {filteredScenarios.length} scénario{filteredScenarios.length > 1 ? 's' : ''} trouvé{filteredScenarios.length > 1 ? 's' : ''} avec le tag "{searchTag}"
+                        </p>
+                      </div>
+                      <ScenarioCarousel 
+                        scenarios={filteredScenarios}
+                        saga={selectedSaga || { name: currentTheme.name }}
+                        onDownloadFree={handleDownloadFree}
+                        onAddToCart={addToCart}
+                        onScenarioClick={setViewingScenario}
+                        theme={currentTheme}
+                      />
+                    </>
+                  );
+                }
+                
+                // Sinon, afficher les scénarios de la campagne sélectionnée
+                if (selectedSaga && selectedSaga.scenarios && selectedSaga.scenarios.length > 0) {
+                  return (
+                    <ScenarioCarousel 
+                      scenarios={selectedSaga.scenarios}
+                      saga={selectedSaga}
+                      onDownloadFree={handleDownloadFree}
+                      onAddToCart={addToCart}
+                      onScenarioClick={setViewingScenario}
+                      theme={currentTheme}
+                    />
+                  );
+                }
+                
+                return null;
+              })()}
           </div>
         )}
       </div>
