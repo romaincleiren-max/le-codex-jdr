@@ -1950,78 +1950,144 @@ export default function App() {
       )}
 
       {!showBook && currentPage !== 'checkout' && currentPage !== 'confirmation' && (
-        <nav className="fixed top-0 left-0 right-0 bg-gradient-to-b from-slate-950 to-slate-900 text-amber-200 shadow-2xl z-50 border-b-4 border-amber-900/70">
-          <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-            <button onClick={() => setCurrentPage('home')} className="group flex items-center gap-4 hover:scale-105 transition-transform">
-              {siteSettings.logoUrl ? (
-                <img 
-                  src={siteSettings.logoUrl} 
-                  alt={siteSettings.siteName}
-                  className="h-16 w-16 object-contain"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
-              ) : (
-                <div className="text-5xl">📚</div>
-              )}
-              <div className="flex flex-col items-start">
-                <span className="text-2xl font-bold text-amber-300 group-hover:text-amber-400 transition-colors">
-                  {siteSettings.siteName}
-                </span>
-                {siteSettings.tagline && (
-                  <span className="text-xs text-amber-500">{siteSettings.tagline}</span>
+        <nav className="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-gradient-to-b from-slate-950/95 to-slate-900/95 border-b border-amber-500/20 shadow-2xl">
+          {/* Barre lumineuse animée en haut */}
+          <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-60"></div>
+          
+          <div className="max-w-7xl mx-auto px-6 py-3">
+            <div className="flex items-center justify-between">
+              {/* Logo et titre */}
+              <button 
+                onClick={() => setCurrentPage('home')} 
+                className="group flex items-center gap-4 hover:scale-105 transition-all duration-300 py-2">
+                {/* Container du logo avec effet glow */}
+                <div className="relative">
+                  {siteSettings.logoUrl ? (
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-amber-500/20 rounded-xl blur-xl group-hover:bg-amber-400/30 transition-all duration-300"></div>
+                      <img 
+                        src={siteSettings.logoUrl} 
+                        alt={siteSettings.siteName}
+                        className="relative h-14 w-14 object-contain rounded-xl"
+                        onError={(e) => { e.target.style.display = 'none'; }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-amber-500/20 rounded-xl blur-lg group-hover:bg-amber-400/30 transition-all duration-300"></div>
+                      <div className="relative text-4xl">📚</div>
+                    </div>
+                  )}
+                </div>
+                
+                {/* Texte */}
+                <div className="flex flex-col items-start">
+                  <span className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300">
+                    {siteSettings.siteName}
+                  </span>
+                  {siteSettings.tagline && (
+                    <span className="text-xs text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300">
+                      {siteSettings.tagline}
+                    </span>
+                  )}
+                </div>
+              </button>
+
+              {/* Navigation centrale */}
+              <div className="flex gap-2 items-center">
+                {['home', 'submit', 'admin', 'stats', 'about']
+                  .filter(page => {
+                    if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
+                      return false;
+                    }
+                    return true;
+                  })
+                  .map(page => {
+                    const isActive = currentPage === page;
+                    const icons = {
+                      home: '🏠',
+                      submit: '✨',
+                      admin: '⚙️',
+                      stats: '📊',
+                      about: 'ℹ️'
+                    };
+                    const labels = {
+                      home: 'Accueil',
+                      submit: 'Proposer',
+                      admin: 'Admin',
+                      stats: 'Stats',
+                      about: 'À propos'
+                    };
+                    
+                    return (
+                      <button 
+                        key={page} 
+                        onClick={() => setCurrentPage(page)}
+                        className={`
+                          relative px-5 py-2.5 rounded-xl font-semibold text-sm
+                          transition-all duration-300 transform hover:scale-105
+                          ${isActive 
+                            ? 'bg-gradient-to-r from-amber-600 to-amber-700 text-white shadow-lg shadow-amber-900/50' 
+                            : 'text-amber-300/90 hover:text-amber-100 hover:bg-slate-800/50'
+                          }
+                        `}>
+                        {/* Effet de brillance au hover */}
+                        {!isActive && (
+                          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-500/10 to-transparent opacity-0 hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
+                        )}
+                        
+                        <span className="relative flex items-center gap-2">
+                          <span>{icons[page]}</span>
+                          <span>{labels[page]}</span>
+                        </span>
+                        
+                        {/* Indicateur actif */}
+                        {isActive && (
+                          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-1/2 h-0.5 bg-gradient-to-r from-transparent via-amber-300 to-transparent"></div>
+                        )}
+                      </button>
+                    );
+                  })}
+              </div>
+
+              {/* Boutons d'action à droite */}
+              <div className="flex gap-3 items-center">
+                {/* Bouton Panier */}
+                <button 
+                  onClick={() => setShowCart(!showCart)} 
+                  className="relative group px-4 py-2.5 rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-semibold flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-green-900/50">
+                  <ShoppingCart size={20} className="group-hover:rotate-12 transition-transform duration-300" />
+                  <span className="hidden sm:inline">Panier</span>
+                  {cartItemCount > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
+                      {cartItemCount}
+                    </span>
+                  )}
+                </button>
+                
+                {/* Bouton Déconnexion */}
+                {isAuthenticated && (
+                  <button 
+                    onClick={async () => {
+                      if (confirm('Voulez-vous vous déconnecter ?')) {
+                        await supabase.auth.signOut();
+                        setIsAuthenticated(false);
+                        setCurrentPage('home');
+                        window.location.href = '/';
+                      }
+                    }}
+                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-900/50"
+                    title="Se déconnecter de l'administration">
+                    <Lock size={18} />
+                    <span className="hidden sm:inline">Déconnexion</span>
+                  </button>
                 )}
               </div>
-            </button>
-            <div className="flex gap-4 items-center">
-              {['home', 'submit', 'admin', 'stats', 'about']
-                .filter(page => {
-                  // Masquer Admin et Stats si non connecté
-                  if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
-                    return false;
-                  }
-                  return true;
-                })
-                .map(page => (
-                <button key={page} onClick={() => setCurrentPage(page)} 
-                  className={`px-4 py-2 rounded transition-all ${currentPage === page ? 'bg-amber-900 text-amber-100 shadow-lg' : 'hover:bg-slate-800 text-amber-200'}`}>
-                  {page === 'home' && 'Accueil'}
-                  {page === 'submit' && 'Proposer'}
-                  {page === 'admin' && 'Admin'}
-                  {page === 'stats' && 'Stats'}
-                  {page === 'about' && 'À propos'}
-                </button>
-              ))}
-              
-              <button onClick={() => setShowCart(!showCart)} className="relative px-4 py-2 rounded bg-green-800 hover:bg-green-700 text-white flex items-center gap-2">
-                <ShoppingCart size={20} />
-                {cartItemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                    {cartItemCount}
-                  </span>
-                )}
-              </button>
-              
-              {/* Bouton de déconnexion si authentifié */}
-              {isAuthenticated && (
-                <button 
-                  onClick={async () => {
-                    if (confirm('Voulez-vous vous déconnecter ?')) {
-                      await supabase.auth.signOut();
-                      setIsAuthenticated(false);
-                      // Rediriger vers la page d'accueil (pas la page de login)
-                      setCurrentPage('home');
-                      // Force le rechargement pour nettoyer tout l'état
-                      window.location.href = '/';
-                    }
-                  }}
-                  className="px-4 py-2 rounded bg-red-800 hover:bg-red-700 text-white flex items-center gap-2"
-                  title="Se déconnecter de l'administration">
-                  <Lock size={18} />
-                  Déconnexion
-                </button>
-              )}
             </div>
           </div>
+          
+          {/* Ligne de séparation subtile */}
+          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
         </nav>
       )}
 
