@@ -3185,6 +3185,11 @@ export default function App() {
                             </div>
                             <span className="text-4xl font-bold text-green-800">GRATUIT</span>
                           </div>
+                          {selectedSaga.description && (
+                            <div className="mb-4 bg-green-50 border-2 border-green-600 rounded-lg p-4">
+                              <p className="text-green-900 leading-relaxed">{selectedSaga.description}</p>
+                            </div>
+                          )}
                           <button 
                             onClick={() => handleDownloadFree(selectedSaga.pdfUrl, selectedSaga.name)}
                             className="w-full bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 font-bold text-lg">
@@ -3200,6 +3205,11 @@ export default function App() {
                             </div>
                             <span className="text-4xl font-bold text-amber-800">{selectedSaga.price.toFixed(2)} €</span>
                           </div>
+                          {selectedSaga.description && (
+                            <div className="mb-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-4">
+                              <p className="text-amber-900 leading-relaxed">{selectedSaga.description}</p>
+                            </div>
+                          )}
                           <button 
                             onClick={() => addToCart({ type: 'saga', item: selectedSaga })}
                             className="w-full bg-amber-800 text-white px-6 py-4 rounded-lg hover:bg-amber-700 flex items-center justify-center gap-2 font-bold text-lg">
