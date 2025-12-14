@@ -2113,7 +2113,7 @@ export default function App() {
               </div>
 
               {/* Boutons d'action à droite */}
-              <div className="flex gap-3 items-center flex-shrink-0">
+              <div className="flex gap-3 items-center flex-shrink-0 ml-8">
                 {/* Bouton Panier */}
                 <button 
                   onClick={() => setShowCart(!showCart)} 
