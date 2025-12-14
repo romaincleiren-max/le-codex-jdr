@@ -2094,7 +2094,7 @@ export default function App() {
                         onClick={() => setCurrentPage(page)}
                         className="nav-button group relative px-5 py-3.5 font-bold text-lg transition-colors duration-300"
                         data-active={isActive}>
-                        <span className={`flex items-center gap-3 transition-colors duration-300 ${
+                        <span className={`flex items-center gap-3 transition-colors duration-300 whitespace-nowrap ${
                           isActive ? 'text-amber-300' : 'text-amber-300/70 group-hover:text-amber-200'
                         }`}>
                           <img src={icons[page]} alt={labels[page]} className="w-8 h-8 object-contain" />
@@ -3010,7 +3010,7 @@ export default function App() {
                       <img 
                         src={siteSettings.logoUrl}
                         alt="Logo"
-                        className={`h-24 w-24 object-contain rounded-lg border-3 p-1 ${
+                        className={`h-48 w-48 object-contain rounded-lg border-3 p-1 ${
                           currentTheme.id === 'medieval' 
                             ? 'border-amber-600 bg-amber-950/50' :
                           currentTheme.id === 'lovecraft'
@@ -3019,7 +3019,7 @@ export default function App() {
                         }`}
                       />
                     ) : (
-                      <div className={`text-6xl p-2 rounded-lg border-3 ${
+                      <div className={`text-8xl p-2 rounded-lg border-3 ${
                         currentTheme.id === 'medieval' 
                           ? 'border-amber-600 bg-amber-950/50' :
                         currentTheme.id === 'lovecraft'
