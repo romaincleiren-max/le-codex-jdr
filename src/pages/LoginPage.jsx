@@ -116,13 +116,13 @@ export const LoginPage = () => {
           <div className="flex justify-center mb-8">
             <div className="relative group">
               <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-red-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity animate-pulse"></div>
-              <div className="relative h-24 w-24 rounded-2xl overflow-hidden">
+              <div className="relative h-40 w-40 rounded-2xl overflow-hidden">
                 {/* Masque gradient pour fondre avec le fond */}
                 <div className="absolute inset-0 pointer-events-none z-10" style={{
                   background: 'radial-gradient(circle at center, transparent 40%, rgba(27, 25, 26, 0.3) 60%, rgba(27, 25, 26, 0.8) 85%, #1b191a 100%)'
                 }}></div>
                 <video 
-                  src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
+                  src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_8.mp4"
                   autoPlay
                   loop
                   muted

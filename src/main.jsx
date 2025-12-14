@@ -2063,7 +2063,7 @@ export default function App() {
               </button>
 
               {/* Navigation centrale */}
-              <div className="flex gap-8 items-center flex-1 justify-center">
+              <div className="flex gap-10 items-center flex-1 justify-center">
                 {['home', 'submit', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
@@ -3010,7 +3010,7 @@ export default function App() {
                       <img 
                         src={siteSettings.logoUrl}
                         alt="Logo"
-                        className={`h-16 w-16 object-contain rounded-lg border-3 p-1 ${
+                        className={`h-24 w-24 object-contain rounded-lg border-3 p-1 ${
                           currentTheme.id === 'medieval' 
                             ? 'border-amber-600 bg-amber-950/50' :
                           currentTheme.id === 'lovecraft'
@@ -3019,7 +3019,7 @@ export default function App() {
                         }`}
                       />
                     ) : (
-                      <div className={`text-4xl p-2 rounded-lg border-3 ${
+                      <div className={`text-6xl p-2 rounded-lg border-3 ${
                         currentTheme.id === 'medieval' 
                           ? 'border-amber-600 bg-amber-950/50' :
                         currentTheme.id === 'lovecraft'
