@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Animation shimmer pour les boutons actifs */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
 /* Fond global pour éliminer le flash blanc */
 html, body {
   background-color: #1b191a !important;

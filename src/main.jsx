@@ -2029,12 +2029,12 @@ export default function App() {
           {/* Barre lumineuse animée en haut */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-60"></div>
           
-          <div className="max-w-7xl mx-auto px-6 py-2 relative z-10">
-            <div className="flex items-center justify-between">
+          <div className="max-w-7xl mx-auto px-6 py-3 relative z-10">
+            <div className="flex items-center justify-between gap-8">
               {/* Logo et titre */}
               <button 
                 onClick={() => setCurrentPage('home')} 
-                className="group flex items-center gap-4 hover:scale-105 transition-all duration-300 py-1">
+                className="group flex items-center gap-4 hover:scale-105 transition-all duration-300 py-1 flex-shrink-0">
                 {/* Container du logo avec bordure */}
                 <div className="relative">
                   {siteSettings.logoUrl ? (
@@ -2063,7 +2063,7 @@ export default function App() {
               </button>
 
               {/* Navigation centrale */}
-              <div className="flex gap-8 items-center">
+              <div className="flex gap-6 items-center flex-1 justify-center">
                 {['home', 'submit', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
@@ -2113,7 +2113,7 @@ export default function App() {
               </div>
 
               {/* Boutons d'action à droite */}
-              <div className="flex gap-3 items-center">
+              <div className="flex gap-3 items-center flex-shrink-0">
                 {/* Bouton Panier */}
                 <button 
                   onClick={() => setShowCart(!showCart)} 
@@ -2226,8 +2226,16 @@ export default function App() {
           }}>
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
+                {/* Logo Feather */}
+                <div className="flex justify-center mb-6">
+                  <img 
+                    src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png"
+                    alt="Proposer"
+                    className="w-24 h-24 object-contain"
+                  />
+                </div>
                 <div className="inline-block bg-gradient-to-r from-amber-500 to-amber-700 text-transparent bg-clip-text mb-4">
-                  <h1 className="text-6xl font-bold">✨ Proposer un Scénario</h1>
+                  <h1 className="text-6xl font-bold">Proposer un Scénario</h1>
                 </div>
                 <div className="w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full mb-6"></div>
                 <p className="text-amber-300 text-xl">Partagez votre création avec la communauté !</p>
@@ -2346,54 +2354,51 @@ export default function App() {
 
         {/* PAGE ADMIN - COMPLETE AVEC TOUS LES ONGLETS */}
         {!showBook && currentPage === 'admin' && (
-          <div className="min-h-screen p-8">
+          <div className="min-h-screen p-8" style={{
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
+          }}>
             <div className="max-w-7xl mx-auto">
-              {/* Logo rappel */}
+              {/* Logo Gear */}
               <div className="flex justify-center mb-6">
-                <div className="relative h-20 w-20 rounded-xl overflow-hidden">
-                  {/* Masque gradient pour fondre avec le fond */}
-                  <div className="absolute inset-0 pointer-events-none z-10" style={{
-                    background: 'radial-gradient(circle at center, transparent 40%, rgba(27, 25, 26, 0.3) 60%, rgba(27, 25, 26, 0.8) 85%, #1b191a 100%)'
-                  }}></div>
-                  {siteSettings.logoUrl ? (
-                    <img 
-                      src={siteSettings.logoUrl} 
-                      alt="Logo"
-                      className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity"
-                    />
-                  ) : (
-                    <video 
-                      src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
-                      autoPlay
-                      loop
-                      muted
-                      playsInline
-                      className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity"
-                    />
-                  )}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-700 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
+                  <img 
+                    src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png"
+                    alt="Administration"
+                    className="relative w-28 h-28 object-contain transform group-hover:rotate-90 transition-transform duration-500"
+                  />
                 </div>
               </div>
-              <h1 className="text-5xl font-bold mb-8 text-amber-300 text-center">🛠️ Administration</h1>
+              <h1 className="text-6xl font-black mb-4 text-center bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent tracking-tight">Administration</h1>
+              <p className="text-center text-amber-400/80 text-lg mb-10">Gérez votre bibliothèque de scénarios</p>
               
-              <div className="flex flex-wrap justify-center gap-4 mb-8">
+              <div className="flex flex-wrap justify-center gap-3 mb-10">
                 {[
-                  {id: 'campagnes', icon: '📚', label: 'Campagnes'},
-                  {id: 'scenarios', icon: '📖', label: 'Scénarios'},
-                  {id: 'pageaccueil', icon: '🏠', label: 'Page Accueil'},
-                  {id: 'notations', icon: '⭐', label: 'Notations'},
-                  {id: 'soumissions', icon: '📥', label: 'Soumissions'},
-                  {id: 'parametres', icon: '⚙️', label: 'Paramètres'}
+                  {id: 'campagnes', icon: '📚', label: 'Campagnes', color: 'from-purple-600 to-purple-700'},
+                  {id: 'scenarios', icon: '📖', label: 'Scénarios', color: 'from-blue-600 to-blue-700'},
+                  {id: 'pageaccueil', icon: '🏠', label: 'Page Accueil', color: 'from-green-600 to-green-700'},
+                  {id: 'notations', icon: '⭐', label: 'Notations', color: 'from-yellow-600 to-yellow-700'},
+                  {id: 'soumissions', icon: '📥', label: 'Soumissions', color: 'from-pink-600 to-pink-700'},
+                  {id: 'parametres', icon: '⚙️', label: 'Paramètres', color: 'from-slate-600 to-slate-700'}
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setAdminTab(tab.id)}
-                    className={`px-6 py-4 rounded-xl font-bold text-lg transition-all transform hover:scale-105 ${
-                      adminTab === tab.id ? 'bg-amber-800 text-white shadow-xl' : 'bg-amber-200 text-amber-900'
+                    className={`relative px-6 py-3.5 rounded-xl font-bold text-base transition-all transform hover:scale-105 overflow-hidden group ${
+                      adminTab === tab.id 
+                        ? `bg-gradient-to-r ${tab.color} text-white shadow-lg` 
+                        : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 border border-slate-700'
                     }`}>
-                    {tab.icon} {tab.label}
+                    {adminTab === tab.id && (
+                      <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-shimmer"></div>
+                    )}
+                    <span className="relative flex items-center gap-2">
+                      <span className="text-xl">{tab.icon}</span>
+                      <span>{tab.label}</span>
+                    </span>
                   </button>
                 ))}
               </div>
 
-              <div className="bg-amber-100 border-4 border-amber-900 rounded-2xl p-8 shadow-2xl min-h-96">
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/30 rounded-2xl p-8 shadow-2xl min-h-96 backdrop-blur-sm">
                 
                 {/* ONGLET CAMPAGNES */}
                 {adminTab === 'campagnes' && (
@@ -2834,7 +2839,15 @@ export default function App() {
         {!showBook && currentPage === 'stats' && (
           <div className="min-h-screen p-8">
             <div className="max-w-7xl mx-auto">
-              <h1 className="text-5xl font-bold mb-8 text-amber-300 text-center">📊 Statistiques</h1>
+              {/* Logo Book */}
+              <div className="flex justify-center mb-6">
+                <img 
+                  src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png"
+                  alt="Statistiques"
+                  className="w-24 h-24 object-contain"
+                />
+              </div>
+              <h1 className="text-5xl font-bold mb-8 text-amber-300 text-center">Statistiques</h1>
               <div className="bg-amber-100 border-4 border-amber-900 rounded-2xl p-8 shadow-2xl">
                 <StatsDisplay />
               </div>
