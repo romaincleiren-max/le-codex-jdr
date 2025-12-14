@@ -2063,7 +2063,7 @@ export default function App() {
               </button>
 
               {/* Navigation centrale */}
-              <div className="flex gap-10 items-center flex-1 justify-center">
+              <div className="flex gap-12 items-center flex-1 justify-center">
                 {['home', 'submit', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
