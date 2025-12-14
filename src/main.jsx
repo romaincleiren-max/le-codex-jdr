@@ -2051,11 +2051,11 @@ export default function App() {
                 
                 {/* Texte */}
                 <div className="flex flex-col items-start">
-                  <span className="text-2xl font-bold bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300">
+                  <span className="text-5xl font-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300 tracking-tight" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
                     {siteSettings.siteName}
                   </span>
                   {siteSettings.tagline && (
-                    <span className="text-xs text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300">
+                    <span className="text-sm text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300 font-medium">
                       {siteSettings.tagline}
                     </span>
                   )}
@@ -2063,7 +2063,7 @@ export default function App() {
               </button>
 
               {/* Navigation centrale */}
-              <div className="flex gap-6 items-center">
+              <div className="flex gap-8 items-center">
                 {['home', 'submit', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
@@ -2074,11 +2074,11 @@ export default function App() {
                   .map(page => {
                     const isActive = currentPage === page;
                     const icons = {
-                      home: '🏠',
-                      submit: '✨',
-                      admin: '⚙️',
-                      stats: '📊',
-                      about: 'ℹ️'
+                      home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
+                      submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                      admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
+                      stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
+                      about: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Scroll%20logo_wthback.png'
                     };
                     const labels = {
                       home: 'Accueil',
@@ -2092,12 +2092,12 @@ export default function App() {
                       <button 
                         key={page} 
                         onClick={() => setCurrentPage(page)}
-                        className="nav-button group relative px-3 py-2.5 font-semibold text-sm transition-colors duration-300"
+                        className="nav-button group relative px-5 py-3.5 font-bold text-lg transition-colors duration-300"
                         data-active={isActive}>
-                        <span className={`flex items-center gap-2 transition-colors duration-300 ${
+                        <span className={`flex items-center gap-3 transition-colors duration-300 ${
                           isActive ? 'text-amber-300' : 'text-amber-300/70 group-hover:text-amber-200'
                         }`}>
-                          <span className="text-base">{icons[page]}</span>
+                          <img src={icons[page]} alt={labels[page]} className="w-8 h-8 object-contain" />
                           <span>{labels[page]}</span>
                         </span>
                         
@@ -2226,26 +2226,6 @@ export default function App() {
           }}>
             <div className="max-w-4xl mx-auto">
               <div className="text-center mb-12">
-                {/* Logo rappel */}
-                <div className="flex justify-center mb-8">
-                  <div className="relative group">
-                    <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-700 rounded-2xl blur opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                    <div className="relative h-20 w-20 rounded-2xl overflow-hidden">
-                      {/* Masque gradient pour fondre avec le fond */}
-                      <div className="absolute inset-0 pointer-events-none z-10" style={{
-                        background: 'radial-gradient(circle at center, transparent 40%, rgba(27, 25, 26, 0.3) 60%, rgba(27, 25, 26, 0.8) 85%, #1b191a 100%)'
-                      }}></div>
-                      <video 
-                        src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="w-full h-full object-contain border-4 border-amber-500 bg-slate-900/80 p-2 backdrop-blur-sm transform group-hover:scale-105 transition-transform"
-                      />
-                    </div>
-                  </div>
-                </div>
                 <div className="inline-block bg-gradient-to-r from-amber-500 to-amber-700 text-transparent bg-clip-text mb-4">
                   <h1 className="text-6xl font-bold">✨ Proposer un Scénario</h1>
                 </div>
@@ -2368,21 +2348,29 @@ export default function App() {
         {!showBook && currentPage === 'admin' && (
           <div className="min-h-screen p-8">
             <div className="max-w-7xl mx-auto">
-              {/* Logo rappel - version sans bordure, style minimaliste */}
+              {/* Logo rappel */}
               <div className="flex justify-center mb-6">
-                <div className="relative h-17 w-17 rounded-xl overflow-hidden">
+                <div className="relative h-20 w-20 rounded-xl overflow-hidden">
                   {/* Masque gradient pour fondre avec le fond */}
                   <div className="absolute inset-0 pointer-events-none z-10" style={{
                     background: 'radial-gradient(circle at center, transparent 40%, rgba(27, 25, 26, 0.3) 60%, rgba(27, 25, 26, 0.8) 85%, #1b191a 100%)'
                   }}></div>
-                  <video 
-                    src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity"
-                  />
+                  {siteSettings.logoUrl ? (
+                    <img 
+                      src={siteSettings.logoUrl} 
+                      alt="Logo"
+                      className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                  ) : (
+                    <video 
+                      src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-contain opacity-70 hover:opacity-100 transition-opacity"
+                    />
+                  )}
                 </div>
               </div>
               <h1 className="text-5xl font-bold mb-8 text-amber-300 text-center">🛠️ Administration</h1>
