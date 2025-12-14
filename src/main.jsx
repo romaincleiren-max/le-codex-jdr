@@ -3004,6 +3004,30 @@ export default function App() {
                   'bg-gradient-to-br from-cyan-950 via-cyan-900 to-cyan-950 border-cyan-700'
               }`}>
                 <div className="pt-8 pb-8 text-center relative overflow-hidden">
+                  {/* Logo du site en haut à droite */}
+                  <div className="absolute top-4 right-6 z-20">
+                    {siteSettings.logoUrl ? (
+                      <img 
+                        src={siteSettings.logoUrl}
+                        alt="Logo"
+                        className={`h-16 w-16 object-contain rounded-lg border-3 p-1 ${
+                          currentTheme.id === 'medieval' 
+                            ? 'border-amber-600 bg-amber-950/50' :
+                          currentTheme.id === 'lovecraft'
+                            ? 'border-emerald-600 bg-emerald-950/50' :
+                            'border-cyan-600 bg-cyan-950/50'
+                        }`}
+                      />
+                    ) : (
+                      <div className={`text-4xl p-2 rounded-lg border-3 ${
+                        currentTheme.id === 'medieval' 
+                          ? 'border-amber-600 bg-amber-950/50' :
+                        currentTheme.id === 'lovecraft'
+                          ? 'border-emerald-600 bg-emerald-950/50' :
+                          'border-cyan-600 bg-cyan-950/50'
+                      }`}>📚</div>
+                    )}
+                  </div>
                   {/* Motifs d'arrière-plan selon le thème */}
                   <div className="absolute inset-0 pointer-events-none opacity-15" style={{
                     backgroundImage: currentTheme.id === 'medieval' 
