@@ -1975,7 +1975,7 @@ export default function App() {
         >
           {/* Logo vidéo centré */}
           <video 
-            src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/logo_6.mp4"
+            src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_8.mp4"
             autoPlay
             loop
             muted
@@ -2063,7 +2063,7 @@ export default function App() {
               </button>
 
               {/* Navigation centrale */}
-              <div className="flex gap-6 items-center flex-1 justify-center">
+              <div className="flex gap-8 items-center flex-1 justify-center">
                 {['home', 'submit', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
