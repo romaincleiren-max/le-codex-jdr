@@ -17,6 +17,9 @@ import { supabase } from './lib/supabase';
 import ScenarioCarousel from './components/carousel/ScenarioCarousel';
 import { processCheckout } from './services/stripeService';
 import StatsDisplay from './components/StatsDisplay';
+import { validateSubmissionForm, validatePDFFile } from './utils/validation';
+import { submissionRateLimiter } from './utils/rateLimiter';
+import RateLimiter from './utils/rateLimiter';
 
 const adminConfig = {
   titleFont: "font-serif",

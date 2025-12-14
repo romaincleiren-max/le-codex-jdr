@@ -3,6 +3,7 @@
 // ============================================================================
 
 import { supabase } from '../lib/supabase';
+import { logger } from '../utils/logger';
 
 // ============================================================================
 // THÈMES
@@ -32,8 +33,8 @@ export const updateTheme = async (themeId, updates) => {
     cleanedUpdates.name = updates.name;
   }
   
-  console.log('updateTheme - themeId:', themeId);
-  console.log('updateTheme - cleanedUpdates:', cleanedUpdates);
+  logger.log('updateTheme - themeId:', themeId);
+  logger.log('updateTheme - cleanedUpdates:', cleanedUpdates);
   
   // D'abord vérifier si le thème existe
   const { data: existingTheme, error: checkError } = await supabase
@@ -41,8 +42,8 @@ export const updateTheme = async (themeId, updates) => {
     .select('*')
     .eq('id', themeId);
   
-  console.log('updateTheme - existingTheme:', existingTheme);
-  console.log('updateTheme - checkError:', checkError);
+  logger.log('updateTheme - existingTheme:', existingTheme);
+  logger.log('updateTheme - checkError:', checkError);
   
   if (checkError) throw checkError;
   
@@ -57,8 +58,8 @@ export const updateTheme = async (themeId, updates) => {
     .eq('id', themeId)
     .select();
   
-  console.log('updateTheme - résultat:', data);
-  console.log('updateTheme - error:', error);
+  logger.log('updateTheme - résultat:', data);
+  logger.log('updateTheme - error:', error);
   
   if (error) throw error;
   
