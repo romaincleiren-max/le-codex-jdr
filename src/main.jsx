@@ -535,7 +535,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
   );
 };
 
-const ScenarioEditModal = ({ scenario, saga, onSave, onClose }) => {
+const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
   const [editedScenario, setEditedScenario] = useState(scenario || {
     id: Date.now(),
     title: '',
@@ -714,44 +714,86 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose }) => {
           </div>
 
           <div>
-            <label className="block text-amber-900 font-bold mb-2">Tags</label>
-            <div className="flex gap-2 mb-2">
-              <input 
-                type="text"
-                value={newTag}
-                onChange={(e) => setNewTag(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    addTag();
-                  }
-                }}
-                className="flex-1 px-4 py-2 border-2 border-amber-700 rounded focus:outline-none focus:border-amber-900"
-                placeholder="Ajouter un tag..."
-              />
-              <button 
-                type="button"
-                onClick={(e) => {
-                  e.preventDefault();
-                  addTag();
-                }}
-                className="bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-700 font-bold">
-                Ajouter
-              </button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {editedScenario.tags.map((tag, i) => (
-                <span key={i} className="bg-amber-200 text-amber-900 px-3 py-1 rounded-full text-sm flex items-center gap-2">
-                  {tag}
-                  <button 
-                    type="button" 
-                    onClick={(e) => {
-                      e.preventDefault();
-                      removeTag(tag);
-                    }} 
-                    className="hover:text-red-700 text-lg font-bold">×</button>
-                </span>
-              ))}
+            <label className="block text-amber-900 font-bold mb-3">🏷️ Tags - Sélection multiple</label>
+            <p className="text-sm text-amber-700 mb-4">Sélectionnez les tags qui correspondent à votre scénario</p>
+            
+            {tags && Object.keys(tags).length > 0 ? (
+              <div className="space-y-4 max-h-96 overflow-y-auto p-4 bg-amber-50 rounded-lg border-2 border-amber-700">
+                {Object.entries(tags).map(([category, categoryTags]) => (
+                  <div key={category} className="bg-white rounded-lg p-4 border border-amber-700">
+                    <h4 className="text-lg font-bold text-amber-900 mb-3 capitalize flex items-center gap-2">
+                      {category === 'genre' && '🎭'}
+                      {category === 'ambiance' && '🌙'}
+                      {category === 'difficulte' && '📊'}
+                      {category === 'duree' && '⏱️'}
+                      {category === 'type' && '📖'}
+                      {category === 'theme' && '🎨'}
+                      {category}
+                    </h4>
+                    <div className="grid grid-cols-2 gap-2">
+                      {categoryTags.map((tag) => {
+                        const isSelected = editedScenario.tags.includes(tag.name);
+                        return (
+                          <label 
+                            key={tag.id}
+                            className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${
+                              isSelected 
+                                ? 'bg-amber-200 border-2 border-amber-700' 
+                                : 'bg-gray-50 border-2 border-gray-300 hover:bg-gray-100'
+                            }`}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setEditedScenario({
+                                    ...editedScenario,
+                                    tags: [...editedScenario.tags, tag.name]
+                                  });
+                                } else {
+                                  setEditedScenario({
+                                    ...editedScenario,
+                                    tags: editedScenario.tags.filter(t => t !== tag.name)
+                                  });
+                                }
+                              }}
+                              className="w-5 h-5"
+                            />
+                            <span className="text-sm font-semibold text-amber-900 flex items-center gap-1">
+                              {tag.icon && <span>{tag.icon}</span>}
+                              {tag.name}
+                            </span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="bg-yellow-50 border-2 border-yellow-700 rounded-lg p-4 text-center">
+                <p className="text-yellow-900 font-bold">⚠️ Aucun tag disponible</p>
+                <p className="text-sm text-yellow-700 mt-1">Les tags sont chargés depuis Supabase</p>
+              </div>
+            )}
+            
+            {/* Tags sélectionnés */}
+            <div className="mt-4">
+              <p className="text-sm font-bold text-amber-900 mb-2">
+                Tags sélectionnés ({editedScenario.tags.length}) :
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {editedScenario.tags.length > 0 ? (
+                  editedScenario.tags.map((tag, i) => (
+                    <span key={i} className="bg-amber-200 text-amber-900 px-3 py-1 rounded-full text-sm font-semibold border-2 border-amber-700">
+                      {tag}
+                    </span>
+                  ))
+                ) : (
+                  <span className="text-sm text-amber-600 italic">Aucun tag sélectionné</span>
+                )}
+              </div>
             </div>
           </div>
 
@@ -2004,7 +2046,8 @@ export default function App() {
           scenario={editingScenario} 
           saga={sagas.find(s => s.id === selectedSagaIdForScenarios)}
           onSave={saveScenario}
-          onClose={() => { setShowScenarioModal(false); setEditingScenario(null); }} 
+          onClose={() => { setShowScenarioModal(false); setEditingScenario(null); }}
+          tags={tags}
         />
       )}
 
@@ -2660,20 +2703,20 @@ export default function App() {
                 {adminTab === 'tags' && (
                   <div>
                     <div className="mb-6">
-                      <h2 className="text-3xl font-bold text-amber-900">🏷️ Gestion des Tags</h2>
-                      <p className="text-amber-700 mt-2">Visualisez et gérez les tags disponibles pour catégoriser vos scénarios</p>
+                      <h2 className="text-3xl font-bold text-white">🏷️ Gestion des Tags</h2>
+                      <p className="text-amber-300 mt-2">Visualisez et gérez les tags disponibles pour catégoriser vos scénarios</p>
                     </div>
 
                     {Object.keys(tags).length === 0 ? (
-                      <div className="bg-amber-50 p-8 rounded-lg border-2 border-amber-700 text-center">
+                      <div className="bg-slate-800/50 p-8 rounded-lg border-2 border-amber-700/50 text-center">
                         <div className="text-6xl mb-4">⏳</div>
-                        <p className="text-xl text-amber-900 font-bold">Chargement des tags...</p>
+                        <p className="text-xl text-white font-bold">Chargement des tags...</p>
                       </div>
                     ) : (
                       <div className="space-y-6">
                         {Object.entries(tags).map(([category, categoryTags]) => (
-                          <div key={category} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6">
-                            <h3 className="text-2xl font-bold text-amber-900 mb-4 capitalize flex items-center gap-2">
+                          <div key={category} className="bg-slate-800/50 border-2 border-amber-700/50 rounded-lg p-6">
+                            <h3 className="text-2xl font-bold text-white mb-4 capitalize flex items-center gap-2">
                               {category === 'genre' && '🎭'}
                               {category === 'ambiance' && '🌙'}
                               {category === 'difficulte' && '📊'}
@@ -2686,8 +2729,11 @@ export default function App() {
                               {categoryTags.map((tag) => (
                                 <span 
                                   key={tag.id}
-                                  className="bg-amber-200 text-amber-900 px-4 py-2 rounded-full font-semibold border-2 border-amber-700 flex items-center gap-2"
-                                  style={{ backgroundColor: tag.color || '#fef3c7' }}
+                                  className="px-4 py-2 rounded-full font-semibold border-2 flex items-center gap-2 text-white"
+                                  style={{ 
+                                    backgroundColor: tag.color || '#f59e0b',
+                                    borderColor: tag.color ? `${tag.color}80` : '#f59e0b80'
+                                  }}
                                 >
                                   {tag.icon && <span>{tag.icon}</span>}
                                   {tag.name}
@@ -2697,9 +2743,9 @@ export default function App() {
                           </div>
                         ))}
                         
-                        <div className="bg-blue-50 border-2 border-blue-700 rounded-lg p-6">
-                          <h3 className="text-lg font-bold text-blue-900 mb-2">💡 Comment utiliser les tags</h3>
-                          <ul className="list-disc list-inside text-blue-800 space-y-1">
+                        <div className="bg-slate-800/50 border-2 border-cyan-700/50 rounded-lg p-6">
+                          <h3 className="text-lg font-bold text-cyan-300 mb-2">💡 Comment utiliser les tags</h3>
+                          <ul className="list-disc list-inside text-cyan-100 space-y-1">
                             <li>Les tags sont automatiquement chargés depuis Supabase</li>
                             <li>Lors de la création/modification d'un scénario, vous pourrez sélectionner ces tags</li>
                             <li>Les tags permettent aux utilisateurs de filtrer et rechercher des scénarios</li>
