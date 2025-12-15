@@ -2160,7 +2160,7 @@ export default function App() {
         <ShoppingCartPanel cart={cart} onRemoveItem={removeFromCart} onClose={() => setShowCart(false)} onGoToCheckout={goToCheckout} />
       )}
 
-      <div className={!showBook && currentPage !== 'checkout' && currentPage !== 'confirmation' && currentPage !== 'home' ? 'pt-20' : ''}>
+      <div>
         {currentPage === 'confirmation' && orderData && (
           <OrderConfirmationPage orderData={orderData} cart={cart} onBackToHome={backToHome} />
         )}
@@ -2873,7 +2873,9 @@ export default function App() {
               
               <div className="space-y-10 text-amber-900">
                 <section className="text-center">
-                  <div className="text-6xl mb-4">👥</div>
+                  <div className="flex justify-center mb-4">
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20group_wthback.png" alt="Qui sommes-nous" className="w-24 h-24 object-contain" />
+                  </div>
                   <h2 className="text-3xl font-bold mb-4">Qui sommes-nous ?</h2>
                   <p className="text-lg leading-relaxed">
                     Nous sommes une équipe passionnée de maîtres du jeu et de créateurs de contenu dédiés à l'univers du jeu de rôle. 
@@ -2883,7 +2885,9 @@ export default function App() {
                 </section>
 
                 <section className="text-center">
-                  <div className="text-6xl mb-4">🎯</div>
+                  <div className="flex justify-center mb-4">
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20target_wthback.png" alt="Notre objectif" className="w-24 h-24 object-contain" />
+                  </div>
                   <h2 className="text-3xl font-bold mb-4">Notre Objectif</h2>
                   <p className="text-lg leading-relaxed">
                     Cette bibliothèque a été conçue pour offrir des scénarios de jeu de rôle d'exception. 
@@ -2894,7 +2898,9 @@ export default function App() {
                 </section>
 
                 <section className="text-center">
-                  <div className="text-6xl mb-4">✍️</div>
+                  <div className="flex justify-center mb-4">
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt="L'Auteur" className="w-24 h-24 object-contain" />
+                  </div>
                   <h2 className="text-3xl font-bold mb-4">L'Auteur</h2>
                   <p className="text-lg leading-relaxed">
                     Maître de jeu depuis plus de dix ans, j'ai exploré de nombreux univers et systèmes de jeu. 
@@ -2903,7 +2909,9 @@ export default function App() {
                 </section>
 
                 <section className="text-center">
-                  <div className="text-6xl mb-4">⚙️</div>
+                  <div className="flex justify-center mb-4">
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png" alt="Comment ça marche" className="w-24 h-24 object-contain" />
+                  </div>
                   <h2 className="text-3xl font-bold mb-4">Comment ça marche ?</h2>
                   <div className="space-y-3 text-left max-w-2xl mx-auto">
                     <p className="flex items-start gap-3">
