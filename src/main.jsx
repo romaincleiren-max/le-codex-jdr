@@ -3298,54 +3298,7 @@ export default function App() {
             </div>
 
             <div className="px-6 pb-12 relative z-10">
-              {selectedSaga ? (
-                <>
-                  {/* Offre campagne complète */}
-                  <div className="max-w-4xl mx-auto mb-8">
-                    {selectedSaga.isFree ? (
-                        <div className="bg-green-100 border-4 border-green-700 rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <h3 className="text-2xl font-bold text-green-900">📥 Campagne complète</h3>
-                              <p className="text-green-700 mt-1">{selectedSaga.scenarios.length} scénarios inclus</p>
-                            </div>
-                            <span className="text-4xl font-bold text-green-800">GRATUIT</span>
-                          </div>
-                          {selectedSaga.description && (
-                            <div className="mb-4 bg-green-50 border-2 border-green-600 rounded-lg p-4">
-                              <p className="text-green-900 leading-relaxed">{selectedSaga.description}</p>
-                            </div>
-                          )}
-                          <button 
-                            onClick={() => handleDownloadFree(selectedSaga.pdfUrl, selectedSaga.name)}
-                            className="w-full bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 font-bold text-lg">
-                            <Download size={24} />Télécharger la campagne complète (PDF)
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="bg-amber-200 border-4 border-amber-800 rounded-lg p-6">
-                          <div className="flex items-center justify-between mb-4">
-                            <div>
-                              <h3 className="text-2xl font-bold text-amber-900">🛒 Campagne complète</h3>
-                              <p className="text-amber-700 mt-1">{selectedSaga.scenarios.length} scénarios · Économisez {((selectedSaga.scenarios.filter(s => !s.isFree).reduce((sum, s) => sum + s.price, 0) - selectedSaga.price).toFixed(2))} €</p>
-                            </div>
-                            <span className="text-4xl font-bold text-amber-800">{selectedSaga.price.toFixed(2)} €</span>
-                          </div>
-                          {selectedSaga.description && (
-                            <div className="mb-4 bg-amber-50 border-2 border-amber-700 rounded-lg p-4">
-                              <p className="text-amber-900 leading-relaxed">{selectedSaga.description}</p>
-                            </div>
-                          )}
-                          <button 
-                            onClick={() => addToCart({ type: 'saga', item: selectedSaga })}
-                            className="w-full bg-amber-800 text-white px-6 py-4 rounded-lg hover:bg-amber-700 flex items-center justify-center gap-2 font-bold text-lg">
-                            <ShoppingCart size={24} />Ajouter la campagne au panier
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </>
-                ) : (
+              {selectedSaga ? null : (
                   <div className="text-center py-20">
                     <h2 className="text-4xl font-bold text-amber-300 mb-4">{currentTheme.name}</h2>
                     <div className="max-w-2xl mx-auto bg-amber-100 border-4 border-amber-900 rounded-lg p-12 shadow-2xl">

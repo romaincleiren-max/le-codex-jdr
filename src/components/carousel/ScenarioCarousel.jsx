@@ -11,6 +11,7 @@ const ScenarioCarousel = ({
   theme
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [showCampaignScenarios, setShowCampaignScenarios] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
@@ -48,7 +49,7 @@ const ScenarioCarousel = ({
   };
 
   const goToNext = () => {
-    setCurrentIndex((prev) => Math.min(scenarios.length - 1, prev + 1));
+    setCurrentIndex((prev) => Math.min(allItems.length - 1, prev + 1));
   };
 
   const goToSlide = (index) => {
@@ -83,8 +84,9 @@ const ScenarioCarousel = ({
       const cardsToMove = Math.round(dragOffset / cardWidth);
       const newIndex = currentIndex + cardsToMove;
       
-      // S'assurer qu'on reste dans les limites
-      const targetIndex = Math.max(0, Math.min(scenarios.length - 1, newIndex));
+      // S'assurer qu'on reste dans les limites (allItems.length sera défini plus tard)
+      const maxIndex = scenarios.length; // campagne (0) + tous les scénarios
+      const targetIndex = Math.max(0, Math.min(maxIndex, newIndex));
       setCurrentIndex(targetIndex);
     }
     // Sinon, on revient à la position actuelle (snap back)
@@ -140,6 +142,27 @@ const ScenarioCarousel = ({
     );
   }
 
+  // Créer un tableau avec la carte campagne + les scénarios
+  const allItems = [
+    { type: 'campaign', data: saga },
+    ...scenarios.map(s => ({ type: 'scenario', data: s }))
+  ];
+
+  const handleCampaignClick = () => {
+    if (!isDragging && Math.abs(dragOffset) < 10) {
+      if (currentIndex === 0) {
+        setShowCampaignScenarios(!showCampaignScenarios);
+      } else {
+        setCurrentIndex(0);
+      }
+    }
+  };
+
+  const handleScenarioLinkClick = (scenarioIndex) => {
+    setShowCampaignScenarios(false);
+    setCurrentIndex(scenarioIndex + 1); // +1 car la carte campagne est en position 0
+  };
+
   return (
     <div 
       ref={carouselRef}
@@ -162,7 +185,203 @@ const ScenarioCarousel = ({
           transition: isDragging ? 'none' : 'transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)'
         }}
       >
-        {scenarios.map((scenario, index) => {
+        {allItems.map((item, index) => {
+          if (item.type === 'campaign') {
+            // Carte "Campagne complète"
+            const distance = Math.abs(currentIndex - index);
+            const isActive = currentIndex === index;
+            const scale = isActive ? 1.15 : 0.8;
+            const opacity = distance > 1 ? 0.3 : (isActive ? 1 : 0.5);
+            
+            return (
+              <div 
+                key="campaign-card"
+                className={`scenario-slide centered ${isActive ? 'active' : ''}`}
+                onClick={handleCampaignClick}
+                style={{ 
+                  cursor: 'pointer',
+                  transform: `scale(${scale})`,
+                  opacity: opacity,
+                  transition: isDragging ? 'none' : 'all 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
+                  zIndex: isActive ? 10 : 5 - distance
+                }}
+              >
+                {/* Image de fond floue de la campagne */}
+                <div 
+                  className="scenario-image-container"
+                  style={{
+                    transform: isActive ? `
+                      translate(
+                        ${mousePosition.x * 0.3 * 20}px,
+                        ${mousePosition.y * 0.3 * 20}px
+                      )
+                      scale(1.1)
+                    ` : 'scale(1.1)'
+                  }}
+                >
+                  {saga.backgroundImageUrl || scenarios[0]?.imageUrl ? (
+                    <img 
+                      src={saga.backgroundImageUrl || scenarios[0]?.imageUrl}
+                      alt={saga.name}
+                      className="scenario-image"
+                      draggable="false"
+                      style={{ filter: 'blur(8px) brightness(0.5)' }}
+                    />
+                  ) : (
+                    <div className="scenario-image" style={{ background: 'linear-gradient(135deg, #1a1a1a, #2d2d2d)' }}></div>
+                  )}
+                </div>
+
+                {/* Overlay plus sombre */}
+                <div className="scenario-overlay" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.7))' }}></div>
+
+                {/* Badge "Pack" */}
+                <div className="scenario-number" style={{ background: saga.isFree ? '#15803d' : '#d97706' }}>
+                  📚 PACK
+                </div>
+
+                {/* Badge gratuit pour la campagne */}
+                {saga.isFree && (
+                  <div className="scenario-free-badge">GRATUIT</div>
+                )}
+
+                {/* Contenu */}
+                <div className="scenario-content">
+                  <h2 className="scenario-title" style={{
+                    fontFamily: theme?.id === 'medieval' 
+                      ? "'Cinzel', serif" :
+                    theme?.id === 'lovecraft'
+                      ? "'IM Fell English', serif" :
+                    theme?.id === 'scifi'
+                      ? "'Orbitron', sans-serif" :
+                      "'Crimson Text', serif",
+                    fontSize: '2rem'
+                  }}>
+                    📚 Campagne complète
+                  </h2>
+                  
+                  <div className="scenario-meta" style={{ marginBottom: '1rem' }}>
+                    <div className="scenario-author" style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
+                      {saga.name}
+                    </div>
+                    <div className="scenario-duration">
+                      📖 {scenarios.length} scénarios
+                    </div>
+                  </div>
+
+                  {saga.description && (
+                    <p className="scenario-description" style={{ marginBottom: '1.5rem' }}>
+                      {saga.description}
+                    </p>
+                  )}
+
+                  {/* Liste des scénarios (affichée si showCampaignScenarios) */}
+                  {showCampaignScenarios && isActive && (
+                    <div style={{
+                      maxHeight: '300px',
+                      overflowY: 'auto',
+                      marginBottom: '1rem',
+                      padding: '0.5rem',
+                      background: 'rgba(0,0,0,0.5)',
+                      borderRadius: '0.5rem',
+                      border: `2px solid ${colors.primary}`
+                    }}>
+                      <p style={{ 
+                        color: colors.text, 
+                        fontWeight: 'bold', 
+                        marginBottom: '0.5rem',
+                        fontSize: '0.9rem'
+                      }}>
+                        Cliquez sur un scénario pour y accéder :
+                      </p>
+                      {scenarios.map((scenario, idx) => (
+                        <button
+                          key={scenario.id}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleScenarioLinkClick(idx);
+                          }}
+                          className="scenario-button"
+                          style={{
+                            width: '100%',
+                            marginBottom: '0.5rem',
+                            padding: '0.75rem',
+                            background: `linear-gradient(135deg, ${colors.primary}40, ${colors.secondary}40)`,
+                            border: `1px solid ${colors.primary}`,
+                            justifyContent: 'flex-start',
+                            fontSize: '0.875rem'
+                          }}
+                        >
+                          #{idx + 1} - {scenario.displayName}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {!showCampaignScenarios && isActive && (
+                    <p style={{ 
+                      color: colors.text, 
+                      fontSize: '0.9rem', 
+                      textAlign: 'center',
+                      marginBottom: '1rem',
+                      opacity: 0.8
+                    }}>
+                      👆 Cliquez pour voir les scénarios
+                    </p>
+                  )}
+
+                  {/* Actions */}
+                  <div className="scenario-actions">
+                    {saga.isFree ? (
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onDownloadFree(saga.pdfUrl, saga.name);
+                        }}
+                        className="scenario-button download"
+                        style={{ width: '100%' }}
+                      >
+                        <Download size={18} />
+                        Télécharger la campagne
+                      </button>
+                    ) : (
+                      <>
+                        <div className="scenario-price" style={{ fontSize: '1.5rem' }}>
+                          {saga.price.toFixed(2)} €
+                        </div>
+                        <button 
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onAddToCart({ type: 'saga', item: saga });
+                          }}
+                          className="scenario-button cart"
+                        >
+                          <ShoppingCart size={18} />
+                          Ajouter
+                        </button>
+                      </>
+                    )}
+                  </div>
+                  
+                  {!saga.isFree && (
+                    <p style={{ 
+                      fontSize: '0.75rem', 
+                      color: colors.primary, 
+                      textAlign: 'center', 
+                      marginTop: '0.5rem',
+                      fontWeight: 'bold'
+                    }}>
+                      Économisez {((scenarios.filter(s => !s.isFree).reduce((sum, s) => sum + s.price, 0) - saga.price).toFixed(2))} €
+                    </p>
+                  )}
+                </div>
+              </div>
+            );
+          }
+
+          // Carte scénario normale
+          const scenario = item.data;
+          const scenarioIndex = index - 1; // -1 car la carte campagne est en position 0
           const distance = Math.abs(currentIndex - index);
           const isActive = currentIndex === index;
           const scale = isActive ? 1.15 : 0.8;
@@ -206,7 +425,7 @@ const ScenarioCarousel = ({
               <div className="scenario-overlay"></div>
 
               {/* Badge numéro */}
-              <div className="scenario-number">#{index + 1}</div>
+              <div className="scenario-number">#{scenarioIndex + 1}</div>
 
               {/* Badge gratuit */}
               {scenario.isFree && (
@@ -333,13 +552,13 @@ const ScenarioCarousel = ({
       </div>
 
       {/* Navigation */}
-      {scenarios.length > 1 && (
+      {allItems.length > 1 && (
         <>
           {currentIndex > 0 && (
             <button 
               className="carousel-nav prev"
               onClick={goToPrevious}
-              aria-label="Scénario précédent"
+              aria-label="Élément précédent"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M15 18l-6-6 6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -347,11 +566,11 @@ const ScenarioCarousel = ({
             </button>
           )}
 
-          {currentIndex < scenarios.length - 1 && (
+          {currentIndex < allItems.length - 1 && (
             <button 
               className="carousel-nav next"
               onClick={goToNext}
-              aria-label="Scénario suivant"
+              aria-label="Élément suivant"
             >
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <path d="M9 18l6-6-6-6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -361,12 +580,12 @@ const ScenarioCarousel = ({
 
           {/* Indicateurs */}
           <div className="carousel-indicators">
-            {scenarios.map((_, index) => (
+            {allItems.map((item, index) => (
               <button
                 key={index}
                 className={`indicator ${index === currentIndex ? 'active' : ''}`}
                 onClick={() => goToSlide(index)}
-                aria-label={`Aller au scénario ${index + 1}`}
+                aria-label={index === 0 ? 'Campagne complète' : `Scénario ${index}`}
               />
             ))}
           </div>
@@ -375,7 +594,7 @@ const ScenarioCarousel = ({
           <div className="carousel-counter">
             <span className="current">{String(currentIndex + 1).padStart(2, '0')}</span>
             <span className="separator">/</span>
-            <span className="total">{String(scenarios.length).padStart(2, '0')}</span>
+            <span className="total">{String(allItems.length).padStart(2, '0')}</span>
           </div>
         </>
       )}
