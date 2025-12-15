@@ -2210,7 +2210,14 @@ export default function App() {
                 <div className="relative z-10 text-center p-8 transform transition-all duration-500 group-hover:scale-110">
                   <h2 className={`text-6xl font-bold mb-4 drop-shadow-2xl transition-all duration-500 ${
                     theme.id === 'medieval' ? 'text-amber-300' : theme.id === 'lovecraft' ? 'text-emerald-400' : 'text-cyan-400'
-                  }`} style={{textShadow: '0 0 30px rgba(251, 191, 36, 0.5), 3px 3px 6px rgba(0,0,0,1)'}}>
+                  }`} style={{
+                    textShadow: '0 0 30px rgba(251, 191, 36, 0.5), 3px 3px 6px rgba(0,0,0,1)',
+                    fontFamily: theme.id === 'medieval' 
+                      ? "'Cinzel', serif" :
+                    theme.id === 'lovecraft'
+                      ? "'IM Fell English', serif" :
+                      "'Orbitron', sans-serif"
+                  }}>
                     {theme.name}
                   </h2>
                   <p className={`text-xl opacity-0 group-hover:opacity-100 transition-all duration-500 ${
@@ -3056,11 +3063,16 @@ export default function App() {
                   
                   <h1 className={`text-6xl font-bold mb-3 drop-shadow-2xl relative z-10 ${
                     currentTheme.id === 'medieval' 
-                      ? 'text-amber-300 font-serif' :
+                      ? 'text-amber-300' :
                     currentTheme.id === 'lovecraft'
-                      ? 'text-emerald-300 font-mono tracking-wider' :
-                      'text-cyan-300 font-sans tracking-widest'
+                      ? 'text-emerald-300' :
+                      'text-cyan-300'
                   }`} style={{
+                    fontFamily: currentTheme.id === 'medieval' 
+                      ? "'Cinzel', serif" :
+                    currentTheme.id === 'lovecraft'
+                      ? "'IM Fell English', serif" :
+                      "'Orbitron', sans-serif",
                     textShadow: currentTheme.id === 'medieval' 
                       ? '0 0 40px rgba(251, 191, 36, 0.6), 4px 4px 8px rgba(0,0,0,0.8)' :
                     currentTheme.id === 'lovecraft'
