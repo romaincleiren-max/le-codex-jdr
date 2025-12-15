@@ -225,6 +225,155 @@ export const deleteScenario = async (id) => {
 };
 
 // ============================================================================
+// TAGS
+// ============================================================================
+
+// Récupérer tous les tags actifs
+export const getTags = async () => {
+  const { data, error } = await supabase
+    .from('tags')
+    .select('*')
+    .eq('is_active', true)
+    .order('category')
+    .order('name');
+  
+  if (error) throw error;
+  return data;
+};
+
+// Récupérer les tags par catégorie
+export const getTagsByCategory = async () => {
+  const { data, error } = await supabase
+    .from('tags')
+    .select('*')
+    .eq('is_active', true)
+    .order('category')
+    .order('name');
+  
+  if (error) throw error;
+  
+  // Grouper par catégorie
+  const tagsByCategory = {};
+  data.forEach(tag => {
+    if (!tagsByCategory[tag.category]) {
+      tagsByCategory[tag.category] = [];
+    }
+    tagsByCategory[tag.category].push(tag);
+  });
+  
+  return tagsByCategory;
+};
+
+// Créer un nouveau tag
+export const createTag = async (tag) => {
+  const { data, error } = await supabase
+    .from('tags')
+    .insert([{
+      name: tag.name,
+      category: tag.category,
+      color: tag.color || '#d97706',
+      description: tag.description || null
+    }])
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
+
+// Modifier un tag
+export const updateTag = async (id, updates) => {
+  const { data, error } = await supabase
+    .from('tags')
+    .update({
+      name: updates.name,
+      category: updates.category,
+      color: updates.color,
+      description: updates.description || null,
+      is_active: updates.isActive !== undefined ? updates.isActive : true
+    })
+    .eq('id', id)
+    .select()
+    .single();
+  
+  if (error) throw error;
+  return data;
+};
+
+// Supprimer (désactiver) un tag
+export const deleteTag = async (id) => {
+  // On désactive le tag au lieu de le supprimer
+  const { error } = await supabase
+    .from('tags')
+    .update({ is_active: false })
+    .eq('id', id);
+  
+  if (error) throw error;
+};
+
+// Récupérer les tags d'un scénario
+export const getScenarioTags = async (scenarioId) => {
+  const { data, error } = await supabase
+    .from('scenario_tags')
+    .select(`
+      tag_id,
+      tags (*)
+    `)
+    .eq('scenario_id', scenarioId);
+  
+  if (error) throw error;
+  return data.map(st => st.tags);
+};
+
+// Assigner des tags à un scénario
+export const setScenarioTags = async (scenarioId, tagIds) => {
+  // 1. Supprimer tous les tags existants du scénario
+  await supabase
+    .from('scenario_tags')
+    .delete()
+    .eq('scenario_id', scenarioId);
+  
+  // 2. Ajouter les nouveaux tags
+  if (tagIds && tagIds.length > 0) {
+    const scenarioTags = tagIds.map(tagId => ({
+      scenario_id: scenarioId,
+      tag_id: tagId
+    }));
+    
+    const { error } = await supabase
+      .from('scenario_tags')
+      .insert(scenarioTags);
+    
+    if (error) throw error;
+  }
+};
+
+// Rechercher des scénarios par tags
+export const searchScenariosByTags = async (tagIds) => {
+  if (!tagIds || tagIds.length === 0) return [];
+  
+  const { data, error } = await supabase
+    .from('scenario_tags')
+    .select(`
+      scenario_id,
+      scenarios (*)
+    `)
+    .in('tag_id', tagIds);
+  
+  if (error) throw error;
+  
+  // Retourner les scénarios uniques
+  const uniqueScenarios = new Map();
+  data.forEach(st => {
+    if (st.scenarios && !uniqueScenarios.has(st.scenario_id)) {
+      uniqueScenarios.set(st.scenario_id, st.scenarios);
+    }
+  });
+  
+  return Array.from(uniqueScenarios.values());
+};
+
+// ============================================================================
 // PARAMÈTRES DU SITE
 // ============================================================================
 
@@ -639,6 +788,16 @@ export const supabaseService = {
   addScenario: createScenario, // Alias
   updateScenario,
   deleteScenario,
+  
+  // Tags
+  getTags,
+  getTagsByCategory,
+  createTag,
+  updateTag,
+  deleteTag,
+  getScenarioTags,
+  setScenarioTags,
+  searchScenariosByTags,
   
   // Paramètres
   getSiteSettings,
