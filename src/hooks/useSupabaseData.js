@@ -6,7 +6,8 @@ import { useState, useEffect } from 'react';
 import { 
   getThemes, 
   getCampaigns, 
-  getSiteSettings 
+  getSiteSettings,
+  getTagsByCategory
 } from '../services/supabaseService';
 
 /**
@@ -16,6 +17,7 @@ import {
 export const useSupabaseData = () => {
   const [themes, setThemes] = useState([]);
   const [campaigns, setCampaigns] = useState([]);
+  const [tags, setTags] = useState({});
   const [siteSettings, setSiteSettings] = useState({
     siteName: 'Le Codex',
     logoUrl: '',
@@ -35,10 +37,11 @@ export const useSupabaseData = () => {
       setError(null);
 
       // Charger en parallèle pour plus de rapidité
-      const [themesData, campaignsData, settingsData] = await Promise.all([
+      const [themesData, campaignsData, settingsData, tagsData] = await Promise.all([
         getThemes(),
         getCampaigns(),
-        getSiteSettings()
+        getSiteSettings(),
+        getTagsByCategory()
       ]);
 
       // Transformer les données Supabase pour correspondre au format actuel
@@ -77,6 +80,7 @@ export const useSupabaseData = () => {
       setThemes(themesData);
       setCampaigns(transformedCampaigns);
       setSiteSettings(transformedSettings);
+      setTags(tagsData);
       setLoading(false);
     } catch (err) {
       console.error('Erreur lors du chargement des données:', err);
@@ -114,12 +118,14 @@ export const useSupabaseData = () => {
     themes,
     campaigns,
     siteSettings,
+    tags,
     loading,
     error,
     refresh,
     // Fonctions de mise à jour (à implémenter)
     setThemes,
     setCampaigns,
-    setSiteSettings
+    setSiteSettings,
+    setTags
   };
 };

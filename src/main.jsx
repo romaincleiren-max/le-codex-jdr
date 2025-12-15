@@ -1542,7 +1542,7 @@ export default function App() {
   const [preloaderFading, setPreloaderFading] = useState(false);
   
   // Charger les données depuis Supabase
-  const { campaigns, themes: supabaseThemes, siteSettings: supabaseSiteSettings, loading, error, refresh } = useSupabaseData();
+  const { campaigns, themes: supabaseThemes, siteSettings: supabaseSiteSettings, tags, loading, error, refresh } = useSupabaseData();
   
   // État pour l'authentification
   const [isAuthenticated, setIsAuthenticated] = useState(false);
