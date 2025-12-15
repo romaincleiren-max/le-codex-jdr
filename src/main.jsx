@@ -2389,6 +2389,7 @@ export default function App() {
                   {id: 'pageaccueil', icon: '🏠', label: 'Page Accueil', color: 'from-green-600 to-green-700'},
                   {id: 'notations', icon: '⭐', label: 'Notations', color: 'from-yellow-600 to-yellow-700'},
                   {id: 'soumissions', icon: '📥', label: 'Soumissions', color: 'from-pink-600 to-pink-700'},
+                  {id: 'tags', icon: '🏷️', label: 'Tags', color: 'from-indigo-600 to-indigo-700'},
                   {id: 'parametres', icon: '⚙️', label: 'Paramètres', color: 'from-slate-600 to-slate-700'}
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setAdminTab(tab.id)}
@@ -2653,6 +2654,61 @@ export default function App() {
                 {/* ONGLET SOUMISSIONS */}
                 {adminTab === 'soumissions' && (
                   <SubmissionsTab />
+                )}
+
+                {/* ONGLET TAGS */}
+                {adminTab === 'tags' && (
+                  <div>
+                    <div className="mb-6">
+                      <h2 className="text-3xl font-bold text-amber-900">🏷️ Gestion des Tags</h2>
+                      <p className="text-amber-700 mt-2">Visualisez et gérez les tags disponibles pour catégoriser vos scénarios</p>
+                    </div>
+
+                    {Object.keys(tags).length === 0 ? (
+                      <div className="bg-amber-50 p-8 rounded-lg border-2 border-amber-700 text-center">
+                        <div className="text-6xl mb-4">⏳</div>
+                        <p className="text-xl text-amber-900 font-bold">Chargement des tags...</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {Object.entries(tags).map(([category, categoryTags]) => (
+                          <div key={category} className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6">
+                            <h3 className="text-2xl font-bold text-amber-900 mb-4 capitalize flex items-center gap-2">
+                              {category === 'genre' && '🎭'}
+                              {category === 'ambiance' && '🌙'}
+                              {category === 'difficulte' && '📊'}
+                              {category === 'duree' && '⏱️'}
+                              {category === 'type' && '📖'}
+                              {category === 'theme' && '🎨'}
+                              {category}
+                            </h3>
+                            <div className="flex flex-wrap gap-3">
+                              {categoryTags.map((tag) => (
+                                <span 
+                                  key={tag.id}
+                                  className="bg-amber-200 text-amber-900 px-4 py-2 rounded-full font-semibold border-2 border-amber-700 flex items-center gap-2"
+                                  style={{ backgroundColor: tag.color || '#fef3c7' }}
+                                >
+                                  {tag.icon && <span>{tag.icon}</span>}
+                                  {tag.name}
+                                </span>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                        
+                        <div className="bg-blue-50 border-2 border-blue-700 rounded-lg p-6">
+                          <h3 className="text-lg font-bold text-blue-900 mb-2">💡 Comment utiliser les tags</h3>
+                          <ul className="list-disc list-inside text-blue-800 space-y-1">
+                            <li>Les tags sont automatiquement chargés depuis Supabase</li>
+                            <li>Lors de la création/modification d'un scénario, vous pourrez sélectionner ces tags</li>
+                            <li>Les tags permettent aux utilisateurs de filtrer et rechercher des scénarios</li>
+                            <li>Pour ajouter de nouveaux tags, utilisez l'interface SQL Supabase ou consultez le guide</li>
+                          </ul>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
 
                 {/* ONGLET PARAMETRES */}
