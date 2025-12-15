@@ -215,7 +215,15 @@ const ScenarioCarousel = ({
 
               {/* Contenu */}
               <div className="scenario-content">
-                <h2 className="scenario-title">{scenario.displayName}</h2>
+                <h2 className="scenario-title" style={{
+                  fontFamily: theme?.id === 'medieval' 
+                    ? "'Cinzel', serif" :
+                  theme?.id === 'lovecraft'
+                    ? "'IM Fell English', serif" :
+                  theme?.id === 'scifi'
+                    ? "'Orbitron', sans-serif" :
+                    "'Crimson Text', serif"
+                }}>{scenario.displayName}</h2>
                 
                 <div className="scenario-meta">
                   <div className="scenario-author">✍️ {scenario.author}</div>

@@ -3169,11 +3169,15 @@ export default function App() {
                                 }`}></div>
                               )}
                               <div className="flex items-center gap-3 relative z-10">
-                                <span className={`text-lg ${
-                                  currentTheme.id === 'medieval' ? 'font-serif' :
-                                  currentTheme.id === 'lovecraft' ? 'font-mono' :
-                                  ''
-                                }`}>{saga.name}</span>
+                                <span className="text-lg" style={{
+                                  fontFamily: currentTheme.id === 'medieval' 
+                                    ? "'Cinzel', serif" :
+                                  currentTheme.id === 'lovecraft'
+                                    ? "'IM Fell English', serif" :
+                                  currentTheme.id === 'scifi'
+                                    ? "'Orbitron', sans-serif" :
+                                    "'Crimson Text', serif"
+                                }}>{saga.name}</span>
                                 {saga.isFree && (
                                   <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-lg text-xs font-bold border border-green-500/50">
                                     📥
