@@ -2430,6 +2430,7 @@ export default function App() {
                   {id: 'campagnes', icon: '📚', label: 'Campagnes', color: 'from-purple-600 to-purple-700'},
                   {id: 'scenarios', icon: '📖', label: 'Scénarios', color: 'from-blue-600 to-blue-700'},
                   {id: 'pageaccueil', icon: '🏠', label: 'Page Accueil', color: 'from-green-600 to-green-700'},
+                  {id: 'apropos', icon: '📜', label: 'À propos', color: 'from-teal-600 to-teal-700'},
                   {id: 'notations', icon: '⭐', label: 'Notations', color: 'from-yellow-600 to-yellow-700'},
                   {id: 'soumissions', icon: '📥', label: 'Soumissions', color: 'from-pink-600 to-pink-700'},
                   {id: 'tags', icon: '🏷️', label: 'Tags', color: 'from-indigo-600 to-indigo-700'},
@@ -2631,6 +2632,78 @@ export default function App() {
                 {/* ONGLET PAGE ACCUEIL */}
                 {adminTab === 'pageaccueil' && (
                   <PageAccueilTab themes={themes} setThemes={setThemes} refresh={refresh} />
+                )}
+
+                {/* ONGLET À PROPOS */}
+                {adminTab === 'apropos' && (
+                  <div>
+                    <h2 className="text-3xl font-bold mb-6 text-white">📜 Éditer la page "À propos"</h2>
+                    <form onSubmit={(e) => {
+                      e.preventDefault();
+                      const formData = new FormData(e.target);
+                      setSiteSettings({
+                        ...siteSettings,
+                        aboutContent: {
+                          section1: formData.get('section1'),
+                          section2: formData.get('section2'),
+                          section3: formData.get('section3'),
+                          contactEmail: formData.get('contactEmail')
+                        }
+                      });
+                      alert('✅ Page "À propos" sauvegardée !');
+                    }} className="space-y-6">
+                      
+                      <div className="bg-slate-800/50 border-2 border-teal-700/50 rounded-lg p-6">
+                        <h3 className="text-xl font-bold text-teal-300 mb-4">Section 1 : Qui sommes-nous ?</h3>
+                        <textarea
+                          name="section1"
+                          rows="5"
+                          defaultValue={siteSettings.aboutContent?.section1 || "Nous sommes une équipe passionnée de maîtres du jeu et de créateurs de contenu dédiés à l'univers du jeu de rôle. Notre amour pour la narration collaborative et les aventures épiques nous pousse à partager nos créations avec la communauté rôliste francophone."}
+                          className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
+                          placeholder="Présentez qui vous êtes..."
+                        />
+                      </div>
+
+                      <div className="bg-slate-800/50 border-2 border-teal-700/50 rounded-lg p-6">
+                        <h3 className="text-xl font-bold text-teal-300 mb-4">Section 2 : Notre Objectif</h3>
+                        <textarea
+                          name="section2"
+                          rows="5"
+                          defaultValue={siteSettings.aboutContent?.section2 || "Cette bibliothèque a été conçue pour offrir des scénarios de jeu de rôle d'exception. Chaque scénario est soigneusement examiné, noté selon plusieurs critères (ambiance, complexité, combat, enquête), et validé par notre équipe avant publication. Nous privilégions la qualité à la quantité : seuls les meilleurs scénarios trouvent leur place dans notre collection."}
+                          className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
+                          placeholder="Décrivez votre objectif..."
+                        />
+                      </div>
+
+                      <div className="bg-slate-800/50 border-2 border-teal-700/50 rounded-lg p-6">
+                        <h3 className="text-xl font-bold text-teal-300 mb-4">Section 3 : L'Auteur</h3>
+                        <textarea
+                          name="section3"
+                          rows="5"
+                          defaultValue={siteSettings.aboutContent?.section3 || "Maître de jeu depuis plus de dix ans, j'ai exploré de nombreux univers et systèmes de jeu. Ma philosophie : créer des aventures mémorables qui laissent une empreinte durable dans l'esprit des joueurs."}
+                          className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
+                          placeholder="Parlez de vous..."
+                        />
+                      </div>
+
+                      <div className="bg-slate-800/50 border-2 border-teal-700/50 rounded-lg p-6">
+                        <h3 className="text-xl font-bold text-teal-300 mb-4">📧 Email de contact</h3>
+                        <input
+                          type="email"
+                          name="contactEmail"
+                          defaultValue={siteSettings.aboutContent?.contactEmail || "contact@lecodex-jdr.fr"}
+                          className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
+                          placeholder="contact@exemple.com"
+                        />
+                      </div>
+
+                      <button
+                        type="submit"
+                        className="w-full bg-gradient-to-r from-teal-600 to-teal-700 text-white px-6 py-4 rounded-lg hover:from-teal-500 hover:to-teal-600 font-bold text-lg shadow-lg">
+                        💾 Sauvegarder la page "À propos"
+                      </button>
+                    </form>
+                  </div>
                 )}
 
                 {/* ONGLET VISUEL */}
@@ -2980,77 +3053,73 @@ export default function App() {
                 <div className="w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full"></div>
               </div>
               
-              <div className="space-y-10 text-amber-900">
-                <section className="text-center">
+              <div className="space-y-10">
+                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
                     <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20group_wthback.png" alt="Qui sommes-nous" className="w-24 h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4">Qui sommes-nous ?</h2>
-                  <p className="text-lg leading-relaxed">
-                    Nous sommes une équipe passionnée de maîtres du jeu et de créateurs de contenu dédiés à l'univers du jeu de rôle. 
-                    Notre amour pour la narration collaborative et les aventures épiques nous pousse à partager nos créations 
-                    avec la communauté rôliste francophone.
+                  <h2 className="text-3xl font-bold mb-4 text-amber-300">Qui sommes-nous ?</h2>
+                  <p className="text-lg leading-relaxed text-amber-100/90">
+                    {siteSettings.aboutContent?.section1 || "Nous sommes une équipe passionnée de maîtres du jeu et de créateurs de contenu dédiés à l'univers du jeu de rôle. Notre amour pour la narration collaborative et les aventures épiques nous pousse à partager nos créations avec la communauté rôliste francophone."}
                   </p>
                 </section>
 
-                <section className="text-center">
+                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
                     <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20target_wthback.png" alt="Notre objectif" className="w-24 h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4">Notre Objectif</h2>
-                  <p className="text-lg leading-relaxed">
-                    Cette bibliothèque a été conçue pour offrir des scénarios de jeu de rôle d'exception. 
-                    Chaque scénario est soigneusement examiné, noté selon plusieurs critères (ambiance, complexité, combat, enquête), 
-                    et validé par notre équipe avant publication. Nous privilégions la qualité à la quantité : 
-                    seuls les meilleurs scénarios trouvent leur place dans notre collection.
+                  <h2 className="text-3xl font-bold mb-4 text-amber-300">Notre Objectif</h2>
+                  <p className="text-lg leading-relaxed text-amber-100/90">
+                    {siteSettings.aboutContent?.section2 || "Cette bibliothèque a été conçue pour offrir des scénarios de jeu de rôle d'exception. Chaque scénario est soigneusement examiné, noté selon plusieurs critères (ambiance, complexité, combat, enquête), et validé par notre équipe avant publication. Nous privilégions la qualité à la quantité : seuls les meilleurs scénarios trouvent leur place dans notre collection."}
                   </p>
                 </section>
 
-                <section className="text-center">
+                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
                     <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt="L'Auteur" className="w-24 h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4">L'Auteur</h2>
-                  <p className="text-lg leading-relaxed">
-                    Maître de jeu depuis plus de dix ans, j'ai exploré de nombreux univers et systèmes de jeu. 
-                    Ma philosophie : créer des aventures mémorables qui laissent une empreinte durable dans l'esprit des joueurs.
+                  <h2 className="text-3xl font-bold mb-4 text-amber-300">L'Auteur</h2>
+                  <p className="text-lg leading-relaxed text-amber-100/90">
+                    {siteSettings.aboutContent?.section3 || "Maître de jeu depuis plus de dix ans, j'ai exploré de nombreux univers et systèmes de jeu. Ma philosophie : créer des aventures mémorables qui laissent une empreinte durable dans l'esprit des joueurs."}
                   </p>
                 </section>
 
-                <section className="text-center">
+                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
                     <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png" alt="Comment ça marche" className="w-24 h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4">Comment ça marche ?</h2>
+                  <h2 className="text-3xl font-bold mb-4 text-amber-300">Comment ça marche ?</h2>
                   <div className="space-y-3 text-left max-w-2xl mx-auto">
-                    <p className="flex items-start gap-3">
-                      <span className="text-amber-800 font-bold text-xl">1.</span>
-                      <span><strong>Explorez</strong> - Parcourez notre collection par thème</span>
+                    <p className="flex items-start gap-3 text-amber-100/90">
+                      <span className="text-amber-400 font-bold text-xl">1.</span>
+                      <span><strong className="text-amber-300">Explorez</strong> - Parcourez notre collection par thème</span>
                     </p>
-                    <p className="flex items-start gap-3">
-                      <span className="text-amber-800 font-bold text-xl">2.</span>
-                      <span><strong>Évaluez</strong> - Consultez nos notations détaillées</span>
+                    <p className="flex items-start gap-3 text-amber-100/90">
+                      <span className="text-amber-400 font-bold text-xl">2.</span>
+                      <span><strong className="text-amber-300">Évaluez</strong> - Consultez nos notations détaillées</span>
                     </p>
-                    <p className="flex items-start gap-3">
-                      <span className="text-amber-800 font-bold text-xl">3.</span>
-                      <span><strong>Téléchargez</strong> - Accédez gratuitement ou achetez les PDFs</span>
+                    <p className="flex items-start gap-3 text-amber-100/90">
+                      <span className="text-amber-400 font-bold text-xl">3.</span>
+                      <span><strong className="text-amber-300">Téléchargez</strong> - Accédez gratuitement ou achetez les PDFs</span>
                     </p>
-                    <p className="flex items-start gap-3">
-                      <span className="text-amber-800 font-bold text-xl">4.</span>
-                      <span><strong>Proposez</strong> - Soumettez vos créations</span>
+                    <p className="flex items-start gap-3 text-amber-100/90">
+                      <span className="text-amber-400 font-bold text-xl">4.</span>
+                      <span><strong className="text-amber-300">Proposez</strong> - Soumettez vos créations</span>
                     </p>
                   </div>
                 </section>
 
-                <section className="text-center border-t-2 border-amber-700 pt-8">
+                <section className="text-center border-t-2 border-amber-700/50 pt-8 bg-slate-800/30 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
                   <div className="text-5xl mb-4">📧</div>
-                  <h2 className="text-2xl font-bold mb-3">Contact</h2>
-                  <p className="text-xl font-semibold text-amber-800">contact@lecodex-jdr.fr</p>
+                  <h2 className="text-2xl font-bold mb-3 text-amber-300">Contact</h2>
+                  <p className="text-xl font-semibold text-amber-200">
+                    {siteSettings.aboutContent?.contactEmail || "contact@lecodex-jdr.fr"}
+                  </p>
                 </section>
 
                 <section className="text-center pt-6">
-                  <p className="text-sm text-amber-700">© 2024 Le Codex - Tous droits réservés</p>
-                  <p className="text-xs text-amber-600 mt-2">Fait avec ❤️ pour la communauté</p>
+                  <p className="text-sm text-amber-400/80">© 2024 Le Codex - Tous droits réservés</p>
+                  <p className="text-xs text-amber-500/70 mt-2">Fait avec ❤️ pour la communauté</p>
                 </section>
               </div>
             </div>
