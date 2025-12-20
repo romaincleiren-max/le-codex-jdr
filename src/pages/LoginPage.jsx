@@ -112,23 +112,12 @@ export const LoginPage = () => {
     }}>
       <div className="max-w-md mx-auto">
         <div className="text-center mb-12">
-          {/* Logo rappel */}
+          {/* Logo cadenas */}
           <div className="flex justify-center mb-8">
             <div className="relative group">
-              <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-red-600 rounded-2xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity animate-pulse"></div>
-              <div className="relative h-40 w-40 rounded-2xl overflow-hidden">
-                {/* Masque gradient pour fondre avec le fond */}
-                <div className="absolute inset-0 pointer-events-none z-10" style={{
-                  background: 'radial-gradient(circle at center, transparent 40%, rgba(27, 25, 26, 0.3) 60%, rgba(27, 25, 26, 0.8) 85%, #1b191a 100%)'
-                }}></div>
-                <video 
-                  src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_8.mp4"
-                  autoPlay
-                  loop
-                  muted
-                  playsInline
-                  className="w-full h-full object-contain border-4 border-red-500 bg-slate-900/80 p-2 backdrop-blur-sm transform group-hover:scale-105 transition-transform shadow-2xl"
-                />
+              <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-red-600 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity animate-pulse"></div>
+              <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 border-4 border-amber-500 rounded-full p-8 shadow-2xl transform group-hover:scale-105 transition-transform">
+                <Lock size={80} className="text-amber-400" strokeWidth={2} />
               </div>
             </div>
           </div>
