@@ -10,6 +10,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock } from 'lucide-react';
 import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
+import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
@@ -3478,6 +3479,7 @@ function AppRouter() {
     <Routes>
       <Route path="/test-supabase" element={<TestSupabase />} />
       <Route path="/login" element={<LoginPage />} />
+      <Route path="/payment/success" element={<PaymentSuccessPage />} />
       <Route path="/*" element={<App />} />
     </Routes>
   );

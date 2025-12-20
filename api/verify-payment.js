@@ -1,5 +1,11 @@
 // API Serverless Vercel pour vérifier le statut d'un paiement Stripe
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const { createClient } = require('@supabase/supabase-js');
+
+const supabase = createClient(
+  process.env.VITE_SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 module.exports = async (req, res) => {
   // Configuration CORS
@@ -34,15 +40,29 @@ module.exports = async (req, res) => {
       // Récupérer les line items pour savoir ce qui a été acheté
       const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
 
+      // Récupérer le purchase depuis Supabase pour obtenir le download token
+      const { data: purchase, error: purchaseError } = await supabase
+        .from('purchases')
+        .select('download_token, expires_at, download_count')
+        .eq('stripe_session_id', sessionId)
+        .single();
+
+      if (purchaseError) {
+        console.error('⚠️ Purchase non trouvé dans Supabase:', purchaseError);
+      }
+
       res.status(200).json({
         success: true,
         paid: true,
-        customerEmail: session.customer_email,
+        email: session.customer_email,
         customerName: session.metadata?.customerName,
         amount: session.amount_total / 100,
         currency: session.currency,
         items: lineItems.data,
-        paymentIntent: session.payment_intent
+        paymentIntent: session.payment_intent,
+        downloadToken: purchase?.download_token,
+        expiresAt: purchase?.expires_at,
+        downloadCount: purchase?.download_count || 0
       });
     } else {
       res.status(200).json({

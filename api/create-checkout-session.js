@@ -62,7 +62,7 @@ module.exports = async (req, res) => {
       payment_method_types: ['card'],
       line_items: lineItems,
       mode: 'payment',
-      success_url: `${req.headers.origin || 'http://localhost:5173'}/?success=true&session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${req.headers.origin || 'http://localhost:5173'}/payment/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${req.headers.origin || 'http://localhost:5173'}/?canceled=true`,
     };
 

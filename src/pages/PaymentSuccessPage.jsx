@@ -1,0 +1,214 @@
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Download, CheckCircle, AlertCircle, ArrowLeft } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+
+export const PaymentSuccessPage = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [purchaseData, setPurchaseData] = useState(null);
+  const [downloadStarted, setDownloadStarted] = useState(false);
+
+  const sessionId = searchParams.get('session_id');
+
+  useEffect(() => {
+    if (!sessionId) {
+      setError('Session de paiement introuvable');
+      setLoading(false);
+      return;
+    }
+
+    verifyPaymentAndGetDownloadLink();
+  }, [sessionId]);
+
+  const verifyPaymentAndGetDownloadLink = async () => {
+    try {
+      setLoading(true);
+
+      // Vérifier le paiement et récupérer les informations d'achat
+      const response = await fetch('/api/verify-payment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ sessionId })
+      });
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la vérification du paiement');
+      }
+
+      const data = await response.json();
+      setPurchaseData(data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Erreur:', err);
+      setError(err.message);
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    if (!purchaseData?.downloadToken) return;
+
+    try {
+      setDownloadStarted(true);
+
+      // Générer l'URL de téléchargement sécurisée
+      const response = await fetch(`/api/download/${purchaseData.downloadToken}`);
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la génération du lien de téléchargement');
+      }
+
+      const { downloadUrl } = await response.json();
+
+      // Télécharger le fichier
+      window.location.href = downloadUrl;
+
+    } catch (err) {
+      console.error('Erreur téléchargement:', err);
+      alert('Erreur lors du téléchargement. Veuillez réessayer ou vérifier votre email.');
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
+      }}>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-4 border-amber-500 border-t-transparent mx-auto mb-4"></div>
+          <p className="text-amber-300 text-xl">Vérification de votre paiement...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-8" style={{
+        background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
+      }}>
+        <div className="max-w-2xl w-full bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-red-500/50 rounded-2xl p-8 shadow-2xl">
+          <div className="text-center">
+            <AlertCircle size={64} className="text-red-500 mx-auto mb-4" />
+            <h1 className="text-3xl font-bold text-red-400 mb-4">Erreur</h1>
+            <p className="text-red-300 mb-6">{error}</p>
+            <button
+              onClick={() => navigate('/')}
+              className="bg-slate-700 hover:bg-slate-600 text-amber-300 px-6 py-3 rounded-lg font-bold flex items-center justify-center gap-2 mx-auto transition-all"
+            >
+              <ArrowLeft size={20} />
+              Retour à l'accueil
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-8" style={{
+      background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
+    }}>
+      <div className="max-w-3xl w-full">
+        {/* En-tête de succès */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-6">
+            <div className="relative">
+              <div className="absolute inset-0 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full blur-xl opacity-50 animate-pulse"></div>
+              <div className="relative bg-gradient-to-br from-slate-800 to-slate-900 border-4 border-green-500 rounded-full p-6 shadow-2xl">
+                <CheckCircle size={64} className="text-green-400" />
+              </div>
+            </div>
+          </div>
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 text-transparent bg-clip-text mb-4">
+            Paiement réussi !
+          </h1>
+          <p className="text-amber-300 text-xl">Merci pour votre achat 🎉</p>
+        </div>
+
+        {/* Carte principale */}
+        <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/50 rounded-2xl p-8 shadow-2xl mb-6">
+          {/* Informations d'achat */}
+          {purchaseData?.items && (
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-amber-400 mb-4">📦 Votre commande</h2>
+              <div className="space-y-3">
+                {purchaseData.items.map((item, index) => (
+                  <div key={index} className="bg-slate-700/50 rounded-lg p-4 border border-amber-500/30">
+                    <p className="text-amber-100 font-semibold text-lg">{item.name}</p>
+                    <p className="text-amber-300/70 text-sm">{item.type === 'saga' ? 'Campagne complète' : 'Scénario'}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Message anti-DRM */}
+          <div className="bg-gradient-to-r from-amber-900/40 to-orange-900/40 border-2 border-amber-500 rounded-xl p-6 mb-8">
+            <h3 className="text-xl font-bold text-amber-300 mb-4 text-center">
+              📜 Message important
+            </h3>
+            <div className="text-amber-100 leading-relaxed space-y-3">
+              <p className="text-center font-semibold">
+                Ce fichier n'est pas protégé par DRM.
+              </p>
+              <p className="text-center">
+                Il repose sur un principe simple : <span className="text-amber-300 font-bold">la confiance</span>.
+              </p>
+              <p className="text-center">
+                Si chacun partage ce qu'il achète, ce type de projet disparaît.
+              </p>
+              <p className="text-center">
+                Si chacun respecte le travail des créateurs, il peut continuer à exister.
+              </p>
+              <p className="text-center font-bold text-amber-300 text-lg mt-4">
+                Merci de votre soutien! 🙏
+              </p>
+            </div>
+          </div>
+
+          {/* Bouton de téléchargement */}
+          <div className="text-center">
+            <button
+              onClick={handleDownload}
+              disabled={!purchaseData?.downloadToken || downloadStarted}
+              className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-500 hover:to-green-600 text-white px-8 py-4 rounded-lg font-bold text-xl shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-3"
+            >
+              <Download size={24} />
+              {downloadStarted ? 'Téléchargement en cours...' : 'Télécharger maintenant'}
+            </button>
+
+            {purchaseData?.downloadToken && (
+              <p className="text-amber-300/70 text-sm mt-4">
+                💡 Vous pouvez télécharger ce fichier jusqu'à 3 fois pendant 48h
+              </p>
+            )}
+          </div>
+
+          {/* Informations email */}
+          <div className="mt-8 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
+            <p className="text-sm text-blue-300 text-center">
+              📧 Un email de confirmation avec le lien de téléchargement a été envoyé à <span className="font-semibold">{purchaseData?.email}</span>
+            </p>
+          </div>
+        </div>
+
+        {/* Bouton retour */}
+        <div className="text-center">
+          <button
+            onClick={() => navigate('/')}
+            className="bg-slate-700 hover:bg-slate-600 text-amber-300 px-6 py-3 rounded-lg font-bold flex items-center justify-center gap-2 mx-auto transition-all"
+          >
+            <ArrowLeft size={20} />
+            Retour à l'accueil
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
