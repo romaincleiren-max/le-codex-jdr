@@ -122,7 +122,7 @@ export const LoginPage = () => {
             </div>
           </div>
           <div className="inline-block bg-gradient-to-r from-red-500 to-amber-600 text-transparent bg-clip-text mb-4">
-            <h1 className="text-6xl font-bold">🔐 Connexion Admin</h1>
+            <h1 className="text-6xl font-bold">Connexion Admin</h1>
           </div>
           <div className="w-32 h-1 bg-gradient-to-r from-red-500 to-amber-600 mx-auto rounded-full mb-6"></div>
           <p className="text-amber-300 text-xl">Accès réservé aux administrateurs</p>
