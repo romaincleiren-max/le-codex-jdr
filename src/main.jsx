@@ -1595,27 +1595,27 @@ export default function App() {
   useEffect(() => {
     // Vérifier si on a déjà vu le preloader dans cette session
     const hasSeenPreloader = sessionStorage.getItem('hasSeenPreloader');
-    
-    if (hasSeenPreloader) {
-      // Si déjà vu, ne pas afficher le preloader
+
+    if (hasSeenPreloader && !loading) {
+      // Si déjà vu ET données chargées, ne pas afficher le preloader
       setShowPreloader(false);
-    } else {
-      // Sinon, afficher le preloader pendant 3 secondes
+    } else if (!loading) {
+      // Les données sont chargées, commencer l'animation de sortie
       const fadeTimer = setTimeout(() => {
         setPreloaderFading(true);
-      }, 2500); // Commence à disparaître après 2.5s
-      
+      }, 500); // Commence à disparaître après 0.5s
+
       const hideTimer = setTimeout(() => {
         setShowPreloader(false);
         sessionStorage.setItem('hasSeenPreloader', 'true');
-      }, 3500); // Disparaît complètement après 3.5s
-      
+      }, 1500); // Disparaît complètement après 1.5s
+
       return () => {
         clearTimeout(fadeTimer);
         clearTimeout(hideTimer);
       };
     }
-  }, []);
+  }, [loading]);
   
   // Vérifier l'authentification Supabase au chargement
   useEffect(() => {
