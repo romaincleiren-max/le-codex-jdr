@@ -1596,11 +1596,24 @@ export default function App() {
     // Vérifier si on a déjà vu le preloader dans cette session
     const hasSeenPreloader = sessionStorage.getItem('hasSeenPreloader');
 
+    // TIMEOUT DE SÉCURITÉ : Forcer la disparition après 5 secondes max
+    const maxLoadingTimer = setTimeout(() => {
+      console.warn('⏱️ Timeout preloader : masquage forcé après 5s');
+      setPreloaderFading(true);
+      setTimeout(() => {
+        setShowPreloader(false);
+        sessionStorage.setItem('hasSeenPreloader', 'true');
+      }, 1000);
+    }, 5000);
+
     if (hasSeenPreloader && !loading) {
       // Si déjà vu ET données chargées, ne pas afficher le preloader
+      clearTimeout(maxLoadingTimer);
       setShowPreloader(false);
     } else if (!loading) {
       // Les données sont chargées, commencer l'animation de sortie
+      clearTimeout(maxLoadingTimer);
+
       const fadeTimer = setTimeout(() => {
         setPreloaderFading(true);
       }, 500); // Commence à disparaître après 0.5s
@@ -1615,6 +1628,10 @@ export default function App() {
         clearTimeout(hideTimer);
       };
     }
+
+    return () => {
+      clearTimeout(maxLoadingTimer);
+    };
   }, [loading]);
   
   // Vérifier l'authentification Supabase au chargement
