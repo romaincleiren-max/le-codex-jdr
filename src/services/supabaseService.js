@@ -164,6 +164,26 @@ export const getScenarios = async (campaignId) => {
 };
 
 export const createScenario = async (campaignId, scenario) => {
+  // Calculer la prochaine position disponible
+  let nextPosition = scenario.position;
+
+  if (nextPosition === undefined || nextPosition === null) {
+    // Récupérer tous les scénarios de cette campagne
+    const { data: existingScenarios, error: fetchError } = await supabase
+      .from('scenarios')
+      .select('position')
+      .eq('campaign_id', campaignId)
+      .order('position', { ascending: false })
+      .limit(1);
+
+    if (fetchError) throw fetchError;
+
+    // La prochaine position est la plus haute + 1, ou 1 si aucun scénario
+    nextPosition = (existingScenarios && existingScenarios.length > 0)
+      ? (existingScenarios[0].position || 0) + 1
+      : 1;
+  }
+
   const { data, error } = await supabase
     .from('scenarios')
     .insert([{
@@ -180,37 +200,44 @@ export const createScenario = async (campaignId, scenario) => {
       pdf_url: scenario.pdfUrl || null,
       ratings: scenario.ratings || { ambiance: 3, complexite: 3, combat: 3, enquete: 3 },
       tags: scenario.tags || [],
-      position: scenario.position || 0
+      position: nextPosition
     }])
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 };
 
 export const updateScenario = async (id, updates) => {
+  // Construire l'objet de mise à jour en excluant position si non fourni
+  const updateData = {
+    title: updates.title,
+    display_name: updates.displayName,
+    author: updates.author,
+    description: updates.description,
+    image_url: updates.imageUrl || null,
+    background_image_url: updates.backgroundImageUrl || null,
+    duration: updates.duration || '4-6 heures',
+    price: updates.price || 0,
+    is_free: updates.isFree || false,
+    pdf_url: updates.pdfUrl || null,
+    ratings: updates.ratings,
+    tags: updates.tags || []
+  };
+
+  // N'ajouter position que si elle est explicitement fournie
+  if (updates.position !== undefined && updates.position !== null) {
+    updateData.position = updates.position;
+  }
+
   const { data, error } = await supabase
     .from('scenarios')
-    .update({
-      title: updates.title,
-      display_name: updates.displayName,
-      author: updates.author,
-      description: updates.description,
-      image_url: updates.imageUrl || null,
-      background_image_url: updates.backgroundImageUrl || null,
-      duration: updates.duration || '4-6 heures',
-      price: updates.price || 0,
-      is_free: updates.isFree || false,
-      pdf_url: updates.pdfUrl || null,
-      ratings: updates.ratings,
-      tags: updates.tags || [],
-      position: updates.position || 0
-    })
+    .update(updateData)
     .eq('id', id)
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 };

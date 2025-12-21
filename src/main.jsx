@@ -2651,7 +2651,7 @@ export default function App() {
                                   <div className="flex-1">
                                     <div className="flex items-center gap-3 mb-2">
                                       <span className="bg-amber-800 text-white px-2 py-1 rounded font-bold text-sm">
-                                        #{index + 1}
+                                        #{scenario.position || (index + 1)}
                                       </span>
                                       <h4 className="font-bold text-xl text-amber-900">{scenario.displayName}</h4>
                                       {scenario.isFree ? (

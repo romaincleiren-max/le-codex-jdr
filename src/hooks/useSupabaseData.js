@@ -54,21 +54,24 @@ export const useSupabaseData = () => {
         isFree: campaign.is_free,
         pdfUrl: campaign.pdf_url,
         backgroundImageUrl: campaign.background_image_url,
-        scenarios: (campaign.scenarios || []).map(scenario => ({
-          id: scenario.id,
-          title: scenario.title,
-          displayName: scenario.display_name,
-          author: scenario.author,
-          description: scenario.description,
-          imageUrl: scenario.image_url,
-          backgroundImageUrl: scenario.background_image_url,
-          duration: scenario.duration,
-          price: parseFloat(scenario.price),
-          isFree: scenario.is_free,
-          pdfUrl: scenario.pdf_url,
-          ratings: scenario.ratings,
-          tags: scenario.tags || []
-        }))
+        scenarios: (campaign.scenarios || [])
+          .map(scenario => ({
+            id: scenario.id,
+            title: scenario.title,
+            displayName: scenario.display_name,
+            author: scenario.author,
+            description: scenario.description,
+            imageUrl: scenario.image_url,
+            backgroundImageUrl: scenario.background_image_url,
+            duration: scenario.duration,
+            price: parseFloat(scenario.price),
+            isFree: scenario.is_free,
+            pdfUrl: scenario.pdf_url,
+            ratings: scenario.ratings,
+            tags: scenario.tags || [],
+            position: scenario.position || 0
+          }))
+          .sort((a, b) => a.position - b.position)
       }));
 
       const transformedSettings = {
