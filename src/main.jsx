@@ -1875,19 +1875,38 @@ export default function App() {
     console.log('🔍 Tentative téléchargement:', { pdfUrl, name });
 
     try {
-      // Si c'est déjà une URL complète (http/https), télécharger directement
+      // Si c'est une URL Supabase Storage complète, extraire le chemin
+      let filePath = pdfUrl;
+
       if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
-        console.log('✅ URL complète détectée, ouverture directe');
-        window.open(pdfUrl, '_blank');
-        return;
+        console.log('⚠️ URL complète détectée - extraction du chemin...');
+
+        // Vérifier si c'est une URL Supabase Storage
+        if (pdfUrl.includes('supabase.co/storage/v1/object/')) {
+          // Extraire le chemin après /object/public/bucket-name/ ou /object/sign/bucket-name/
+          const match = pdfUrl.match(/\/object\/(public|sign)\/([^/]+)\/(.+)/);
+          if (match && match[3]) {
+            filePath = match[3].split('?')[0]; // Enlever les query params
+            console.log('📂 Chemin extrait:', filePath);
+          } else {
+            console.error('❌ Format URL Supabase non reconnu:', pdfUrl);
+            alert('Format d\'URL non supporté. Veuillez contacter le support.');
+            return;
+          }
+        } else {
+          // Si ce n'est pas une URL Supabase, ouvrir directement (lien externe)
+          console.log('🌐 URL externe, ouverture directe');
+          window.open(pdfUrl, '_blank');
+          return;
+        }
       }
 
       console.log('🔐 Génération URL signée depuis bucket "pdfs"...');
 
-      // Sinon, générer une URL signée depuis Supabase Storage
+      // Générer une URL signée fraîche depuis Supabase Storage
       const { data, error } = await supabase.storage
         .from('pdfs')
-        .createSignedUrl(pdfUrl, 300); // 5 minutes
+        .createSignedUrl(filePath, 300); // 5 minutes
 
       if (error) {
         console.error('❌ Erreur génération URL signée:', error);
