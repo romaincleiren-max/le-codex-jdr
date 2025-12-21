@@ -1866,11 +1866,45 @@ export default function App() {
   const handleOrderComplete = (formData) => { setOrderData(formData); setCurrentPage('confirmation'); };
   const backToHome = () => { setCart([]); setOrderData(null); setCurrentPage('home'); };
   
-  const handleDownloadFree = (pdfUrl, name) => {
-    if (pdfUrl) {
-      alert(`Téléchargement de "${name}" en cours...`);
-    } else {
+  const handleDownloadFree = async (pdfUrl, name) => {
+    if (!pdfUrl) {
       alert('PDF non disponible');
+      return;
+    }
+
+    try {
+      // Si c'est déjà une URL complète (http/https), télécharger directement
+      if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
+        window.open(pdfUrl, '_blank');
+        return;
+      }
+
+      // Sinon, générer une URL signée depuis Supabase Storage
+      const { data, error } = await supabase.storage
+        .from('pdfs')
+        .createSignedUrl(pdfUrl, 300); // 5 minutes
+
+      if (error) {
+        console.error('Erreur génération URL signée:', error);
+        alert('Erreur lors de la préparation du téléchargement. Veuillez réessayer.');
+        return;
+      }
+
+      if (data?.signedUrl) {
+        // Créer un lien temporaire et le cliquer pour télécharger
+        const link = document.createElement('a');
+        link.href = data.signedUrl;
+        link.download = `${name}.pdf`;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert('Erreur lors de la génération du lien de téléchargement.');
+      }
+    } catch (err) {
+      console.error('Erreur téléchargement:', err);
+      alert('Erreur lors du téléchargement. Veuillez réessayer.');
     }
   };
 
