@@ -1872,12 +1872,17 @@ export default function App() {
       return;
     }
 
+    console.log('🔍 Tentative téléchargement:', { pdfUrl, name });
+
     try {
       // Si c'est déjà une URL complète (http/https), télécharger directement
       if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
+        console.log('✅ URL complète détectée, ouverture directe');
         window.open(pdfUrl, '_blank');
         return;
       }
+
+      console.log('🔐 Génération URL signée depuis bucket "pdfs"...');
 
       // Sinon, générer une URL signée depuis Supabase Storage
       const { data, error } = await supabase.storage
@@ -1885,12 +1890,14 @@ export default function App() {
         .createSignedUrl(pdfUrl, 300); // 5 minutes
 
       if (error) {
-        console.error('Erreur génération URL signée:', error);
-        alert('Erreur lors de la préparation du téléchargement. Veuillez réessayer.');
+        console.error('❌ Erreur génération URL signée:', error);
+        console.error('Details:', { pdfUrl, errorMessage: error.message, errorDetails: error });
+        alert(`Erreur: ${error.message || 'Impossible de générer le lien de téléchargement'}`);
         return;
       }
 
       if (data?.signedUrl) {
+        console.log('✅ URL signée générée:', data.signedUrl);
         // Créer un lien temporaire et le cliquer pour télécharger
         const link = document.createElement('a');
         link.href = data.signedUrl;
@@ -1900,11 +1907,12 @@ export default function App() {
         link.click();
         document.body.removeChild(link);
       } else {
+        console.error('❌ Pas de signedUrl dans la réponse:', data);
         alert('Erreur lors de la génération du lien de téléchargement.');
       }
     } catch (err) {
-      console.error('Erreur téléchargement:', err);
-      alert('Erreur lors du téléchargement. Veuillez réessayer.');
+      console.error('❌ Exception téléchargement:', err);
+      alert(`Erreur: ${err.message || 'Veuillez réessayer'}`);
     }
   };
 
