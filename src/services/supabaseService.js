@@ -79,8 +79,18 @@ export const getCampaigns = async () => {
       scenarios (*)
     `)
     .order('created_at', { ascending: false });
-  
+
   if (error) throw error;
+
+  // Trier les scénarios par numéro (id) pour chaque campagne
+  if (data) {
+    data.forEach(campaign => {
+      if (campaign.scenarios && campaign.scenarios.length > 0) {
+        campaign.scenarios.sort((a, b) => a.id - b.id);
+      }
+    });
+  }
+
   return data;
 };
 
