@@ -1884,7 +1884,7 @@ export default function App() {
   const backToHome = () => { setCart([]); setOrderData(null); setCurrentPage('home'); };
   
   const handleDownloadFree = async (pdfUrl, name) => {
-    if (!pdfUrl) {
+    if (!pdfUrl || typeof pdfUrl !== 'string') {
       alert('PDF non disponible');
       return;
     }
