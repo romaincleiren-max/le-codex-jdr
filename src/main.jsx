@@ -1077,7 +1077,7 @@ const handleSubmit = async (e) => {
   };
 
   const formatCardNumber = (value) => {
-    if (!value) return '';
+    if (!value || typeof value !== 'string') return '';
     const cleaned = value.replace(/\s/g, '');
     const chunks = cleaned.match(/.{1,4}/g) || [];
     return chunks.join(' ').substr(0, 19);

@@ -181,32 +181,32 @@ export const analyticsService = {
   // Récupérer les statistiques générales des derniers jours
   async getGeneralStats(days = 30) {
     try {
-      const { data, error } = await supabase
-        .from('analytics_events')
-        .select('event_type, event_category, created_at, event_value')
-        .gte('created_at', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString());
-      
-      if (error) throw error;
-      
-      // Calculer les statistiques
+      // Utiliser les vues analytics au lieu de lire directement analytics_events
+      // pour éviter les problèmes RLS
+      const [realtimeData, byThemeData] = await Promise.all([
+        supabase.from('analytics_realtime').select('*').single(),
+        supabase.from('analytics_by_theme').select('*')
+      ]);
+
+      if (realtimeData.error) throw realtimeData.error;
+
+      // Construire les stats depuis les vues
       const stats = {
-        totalVisits: data.filter(e => e.event_type === 'page_view').length,
-        scenarioViews: data.filter(e => e.event_type === 'scenario_view').length,
-        downloads: data.filter(e => e.event_type === 'download').length,
-        cartAdds: data.filter(e => e.event_type === 'cart_add').length,
-        purchases: data.filter(e => e.event_type === 'purchase').length,
-        revenue: data
-          .filter(e => e.event_type === 'purchase')
-          .reduce((sum, e) => sum + (parseFloat(e.event_value) || 0), 0),
-        
-        // Par catégorie
+        totalVisits: realtimeData.data?.total_visits || 0,
+        scenarioViews: realtimeData.data?.scenario_views || 0,
+        downloads: realtimeData.data?.total_downloads || 0,
+        cartAdds: realtimeData.data?.cart_adds || 0,
+        purchases: realtimeData.data?.purchases || 0,
+        revenue: realtimeData.data?.revenue || 0,
+
+        // Par catégorie (depuis analytics_by_theme)
         byCategory: {
-          medieval: data.filter(e => e.event_category === 'medieval').length,
-          lovecraft: data.filter(e => e.event_category === 'lovecraft').length,
-          scifi: data.filter(e => e.event_category === 'scifi').length
+          medieval: byThemeData.data?.find(t => t.theme === 'medieval')?.total_views || 0,
+          lovecraft: byThemeData.data?.find(t => t.theme === 'lovecraft')?.total_views || 0,
+          scifi: byThemeData.data?.find(t => t.theme === 'scifi')?.total_views || 0
         }
       };
-      
+
       return stats;
     } catch (error) {
       console.error('❌ Erreur récupération stats générales:', error);
@@ -216,32 +216,10 @@ export const analyticsService = {
   
   // Récupérer la répartition géographique (si on a des données)
   async getGeographicDistribution() {
-    try {
-      const { data, error } = await supabase
-        .from('analytics_events')
-        .select('country')
-        .not('country', 'is', null)
-        .gte('created_at', new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString());
-      
-      if (error) throw error;
-      
-      // Compter les occurrences par pays
-      const countryCounts = {};
-      data.forEach(event => {
-        if (event.country) {
-          countryCounts[event.country] = (countryCounts[event.country] || 0) + 1;
-        }
-      });
-      
-      // Convertir en array et trier
-      return Object.entries(countryCounts)
-        .map(([country, count]) => ({ country, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 10);
-    } catch (error) {
-      console.error('❌ Erreur récupération distribution géographique:', error);
-      return [];
-    }
+    // Note: La colonne 'country' n'existe pas dans analytics_events
+    // Cette fonctionnalité nécessiterait d'ajouter le tracking géographique
+    // Pour l'instant, retourner un tableau vide
+    return [];
   }
 };
 
