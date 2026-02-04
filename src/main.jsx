@@ -2155,8 +2155,8 @@ export default function App() {
           {/* Barre lumineuse animée en haut */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-60"></div>
           
-          <div className="max-w-7xl mx-auto px-6 py-3 relative z-10">
-            <div className="flex items-center justify-between gap-8">
+          <div className="max-w-7xl mx-auto px-3 md:px-6 py-2 md:py-3 relative z-10">
+            <div className="flex items-center justify-between gap-2 md:gap-8">
               {/* Logo et titre */}
               <button
                 onClick={() => setCurrentPage('home')}
@@ -2167,21 +2167,21 @@ export default function App() {
                     <img
                       src={siteSettings.logoUrl}
                       alt={siteSettings.siteName}
-                      className="h-12 w-12 md:h-28 md:w-28 object-contain rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50 p-1 md:p-2"
+                      className="h-10 w-10 md:h-28 md:w-28 object-contain rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50 p-0.5 md:p-2"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : (
-                    <div className="text-3xl md:text-6xl p-1 md:p-2 rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
+                    <div className="text-2xl md:text-6xl p-0.5 md:p-2 rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
                   )}
                 </div>
 
                 {/* Texte */}
                 <div className="flex flex-col items-start">
-                  <span className="text-xl md:text-5xl font-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300 tracking-tight" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
+                  <span className="text-base md:text-5xl font-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300 tracking-tight" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
                     {siteSettings.siteName}
                   </span>
                   {siteSettings.tagline && (
-                    <span className="text-xs md:text-sm text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300 font-medium hidden sm:block">
+                    <span className="text-xs md:text-sm text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300 font-medium hidden md:block">
                       {siteSettings.tagline}
                     </span>
                   )}

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Star, Clock, Download, ShoppingCart } from 'lucide-react';
 import './ScenarioCarousel.css';
 
-const ScenarioCarousel = ({ 
+const ScenarioCarousel = ({
   scenarios,
   saga,
   onDownloadFree,
@@ -16,9 +16,20 @@ const ScenarioCarousel = ({
   const [startX, setStartX] = useState(0);
   const [dragOffset, setDragOffset] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  
+  const [isMobile, setIsMobile] = useState(false);
+
   const carouselRef = useRef(null);
   const trackRef = useRef(null);
+
+  // Detecter si on est sur mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Parallax à la souris
   useEffect(() => {
@@ -163,8 +174,350 @@ const ScenarioCarousel = ({
     setCurrentIndex(scenarioIndex + 1); // +1 car la carte campagne est en position 0
   };
 
+  // ========== VERSION MOBILE - Liste verticale scrollable ==========
+  if (isMobile) {
+    return (
+      <div
+        className="mobile-scenario-list"
+        style={{
+          '--theme-primary': colors.primary,
+          '--theme-secondary': colors.secondary,
+          '--theme-text': colors.text,
+          padding: '1rem',
+          paddingTop: '5rem',
+          minHeight: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1.5rem'
+        }}
+      >
+        {/* Carte Campagne */}
+        <div
+          className="mobile-campaign-card"
+          onClick={() => setShowCampaignScenarios(!showCampaignScenarios)}
+          style={{
+            background: 'linear-gradient(135deg, rgba(0,0,0,0.8), rgba(0,0,0,0.95))',
+            borderRadius: '1rem',
+            overflow: 'hidden',
+            border: `2px solid ${colors.primary}`,
+            position: 'relative'
+          }}
+        >
+          {/* Image de fond */}
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundImage: `url(${saga.backgroundImageUrl || scenarios[0]?.imageUrl})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            filter: 'blur(5px) brightness(0.3)',
+            zIndex: 0
+          }} />
+
+          <div style={{ position: 'relative', zIndex: 1, padding: '1.5rem' }}>
+            <div style={{
+              display: 'inline-block',
+              background: saga.isFree ? '#15803d' : colors.primary,
+              color: 'white',
+              padding: '0.3rem 0.8rem',
+              borderRadius: '1rem',
+              fontSize: '0.75rem',
+              fontWeight: 'bold',
+              marginBottom: '0.75rem'
+            }}>
+              📚 CAMPAGNE COMPLETE
+            </div>
+
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              color: colors.text,
+              marginBottom: '0.5rem'
+            }}>{saga.name}</h2>
+
+            <p style={{
+              fontSize: '0.875rem',
+              color: 'rgba(255,255,255,0.8)',
+              marginBottom: '0.75rem'
+            }}>📖 {scenarios.length} scénarios</p>
+
+            {saga.description && (
+              <p style={{
+                fontSize: '0.875rem',
+                color: 'rgba(255,255,255,0.7)',
+                lineHeight: 1.5,
+                marginBottom: '1rem',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden'
+              }}>{saga.description}</p>
+            )}
+
+            {/* Liste des scénarios si déplié */}
+            {showCampaignScenarios && (
+              <div style={{
+                background: 'rgba(0,0,0,0.5)',
+                borderRadius: '0.5rem',
+                padding: '0.75rem',
+                marginBottom: '1rem',
+                maxHeight: '200px',
+                overflowY: 'auto'
+              }}>
+                {scenarios.map((scenario, idx) => (
+                  <button
+                    key={scenario.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onScenarioClick(scenario);
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '0.5rem',
+                      marginBottom: '0.25rem',
+                      background: `linear-gradient(135deg, ${colors.primary}30, ${colors.secondary}30)`,
+                      border: `1px solid ${colors.primary}50`,
+                      borderRadius: '0.5rem',
+                      color: 'white',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    #{idx + 1} - {scenario.displayName}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+              {saga.isFree ? (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDownloadFree(saga.pdfUrl, saga.name);
+                  }}
+                  style={{
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #10b981, #059669)',
+                    color: 'white',
+                    padding: '0.75rem 1rem',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    fontWeight: 'bold',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.5rem'
+                  }}
+                >
+                  <Download size={18} /> Télécharger
+                </button>
+              ) : (
+                <>
+                  <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: colors.primary }}>
+                    {saga.price.toFixed(2)} €
+                  </span>
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onAddToCart({ type: 'saga', item: saga });
+                    }}
+                    style={{
+                      flex: 1,
+                      background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+                      color: 'white',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem'
+                    }}
+                  >
+                    <ShoppingCart size={18} /> Ajouter
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Liste des scénarios */}
+        {scenarios.map((scenario, idx) => (
+          <div
+            key={scenario.id}
+            onClick={() => onScenarioClick(scenario)}
+            style={{
+              background: 'linear-gradient(135deg, rgba(0,0,0,0.7), rgba(0,0,0,0.9))',
+              borderRadius: '1rem',
+              overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.1)',
+              position: 'relative'
+            }}
+          >
+            {/* Image */}
+            <div style={{
+              position: 'relative',
+              height: '180px',
+              overflow: 'hidden'
+            }}>
+              <img
+                src={scenario.imageUrl}
+                alt={scenario.displayName}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  objectFit: 'cover'
+                }}
+              />
+              <div style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'linear-gradient(to top, rgba(0,0,0,0.9) 0%, transparent 50%)'
+              }} />
+
+              {/* Badge numéro */}
+              <div style={{
+                position: 'absolute',
+                top: '0.75rem',
+                left: '0.75rem',
+                background: colors.primary,
+                color: 'white',
+                padding: '0.25rem 0.75rem',
+                borderRadius: '1rem',
+                fontSize: '0.75rem',
+                fontWeight: 'bold'
+              }}>#{idx + 1}</div>
+
+              {/* Badge gratuit */}
+              {scenario.isFree && (
+                <div style={{
+                  position: 'absolute',
+                  top: '0.75rem',
+                  right: '0.75rem',
+                  background: '#10b981',
+                  color: 'white',
+                  padding: '0.25rem 0.75rem',
+                  borderRadius: '1rem',
+                  fontSize: '0.75rem',
+                  fontWeight: 'bold'
+                }}>GRATUIT</div>
+              )}
+            </div>
+
+            {/* Contenu */}
+            <div style={{ padding: '1rem' }}>
+              <h3 style={{
+                fontSize: '1.125rem',
+                fontWeight: 'bold',
+                color: colors.text,
+                marginBottom: '0.5rem'
+              }}>{scenario.displayName}</h3>
+
+              <div style={{
+                display: 'flex',
+                gap: '1rem',
+                fontSize: '0.75rem',
+                color: 'rgba(255,255,255,0.7)',
+                marginBottom: '0.75rem'
+              }}>
+                <span>✍️ {scenario.author}</span>
+                <span>⏱️ {scenario.duration}</span>
+              </div>
+
+              {/* Ratings */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '0.5rem',
+                marginBottom: '1rem',
+                fontSize: '0.7rem'
+              }}>
+                <div style={{ textAlign: 'center' }}>
+                  <div>🌙</div>
+                  <div style={{ color: '#fbbf24' }}>{'★'.repeat(scenario.ratings.ambiance)}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div>🧩</div>
+                  <div style={{ color: '#fbbf24' }}>{'★'.repeat(scenario.ratings.complexite)}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div>⚔️</div>
+                  <div style={{ color: '#fbbf24' }}>{'★'.repeat(scenario.ratings.combat)}</div>
+                </div>
+                <div style={{ textAlign: 'center' }}>
+                  <div>🔍</div>
+                  <div style={{ color: '#fbbf24' }}>{'★'.repeat(scenario.ratings.enquete)}</div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                {scenario.isFree ? (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDownloadFree(scenario.pdfUrl, scenario.displayName);
+                    }}
+                    style={{
+                      flex: 1,
+                      background: 'linear-gradient(135deg, #10b981, #059669)',
+                      color: 'white',
+                      padding: '0.75rem 1rem',
+                      borderRadius: '0.5rem',
+                      border: 'none',
+                      fontWeight: 'bold',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem',
+                      fontSize: '0.875rem'
+                    }}
+                  >
+                    <Download size={16} /> Télécharger
+                  </button>
+                ) : (
+                  <>
+                    <span style={{ fontSize: '1.125rem', fontWeight: 'bold', color: colors.primary }}>
+                      {scenario.price.toFixed(2)} €
+                    </span>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAddToCart({ type: 'scenario', item: scenario, saga });
+                      }}
+                      style={{
+                        flex: 1,
+                        background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+                        color: 'white',
+                        padding: '0.75rem 1rem',
+                        borderRadius: '0.5rem',
+                        border: 'none',
+                        fontWeight: 'bold',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        gap: '0.5rem',
+                        fontSize: '0.875rem'
+                      }}
+                    >
+                      <ShoppingCart size={16} /> Ajouter
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // ========== VERSION DESKTOP - Carousel horizontal ==========
   return (
-    <div 
+    <div
       ref={carouselRef}
       className="scenario-carousel centered"
       onMouseDown={handleMouseDown}
