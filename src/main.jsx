@@ -3344,17 +3344,17 @@ export default function App() {
             )}
 
             {/* Bouton retour flottant selon le thème */}
-            <button 
-              onClick={closeBook} 
-              className={`fixed top-24 left-20 z-50 backdrop-blur-md px-6 py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
-                currentTheme.id === 'medieval' 
+            <button
+              onClick={closeBook}
+              className={`fixed top-20 md:top-24 left-2 md:left-20 z-50 backdrop-blur-md p-2 md:px-6 md:py-3 rounded-full flex items-center gap-2 transition-all shadow-2xl hover:scale-105 border-2 ${
+                currentTheme.id === 'medieval'
                   ? 'bg-amber-800/90 hover:bg-amber-700 text-amber-100 border-amber-600 hover:border-amber-400' :
                 currentTheme.id === 'lovecraft'
                   ? 'bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border-emerald-600 hover:border-emerald-400' :
                   'bg-cyan-900/90 hover:bg-cyan-800 text-cyan-100 border-cyan-600 hover:border-cyan-400'
               }`}>
               <ChevronLeft size={20} />
-              <span className="font-bold">Retour</span>
+              <span className="font-bold hidden md:inline">Retour</span>
             </button>
 
             {/* Bannière distincte avec fond propre + Motifs thématiques */}
