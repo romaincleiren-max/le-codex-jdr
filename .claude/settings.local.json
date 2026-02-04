@@ -4,7 +4,8 @@
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nFix: Tri des scénarios par numéro + Corrections sécurité Supabase\n\n- Ajout du tri automatique des scénarios par ID dans getCampaigns\\(\\)\n- Les scénarios s''affichent maintenant dans l''ordre numérique \\(#1, #2, #3\\) au lieu de l''ordre par date de modification\n- Correction complète des problèmes de sécurité Supabase détectés par Security Advisor:\n  * 13 fonctions avec search_path sécurisé \\(SET search_path = public, pg_temp\\)\n  * Politiques RLS renforcées \\(analytics_events, orders, purchases, submissions\\)\n  * 4 vues analytics converties en SECURITY INVOKER\n  * Script de migration complet pour l''application des correctifs\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git push)",
-      "Bash(git pull:*)"
+      "Bash(git pull:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

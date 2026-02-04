@@ -3358,17 +3358,17 @@ export default function App() {
             </button>
 
             {/* Bannière distincte avec fond propre + Motifs thématiques */}
-            <div className="relative z-20 mb-8 pt-4">
-              <div className={`mx-6 rounded-2xl overflow-hidden shadow-2xl border-4 ${
+            <div className="relative z-20 mb-4 md:mb-8 pt-2 md:pt-4">
+              <div className={`mx-2 md:mx-6 rounded-xl md:rounded-2xl overflow-hidden shadow-2xl border-2 md:border-4 ${
                 currentTheme.id === 'medieval' 
                   ? 'bg-gradient-to-br from-amber-950 via-amber-900 to-amber-950 border-amber-700' :
                 currentTheme.id === 'lovecraft'
                   ? 'bg-gradient-to-br from-emerald-950 via-emerald-900 to-emerald-950 border-emerald-700' :
                   'bg-gradient-to-br from-cyan-950 via-cyan-900 to-cyan-950 border-cyan-700'
               }`}>
-                <div className="pt-8 pb-8 text-center relative overflow-hidden">
-                  {/* Logo du site en haut à droite */}
-                  <div className="absolute top-4 right-6 z-20">
+                <div className="pt-4 pb-4 md:pt-8 md:pb-8 text-center relative overflow-hidden">
+                  {/* Logo du site en haut à droite - caché sur mobile */}
+                  <div className="absolute top-4 right-6 z-20 hidden md:block">
                     {siteSettings.logoUrl ? (
                       <img 
                         src={siteSettings.logoUrl}
@@ -3406,8 +3406,8 @@ export default function App() {
                       currentTheme.id === 'lovecraft' ? '200px 200px' : '50px 50px'
                   }}></div>
                   
-                  <h1 className={`text-6xl font-bold mb-3 drop-shadow-2xl relative z-10 ${
-                    currentTheme.id === 'medieval' 
+                  <h1 className={`text-2xl md:text-6xl font-bold mb-2 md:mb-3 drop-shadow-2xl relative z-10 ${
+                    currentTheme.id === 'medieval'
                       ? 'text-amber-300' :
                     currentTheme.id === 'lovecraft'
                       ? 'text-emerald-300' :
@@ -3429,7 +3429,7 @@ export default function App() {
                     {currentTheme.id === 'scifi' && '🚀 '}
                     {currentTheme.name}
                   </h1>
-                  <p className={`text-xl relative z-10 mb-4 ${
+                  <p className={`text-sm md:text-xl relative z-10 mb-2 md:mb-4 ${
                     currentTheme.id === 'medieval' ? 'text-amber-400 font-serif italic' :
                     currentTheme.id === 'lovecraft' ? 'text-emerald-400 font-mono' :
                     'text-cyan-400 tracking-wide'
@@ -3440,13 +3440,13 @@ export default function App() {
                   </p>
                   
                   {/* Champ de recherche par tags */}
-                  <div className="max-w-md mx-auto relative z-10">
+                  <div className="max-w-xs md:max-w-md mx-auto relative z-10 px-2 md:px-0">
                     <input
                       type="text"
                       value={searchTag}
                       onChange={(e) => setSearchTag(e.target.value)}
-                      placeholder="🔍 Rechercher par tag (horreur, enquête, combat...)"
-                      className={`w-full px-6 py-3 rounded-full text-center font-semibold transition-all focus:outline-none focus:ring-4 ${
+                      placeholder="🔍 Rechercher par tag..."
+                      className={`w-full px-4 py-2 md:px-6 md:py-3 rounded-full text-center text-sm md:text-base font-semibold transition-all focus:outline-none focus:ring-4 ${
                         currentTheme.id === 'medieval'
                           ? 'bg-amber-900/80 text-amber-100 placeholder-amber-400/70 focus:ring-amber-500/50 border-2 border-amber-600'
                           : currentTheme.id === 'lovecraft'
@@ -3473,8 +3473,8 @@ export default function App() {
               </div>
             </div>
 
-            {/* Menu horizontal des campagnes - Thématique selon section */}
-            <div className="sticky top-0 z-40 py-6 mb-8">
+            {/* Menu horizontal des campagnes - Caché sur mobile (doublon avec carte campagne) */}
+            <div className="hidden md:block sticky top-0 z-40 py-6 mb-8">
               {(() => {
                 const themeCampaigns = sagas.filter(s => {
                   const sagaThemeId = String(s.themeId || '').trim().toLowerCase();
