@@ -7,7 +7,7 @@ import './index.css';
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock } from 'lucide-react';
+import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock, Menu } from 'lucide-react';
 import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
@@ -234,14 +234,14 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-amber-100 border-4 border-amber-900 rounded-lg p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-amber-900">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-2 md:p-4">
+      <div className="bg-amber-100 border-2 md:border-4 border-amber-900 rounded-lg p-4 md:p-8 max-w-2xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h2 className="text-xl md:text-3xl font-bold text-amber-900">
             {saga ? '✏️ Modifier' : '➕ Créer'} une campagne
           </h2>
-          <button onClick={onClose} className="text-amber-900 hover:text-amber-700 text-2xl">
-            <X size={28} />
+          <button onClick={onClose} className="text-amber-900 hover:text-amber-700 text-xl md:text-2xl">
+            <X size={24} />
           </button>
         </div>
 
@@ -400,27 +400,27 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
   if (!scenario) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-4" onClick={onClose}>
-      <div className="relative max-w-6xl w-full max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
-        <button 
+    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-2 md:p-4" onClick={onClose}>
+      <div className="relative max-w-6xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <button
           onClick={onClose}
-          className="fixed top-4 right-4 bg-amber-800 text-white p-3 rounded-full hover:bg-amber-700 shadow-2xl z-50">
-          <X size={32} />
+          className="fixed top-2 right-2 md:top-4 md:right-4 bg-amber-800 text-white p-2 md:p-3 rounded-full hover:bg-amber-700 shadow-2xl z-50">
+          <X size={24} className="md:w-8 md:h-8" />
         </button>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
           {/* Colonne gauche - Image en grand */}
-          <div className="flex items-center justify-center bg-black/50 rounded-lg p-4">
-            <img 
-              src={scenario.imageUrl} 
+          <div className="flex items-center justify-center bg-black/50 rounded-lg p-2 md:p-4">
+            <img
+              src={scenario.imageUrl}
               alt={scenario.displayName}
-              className="w-full max-h-[85vh] object-contain rounded-lg border-4 border-amber-800 shadow-2xl"
+              className="w-full max-h-[50vh] md:max-h-[85vh] object-contain rounded-lg border-2 md:border-4 border-amber-800 shadow-2xl"
             />
           </div>
 
           {/* Colonne droite - Détails */}
-          <div className="bg-amber-100 border-4 border-amber-900 rounded-lg p-8 shadow-2xl">
-            <h2 className="text-4xl font-bold text-amber-900 mb-4 font-serif">{scenario.displayName}</h2>
+          <div className="bg-amber-100 border-2 md:border-4 border-amber-900 rounded-lg p-4 md:p-8 shadow-2xl">
+            <h2 className="text-2xl md:text-4xl font-bold text-amber-900 mb-4 font-serif">{scenario.displayName}</h2>
             
             <div className="mb-6">
               <h3 className="text-lg font-bold text-amber-900 mb-2">Description</h3>
@@ -578,19 +578,19 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
   };
 
   return (
-    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-amber-100 border-4 border-amber-900 rounded-lg p-8 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-3xl font-bold text-amber-900">
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-2 md:p-4">
+      <div className="bg-amber-100 border-2 md:border-4 border-amber-900 rounded-lg p-4 md:p-8 max-w-4xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4 md:mb-6">
+          <h2 className="text-xl md:text-3xl font-bold text-amber-900">
             {scenario ? '✏️ Modifier' : '➕ Créer'} un scénario
           </h2>
-          <button onClick={onClose} className="text-amber-900 hover:text-amber-700 text-2xl">
-            <X size={28} />
+          <button onClick={onClose} className="text-amber-900 hover:text-amber-700 text-xl md:text-2xl">
+            <X size={24} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-amber-900 font-bold mb-2">Titre *</label>
               <input 
@@ -615,11 +615,11 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-amber-900 font-bold mb-2">Auteur *</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 value={editedScenario.author}
                 onChange={(e) => setEditedScenario({...editedScenario, author: e.target.value})}
@@ -628,8 +628,8 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
             </div>
             <div>
               <label className="block text-amber-900 font-bold mb-2">Durée *</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 value={editedScenario.duration}
                 onChange={(e) => setEditedScenario({...editedScenario, duration: e.target.value})}
@@ -693,7 +693,7 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
 
           <div>
             <label className="block text-amber-900 font-bold mb-3">Notations</label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {['ambiance', 'complexite', 'combat', 'enquete'].map(rating => (
                 <div key={rating}>
                   <label className="block text-sm text-amber-800 mb-1 capitalize">{rating}</label>
@@ -731,14 +731,14 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
                       {category === 'theme' && '🎨'}
                       {category}
                     </h4>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {categoryTags.map((tag) => {
                         const isSelected = editedScenario.tags.includes(tag.name);
                         return (
-                          <label 
+                          <label
                             key={tag.id}
                             className={`flex items-center gap-2 p-2 rounded cursor-pointer transition-all ${
-                              isSelected 
+                              isSelected
                                 ? 'bg-amber-200 border-2 border-amber-700' 
                                 : 'bg-gray-50 border-2 border-gray-300 hover:bg-gray-100'
                             }`}
@@ -879,20 +879,20 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
   };
 
   return (
-    <div className="fixed right-0 top-0 h-full w-[450px] shadow-2xl z-50 flex flex-col"
+    <div className="fixed right-0 top-0 h-full w-full md:w-[450px] shadow-2xl z-50 flex flex-col"
       style={{
         background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
       }}>
       {/* Header élégant */}
       <div className="relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-amber-800/20"></div>
-        <div className="relative p-6 border-b border-amber-700/30 flex justify-between items-center">
+        <div className="relative p-4 md:p-6 border-b border-amber-700/30 flex justify-between items-center">
           <div>
-            <h2 className="text-3xl font-bold text-amber-300 mb-1">Votre Panier</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-1">Votre Panier</h2>
             <p className="text-amber-500 text-sm">{cart.length} article{cart.length > 1 ? 's' : ''}</p>
           </div>
-          <button 
-            onClick={onClose} 
+          <button
+            onClick={onClose}
             className="text-amber-300 hover:text-amber-100 transition-colors p-2 rounded-full hover:bg-amber-900/20">
             <X size={28} />
           </button>
@@ -900,7 +900,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
       </div>
       
       {/* Contenu scrollable */}
-      <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
+      <div className="flex-1 overflow-y-auto p-4 md:p-6 custom-scrollbar">
         {cart.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full">
             <div className="bg-gradient-to-br from-amber-900/30 to-amber-800/20 rounded-full p-8 mb-6 border border-amber-700/30">
@@ -1097,7 +1097,7 @@ const handleSubmit = async (e) => {
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
                 <h2 className="text-xl font-bold text-amber-900 mb-4">Informations</h2>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-amber-900 font-bold mb-2">Prénom *</label>
                     <input type="text" value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)}
@@ -1137,7 +1137,7 @@ const handleSubmit = async (e) => {
                   {formErrors.cardNumber && <p className="text-red-600 text-sm mt-1">{formErrors.cardNumber}</p>}
                 </div>
                 
-                <div className="grid grid-cols-2 gap-4 mt-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block text-amber-900 font-bold mb-2">Expiration *</label>
                     <input type="text" value={formData.expiryDate} onChange={(e) => handleInputChange('expiryDate', e.target.value)}
@@ -1753,6 +1753,7 @@ export default function App() {
   const [showCampaignMenu, setShowCampaignMenu] = useState(false);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [orderData, setOrderData] = useState(null);
   const [showCampaignModal, setShowCampaignModal] = useState(false);
   const [editingSaga, setEditingSaga] = useState(null);
@@ -2157,38 +2158,38 @@ export default function App() {
           <div className="max-w-7xl mx-auto px-6 py-3 relative z-10">
             <div className="flex items-center justify-between gap-8">
               {/* Logo et titre */}
-              <button 
-                onClick={() => setCurrentPage('home')} 
-                className="group flex items-center gap-4 hover:scale-105 transition-all duration-300 py-1 flex-shrink-0">
+              <button
+                onClick={() => setCurrentPage('home')}
+                className="group flex items-center gap-2 md:gap-4 hover:scale-105 transition-all duration-300 py-1 flex-shrink-0">
                 {/* Container du logo avec bordure */}
                 <div className="relative">
                   {siteSettings.logoUrl ? (
-                    <img 
-                      src={siteSettings.logoUrl} 
+                    <img
+                      src={siteSettings.logoUrl}
                       alt={siteSettings.siteName}
-                      className="h-28 w-28 object-contain rounded-xl border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50 p-2"
+                      className="h-12 w-12 md:h-28 md:w-28 object-contain rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50 p-1 md:p-2"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : (
-                    <div className="text-6xl p-2 rounded-xl border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
+                    <div className="text-3xl md:text-6xl p-1 md:p-2 rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
                   )}
                 </div>
-                
+
                 {/* Texte */}
                 <div className="flex flex-col items-start">
-                  <span className="text-5xl font-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300 tracking-tight" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
+                  <span className="text-xl md:text-5xl font-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300 tracking-tight" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
                     {siteSettings.siteName}
                   </span>
                   {siteSettings.tagline && (
-                    <span className="text-sm text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300 font-medium">
+                    <span className="text-xs md:text-sm text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300 font-medium hidden sm:block">
                       {siteSettings.tagline}
                     </span>
                   )}
                 </div>
               </button>
 
-              {/* Navigation centrale */}
-              <div className="flex gap-12 items-center flex-1 justify-center">
+              {/* Navigation centrale - cachee sur mobile */}
+              <div className="hidden md:flex gap-6 lg:gap-12 items-center flex-1 justify-center">
                 {['home', 'submit', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
@@ -2238,23 +2239,23 @@ export default function App() {
               </div>
 
               {/* Boutons d'action à droite */}
-              <div className="flex gap-3 items-center flex-shrink-0 ml-8">
+              <div className="flex gap-2 md:gap-3 items-center flex-shrink-0 ml-2 md:ml-8">
                 {/* Bouton Panier */}
-                <button 
-                  onClick={() => setShowCart(!showCart)} 
-                  className="relative group px-4 py-2.5 rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-semibold flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-green-900/50">
-                  <ShoppingCart size={20} className="group-hover:rotate-12 transition-transform duration-300" />
+                <button
+                  onClick={() => setShowCart(!showCart)}
+                  className="relative group px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-semibold flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-green-900/50">
+                  <ShoppingCart size={18} className="md:w-5 md:h-5 group-hover:rotate-12 transition-transform duration-300" />
                   <span className="hidden sm:inline">Panier</span>
                   {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center animate-pulse shadow-lg">
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {cartItemCount}
                     </span>
                   )}
                 </button>
-                
-                {/* Bouton Déconnexion */}
+
+                {/* Bouton Déconnexion - caché sur mobile (dans le menu) */}
                 {isAuthenticated && (
-                  <button 
+                  <button
                     onClick={async () => {
                       if (confirm('Voulez-vous vous déconnecter ?')) {
                         await supabase.auth.signOut();
@@ -2263,12 +2264,19 @@ export default function App() {
                         window.location.href = '/';
                       }
                     }}
-                    className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-900/50"
+                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-900/50"
                     title="Se déconnecter de l'administration">
                     <Lock size={18} />
-                    <span className="hidden sm:inline">Déconnexion</span>
+                    <span className="hidden lg:inline">Déconnexion</span>
                   </button>
                 )}
+
+                {/* Bouton Menu Hamburger - visible sur mobile uniquement */}
+                <button
+                  onClick={() => setMobileMenuOpen(true)}
+                  className="md:hidden p-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white transition-all duration-300">
+                  <Menu size={24} />
+                </button>
               </div>
             </div>
           </div>
@@ -2276,6 +2284,93 @@ export default function App() {
           {/* Ligne de séparation subtile */}
           <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/30 to-transparent"></div>
         </nav>
+      )}
+
+      {/* Sidebar Mobile */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[100] md:hidden">
+          {/* Overlay sombre */}
+          <div
+            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+
+          {/* Sidebar */}
+          <div className="absolute right-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl transform transition-transform duration-300 ease-out">
+            {/* Header sidebar */}
+            <div className="flex items-center justify-between p-4 border-b border-amber-600/30">
+              <span className="text-xl font-bold text-amber-300" style={{ fontFamily: "'Cinzel', serif" }}>Menu</span>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-colors">
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Liens de navigation */}
+            <nav className="p-4 space-y-2">
+              {['home', 'submit', 'admin', 'stats', 'about']
+                .filter(page => {
+                  if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
+                    return false;
+                  }
+                  return true;
+                })
+                .map(page => {
+                  const isActive = currentPage === page;
+                  const icons = {
+                    home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
+                    submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                    admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
+                    stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
+                    about: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Scroll%20logo_wthback.png'
+                  };
+                  const labels = {
+                    home: 'Accueil',
+                    submit: 'Proposer',
+                    admin: 'Admin',
+                    stats: 'Statistiques',
+                    about: 'À propos'
+                  };
+
+                  return (
+                    <button
+                      key={page}
+                      onClick={() => {
+                        setCurrentPage(page);
+                        setMobileMenuOpen(false);
+                      }}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                        isActive
+                          ? 'bg-amber-600/30 text-amber-300 border border-amber-500/50'
+                          : 'text-amber-100/80 hover:bg-slate-700/50 hover:text-amber-200'
+                      }`}>
+                      <img src={icons[page]} alt={labels[page]} className="w-7 h-7 object-contain" />
+                      <span className="font-semibold">{labels[page]}</span>
+                    </button>
+                  );
+                })}
+
+              {/* Bouton Déconnexion dans le menu mobile */}
+              {isAuthenticated && (
+                <button
+                  onClick={async () => {
+                    if (confirm('Voulez-vous vous déconnecter ?')) {
+                      await supabase.auth.signOut();
+                      setIsAuthenticated(false);
+                      setCurrentPage('home');
+                      setMobileMenuOpen(false);
+                      window.location.href = '/';
+                    }
+                  }}
+                  className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-900/30 hover:text-red-300 transition-all duration-200 mt-4 border border-red-500/30">
+                  <Lock size={20} />
+                  <span className="font-semibold">Déconnexion</span>
+                </button>
+              )}
+            </nav>
+          </div>
+        </div>
       )}
 
       {showCart && currentPage !== 'checkout' && currentPage !== 'confirmation' && (
@@ -2293,10 +2388,10 @@ export default function App() {
 
         {/* PAGE ACCUEIL */}
         {!showBook && currentPage === 'home' && (
-          <div className="h-screen flex">
+          <div className="min-h-screen flex flex-col md:flex-row pt-20 md:pt-0">
             {themes.map((theme, idx) => (
               <div key={theme.id} onClick={() => { setCurrentTheme(theme); openBook(theme); }}
-                className="flex-1 flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out hover:flex-[1.5] group relative overflow-hidden"
+                className="flex-1 min-h-[33vh] md:min-h-screen flex items-center justify-center cursor-pointer transition-all duration-500 ease-in-out md:hover:flex-[1.5] group relative overflow-hidden"
                 style={{backgroundColor: theme.id === 'medieval' ? '#78350f' : '#020617'}}>
                 {/* Image d'arrière-plan avec effets */}
                 <div className="absolute inset-0 transition-all duration-700">
@@ -2329,12 +2424,12 @@ export default function App() {
                 `}</style>
 
                 {/* Contenu */}
-                <div className="relative z-10 text-center p-8 transform transition-all duration-500 group-hover:scale-110">
-                  <h2 className={`text-6xl font-bold mb-4 drop-shadow-2xl transition-all duration-500 ${
+                <div className="relative z-10 text-center p-4 md:p-8 transform transition-all duration-500 group-hover:scale-110">
+                  <h2 className={`text-3xl md:text-6xl font-bold mb-2 md:mb-4 drop-shadow-2xl transition-all duration-500 ${
                     theme.id === 'medieval' ? 'text-amber-300' : theme.id === 'lovecraft' ? 'text-emerald-400' : 'text-cyan-400'
                   }`} style={{
                     textShadow: '0 0 30px rgba(251, 191, 36, 0.5), 3px 3px 6px rgba(0,0,0,1)',
-                    fontFamily: theme.id === 'medieval' 
+                    fontFamily: theme.id === 'medieval'
                       ? "'Cinzel', serif" :
                     theme.id === 'lovecraft'
                       ? "'IM Fell English', serif" :
@@ -2342,7 +2437,7 @@ export default function App() {
                   }}>
                     {theme.name}
                   </h2>
-                  <p className={`text-xl opacity-0 group-hover:opacity-100 transition-all duration-500 ${
+                  <p className={`text-base md:text-xl opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-500 ${
                     theme.id === 'medieval' ? 'text-amber-200' : theme.id === 'lovecraft' ? 'text-emerald-300' : 'text-cyan-300'
                   }`}>Cliquez pour explorer</p>
                 </div>
@@ -2353,27 +2448,27 @@ export default function App() {
 
         {/* PAGE PROPOSER - Formulaire de soumission REDESIGN */}
         {!showBook && currentPage === 'submit' && (
-          <div className="min-h-screen p-8" style={{
+          <div className="min-h-screen p-4 md:p-8 pt-24 md:pt-8" style={{
             background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
           }}>
             <div className="max-w-4xl mx-auto">
-              <div className="text-center mb-12">
+              <div className="text-center mb-8 md:mb-12">
                 {/* Logo Feather */}
-                <div className="flex justify-center mb-6">
-                  <img 
+                <div className="flex justify-center mb-4 md:mb-6">
+                  <img
                     src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png"
                     alt="Proposer"
-                    className="w-24 h-24 object-contain"
+                    className="w-16 h-16 md:w-24 md:h-24 object-contain"
                   />
                 </div>
                 <div className="inline-block bg-gradient-to-r from-amber-500 to-amber-700 text-transparent bg-clip-text mb-4">
-                  <h1 className="text-6xl font-bold">Proposer un Scénario</h1>
+                  <h1 className="text-3xl md:text-6xl font-bold">Proposer un Scénario</h1>
                 </div>
-                <div className="w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full mb-6"></div>
-                <p className="text-amber-300 text-xl">Partagez votre création avec la communauté !</p>
+                <div className="w-24 md:w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full mb-4 md:mb-6"></div>
+                <p className="text-amber-300 text-base md:text-xl">Partagez votre création avec la communauté !</p>
               </div>
-              
-              <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/50 rounded-2xl p-8 shadow-2xl">
+
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/50 rounded-2xl p-4 md:p-8 shadow-2xl">
                 <form onSubmit={async (e) => {
                   e.preventDefault();
                   
@@ -2486,25 +2581,25 @@ export default function App() {
 
         {/* PAGE ADMIN - COMPLETE AVEC TOUS LES ONGLETS */}
         {!showBook && currentPage === 'admin' && (
-          <div className="min-h-screen p-8" style={{
+          <div className="min-h-screen p-4 md:p-8 pt-24 md:pt-8" style={{
             background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
           }}>
             <div className="max-w-7xl mx-auto">
               {/* Logo Gear */}
-              <div className="flex justify-center mb-6">
+              <div className="flex justify-center mb-4 md:mb-6">
                 <div className="relative group">
                   <div className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-700 rounded-full blur-xl opacity-50 group-hover:opacity-75 transition-opacity"></div>
-                  <img 
+                  <img
                     src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png"
                     alt="Administration"
-                    className="relative w-28 h-28 object-contain transform group-hover:rotate-90 transition-transform duration-500"
+                    className="relative w-16 h-16 md:w-28 md:h-28 object-contain transform group-hover:rotate-90 transition-transform duration-500"
                   />
                 </div>
               </div>
-              <h1 className="text-6xl font-black mb-4 text-center bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent tracking-tight">Administration</h1>
-              <p className="text-center text-amber-400/80 text-lg mb-10">Gérez votre bibliothèque de scénarios</p>
-              
-              <div className="flex flex-wrap justify-center gap-3 mb-10">
+              <h1 className="text-3xl md:text-6xl font-black mb-2 md:mb-4 text-center bg-gradient-to-r from-amber-400 via-amber-300 to-amber-400 bg-clip-text text-transparent tracking-tight">Administration</h1>
+              <p className="text-center text-amber-400/80 text-sm md:text-lg mb-6 md:mb-10">Gérez votre bibliothèque de scénarios</p>
+
+              <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-6 md:mb-10">
                 {[
                   {id: 'campagnes', icon: '📚', label: 'Campagnes', color: 'from-purple-600 to-purple-700'},
                   {id: 'scenarios', icon: '📖', label: 'Scénarios', color: 'from-blue-600 to-blue-700'},
@@ -2516,23 +2611,23 @@ export default function App() {
                   {id: 'parametres', icon: '⚙️', label: 'Paramètres', color: 'from-slate-600 to-slate-700'}
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setAdminTab(tab.id)}
-                    className={`relative px-6 py-3.5 rounded-xl font-bold text-base transition-all transform hover:scale-105 overflow-hidden group ${
-                      adminTab === tab.id 
-                        ? `bg-gradient-to-r ${tab.color} text-white shadow-lg` 
+                    className={`relative px-3 py-2 md:px-6 md:py-3.5 rounded-xl font-bold text-xs md:text-base transition-all transform hover:scale-105 overflow-hidden group ${
+                      adminTab === tab.id
+                        ? `bg-gradient-to-r ${tab.color} text-white shadow-lg`
                         : 'bg-slate-800/50 text-slate-300 hover:bg-slate-700/50 border border-slate-700'
                     }`}>
                     {adminTab === tab.id && (
                       <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 animate-shimmer"></div>
                     )}
-                    <span className="relative flex items-center gap-2">
-                      <span className="text-xl">{tab.icon}</span>
-                      <span>{tab.label}</span>
+                    <span className="relative flex items-center gap-1 md:gap-2">
+                      <span className="text-base md:text-xl">{tab.icon}</span>
+                      <span className="hidden sm:inline">{tab.label}</span>
                     </span>
                   </button>
                 ))}
               </div>
 
-              <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/30 rounded-2xl p-8 shadow-2xl min-h-96 backdrop-blur-sm">
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/30 rounded-2xl p-4 md:p-8 shadow-2xl min-h-96 backdrop-blur-sm">
                 
                 {/* ONGLET CAMPAGNES */}
                 {adminTab === 'campagnes' && (
@@ -3101,18 +3196,18 @@ export default function App() {
 
         {/* PAGE STATS - AVEC VRAIES DONNEES */}
         {!showBook && currentPage === 'stats' && (
-          <div className="min-h-screen p-8">
+          <div className="min-h-screen p-4 md:p-8 pt-24 md:pt-8">
             <div className="max-w-7xl mx-auto">
               {/* Logo Book */}
-              <div className="flex justify-center mb-6">
-                <img 
+              <div className="flex justify-center mb-4 md:mb-6">
+                <img
                   src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png"
                   alt="Statistiques"
-                  className="w-24 h-24 object-contain"
+                  className="w-16 h-16 md:w-24 md:h-24 object-contain"
                 />
               </div>
-              <h1 className="text-5xl font-bold mb-8 text-amber-300 text-center">Statistiques</h1>
-              <div className="bg-amber-100 border-4 border-amber-900 rounded-2xl p-8 shadow-2xl">
+              <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-8 text-amber-300 text-center">Statistiques</h1>
+              <div className="bg-amber-100 border-2 md:border-4 border-amber-900 rounded-2xl p-4 md:p-8 shadow-2xl">
                 <StatsDisplay />
               </div>
             </div>
@@ -3121,44 +3216,44 @@ export default function App() {
 
         {/* PAGE À PROPOS - REDESIGN MODERNE */}
         {!showBook && currentPage === 'about' && (
-          <div className="min-h-screen p-8" style={{
+          <div className="min-h-screen p-4 md:p-8 pt-24 md:pt-8" style={{
             background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%)'
           }}>
             <div className="max-w-6xl mx-auto">
-              <div className="text-center mb-16">
+              <div className="text-center mb-8 md:mb-16">
                 <div className="inline-block bg-gradient-to-r from-amber-500 to-amber-700 text-transparent bg-clip-text mb-4">
-                  <h1 className="text-7xl font-bold">À Propos</h1>
+                  <h1 className="text-4xl md:text-7xl font-bold">À Propos</h1>
                 </div>
-                <div className="w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full"></div>
+                <div className="w-24 md:w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full"></div>
               </div>
-              
-              <div className="space-y-10">
-                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
+
+              <div className="space-y-6 md:space-y-10">
+                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-4 md:p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
-                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20group_wthback.png" alt="Qui sommes-nous" className="w-24 h-24 object-contain" />
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20group_wthback.png" alt="Qui sommes-nous" className="w-16 h-16 md:w-24 md:h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4 text-amber-300">Qui sommes-nous ?</h2>
-                  <p className="text-lg leading-relaxed text-amber-100/90">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">Qui sommes-nous ?</h2>
+                  <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
                     {siteSettings.aboutContent?.section1 || "Nous sommes une équipe passionnée de maîtres du jeu et de créateurs de contenu dédiés à l'univers du jeu de rôle. Notre amour pour la narration collaborative et les aventures épiques nous pousse à partager nos créations avec la communauté rôliste francophone."}
                   </p>
                 </section>
 
-                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
+                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-4 md:p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
-                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20target_wthback.png" alt="Notre objectif" className="w-24 h-24 object-contain" />
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20target_wthback.png" alt="Notre objectif" className="w-16 h-16 md:w-24 md:h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4 text-amber-300">Notre Objectif</h2>
-                  <p className="text-lg leading-relaxed text-amber-100/90">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">Notre Objectif</h2>
+                  <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
                     {siteSettings.aboutContent?.section2 || "Cette bibliothèque a été conçue pour offrir des scénarios de jeu de rôle d'exception. Chaque scénario est soigneusement examiné, noté selon plusieurs critères (ambiance, complexité, combat, enquête), et validé par notre équipe avant publication. Nous privilégions la qualité à la quantité : seuls les meilleurs scénarios trouvent leur place dans notre collection."}
                   </p>
                 </section>
 
-                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
+                <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-4 md:p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
-                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt="L'Auteur" className="w-24 h-24 object-contain" />
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt="L'Auteur" className="w-16 h-16 md:w-24 md:h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4 text-amber-300">L'Auteur</h2>
-                  <p className="text-lg leading-relaxed text-amber-100/90">
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">L'Auteur</h2>
+                  <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
                     {siteSettings.aboutContent?.section3 || "Maître de jeu depuis plus de dix ans, j'ai exploré de nombreux univers et systèmes de jeu. Ma philosophie : créer des aventures mémorables qui laissent une empreinte durable dans l'esprit des joueurs."}
                   </p>
                 </section>

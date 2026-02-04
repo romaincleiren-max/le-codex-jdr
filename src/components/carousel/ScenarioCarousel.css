@@ -466,6 +466,11 @@
     min-height: 600px;
   }
 
+  .scenario-slide {
+    min-width: 500px;
+    max-width: 500px;
+  }
+
   .scenario-title {
     font-size: 2.5rem;
   }
@@ -495,13 +500,25 @@
   .scenario-carousel {
     height: auto;
     min-height: 100vh;
+    padding-top: 80px; /* Espace pour la navbar */
+  }
+
+  .scenario-carousel-track {
+    gap: 0.5rem;
+  }
+
+  .scenario-slide {
+    min-width: calc(100vw - 2rem);
+    max-width: calc(100vw - 2rem);
+    margin: 0 1rem;
+    border-radius: 16px;
   }
 
   .scenario-number {
-    top: 1rem;
-    left: 1rem;
-    padding: 0.4rem 1rem;
-    font-size: 1rem;
+    top: 0.75rem;
+    left: 0.75rem;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
   }
 
   .scenario-free-badge {
