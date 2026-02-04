@@ -183,12 +183,12 @@ const ScenarioCarousel = ({
           '--theme-primary': colors.primary,
           '--theme-secondary': colors.secondary,
           '--theme-text': colors.text,
-          padding: '1rem',
-          paddingTop: '5rem',
+          padding: '0.75rem',
+          paddingTop: '3.5rem',
           minHeight: '100vh',
           display: 'flex',
           flexDirection: 'column',
-          gap: '1.5rem'
+          gap: '1rem'
         }}
       >
         {/* Carte Campagne */}

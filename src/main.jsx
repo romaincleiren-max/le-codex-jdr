@@ -2155,29 +2155,29 @@ export default function App() {
           {/* Barre lumineuse animée en haut */}
           <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-60"></div>
           
-          <div className="max-w-7xl mx-auto px-3 md:px-6 py-2 md:py-3 relative z-10">
-            <div className="flex items-center justify-between gap-2 md:gap-8">
+          <div className="max-w-7xl mx-auto px-2 md:px-6 py-1.5 md:py-3 relative z-10">
+            <div className="flex items-center justify-between gap-1 md:gap-8">
               {/* Logo et titre */}
               <button
                 onClick={() => setCurrentPage('home')}
-                className="group flex items-center gap-2 md:gap-4 hover:scale-105 transition-all duration-300 py-1 flex-shrink-0">
+                className="group flex items-center gap-1.5 md:gap-4 hover:scale-105 transition-all duration-300 flex-shrink-0">
                 {/* Container du logo avec bordure */}
                 <div className="relative">
                   {siteSettings.logoUrl ? (
                     <img
                       src={siteSettings.logoUrl}
                       alt={siteSettings.siteName}
-                      className="h-10 w-10 md:h-28 md:w-28 object-contain rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50 p-0.5 md:p-2"
+                      className="h-8 w-8 md:h-28 md:w-28 object-contain rounded md:rounded-xl border md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50"
                       onError={(e) => { e.target.style.display = 'none'; }}
                     />
                   ) : (
-                    <div className="text-2xl md:text-6xl p-0.5 md:p-2 rounded-lg md:rounded-xl border-2 md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
+                    <div className="text-xl md:text-6xl p-0.5 md:p-2 rounded md:rounded-xl border md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
                   )}
                 </div>
 
                 {/* Texte */}
                 <div className="flex flex-col items-start">
-                  <span className="text-base md:text-5xl font-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300 tracking-tight" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
+                  <span className="text-sm md:text-5xl font-black bg-gradient-to-r from-amber-300 via-amber-200 to-amber-300 bg-clip-text text-transparent group-hover:from-amber-200 group-hover:via-amber-100 group-hover:to-amber-200 transition-all duration-300 tracking-tight" style={{ fontFamily: "'Cinzel', 'Playfair Display', serif" }}>
                     {siteSettings.siteName}
                   </span>
                   {siteSettings.tagline && (
@@ -2239,15 +2239,15 @@ export default function App() {
               </div>
 
               {/* Boutons d'action à droite */}
-              <div className="flex gap-2 md:gap-3 items-center flex-shrink-0 ml-2 md:ml-8">
+              <div className="flex gap-1.5 md:gap-3 items-center flex-shrink-0">
                 {/* Bouton Panier */}
                 <button
                   onClick={() => setShowCart(!showCart)}
-                  className="relative group px-3 py-2 md:px-4 md:py-2.5 rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-semibold flex items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-green-900/50">
-                  <ShoppingCart size={18} className="md:w-5 md:h-5 group-hover:rotate-12 transition-transform duration-300" />
-                  <span className="hidden sm:inline">Panier</span>
+                  className="relative group px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-semibold flex items-center gap-1 md:gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                  <ShoppingCart size={16} className="md:w-5 md:h-5 group-hover:rotate-12 transition-transform duration-300" />
+                  <span className="hidden sm:inline text-sm md:text-base">Panier</span>
                   {cartItemCount > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 md:w-6 md:h-6 flex items-center justify-center animate-pulse shadow-lg">
+                    <span className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold rounded-full w-4 h-4 md:w-6 md:h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {cartItemCount}
                     </span>
                   )}
@@ -2274,8 +2274,8 @@ export default function App() {
                 {/* Bouton Menu Hamburger - visible sur mobile uniquement */}
                 <button
                   onClick={() => setMobileMenuOpen(true)}
-                  className="md:hidden p-2 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white transition-all duration-300">
-                  <Menu size={24} />
+                  className="md:hidden p-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white transition-all duration-300">
+                  <Menu size={20} />
                 </button>
               </div>
             </div>
