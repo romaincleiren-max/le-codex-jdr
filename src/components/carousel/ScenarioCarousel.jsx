@@ -268,12 +268,12 @@ const ScenarioCarousel = ({
             {/* Liste des scénarios si déplié */}
             {showCampaignScenarios && (
               <div style={{
-                background: 'rgba(0,0,0,0.5)',
-                borderRadius: '0.5rem',
-                padding: '0.75rem',
                 marginBottom: '1rem',
                 maxHeight: '200px',
-                overflowY: 'auto'
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '0.5rem'
               }}>
                 {scenarios.map((scenario, idx) => (
                   <button
@@ -285,16 +285,18 @@ const ScenarioCarousel = ({
                     style={{
                       width: '100%',
                       textAlign: 'left',
-                      padding: '0.5rem',
-                      marginBottom: '0.25rem',
-                      background: `linear-gradient(135deg, ${colors.primary}30, ${colors.secondary}30)`,
-                      border: `1px solid ${colors.primary}50`,
-                      borderRadius: '0.5rem',
+                      padding: '0.75rem 1rem',
+                      background: `linear-gradient(135deg, ${colors.primary}20, ${colors.secondary}30)`,
+                      border: `2px solid ${colors.primary}`,
+                      borderRadius: '0.75rem',
                       color: 'white',
-                      fontSize: '0.875rem'
+                      fontSize: '0.875rem',
+                      fontWeight: '600',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.2)'
                     }}
                   >
-                    #{idx + 1} - {scenario.displayName}
+                    <span style={{ opacity: 0.7, marginRight: '0.5rem' }}>#{idx + 1}</span>
+                    {scenario.displayName}
                   </button>
                 ))}
               </div>
@@ -661,19 +663,10 @@ const ScenarioCarousel = ({
                       maxHeight: '300px',
                       overflowY: 'auto',
                       marginBottom: '1rem',
-                      padding: '0.5rem',
-                      background: 'rgba(0,0,0,0.5)',
-                      borderRadius: '0.5rem',
-                      border: `2px solid ${colors.primary}`
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '0.5rem'
                     }}>
-                      <p style={{ 
-                        color: colors.text, 
-                        fontWeight: 'bold', 
-                        marginBottom: '0.5rem',
-                        fontSize: '0.9rem'
-                      }}>
-                        Cliquez sur un scénario pour y accéder :
-                      </p>
                       {scenarios.map((scenario, idx) => (
                         <button
                           key={scenario.id}
@@ -684,15 +677,29 @@ const ScenarioCarousel = ({
                           className="scenario-button"
                           style={{
                             width: '100%',
-                            marginBottom: '0.5rem',
-                            padding: '0.75rem',
-                            background: `linear-gradient(135deg, ${colors.primary}40, ${colors.secondary}40)`,
-                            border: `1px solid ${colors.primary}`,
+                            padding: '0.875rem 1rem',
+                            background: `linear-gradient(135deg, ${colors.primary}20, ${colors.secondary}30)`,
+                            border: `2px solid ${colors.primary}`,
+                            borderRadius: '0.75rem',
                             justifyContent: 'flex-start',
-                            fontSize: '0.875rem'
+                            fontSize: '0.9rem',
+                            fontWeight: '600',
+                            color: colors.text,
+                            transition: 'all 0.2s ease',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                            textAlign: 'left'
+                          }}
+                          onMouseEnter={(e) => {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.primary}50, ${colors.secondary}60)`;
+                            e.target.style.transform = 'translateX(4px)';
+                          }}
+                          onMouseLeave={(e) => {
+                            e.target.style.background = `linear-gradient(135deg, ${colors.primary}20, ${colors.secondary}30)`;
+                            e.target.style.transform = 'translateX(0)';
                           }}
                         >
-                          #{idx + 1} - {scenario.displayName}
+                          <span style={{ opacity: 0.7, marginRight: '0.5rem' }}>#{idx + 1}</span>
+                          {scenario.displayName}
                         </button>
                       ))}
                     </div>
