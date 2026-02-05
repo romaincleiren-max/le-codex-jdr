@@ -267,7 +267,7 @@ const ScenarioCarousel = ({
 
             {/* Liste des scénarios si déplié */}
             {showCampaignScenarios && (
-              <div style={{
+              <div className="hide-scrollbar" style={{
                 marginBottom: '1rem',
                 maxHeight: '200px',
                 overflowY: 'auto',
@@ -659,7 +659,7 @@ const ScenarioCarousel = ({
 
                   {/* Liste des scénarios (affichée si showCampaignScenarios) */}
                   {showCampaignScenarios && isActive && (
-                    <div style={{
+                    <div className="hide-scrollbar" style={{
                       maxHeight: '300px',
                       overflowY: 'auto',
                       marginBottom: '1rem',
