@@ -18,7 +18,4 @@ if (supabaseAnonKey.includes('\n') || supabaseAnonKey.includes('\r')) {
   throw new Error('VITE_SUPABASE_ANON_KEY contient des retours à la ligne invalides');
 }
 
-console.log('Supabase URL:', supabaseUrl);
-console.log('Supabase Key length:', supabaseAnonKey.length);
-
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
