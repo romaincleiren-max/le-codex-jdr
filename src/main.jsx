@@ -3292,8 +3292,7 @@ export default function App() {
                 </section>
 
                 <section className="text-center pt-6">
-                  <p className="text-sm text-amber-400/80">© 2024 Le Codex - Tous droits réservés</p>
-                  <p className="text-xs text-amber-500/70 mt-2">Fait avec ❤️ pour la communauté</p>
+                  <p className="text-sm text-amber-400/80">© 2025 Le Codex - Tous droits réservés</p>
                 </section>
               </div>
             </div>
