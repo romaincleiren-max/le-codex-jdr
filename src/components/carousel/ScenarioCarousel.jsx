@@ -216,30 +216,41 @@ const ScenarioCarousel = ({
 
           <div style={{ position: 'relative', zIndex: 1, padding: '1.5rem' }}>
             <div style={{
-              display: 'inline-block',
-              background: saga.isFree ? '#15803d' : colors.primary,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              background: saga.isFree ? 'linear-gradient(135deg, #15803d, #059669)' : `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
               color: 'white',
-              padding: '0.3rem 0.8rem',
+              padding: '0.4rem 0.8rem',
               borderRadius: '1rem',
               fontSize: '0.75rem',
               fontWeight: 'bold',
-              marginBottom: '0.75rem'
+              marginBottom: '0.75rem',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
             }}>
-              📚 CAMPAGNE COMPLETE
+              <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
+              CAMPAGNE COMPLÈTE
             </div>
 
             <h2 style={{
               fontSize: '1.5rem',
               fontWeight: 'bold',
               color: colors.text,
-              marginBottom: '0.5rem'
+              marginBottom: '0.5rem',
+              fontFamily: "'Cinzel', serif"
             }}>{saga.name}</h2>
 
             <p style={{
               fontSize: '0.875rem',
               color: 'rgba(255,255,255,0.8)',
-              marginBottom: '0.75rem'
-            }}>📖 {scenarios.length} scénarios</p>
+              marginBottom: '0.75rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem'
+            }}>
+              <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+              {scenarios.length} scénarios
+            </p>
 
             {saga.description && (
               <p style={{
@@ -589,8 +600,16 @@ const ScenarioCarousel = ({
                 <div className="scenario-overlay" style={{ background: 'linear-gradient(to top, rgba(0,0,0,0.95), rgba(0,0,0,0.7))' }}></div>
 
                 {/* Badge "Pack" */}
-                <div className="scenario-number" style={{ background: saga.isFree ? '#15803d' : '#d97706' }}>
-                  📚 PACK
+                <div className="scenario-number" style={{
+                  background: saga.isFree ? 'linear-gradient(135deg, #15803d, #059669)' : 'linear-gradient(135deg, #d97706, #b45309)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.4rem',
+                  padding: '0.4rem 0.8rem',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
+                }}>
+                  <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
+                  PACK
                 </div>
 
                 {/* Badge gratuit pour la campagne */}
@@ -601,24 +620,32 @@ const ScenarioCarousel = ({
                 {/* Contenu */}
                 <div className="scenario-content">
                   <h2 className="scenario-title" style={{
-                    fontFamily: theme?.id === 'medieval' 
+                    fontFamily: theme?.id === 'medieval'
                       ? "'Cinzel', serif" :
                     theme?.id === 'lovecraft'
                       ? "'IM Fell English', serif" :
                     theme?.id === 'scifi'
                       ? "'Orbitron', sans-serif" :
                       "'Crimson Text', serif",
-                    fontSize: '2rem'
+                    fontSize: '1.8rem',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '0.75rem',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em'
                   }}>
-                    📚 Campagne complète
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
+                    Campagne Complète
                   </h2>
                   
                   <div className="scenario-meta" style={{ marginBottom: '1rem' }}>
                     <div className="scenario-author" style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
                       {saga.name}
                     </div>
-                    <div className="scenario-duration">
-                      📖 {scenarios.length} scénarios
+                    <div className="scenario-duration" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
+                      {scenarios.length} scénarios
                     </div>
                   </div>
 
@@ -672,14 +699,19 @@ const ScenarioCarousel = ({
                   )}
 
                   {!showCampaignScenarios && isActive && (
-                    <p style={{ 
-                      color: colors.text, 
-                      fontSize: '0.9rem', 
+                    <p style={{
+                      color: colors.text,
+                      fontSize: '0.9rem',
                       textAlign: 'center',
                       marginBottom: '1rem',
-                      opacity: 0.8
+                      opacity: 0.8,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '0.5rem'
                     }}>
-                      👆 Cliquez pour voir les scénarios
+                      <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
+                      Cliquez pour voir les scénarios
                     </p>
                   )}
 
