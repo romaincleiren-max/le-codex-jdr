@@ -178,7 +178,7 @@ const ScenarioCarousel = ({
   if (isMobile) {
     return (
       <div
-        className="mobile-scenario-list"
+        className="mobile-scenario-list hide-scrollbar"
         style={{
           '--theme-primary': colors.primary,
           '--theme-secondary': colors.secondary,
