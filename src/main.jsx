@@ -2865,7 +2865,7 @@ export default function App() {
                         <input
                           type="email"
                           name="contactEmail"
-                          defaultValue={siteSettings.aboutContent?.contactEmail || "contact@lecodex-jdr.fr"}
+                          defaultValue={siteSettings.aboutContent?.contactEmail || "lecodexjdr@gmail.com"}
                           className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
                           placeholder="contact@exemple.com"
                         />
@@ -3157,7 +3157,7 @@ export default function App() {
                     <div className="space-y-6">
                       <div>
                         <label className="block text-amber-900 font-bold mb-2 text-lg">Email de contact</label>
-                        <input type="email" defaultValue="contact@lecodex-jdr.fr" className="w-full px-4 py-3 border-2 border-amber-700 rounded-lg text-lg"/>
+                        <input type="email" defaultValue="lecodexjdr@gmail.com" className="w-full px-4 py-3 border-2 border-amber-700 rounded-lg text-lg"/>
                       </div>
                       <div className="space-y-3">
                         <label className="flex items-center gap-3">
@@ -3287,7 +3287,7 @@ export default function App() {
                   <div className="text-5xl mb-4">📧</div>
                   <h2 className="text-2xl font-bold mb-3 text-amber-300">Contact</h2>
                   <p className="text-xl font-semibold text-amber-200">
-                    {siteSettings.aboutContent?.contactEmail || "contact@lecodex-jdr.fr"}
+                    {siteSettings.aboutContent?.contactEmail || "lecodexjdr@gmail.com"}
                   </p>
                 </section>
 
