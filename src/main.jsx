@@ -2252,10 +2252,24 @@ export default function App() {
                 {/* Bouton Langue */}
                 <button
                   onClick={toggleLanguage}
-                  className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-amber-600/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105 text-lg md:text-xl"
+                  className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-amber-600/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105"
                   title={language === 'fr' ? 'Switch to English' : 'Passer en français'}
                 >
-                  {language === 'fr' ? '🇬🇧' : '🇫🇷'}
+                  {language === 'fr' ? (
+                    <svg viewBox="0 0 30 20" className="w-6 h-4 md:w-7 md:h-5 rounded-sm" style={{display:'block'}}>
+                      <rect width="30" height="20" fill="#012169"/>
+                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#fff" strokeWidth="4"/>
+                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#C8102E" strokeWidth="2"/>
+                      <path d="M15,0 V20 M0,10 H30" stroke="#fff" strokeWidth="6"/>
+                      <path d="M15,0 V20 M0,10 H30" stroke="#C8102E" strokeWidth="3"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 30 20" className="w-6 h-4 md:w-7 md:h-5 rounded-sm" style={{display:'block'}}>
+                      <rect width="10" height="20" fill="#002395"/>
+                      <rect x="10" width="10" height="20" fill="#fff"/>
+                      <rect x="20" width="10" height="20" fill="#ED2939"/>
+                    </svg>
+                  )}
                 </button>
                 {/* Bouton Panier */}
                 <button
@@ -2320,10 +2334,24 @@ export default function App() {
                 <span className="text-xl font-bold text-amber-300" style={{ fontFamily: "'Cinzel', serif" }}>{t('nav.menu')}</span>
                 <button
                   onClick={toggleLanguage}
-                  className="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors text-lg"
+                  className="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors"
                   title={language === 'fr' ? 'Switch to English' : 'Passer en français'}
                 >
-                  {language === 'fr' ? '🇬🇧' : '🇫🇷'}
+                  {language === 'fr' ? (
+                    <svg viewBox="0 0 30 20" className="w-6 h-4 rounded-sm" style={{display:'block'}}>
+                      <rect width="30" height="20" fill="#012169"/>
+                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#fff" strokeWidth="4"/>
+                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#C8102E" strokeWidth="2"/>
+                      <path d="M15,0 V20 M0,10 H30" stroke="#fff" strokeWidth="6"/>
+                      <path d="M15,0 V20 M0,10 H30" stroke="#C8102E" strokeWidth="3"/>
+                    </svg>
+                  ) : (
+                    <svg viewBox="0 0 30 20" className="w-6 h-4 rounded-sm" style={{display:'block'}}>
+                      <rect width="10" height="20" fill="#002395"/>
+                      <rect x="10" width="10" height="20" fill="#fff"/>
+                      <rect x="20" width="10" height="20" fill="#ED2939"/>
+                    </svg>
+                  )}
                 </button>
               </div>
               <button
@@ -2424,7 +2452,7 @@ export default function App() {
                   <img 
                     key={theme.background_image || theme.backgroundImage || `theme-${theme.id}`}
                     src={theme.background_image || theme.backgroundImage}
-                    alt={theme.name}
+                    alt={t('home.' + theme.id)}
                     className="w-full h-full object-cover transition-all duration-700 group-hover:scale-110"
                     style={{
                       filter: 'blur(8px) brightness(0.4)',
@@ -2461,7 +2489,7 @@ export default function App() {
                       ? "'IM Fell English', serif" :
                       "'Orbitron', sans-serif"
                   }}>
-                    {theme.name}
+                    {t('home.' + theme.id)}
                   </h2>
                   <p className={`text-base md:text-xl opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-500 ${
                     theme.id === 'medieval' ? 'text-amber-200' : theme.id === 'lovecraft' ? 'text-emerald-300' : 'text-cyan-300'

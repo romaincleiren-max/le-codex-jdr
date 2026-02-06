@@ -207,7 +207,7 @@ export const PaymentSuccessPage = () => {
             className="bg-slate-700 hover:bg-slate-600 text-amber-300 px-6 py-3 rounded-lg font-bold flex items-center justify-center gap-2 mx-auto transition-all"
           >
             <ArrowLeft size={20} />
-            Retour à l'accueil
+            {t('paymentSuccess.backToHome')}
           </button>
         </div>
       </div>

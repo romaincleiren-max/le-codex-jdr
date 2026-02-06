@@ -618,7 +618,7 @@ const ScenarioCarousel = ({
 
                 {/* Badge gratuit pour la campagne */}
                 {saga.isFree && (
-                  <div className="scenario-free-badge">GRATUIT</div>
+                  <div className="scenario-free-badge">{t('carousel.free')}</div>
                 )}
 
                 {/* Contenu */}
@@ -823,7 +823,7 @@ const ScenarioCarousel = ({
 
               {/* Badge gratuit */}
               {scenario.isFree && (
-                <div className="scenario-free-badge">GRATUIT</div>
+                <div className="scenario-free-badge">{t('carousel.free')}</div>
               )}
 
               {/* Contenu */}
