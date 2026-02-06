@@ -4,6 +4,7 @@ import { Lock, Mail, ArrowLeft } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { loginRateLimiter } from '../utils/rateLimiter';
 import RateLimiter from '../utils/rateLimiter';
+import { useLanguage } from '../i18n';
 
 export const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,6 +14,7 @@ export const LoginPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [rateLimitInfo, setRateLimitInfo] = useState(null);
+  const { t } = useLanguage();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,7 +27,7 @@ export const LoginPage = () => {
     
     if (!rateLimitCheck.allowed) {
       const timeRemaining = RateLimiter.formatTime(rateLimitCheck.resetIn);
-      setError(`Trop de tentatives de connexion. Veuillez réessayer dans ${timeRemaining}.`);
+      setError(`${t('login.tooManyAttempts')} ${timeRemaining}.`);
       setRateLimitInfo(rateLimitCheck);
       return;
     }
@@ -51,7 +53,7 @@ export const LoginPage = () => {
         console.error('❌ Erreur d\'authentification:', authError);
         const remaining = attemptResult.remaining;
         setError(
-          `Email ou mot de passe incorrect. ${remaining > 0 ? `${remaining} tentative${remaining > 1 ? 's' : ''} restante${remaining > 1 ? 's' : ''}.` : 'Limite atteinte.'}`
+          `${t('login.invalidCredentials')} ${remaining > 0 ? `${remaining} ${t('login.attemptsRemaining')}` : t('login.limitReached')}`
         );
         setPassword('');
         setIsLoading(false);
@@ -75,7 +77,7 @@ export const LoginPage = () => {
         // Pas un admin, déconnecter
         console.warn('⚠️ Utilisateur non admin, déconnexion...');
         await supabase.auth.signOut();
-        setError('Accès non autorisé. Cet utilisateur n\'est pas administrateur.');
+        setError(t('login.notAdmin'));
         setPassword('');
         setIsLoading(false);
         return;
@@ -99,7 +101,7 @@ export const LoginPage = () => {
       
     } catch (err) {
       console.error('Erreur d\'authentification:', err);
-      setError('Erreur lors de la connexion. Veuillez réessayer.');
+      setError(t('login.connectionError'));
       setPassword('');
     } finally {
       setIsLoading(false);
@@ -122,10 +124,10 @@ export const LoginPage = () => {
             </div>
           </div>
           <div className="inline-block bg-gradient-to-r from-red-500 to-amber-600 text-transparent bg-clip-text mb-4">
-            <h1 className="text-6xl font-bold">Connexion Admin</h1>
+            <h1 className="text-6xl font-bold">{t('login.title')}</h1>
           </div>
           <div className="w-32 h-1 bg-gradient-to-r from-red-500 to-amber-600 mx-auto rounded-full mb-6"></div>
-          <p className="text-amber-300 text-xl">Accès réservé aux administrateurs</p>
+          <p className="text-amber-300 text-xl">{t('login.subtitle')}</p>
         </div>
         
         <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/50 rounded-2xl p-8 shadow-2xl">
@@ -133,14 +135,14 @@ export const LoginPage = () => {
             <div>
               <label className="flex items-center gap-2 text-amber-300 font-bold mb-2 text-lg">
                 <Mail size={20} />
-                Email administrateur
+                {t('login.emailLabel')}
               </label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); setError(''); }}
                 className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 transition-all"
-                placeholder="admin@exemple.com"
+                placeholder={t('login.emailPlaceholder')}
                 autoFocus
                 required
               />
@@ -149,7 +151,7 @@ export const LoginPage = () => {
             <div>
               <label className="flex items-center gap-2 text-amber-300 font-bold mb-2 text-lg">
                 <Lock size={20} />
-                Mot de passe
+                {t('login.passwordLabel')}
               </label>
               <input
                 type="password"
@@ -174,12 +176,12 @@ export const LoginPage = () => {
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                  Connexion en cours...
+                  {t('login.loggingIn')}
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
                   <Lock size={20} />
-                  Se connecter
+                  {t('login.loginButton')}
                 </span>
               )}
             </button>
@@ -187,10 +189,10 @@ export const LoginPage = () => {
 
           <div className="mt-6 bg-blue-500/10 border border-blue-500/30 rounded-lg p-4">
             <p className="text-sm text-blue-300 font-semibold mb-2">
-              🔐 Authentification sécurisée
+              🔐 {t('login.secureAuth')}
             </p>
             <p className="text-xs text-blue-400">
-              Cette page est protégée par Supabase Auth. Seuls les administrateurs autorisés dans la base de données peuvent accéder au panneau d'administration.
+              {t('login.secureAuthDesc')}
             </p>
           </div>
 
@@ -198,7 +200,7 @@ export const LoginPage = () => {
             onClick={() => navigate('/')}
             className="w-full mt-4 bg-slate-700 hover:bg-slate-600 text-amber-300 px-6 py-3 rounded-lg font-bold flex items-center justify-center gap-2 transition-all">
             <ArrowLeft size={20} />
-            Retour à l'accueil
+            {t('login.backToHome')}
           </button>
         </div>
       </div>

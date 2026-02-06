@@ -12,6 +12,7 @@ import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { LanguageProvider, useLanguage } from './i18n';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
@@ -85,6 +86,7 @@ const StarRating = ({ rating, label, icon, theme }) => (
 );
 
 const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, hasNextCampaign, hasPreviousCampaign, onAddToCart, onDownloadFree, saga }) => {
+  const { t } = useLanguage();
   const colors = theme.colors;
   
   if (side === 'left') {
@@ -100,17 +102,17 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
         </div>
         <div className="mb-4 grid grid-cols-2 gap-3">
           <div>
-            <StarRating rating={scenario.ratings.ambiance} label={adminConfig.ratingLabels.ambiance} icon={adminConfig.ratingIcons.ambiance} theme={colors} />
-            <StarRating rating={scenario.ratings.complexite} label={adminConfig.ratingLabels.complexite} icon={adminConfig.ratingIcons.complexite} theme={colors} />
+            <StarRating rating={scenario.ratings.ambiance} label={t('ratings.ambiance')} icon={adminConfig.ratingIcons.ambiance} theme={colors} />
+            <StarRating rating={scenario.ratings.complexite} label={t('ratings.complexity')} icon={adminConfig.ratingIcons.complexite} theme={colors} />
           </div>
           <div>
-            <StarRating rating={scenario.ratings.combat} label={adminConfig.ratingLabels.combat} icon={adminConfig.ratingIcons.combat} theme={colors} />
-            <StarRating rating={scenario.ratings.enquete} label={adminConfig.ratingLabels.enquete} icon={adminConfig.ratingIcons.enquete} theme={colors} />
+            <StarRating rating={scenario.ratings.combat} label={t('ratings.combat')} icon={adminConfig.ratingIcons.combat} theme={colors} />
+            <StarRating rating={scenario.ratings.enquete} label={t('ratings.investigation')} icon={adminConfig.ratingIcons.enquete} theme={colors} />
           </div>
         </div>
         {hasPreviousCampaign && (
           <button onClick={onPreviousCampaign} className="mt-auto bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center gap-2">
-            <ChevronLeft size={20} />Campagne précédente
+            <ChevronLeft size={20} />{t('book.previousCampaign')}
           </button>
         )}
       </div>
@@ -119,15 +121,15 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
     return (
       <div className="w-full h-full p-8 pl-4 flex flex-col">
         <div className="mb-6 flex-grow">
-          <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>Résumé</h3>
+          <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>{t('book.summary')}</h3>
           <p className={`text-base ${colors.textLight} leading-relaxed`}>{scenario.description}</p>
         </div>
         <div className="mb-4">
-          <h3 className={`text-sm font-bold mb-1 ${colors.text}`}>Auteur</h3>
+          <h3 className={`text-sm font-bold mb-1 ${colors.text}`}>{t('book.author')}</h3>
           <p className={`text-base ${colors.textLight}`}>{scenario.author}</p>
         </div>
         <div className="mb-6">
-          <h3 className={`text-sm font-bold mb-2 ${colors.text}`}>Tags</h3>
+          <h3 className={`text-sm font-bold mb-2 ${colors.text}`}>{t('book.tags')}</h3>
           <div className="flex flex-wrap gap-2">
             {scenario.tags.map((tag, i) => <span key={i} className={`${colors.tag} px-3 py-1 rounded-full text-sm`}>{tag}</span>)}
           </div>
@@ -137,61 +139,61 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
           {scenario.isFree ? (
             <div className="bg-green-100 border-2 border-green-700 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-green-900">📥 Scénario individuel</span>
-                <span className="text-2xl font-bold text-green-800">GRATUIT</span>
+                <span className="text-lg font-bold text-green-900">📥 {t('book.individualScenario')}</span>
+                <span className="text-2xl font-bold text-green-800">{t('book.free')}</span>
               </div>
-              <button 
+              <button
                 onClick={() => onDownloadFree(scenario.pdfUrl, scenario.displayName)}
                 className="w-full bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center justify-center gap-2 font-semibold">
-                <Download size={18} />Télécharger PDF
+                <Download size={18} />{t('book.downloadPdf')}
               </button>
             </div>
           ) : (
             <div className="bg-amber-200 border-2 border-amber-800 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-amber-900">🛒 Scénario individuel</span>
+                <span className="text-lg font-bold text-amber-900">🛒 {t('book.individualScenario')}</span>
                 <span className="text-2xl font-bold text-amber-800">{scenario.price.toFixed(2)} €</span>
               </div>
               <button 
                 onClick={() => onAddToCart({ type: 'scenario', item: scenario, saga })}
                 className={`w-full ${colors.primary} text-white px-4 py-2 rounded ${colors.hover} flex items-center justify-center gap-2 font-semibold`}>
-                <ShoppingCart size={18} />Ajouter au panier
+                <ShoppingCart size={18} />{t('book.addToCart')}
               </button>
             </div>
           )}
-          
+
           {saga.isFree ? (
             <div className="bg-green-100 border-2 border-green-700 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-green-900">📥 Campagne complète</span>
-                <span className="text-2xl font-bold text-green-800">GRATUIT</span>
+                <span className="text-lg font-bold text-green-900">📥 {t('book.fullCampaign')}</span>
+                <span className="text-2xl font-bold text-green-800">{t('book.free')}</span>
               </div>
-              <p className="text-xs text-green-700 mb-2">{saga.scenarios.length} scénarios inclus</p>
-              <button 
+              <p className="text-xs text-green-700 mb-2">{saga.scenarios.length} {t('book.scenariosIncluded')}</p>
+              <button
                 onClick={() => onDownloadFree(saga.pdfUrl, saga.name)}
                 className="w-full bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center justify-center gap-2 font-semibold">
-                <Download size={18} />Télécharger PDF
+                <Download size={18} />{t('book.downloadPdf')}
               </button>
             </div>
           ) : (
             <div className="bg-amber-200 border-2 border-amber-800 rounded-lg p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-amber-900">🛒 Campagne complète</span>
+                <span className="text-lg font-bold text-amber-900">🛒 {t('book.fullCampaign')}</span>
                 <span className="text-2xl font-bold text-amber-800">{saga.price.toFixed(2)} €</span>
               </div>
-              <p className="text-xs text-amber-700 mb-2">Économisez {((saga.scenarios.filter(s => !s.isFree).reduce((sum, s) => sum + s.price, 0) - saga.price).toFixed(2))} €</p>
+              <p className="text-xs text-amber-700 mb-2">{t('book.save')} {((saga.scenarios.filter(s => !s.isFree).reduce((sum, s) => sum + s.price, 0) - saga.price).toFixed(2))} €</p>
               <button 
                 onClick={() => onAddToCart({ type: 'saga', item: saga })}
                 className={`w-full ${colors.primary} text-white px-4 py-2 rounded ${colors.hover} flex items-center justify-center gap-2 font-semibold`}>
-                <ShoppingCart size={18} />Ajouter au panier
+                <ShoppingCart size={18} />{t('book.addToCart')}
               </button>
             </div>
           )}
         </div>
-        
+
         {hasNextCampaign && (
           <button onClick={onNextCampaign} className="mt-auto bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center gap-2 ml-auto">
-            Campagne suivante<ChevronRight size={20} />
+            {t('book.nextCampaign')}<ChevronRight size={20} />
           </button>
         )}
       </div>
@@ -397,6 +399,7 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
 };
 
 const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToCart }) => {
+  const { t } = useLanguage();
   if (!scenario) return null;
 
   return (
@@ -423,12 +426,12 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
             <h2 className="text-2xl md:text-4xl font-bold text-amber-900 mb-4 font-serif">{scenario.displayName}</h2>
             
             <div className="mb-6">
-              <h3 className="text-lg font-bold text-amber-900 mb-2">Description</h3>
+              <h3 className="text-lg font-bold text-amber-900 mb-2">{t('book.summary')}</h3>
               <p className="text-amber-800 leading-relaxed">{scenario.description}</p>
             </div>
 
             <div className="mb-4">
-              <h3 className="text-sm font-bold text-amber-900 mb-1">Auteur</h3>
+              <h3 className="text-sm font-bold text-amber-900 mb-1">{t('book.author')}</h3>
               <p className="text-amber-800">{scenario.author}</p>
             </div>
 
@@ -438,7 +441,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
             </div>
 
             <div className="mb-6">
-              <h3 className="text-sm font-bold text-amber-900 mb-2">Tags</h3>
+              <h3 className="text-sm font-bold text-amber-900 mb-2">{t('book.tags')}</h3>
               <div className="flex flex-wrap gap-2">
                 {scenario.tags.map((tag, i) => (
                   <span key={i} className="bg-amber-200 text-amber-900 px-3 py-1 rounded-full text-sm">
@@ -449,11 +452,11 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
             </div>
 
             <div className="mb-6">
-              <h3 className="text-sm font-bold text-amber-900 mb-3">Notations</h3>
+              <h3 className="text-sm font-bold text-amber-900 mb-3">{t('ratings.ambiance')}</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🌙</span>
-                  <span className="text-xs font-medium w-20 text-amber-700">Ambiance</span>
+                  <span className="text-xs font-medium w-20 text-amber-700">{t('ratings.ambiance')}</span>
                   <div className="flex gap-1">
                     {[1,2,3,4,5].map(s => (
                       <Star key={s} size={14} 
@@ -465,7 +468,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🧩</span>
-                  <span className="text-xs font-medium w-20 text-amber-700">Complexité</span>
+                  <span className="text-xs font-medium w-20 text-amber-700">{t('ratings.complexity')}</span>
                   <div className="flex gap-1">
                     {[1,2,3,4,5].map(s => (
                       <Star key={s} size={14} 
@@ -477,7 +480,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-lg">⚔️</span>
-                  <span className="text-xs font-medium w-20 text-amber-700">Combat</span>
+                  <span className="text-xs font-medium w-20 text-amber-700">{t('ratings.combat')}</span>
                   <div className="flex gap-1">
                     {[1,2,3,4,5].map(s => (
                       <Star key={s} size={14} 
@@ -489,7 +492,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-lg">🔍</span>
-                  <span className="text-xs font-medium w-20 text-amber-700">Enquête</span>
+                  <span className="text-xs font-medium w-20 text-amber-700">{t('ratings.investigation')}</span>
                   <div className="flex gap-1">
                     {[1,2,3,4,5].map(s => (
                       <Star key={s} size={14} 
@@ -509,13 +512,13 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
                   onDownloadFree(scenario.pdfUrl, scenario.displayName);
                 }}
                 className="w-full bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 font-bold text-lg">
-                <Download size={24} />Télécharger PDF
+                <Download size={24} />{t('book.downloadPdf')}
               </button>
             ) : (
               <div className="space-y-3">
                 <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg font-bold text-amber-900">Prix du scénario</span>
+                    <span className="text-lg font-bold text-amber-900">{t('book.individualScenario')}</span>
                     <span className="text-3xl font-bold text-amber-800">{scenario.price.toFixed(2)} €</span>
                   </div>
                 </div>
@@ -525,7 +528,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
                     onAddToCart({ type: 'scenario', item: scenario, saga });
                   }}
                   className="w-full bg-amber-800 text-white px-6 py-4 rounded-lg hover:bg-amber-700 flex items-center justify-center gap-2 font-bold text-lg">
-                  <ShoppingCart size={24} />Ajouter au panier
+                  <ShoppingCart size={24} />{t('book.addToCart')}
                 </button>
               </div>
             )}
@@ -859,6 +862,7 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
 };
 
 const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
+  const { t } = useLanguage();
   const total = cart.reduce((sum, item) => sum + (item.type === 'saga' ? item.item.price : item.item.price), 0);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -873,7 +877,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
       });
     } catch (error) {
       console.error('❌ Erreur:', error);
-      alert('❌ Erreur lors du paiement. Veuillez réessayer.');
+      alert(t('cart.paymentError'));
       setIsProcessing(false);
     }
   };
@@ -888,8 +892,8 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
         <div className="absolute inset-0 bg-gradient-to-r from-amber-600/20 to-amber-800/20"></div>
         <div className="relative p-4 md:p-6 border-b border-amber-700/30 flex justify-between items-center">
           <div>
-            <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-1">Votre Panier</h2>
-            <p className="text-amber-500 text-sm">{cart.length} article{cart.length > 1 ? 's' : ''}</p>
+            <h2 className="text-2xl md:text-3xl font-bold text-amber-300 mb-1">{t('cart.title')}</h2>
+            <p className="text-amber-500 text-sm">{cart.length} {cart.length > 1 ? t('cart.items') : t('cart.item')}</p>
           </div>
           <button
             onClick={onClose}
@@ -906,8 +910,8 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
             <div className="bg-gradient-to-br from-amber-900/30 to-amber-800/20 rounded-full p-8 mb-6 border border-amber-700/30">
               <ShoppingCart size={64} className="text-amber-600" />
             </div>
-            <p className="text-amber-400 text-xl font-semibold mb-2">Panier vide</p>
-            <p className="text-amber-600 text-center">Ajoutez des scénarios pour commencer</p>
+            <p className="text-amber-400 text-xl font-semibold mb-2">{t('cart.empty')}</p>
+            <p className="text-amber-600 text-center">{t('cart.emptyMessage')}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -941,12 +945,12 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
                     
                     {cartItem.type === 'scenario' && (
                       <p className="text-amber-500 text-sm mb-2 flex items-center gap-1">
-                        <span className="opacity-60">De:</span> {cartItem.saga.name}
+                        <span className="opacity-60">{t('cart.from')}</span> {cartItem.saga.name}
                       </p>
                     )}
                     {cartItem.type === 'saga' && (
                       <p className="text-amber-500 text-sm mb-2 flex items-center gap-1">
-                        <span className="text-amber-400">📦</span> {cartItem.item.scenarios.length} scénarios inclus
+                        <span className="text-amber-400">📦</span> {cartItem.item.scenarios.length} {t('cart.scenariosIncluded')}
                       </p>
                     )}
                     
@@ -956,7 +960,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
                           ? 'bg-purple-600/20 text-purple-300 border border-purple-600/30'
                           : 'bg-blue-600/20 text-blue-300 border border-blue-600/30'
                       }`}>
-                        {cartItem.type === 'saga' ? 'Campagne complète' : 'Scénario unique'}
+                        {cartItem.type === 'saga' ? t('cart.fullCampaign') : t('cart.singleScenario')}
                       </span>
                       <span className="text-2xl font-bold text-amber-300">
                         {(cartItem.type === 'saga' ? cartItem.item.price : cartItem.item.price).toFixed(2)} €
@@ -975,12 +979,12 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
         <div className="border-t border-amber-700/30 p-6 bg-gradient-to-b from-slate-900 to-slate-950">
           <div className="bg-gradient-to-br from-amber-900/20 to-amber-800/20 rounded-xl p-5 mb-4 border border-amber-700/30">
             <div className="flex items-center justify-between mb-1">
-              <span className="text-amber-400 text-lg font-semibold">Total</span>
+              <span className="text-amber-400 text-lg font-semibold">{t('cart.total')}</span>
               <span className="text-4xl font-bold bg-gradient-to-r from-amber-300 to-amber-500 bg-clip-text text-transparent">
                 {total.toFixed(2)} €
               </span>
             </div>
-            <p className="text-amber-600 text-xs text-right">TVA incluse</p>
+            <p className="text-amber-600 text-xs text-right">{t('cart.vatIncluded')}</p>
           </div>
           
           <button 
@@ -990,18 +994,18 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
             {isProcessing ? (
               <>
                 <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent"></div>
-                Redirection...
+                {t('cart.redirecting')}
               </>
             ) : (
               <>
                 <CreditCard size={24} />
-                Payer avec Stripe
+                {t('cart.payWithStripe')}
               </>
             )}
           </button>
           
           <p className="text-center text-amber-700 text-xs mt-3">
-            🔒 Paiement sécurisé par Stripe
+            🔒 {t('cart.securePayment')}
           </p>
         </div>
       )}
@@ -1028,6 +1032,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
 };
 
 const CheckoutPage = ({ cart, onBack, onOrderComplete }) => {
+  const { t } = useLanguage();
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', confirmEmail: '',
     address: '', city: '', postalCode: '', country: 'France',
@@ -1040,13 +1045,13 @@ const CheckoutPage = ({ cart, onBack, onOrderComplete }) => {
 
   const validateForm = () => {
     const errors = {};
-    if (!formData.firstName.trim()) errors.firstName = "Prénom requis";
-    if (!formData.lastName.trim()) errors.lastName = "Nom requis";
-    if (!formData.email.trim()) errors.email = "Email requis";
-    if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = "Email invalide";
-    if (formData.email !== formData.confirmEmail) errors.confirmEmail = "Les emails ne correspondent pas";
-    if (!formData.cardNumber.trim() || formData.cardNumber.replace(/\s/g, '').length !== 16) errors.cardNumber = "Numéro invalide";
-    if (!formData.cvv.trim() || formData.cvv.length !== 3) errors.cvv = "CVV invalide";
+    if (!formData.firstName.trim()) errors.firstName = t('checkout.firstNameRequired');
+    if (!formData.lastName.trim()) errors.lastName = t('checkout.lastNameRequired');
+    if (!formData.email.trim()) errors.email = t('checkout.emailRequired');
+    if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = t('checkout.emailInvalid');
+    if (formData.email !== formData.confirmEmail) errors.confirmEmail = t('checkout.emailMismatch');
+    if (!formData.cardNumber.trim() || formData.cardNumber.replace(/\s/g, '').length !== 16) errors.cardNumber = t('checkout.cardNumberInvalid');
+    if (!formData.cvv.trim() || formData.cvv.length !== 3) errors.cvv = t('checkout.cvvInvalid');
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -1065,7 +1070,7 @@ const handleSubmit = async (e) => {
       // La redirection vers Stripe Checkout se fait automatiquement
     } catch (error) {
       console.error('❌ Erreur lors du paiement:', error);
-      alert('❌ Erreur lors de la création de la session de paiement.');
+      alert(t('checkout.sessionError'));
       setIsProcessing(false);
     }
   }
@@ -1087,25 +1092,25 @@ const handleSubmit = async (e) => {
     <div className="min-h-screen bg-slate-900 py-8">
       <div className="max-w-6xl mx-auto px-4">
         <button onClick={onBack} className="mb-6 bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center gap-2">
-          <ChevronLeft size={20} />Retour
+          <ChevronLeft size={20} />{t('checkout.back')}
         </button>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-amber-100 border-4 border-amber-900 rounded-lg p-8">
-            <h1 className="text-3xl font-bold text-amber-900 mb-6">💳 Paiement</h1>
+            <h1 className="text-3xl font-bold text-amber-900 mb-6">{t('checkout.payment')}</h1>
             
             <form onSubmit={handleSubmit} className="space-y-6">
               <div>
-                <h2 className="text-xl font-bold text-amber-900 mb-4">Informations</h2>
+                <h2 className="text-xl font-bold text-amber-900 mb-4">{t('checkout.information')}</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-amber-900 font-bold mb-2">Prénom *</label>
+                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.firstName')}</label>
                     <input type="text" value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)}
                       className={`w-full px-4 py-2 border-2 rounded ${formErrors.firstName ? 'border-red-500' : 'border-amber-700'}`} />
                     {formErrors.firstName && <p className="text-red-600 text-sm mt-1">{formErrors.firstName}</p>}
                   </div>
                   <div>
-                    <label className="block text-amber-900 font-bold mb-2">Nom *</label>
+                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.lastName')}</label>
                     <input type="text" value={formData.lastName} onChange={(e) => handleInputChange('lastName', e.target.value)}
                       className={`w-full px-4 py-2 border-2 rounded ${formErrors.lastName ? 'border-red-500' : 'border-amber-700'}`} />
                     {formErrors.lastName && <p className="text-red-600 text-sm mt-1">{formErrors.lastName}</p>}
@@ -1113,14 +1118,14 @@ const handleSubmit = async (e) => {
                 </div>
                 
                 <div className="mt-4">
-                  <label className="block text-amber-900 font-bold mb-2">Email *</label>
+                  <label className="block text-amber-900 font-bold mb-2">{t('checkout.email')}</label>
                   <input type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)}
                     className={`w-full px-4 py-2 border-2 rounded ${formErrors.email ? 'border-red-500' : 'border-amber-700'}`} />
                   {formErrors.email && <p className="text-red-600 text-sm mt-1">{formErrors.email}</p>}
                 </div>
                 
                 <div className="mt-4">
-                  <label className="block text-amber-900 font-bold mb-2">Confirmer email *</label>
+                  <label className="block text-amber-900 font-bold mb-2">{t('checkout.confirmEmail')}</label>
                   <input type="email" value={formData.confirmEmail} onChange={(e) => handleInputChange('confirmEmail', e.target.value)}
                     className={`w-full px-4 py-2 border-2 rounded ${formErrors.confirmEmail ? 'border-red-500' : 'border-amber-700'}`} />
                   {formErrors.confirmEmail && <p className="text-red-600 text-sm mt-1">{formErrors.confirmEmail}</p>}
@@ -1128,9 +1133,9 @@ const handleSubmit = async (e) => {
               </div>
 
               <div>
-                <h2 className="text-xl font-bold text-amber-900 mb-4">Paiement</h2>
+                <h2 className="text-xl font-bold text-amber-900 mb-4">{t('checkout.payment')}</h2>
                 <div>
-                  <label className="block text-amber-900 font-bold mb-2">Numéro de carte *</label>
+                  <label className="block text-amber-900 font-bold mb-2">{t('checkout.cardNumber')}</label>
                   <input type="text" value={formData.cardNumber} onChange={(e) => handleInputChange('cardNumber', formatCardNumber(e.target.value))}
                     placeholder="1234 5678 9012 3456" maxLength="19"
                     className={`w-full px-4 py-2 border-2 rounded ${formErrors.cardNumber ? 'border-red-500' : 'border-amber-700'}`} />
@@ -1139,12 +1144,12 @@ const handleSubmit = async (e) => {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
                   <div>
-                    <label className="block text-amber-900 font-bold mb-2">Expiration *</label>
+                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.expiration')}</label>
                     <input type="text" value={formData.expiryDate} onChange={(e) => handleInputChange('expiryDate', e.target.value)}
                       placeholder="MM/AA" maxLength="5" className="w-full px-4 py-2 border-2 border-amber-700 rounded" />
                   </div>
                   <div>
-                    <label className="block text-amber-900 font-bold mb-2">CVV *</label>
+                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.cvv')}</label>
                     <input type="text" value={formData.cvv} onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, '').substr(0, 3))}
                       placeholder="123" maxLength="3"
                       className={`w-full px-4 py-2 border-2 rounded ${formErrors.cvv ? 'border-red-500' : 'border-amber-700'}`} />
@@ -1155,19 +1160,19 @@ const handleSubmit = async (e) => {
 
               <button type="submit" disabled={isProcessing}
                 className="w-full bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50">
-                {isProcessing ? <>⏳ Traitement...</> : <><CreditCard size={20} />Payer {total.toFixed(2)} €</>}
+                {isProcessing ? <>{t('checkout.processing')}</> : <><CreditCard size={20} />{t('checkout.pay')} {total.toFixed(2)} €</>}
               </button>
             </form>
           </div>
 
           <div className="lg:col-span-1 bg-amber-100 border-4 border-amber-900 rounded-lg p-6 sticky top-4">
-            <h2 className="text-2xl font-bold text-amber-900 mb-4">📋 Récapitulatif</h2>
+            <h2 className="text-2xl font-bold text-amber-900 mb-4">📋 {t('checkout.orderSummary')}</h2>
             <div className="space-y-3 mb-6">
               {cart.map((item, i) => (
                 <div key={i} className="border-b-2 border-amber-700 pb-3">
                   <div className="font-bold text-amber-900">{item.type === 'saga' ? item.item.name : item.item.displayName}</div>
                   <div className="flex justify-between text-sm">
-                    <span className="text-amber-700">{item.type === 'saga' ? `${item.item.scenarios.length} scénarios` : 'Scénario'}</span>
+                    <span className="text-amber-700">{item.type === 'saga' ? `${item.item.scenarios.length} ${t('cart.scenariosIncluded')}` : t('checkout.scenario')}</span>
                     <span className="font-bold text-amber-800">{(item.type === 'saga' ? item.item.price : item.item.price).toFixed(2)} €</span>
                   </div>
                 </div>
@@ -1175,7 +1180,7 @@ const handleSubmit = async (e) => {
             </div>
             <div className="border-t-2 border-amber-900 pt-4">
               <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-amber-900">Total</span>
+                <span className="text-lg font-bold text-amber-900">{t('checkout.total')}</span>
                 <span className="text-2xl font-bold text-green-700">{total.toFixed(2)} €</span>
               </div>
             </div>
@@ -1187,22 +1192,23 @@ const handleSubmit = async (e) => {
 };
 
 const OrderConfirmationPage = ({ orderData, cart, onBackToHome }) => {
+  const { t } = useLanguage();
   const total = cart.reduce((sum, item) => sum + (item.type === 'saga' ? item.item.price : item.item.price), 0);
 
   return (
     <div className="min-h-screen bg-slate-900 flex items-center justify-center p-8">
       <div className="max-w-2xl w-full bg-amber-100 border-4 border-amber-900 rounded-lg p-10 text-center shadow-2xl">
         <div className="text-green-600 mb-6"><Check size={80} className="mx-auto" strokeWidth={3} /></div>
-        <h1 className="text-4xl font-bold text-amber-900 mb-4">Commande confirmée !</h1>
-        <p className="text-xl text-amber-700 mb-8">Merci {orderData.firstName} !</p>
+        <h1 className="text-4xl font-bold text-amber-900 mb-4">{t('confirmation.title')}</h1>
+        <p className="text-xl text-amber-700 mb-8">{t('confirmation.thankYou')} {orderData.firstName} !</p>
 
         <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 mb-8 text-left">
-          <h2 className="text-2xl font-bold text-amber-900 mb-4">📧 Email envoyé</h2>
-          <p className="text-amber-800">Confirmation à : <strong>{orderData.email}</strong></p>
+          <h2 className="text-2xl font-bold text-amber-900 mb-4">{t('confirmation.emailSent')}</h2>
+          <p className="text-amber-800">{t('confirmation.confirmationTo')} <strong>{orderData.email}</strong></p>
         </div>
 
         <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-6 mb-8 text-left">
-          <h2 className="text-xl font-bold text-amber-900 mb-4">📦 Commande</h2>
+          <h2 className="text-xl font-bold text-amber-900 mb-4">📦 {t('confirmation.order')}</h2>
           {cart.map((item, i) => (
             <div key={i} className="flex justify-between py-2 border-b border-amber-300">
               <span>{item.type === 'saga' ? item.item.name : item.item.displayName}</span>
@@ -1210,13 +1216,13 @@ const OrderConfirmationPage = ({ orderData, cart, onBackToHome }) => {
             </div>
           ))}
           <div className="flex justify-between pt-4 border-t-2 border-amber-700 mt-4">
-            <span className="text-xl font-bold">Total</span>
+            <span className="text-xl font-bold">{t('confirmation.total')}</span>
             <span className="text-2xl font-bold text-green-700">{total.toFixed(2)} €</span>
           </div>
         </div>
 
         <button onClick={onBackToHome} className="bg-amber-800 text-white px-8 py-4 rounded-lg hover:bg-amber-700 font-bold text-lg">
-          Retour à l'accueil
+          {t('confirmation.backToHome')}
         </button>
       </div>
     </div>
@@ -1580,6 +1586,9 @@ const SubmissionsTab = () => {
 };
 
 export default function App() {
+  // i18n
+  const { language, toggleLanguage, t } = useLanguage();
+
   // État pour le preloader
   const [showPreloader, setShowPreloader] = useState(true);
   const [preloaderFading, setPreloaderFading] = useState(false);
@@ -1886,7 +1895,7 @@ export default function App() {
   
   const handleDownloadFree = async (pdfUrl, name) => {
     if (!pdfUrl || typeof pdfUrl !== 'string') {
-      alert('PDF non disponible');
+      alert(t('download.pdfUnavailable'));
       return;
     }
 
@@ -1908,7 +1917,7 @@ export default function App() {
             console.log('📂 Chemin extrait:', filePath);
           } else {
             console.error('❌ Format URL Supabase non reconnu:', pdfUrl);
-            alert('Format d\'URL non supporté. Veuillez contacter le support.');
+            alert(t('download.unsupportedUrl'));
             return;
           }
         } else {
@@ -1945,7 +1954,7 @@ export default function App() {
         document.body.removeChild(link);
       } else {
         console.error('❌ Pas de signedUrl dans la réponse:', data);
-        alert('Erreur lors de la génération du lien de téléchargement.');
+        alert(t('download.linkGenerationError'));
       }
     } catch (err) {
       console.error('❌ Exception téléchargement:', err);
@@ -2207,11 +2216,11 @@ export default function App() {
                       about: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Scroll%20logo_wthback.png'
                     };
                     const labels = {
-                      home: 'Accueil',
-                      submit: 'Proposer',
-                      admin: 'Admin',
-                      stats: 'Stats',
-                      about: 'À propos'
+                      home: t('nav.home'),
+                      submit: t('nav.submit'),
+                      admin: t('nav.admin'),
+                      stats: t('nav.stats'),
+                      about: t('nav.about')
                     };
                     
                     return (
@@ -2240,12 +2249,20 @@ export default function App() {
 
               {/* Boutons d'action à droite */}
               <div className="flex gap-1.5 md:gap-3 items-center flex-shrink-0">
+                {/* Bouton Langue */}
+                <button
+                  onClick={toggleLanguage}
+                  className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-amber-600/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105 text-lg md:text-xl"
+                  title={language === 'fr' ? 'Switch to English' : 'Passer en français'}
+                >
+                  {language === 'fr' ? '🇬🇧' : '🇫🇷'}
+                </button>
                 {/* Bouton Panier */}
                 <button
                   onClick={() => setShowCart(!showCart)}
                   className="relative group px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-semibold flex items-center gap-1 md:gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
                   <ShoppingCart size={16} className="md:w-5 md:h-5 group-hover:rotate-12 transition-transform duration-300" />
-                  <span className="hidden sm:inline text-sm md:text-base">Panier</span>
+                  <span className="hidden sm:inline text-sm md:text-base">{t('nav.cart')}</span>
                   {cartItemCount > 0 && (
                     <span className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold rounded-full w-4 h-4 md:w-6 md:h-6 flex items-center justify-center animate-pulse shadow-lg">
                       {cartItemCount}
@@ -2257,7 +2274,7 @@ export default function App() {
                 {isAuthenticated && (
                   <button
                     onClick={async () => {
-                      if (confirm('Voulez-vous vous déconnecter ?')) {
+                      if (confirm(t('nav.logoutConfirm'))) {
                         await supabase.auth.signOut();
                         setIsAuthenticated(false);
                         setCurrentPage('home');
@@ -2265,9 +2282,9 @@ export default function App() {
                       }
                     }}
                     className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-900/50"
-                    title="Se déconnecter de l'administration">
+                    title={t('nav.logoutTitle')}>
                     <Lock size={18} />
-                    <span className="hidden lg:inline">Déconnexion</span>
+                    <span className="hidden lg:inline">{t('nav.logout')}</span>
                   </button>
                 )}
 
@@ -2299,7 +2316,16 @@ export default function App() {
           <div className="absolute right-0 top-0 h-full w-72 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 shadow-2xl transform transition-transform duration-300 ease-out">
             {/* Header sidebar */}
             <div className="flex items-center justify-between p-4 border-b border-amber-600/30">
-              <span className="text-xl font-bold text-amber-300" style={{ fontFamily: "'Cinzel', serif" }}>Menu</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xl font-bold text-amber-300" style={{ fontFamily: "'Cinzel', serif" }}>{t('nav.menu')}</span>
+                <button
+                  onClick={toggleLanguage}
+                  className="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors text-lg"
+                  title={language === 'fr' ? 'Switch to English' : 'Passer en français'}
+                >
+                  {language === 'fr' ? '🇬🇧' : '🇫🇷'}
+                </button>
+              </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 rounded-lg bg-slate-700 hover:bg-slate-600 text-white transition-colors">
@@ -2326,11 +2352,11 @@ export default function App() {
                     about: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Scroll%20logo_wthback.png'
                   };
                   const labels = {
-                    home: 'Accueil',
-                    submit: 'Proposer',
-                    admin: 'Admin',
-                    stats: 'Statistiques',
-                    about: 'À propos'
+                    home: t('nav.home'),
+                    submit: t('nav.submit'),
+                    admin: t('nav.admin'),
+                    stats: t('nav.statistics'),
+                    about: t('nav.about')
                   };
 
                   return (
@@ -2355,7 +2381,7 @@ export default function App() {
               {isAuthenticated && (
                 <button
                   onClick={async () => {
-                    if (confirm('Voulez-vous vous déconnecter ?')) {
+                    if (confirm(t('nav.logoutConfirm'))) {
                       await supabase.auth.signOut();
                       setIsAuthenticated(false);
                       setCurrentPage('home');
@@ -2365,7 +2391,7 @@ export default function App() {
                   }}
                   className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:bg-red-900/30 hover:text-red-300 transition-all duration-200 mt-4 border border-red-500/30">
                   <Lock size={20} />
-                  <span className="font-semibold">Déconnexion</span>
+                  <span className="font-semibold">{t('nav.logout')}</span>
                 </button>
               )}
             </nav>
@@ -2439,7 +2465,7 @@ export default function App() {
                   </h2>
                   <p className={`text-base md:text-xl opacity-100 md:opacity-0 group-hover:opacity-100 transition-all duration-500 ${
                     theme.id === 'medieval' ? 'text-amber-200' : theme.id === 'lovecraft' ? 'text-emerald-300' : 'text-cyan-300'
-                  }`}>Cliquez pour explorer</p>
+                  }`}>{t('home.clickToExplore')}</p>
                 </div>
               </div>
             ))}
@@ -2462,10 +2488,10 @@ export default function App() {
                   />
                 </div>
                 <div className="inline-block bg-gradient-to-r from-amber-500 to-amber-700 text-transparent bg-clip-text mb-4">
-                  <h1 className="text-3xl md:text-6xl font-bold">Proposer un Scénario</h1>
+                  <h1 className="text-3xl md:text-6xl font-bold">{t('submit.title')}</h1>
                 </div>
                 <div className="w-24 md:w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full mb-4 md:mb-6"></div>
-                <p className="text-amber-300 text-base md:text-xl">Partagez votre création avec la communauté !</p>
+                <p className="text-amber-300 text-base md:text-xl">{t('submit.subtitle')}</p>
               </div>
 
               <div className="bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-amber-700/50 rounded-2xl p-4 md:p-8 shadow-2xl">
@@ -2474,12 +2500,12 @@ export default function App() {
                   
                   const pdfFile = e.target.pdfFile.files[0];
                   if (!pdfFile) {
-                    alert('❌ Veuillez sélectionner un fichier PDF');
+                    alert(t('submit.noPdfError'));
                     return;
                   }
-                  
+
                   if (pdfFile.type !== 'application/pdf') {
-                    alert('❌ Seuls les fichiers PDF sont acceptés');
+                    alert(t('submit.pdfOnlyError'));
                     return;
                   }
                   
@@ -2487,7 +2513,7 @@ export default function App() {
                   const submitButton = e.target.querySelector('button[type="submit"]');
                   const originalButtonText = submitButton.innerHTML;
                   submitButton.disabled = true;
-                  submitButton.innerHTML = '⏳ Envoi en cours...';
+                  submitButton.innerHTML = `⏳ ${t('submit.sending')}`;
                   
                   try {
                     const submissionData = {
@@ -2500,58 +2526,58 @@ export default function App() {
                     // Uploader vers Supabase (Storage + Database)
                     await supabaseService.createSubmission(submissionData, pdfFile);
                     
-                    alert('✅ Votre scénario a été soumis avec succès !\n\n📧 Nous reviendrons vers vous par email sous 48h.\n🔒 Votre PDF est stocké en sécurité sur nos serveurs.');
+                    alert(t('submit.successMessage'));
                     e.target.reset();
                   } catch (error) {
                     console.error('Erreur soumission:', error);
-                    alert('❌ Erreur lors de l\'envoi de votre soumission.\n\nVeuillez réessayer ou nous contacter si le problème persiste.');
+                    alert(t('submit.errorMessage'));
                   } finally {
                     submitButton.disabled = false;
                     submitButton.innerHTML = originalButtonText;
                   }
                 }} className="space-y-6">
                   <div>
-                    <label className="block text-amber-300 font-bold mb-2">Nom du scénario *</label>
-                    <input 
-                      type="text" 
+                    <label className="block text-amber-300 font-bold mb-2">{t('submit.scenarioName')}</label>
+                    <input
+                      type="text"
                       name="scenarioName"
-                      required 
-                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
-                      placeholder="Le titre de votre scénario"
+                      required
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      placeholder={t('submit.scenarioNamePlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-amber-300 font-bold mb-2">Auteur *</label>
-                    <input 
-                      type="text" 
+                    <label className="block text-amber-300 font-bold mb-2">{t('submit.author')}</label>
+                    <input
+                      type="text"
                       name="author"
-                      required 
-                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
-                      placeholder="Votre nom"
+                      required
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      placeholder={t('submit.authorPlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-amber-300 font-bold mb-2">Email *</label>
-                    <input 
-                      type="email" 
+                    <label className="block text-amber-300 font-bold mb-2">{t('submit.email')}</label>
+                    <input
+                      type="email"
                       name="email"
-                      required 
-                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
-                      placeholder="email@exemple.com"
+                      required
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      placeholder={t('submit.emailPlaceholder')}
                     />
                   </div>
                   <div>
-                    <label className="block text-amber-300 font-bold mb-2">Résumé *</label>
-                    <textarea 
-                      rows="5" 
+                    <label className="block text-amber-300 font-bold mb-2">{t('submit.summary')}</label>
+                    <textarea
+                      rows="5"
                       name="summary"
-                      required 
-                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20" 
-                      placeholder="Décrivez votre scénario..."
+                      required
+                      className="w-full px-4 py-3 border-2 border-amber-500/30 bg-slate-700/50 text-amber-100 rounded-lg focus:outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20"
+                      placeholder={t('submit.summaryPlaceholder')}
                     ></textarea>
                   </div>
                   <div>
-                    <label className="block text-amber-300 font-bold mb-2">Fichier PDF * (PDF uniquement)</label>
+                    <label className="block text-amber-300 font-bold mb-2">{t('submit.pdfFile')}</label>
                     <div className="border-2 border-dashed border-amber-500/30 rounded-lg p-6 text-center bg-slate-700/30 hover:bg-slate-700/50 transition-colors">
                       <input 
                         type="file" 
@@ -2561,17 +2587,17 @@ export default function App() {
                         onChange={(e) => {
                           const file = e.target.files[0];
                           if (file && file.type !== 'application/pdf') {
-                            alert('❌ Erreur : Seuls les fichiers PDF sont acceptés !');
+                            alert(t('submit.pdfValidationError'));
                             e.target.value = '';
                           }
                         }}
                         className="w-full file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:bg-amber-700 file:text-white file:cursor-pointer file:hover:bg-amber-600 file:transition-colors"
                       />
-                      <p className="text-xs text-amber-300 mt-2">📄 Format accepté : PDF uniquement</p>
+                      <p className="text-xs text-amber-300 mt-2">📄 {t('submit.pdfFormatNote')}</p>
                     </div>
                   </div>
                   <button type="submit" className="w-full bg-gradient-to-r from-amber-600 to-amber-700 text-white px-8 py-4 rounded-lg hover:from-amber-500 hover:to-amber-600 font-bold text-lg shadow-lg hover:shadow-xl transition-all transform hover:scale-[1.02]">
-                    ✨ Soumettre mon scénario
+                    ✨ {t('submit.submitButton')}
                   </button>
                 </form>
               </div>
@@ -3222,7 +3248,7 @@ export default function App() {
             <div className="max-w-6xl mx-auto">
               <div className="text-center mb-8 md:mb-16">
                 <div className="inline-block bg-gradient-to-r from-amber-500 to-amber-700 text-transparent bg-clip-text mb-4">
-                  <h1 className="text-4xl md:text-7xl font-bold">À Propos</h1>
+                  <h1 className="text-4xl md:text-7xl font-bold">{t('about.title')}</h1>
                 </div>
                 <div className="w-24 md:w-32 h-1 bg-gradient-to-r from-amber-500 to-amber-700 mx-auto rounded-full"></div>
               </div>
@@ -3230,62 +3256,62 @@ export default function App() {
               <div className="space-y-6 md:space-y-10">
                 <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-4 md:p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
-                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20group_wthback.png" alt="Qui sommes-nous" className="w-16 h-16 md:w-24 md:h-24 object-contain" />
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20group_wthback.png" alt={t('about.whoWeAre')} className="w-16 h-16 md:w-24 md:h-24 object-contain" />
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">Qui sommes-nous ?</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">{t('about.whoWeAre')}</h2>
                   <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
-                    {siteSettings.aboutContent?.section1 || "Nous sommes une équipe passionnée de maîtres du jeu et de créateurs de contenu dédiés à l'univers du jeu de rôle. Notre amour pour la narration collaborative et les aventures épiques nous pousse à partager nos créations avec la communauté rôliste francophone."}
+                    {siteSettings.aboutContent?.section1 || t('about.whoWeAreDefault')}
                   </p>
                 </section>
 
                 <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-4 md:p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
-                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20target_wthback.png" alt="Notre objectif" className="w-16 h-16 md:w-24 md:h-24 object-contain" />
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo%20target_wthback.png" alt={t('about.ourGoal')} className="w-16 h-16 md:w-24 md:h-24 object-contain" />
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">Notre Objectif</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">{t('about.ourGoal')}</h2>
                   <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
-                    {siteSettings.aboutContent?.section2 || "Cette bibliothèque a été conçue pour offrir des scénarios de jeu de rôle d'exception. Chaque scénario est soigneusement examiné, noté selon plusieurs critères (ambiance, complexité, combat, enquête), et validé par notre équipe avant publication. Nous privilégions la qualité à la quantité : seuls les meilleurs scénarios trouvent leur place dans notre collection."}
+                    {siteSettings.aboutContent?.section2 || t('about.ourGoalDefault')}
                   </p>
                 </section>
 
                 <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-4 md:p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
-                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt="L'Auteur" className="w-16 h-16 md:w-24 md:h-24 object-contain" />
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt={t('about.theAuthor')} className="w-16 h-16 md:w-24 md:h-24 object-contain" />
                   </div>
-                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">L'Auteur</h2>
+                  <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">{t('about.theAuthor')}</h2>
                   <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
-                    {siteSettings.aboutContent?.section3 || "Maître de jeu depuis plus de dix ans, j'ai exploré de nombreux univers et systèmes de jeu. Ma philosophie : créer des aventures mémorables qui laissent une empreinte durable dans l'esprit des joueurs."}
+                    {siteSettings.aboutContent?.section3 || t('about.theAuthorDefault')}
                   </p>
                 </section>
 
                 <section className="text-center bg-slate-800/50 backdrop-blur-sm border-2 border-amber-700/30 rounded-2xl p-8 shadow-xl">
                   <div className="flex justify-center mb-4">
-                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png" alt="Comment ça marche" className="w-24 h-24 object-contain" />
+                    <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png" alt={t('about.howItWorks')} className="w-24 h-24 object-contain" />
                   </div>
-                  <h2 className="text-3xl font-bold mb-4 text-amber-300">Comment ça marche ?</h2>
+                  <h2 className="text-3xl font-bold mb-4 text-amber-300">{t('about.howItWorks')}</h2>
                   <div className="space-y-3 text-left max-w-2xl mx-auto">
                     <p className="flex items-start gap-3 text-amber-100/90">
                       <span className="text-amber-400 font-bold text-xl">1.</span>
-                      <span><strong className="text-amber-300">Explorez</strong> - Parcourez notre collection par thème</span>
+                      <span><strong className="text-amber-300">{t('about.step1Title')}</strong> - {t('about.step1Desc')}</span>
                     </p>
                     <p className="flex items-start gap-3 text-amber-100/90">
                       <span className="text-amber-400 font-bold text-xl">2.</span>
-                      <span><strong className="text-amber-300">Évaluez</strong> - Consultez nos notations détaillées</span>
+                      <span><strong className="text-amber-300">{t('about.step2Title')}</strong> - {t('about.step2Desc')}</span>
                     </p>
                     <p className="flex items-start gap-3 text-amber-100/90">
                       <span className="text-amber-400 font-bold text-xl">3.</span>
-                      <span><strong className="text-amber-300">Téléchargez</strong> - Accédez gratuitement ou achetez les PDFs</span>
+                      <span><strong className="text-amber-300">{t('about.step3Title')}</strong> - {t('about.step3Desc')}</span>
                     </p>
                     <p className="flex items-start gap-3 text-amber-100/90">
                       <span className="text-amber-400 font-bold text-xl">4.</span>
-                      <span><strong className="text-amber-300">Proposez</strong> - Soumettez vos créations</span>
+                      <span><strong className="text-amber-300">{t('about.step4Title')}</strong> - {t('about.step4Desc')}</span>
                     </p>
                   </div>
                 </section>
 
                 <section className="text-center border-t-2 border-amber-700/50 pt-8 bg-slate-800/30 backdrop-blur-sm rounded-2xl p-6 shadow-lg">
                   <div className="text-5xl mb-4">📧</div>
-                  <h2 className="text-2xl font-bold mb-3 text-amber-300">Contact</h2>
+                  <h2 className="text-2xl font-bold mb-3 text-amber-300">{t('about.contact')}</h2>
                   <p className="text-xl font-semibold text-amber-200">
                     {siteSettings.aboutContent?.contactEmail || "lecodexjdr@gmail.com"}
                   </p>
@@ -3353,7 +3379,7 @@ export default function App() {
                   'bg-cyan-900/90 hover:bg-cyan-800 text-cyan-100 border-cyan-600 hover:border-cyan-400'
               }`}>
               <ChevronLeft size={20} />
-              <span className="font-bold hidden md:inline">Retour</span>
+              <span className="font-bold hidden md:inline">{t('scenarios.back')}</span>
             </button>
 
             {/* Bannière distincte avec fond propre + Motifs thématiques */}
@@ -3433,9 +3459,9 @@ export default function App() {
                     currentTheme.id === 'lovecraft' ? 'text-emerald-400 font-mono' :
                     'text-cyan-400 tracking-wide'
                   }`}>
-                    {currentTheme.id === 'medieval' && '« Sélectionnez votre épopée »'}
-                    {currentTheme.id === 'lovecraft' && '[ Choisissez votre cauchemar ]'}
-                    {currentTheme.id === 'scifi' && '// SÉLECTIONNEZ VOTRE MISSION //'}
+                    {currentTheme.id === 'medieval' && t('scenarios.medievalSubtitle')}
+                    {currentTheme.id === 'lovecraft' && t('scenarios.lovecraftSubtitle')}
+                    {currentTheme.id === 'scifi' && t('scenarios.scifiSubtitle')}
                   </p>
                   
                   {/* Champ de recherche par tags */}
@@ -3444,7 +3470,7 @@ export default function App() {
                       type="text"
                       value={searchTag}
                       onChange={(e) => setSearchTag(e.target.value)}
-                      placeholder="🔍 Rechercher par tag..."
+                      placeholder={t('scenarios.searchPlaceholder')}
                       className={`w-full px-4 py-2 md:px-6 md:py-3 rounded-full text-center text-sm md:text-base font-semibold transition-all focus:outline-none focus:ring-4 ${
                         currentTheme.id === 'medieval'
                           ? 'bg-amber-900/80 text-amber-100 placeholder-amber-400/70 focus:ring-amber-500/50 border-2 border-amber-600'
@@ -3545,10 +3571,9 @@ export default function App() {
                     <h2 className="text-4xl font-bold text-amber-300 mb-4">{currentTheme.name}</h2>
                     <div className="max-w-2xl mx-auto bg-amber-100 border-4 border-amber-900 rounded-lg p-12 shadow-2xl">
                       <div className="text-8xl mb-6">📚</div>
-                      <h3 className="text-3xl font-bold text-amber-900 mb-4">Aucune campagne disponible</h3>
-                      <p className="text-xl text-amber-700">
-                        Cette section ne contient pas encore de campagne.<br/>
-                        Revenez plus tard !
+                      <h3 className="text-3xl font-bold text-amber-900 mb-4">{t('scenarios.noCampaigns')}</h3>
+                      <p className="text-xl text-amber-700" style={{ whiteSpace: 'pre-line' }}>
+                        {t('scenarios.noCampaignsMessage')}
                       </p>
                     </div>
                   </div>
@@ -3586,14 +3611,14 @@ export default function App() {
                           currentTheme.id === 'lovecraft' ? 'text-emerald-300' :
                           'text-cyan-300'
                         }`}>
-                          Aucun résultat pour "{searchTag}"
+                          {t('scenarios.noResults')} "{searchTag}"
                         </h3>
                         <p className={`text-xl ${
                           currentTheme.id === 'medieval' ? 'text-amber-400/80' :
                           currentTheme.id === 'lovecraft' ? 'text-emerald-400/80' :
                           'text-cyan-400/80'
                         }`}>
-                          Essayez avec un autre tag ou effacez la recherche pour voir tous les scénarios
+                          {t('scenarios.noResultsHint')}
                         </p>
                       </div>
                     );
@@ -3607,7 +3632,7 @@ export default function App() {
                           currentTheme.id === 'lovecraft' ? 'text-emerald-300' :
                           'text-cyan-300'
                         }`}>
-                          🔍 {filteredScenarios.length} scénario{filteredScenarios.length > 1 ? 's' : ''} trouvé{filteredScenarios.length > 1 ? 's' : ''} avec le tag "{searchTag}"
+                          🔍 {filteredScenarios.length} {t('scenarios.searchResults')} "{searchTag}"
                         </p>
                       </div>
                       <ScenarioCarousel 
@@ -3660,9 +3685,11 @@ function AppRouter() {
 const rootEl = document.getElementById('root');
 if (rootEl) {
   createRoot(rootEl).render(
-    <BrowserRouter>
-      <AppRouter />
-    </BrowserRouter>
+    <LanguageProvider>
+      <BrowserRouter>
+        <AppRouter />
+      </BrowserRouter>
+    </LanguageProvider>
   );
 } else {
   console.error('Element #root introuvable');

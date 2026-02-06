@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, Clock, Download, ShoppingCart } from 'lucide-react';
+import { useLanguage } from '../../i18n';
 import './ScenarioCarousel.css';
 
 const ScenarioCarousel = ({
@@ -17,6 +18,7 @@ const ScenarioCarousel = ({
   const [dragOffset, setDragOffset] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
+  const { t } = useLanguage();
 
   const carouselRef = useRef(null);
   const trackRef = useRef(null);
@@ -148,7 +150,7 @@ const ScenarioCarousel = ({
   if (!scenarios || scenarios.length === 0) {
     return (
       <div className="scenario-carousel-empty">
-        <p>Aucun scénario disponible</p>
+        <p>{t('carousel.noScenarios')}</p>
       </div>
     );
   }
@@ -229,7 +231,7 @@ const ScenarioCarousel = ({
               boxShadow: '0 4px 12px rgba(0,0,0,0.3)'
             }}>
               <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '14px', height: '14px', objectFit: 'contain' }} />
-              CAMPAGNE COMPLÈTE
+              {t('carousel.fullCampaignBadge')}
             </div>
 
             <h2 style={{
@@ -249,7 +251,7 @@ const ScenarioCarousel = ({
               gap: '0.5rem'
             }}>
               <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-              {scenarios.length} scénarios
+              {scenarios.length} {t('carousel.scenarios')}
             </p>
 
             {saga.description && (
@@ -323,7 +325,7 @@ const ScenarioCarousel = ({
                     gap: '0.5rem'
                   }}
                 >
-                  <Download size={18} /> Télécharger
+                  <Download size={18} /> {t('carousel.download')}
                 </button>
               ) : (
                 <>
@@ -349,7 +351,7 @@ const ScenarioCarousel = ({
                       gap: '0.5rem'
                     }}
                   >
-                    <ShoppingCart size={18} /> Ajouter
+                    <ShoppingCart size={18} /> {t('carousel.add')}
                   </button>
                 </>
               )}
@@ -416,7 +418,7 @@ const ScenarioCarousel = ({
                   borderRadius: '1rem',
                   fontSize: '0.75rem',
                   fontWeight: 'bold'
-                }}>GRATUIT</div>
+                }}>{t('carousel.free')}</div>
               )}
             </div>
 
@@ -489,7 +491,7 @@ const ScenarioCarousel = ({
                       fontSize: '0.875rem'
                     }}
                   >
-                    <Download size={16} /> Télécharger
+                    <Download size={16} /> {t('carousel.download')}
                   </button>
                 ) : (
                   <>
@@ -516,7 +518,7 @@ const ScenarioCarousel = ({
                         fontSize: '0.875rem'
                       }}
                     >
-                      <ShoppingCart size={16} /> Ajouter
+                      <ShoppingCart size={16} /> {t('carousel.add')}
                     </button>
                   </>
                 )}
@@ -611,7 +613,7 @@ const ScenarioCarousel = ({
                   boxShadow: '0 4px 12px rgba(0,0,0,0.4)'
                 }}>
                   <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '16px', height: '16px', objectFit: 'contain' }} />
-                  PACK
+                  {t('carousel.pack')}
                 </div>
 
                 {/* Badge gratuit pour la campagne */}
@@ -638,7 +640,7 @@ const ScenarioCarousel = ({
                     letterSpacing: '0.05em'
                   }}>
                     <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
-                    Campagne Complète
+                    {t('carousel.fullCampaignTitle')}
                   </h2>
                   
                   <div className="scenario-meta" style={{ marginBottom: '1rem' }}>
@@ -647,7 +649,7 @@ const ScenarioCarousel = ({
                     </div>
                     <div className="scenario-duration" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
-                      {scenarios.length} scénarios
+                      {scenarios.length} {t('carousel.scenarios')}
                     </div>
                   </div>
 
@@ -718,7 +720,7 @@ const ScenarioCarousel = ({
                       gap: '0.5rem'
                     }}>
                       <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png" alt="" style={{ width: '20px', height: '20px', objectFit: 'contain' }} />
-                      Cliquez pour voir les scénarios
+                      {t('carousel.clickToSeeScenarios')}
                     </p>
                   )}
 
@@ -734,14 +736,14 @@ const ScenarioCarousel = ({
                         style={{ width: '100%' }}
                       >
                         <Download size={18} />
-                        Télécharger la campagne
+                        {t('carousel.downloadCampaign')}
                       </button>
                     ) : (
                       <>
                         <div className="scenario-price" style={{ fontSize: '1.5rem' }}>
                           {saga.price.toFixed(2)} €
                         </div>
-                        <button 
+                        <button
                           onClick={(e) => {
                             e.stopPropagation();
                             onAddToCart({ type: 'saga', item: saga });
@@ -749,7 +751,7 @@ const ScenarioCarousel = ({
                           className="scenario-button cart"
                         >
                           <ShoppingCart size={18} />
-                          Ajouter
+                          {t('carousel.add')}
                         </button>
                       </>
                     )}
@@ -763,7 +765,7 @@ const ScenarioCarousel = ({
                       marginTop: '0.5rem',
                       fontWeight: 'bold'
                     }}>
-                      Économisez {((scenarios.filter(s => !s.isFree).reduce((sum, s) => sum + s.price, 0) - saga.price).toFixed(2))} €
+                      {t('carousel.save')} {((scenarios.filter(s => !s.isFree).reduce((sum, s) => sum + s.price, 0) - saga.price).toFixed(2))} €
                     </p>
                   )}
                 </div>
@@ -919,12 +921,12 @@ const ScenarioCarousel = ({
                       className="scenario-button download"
                     >
                       <Download size={18} />
-                      Télécharger
+                      {t('carousel.download')}
                     </button>
                   ) : (
                     <>
                       <div className="scenario-price">{scenario.price.toFixed(2)} €</div>
-                      <button 
+                      <button
                         onClick={(e) => {
                           e.stopPropagation();
                           onAddToCart({ type: 'scenario', item: scenario, saga });
@@ -932,7 +934,7 @@ const ScenarioCarousel = ({
                         className="scenario-button cart"
                       >
                         <ShoppingCart size={18} />
-                        Ajouter
+                        {t('carousel.add')}
                       </button>
                     </>
                   )}
