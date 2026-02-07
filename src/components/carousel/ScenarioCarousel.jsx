@@ -18,7 +18,7 @@ const ScenarioCarousel = ({
   const [dragOffset, setDragOffset] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
-  const { t } = useLanguage();
+  const { t, tTag, tDuration, tf } = useLanguage();
 
   const carouselRef = useRef(null);
   const trackRef = useRef(null);
@@ -240,7 +240,7 @@ const ScenarioCarousel = ({
               color: colors.text,
               marginBottom: '0.5rem',
               fontFamily: "'Cinzel', serif"
-            }}>{saga.name}</h2>
+            }}>{tf(saga, 'name')}</h2>
 
             <p style={{
               fontSize: '0.875rem',
@@ -264,7 +264,7 @@ const ScenarioCarousel = ({
                 WebkitLineClamp: 2,
                 WebkitBoxOrient: 'vertical',
                 overflow: 'hidden'
-              }}>{saga.description}</p>
+              }}>{tf(saga, 'description')}</p>
             )}
 
             {/* Liste des scénarios si déplié */}
@@ -298,7 +298,7 @@ const ScenarioCarousel = ({
                     }}
                   >
                     <span style={{ opacity: 0.7, marginRight: '0.5rem' }}>#{idx + 1}</span>
-                    {scenario.displayName}
+                    {tf(scenario, 'displayName')}
                   </button>
                 ))}
               </div>
@@ -429,7 +429,7 @@ const ScenarioCarousel = ({
                 fontWeight: 'bold',
                 color: colors.text,
                 marginBottom: '0.5rem'
-              }}>{scenario.displayName}</h3>
+              }}>{tf(scenario, 'displayName')}</h3>
 
               <div style={{
                 display: 'flex',
@@ -439,7 +439,7 @@ const ScenarioCarousel = ({
                 marginBottom: '0.75rem'
               }}>
                 <span>✍️ {scenario.author}</span>
-                <span>⏱️ {scenario.duration}</span>
+                <span>⏱️ {tDuration(scenario.duration)}</span>
               </div>
 
               {/* Ratings */}
@@ -590,7 +590,7 @@ const ScenarioCarousel = ({
                   {saga.backgroundImageUrl || scenarios[0]?.imageUrl ? (
                     <img 
                       src={saga.backgroundImageUrl || scenarios[0]?.imageUrl}
-                      alt={saga.name}
+                      alt={tf(saga, 'name')}
                       className="scenario-image"
                       draggable="false"
                       style={{ filter: 'blur(8px) brightness(0.5)' }}
@@ -645,7 +645,7 @@ const ScenarioCarousel = ({
                   
                   <div className="scenario-meta" style={{ marginBottom: '1rem' }}>
                     <div className="scenario-author" style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>
-                      {saga.name}
+                      {tf(saga, 'name')}
                     </div>
                     <div className="scenario-duration" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                       <img src="https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png" alt="" style={{ width: '18px', height: '18px', objectFit: 'contain' }} />
@@ -655,7 +655,7 @@ const ScenarioCarousel = ({
 
                   {saga.description && (
                     <p className="scenario-description" style={{ marginBottom: '1.5rem' }}>
-                      {saga.description}
+                      {tf(saga, 'description')}
                     </p>
                   )}
 
@@ -701,7 +701,7 @@ const ScenarioCarousel = ({
                           }}
                         >
                           <span style={{ opacity: 0.7, marginRight: '0.5rem' }}>#{idx + 1}</span>
-                          {scenario.displayName}
+                          {tf(scenario, 'displayName')}
                         </button>
                       ))}
                     </div>
@@ -809,7 +809,7 @@ const ScenarioCarousel = ({
               >
                 <img 
                   src={scenario.imageUrl}
-                  alt={scenario.displayName}
+                  alt={tf(scenario, 'displayName')}
                   className="scenario-image"
                   draggable="false"
                 />
@@ -836,21 +836,21 @@ const ScenarioCarousel = ({
                   theme?.id === 'scifi'
                     ? "'Orbitron', sans-serif" :
                     "'Crimson Text', serif"
-                }}>{scenario.displayName}</h2>
+                }}>{tf(scenario, 'displayName')}</h2>
                 
                 <div className="scenario-meta">
                   <div className="scenario-author">✍️ {scenario.author}</div>
                   <div className="scenario-duration">
-                    <Clock size={16} /> {scenario.duration}
+                    <Clock size={16} /> {tDuration(scenario.duration)}
                   </div>
                 </div>
 
-                <p className="scenario-description">{scenario.description}</p>
+                <p className="scenario-description">{tf(scenario, 'description')}</p>
 
                 {/* Tags */}
                 <div className="scenario-tags">
                   {scenario.tags.slice(0, 3).map((tag, i) => (
-                    <span key={i} className="scenario-tag">{tag}</span>
+                    <span key={i} className="scenario-tag">{tTag(tag)}</span>
                   ))}
                 </div>
 

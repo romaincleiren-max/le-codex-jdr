@@ -32,8 +32,33 @@ export function LanguageProvider({ children }) {
     return value || key;
   }, [language]);
 
+  // Traduit un tag FR en EN via le mapping tagMap
+  const tTag = useCallback((tag) => {
+    if (language === 'fr') return tag;
+    const map = translations.en.tagMap;
+    return map?.[tag] || tag;
+  }, [language]);
+
+  // Traduit une durée "4-6 heures" → "4-6 hours"
+  const tDuration = useCallback((duration) => {
+    if (language === 'fr' || !duration) return duration;
+    return duration
+      .replace(/heures/gi, 'hours')
+      .replace(/heure/gi, 'hour');
+  }, [language]);
+
+  // Lit un champ localisé : tf(scenario, 'description') → scenario.description_en || scenario.description
+  const tf = useCallback((obj, field) => {
+    if (!obj) return '';
+    if (language === 'en') {
+      const enField = obj[field + '_en'] || obj[field + 'En'];
+      if (enField) return enField;
+    }
+    return obj[field] || '';
+  }, [language]);
+
   return (
-    <LanguageContext.Provider value={{ language, toggleLanguage, t }}>
+    <LanguageContext.Provider value={{ language, toggleLanguage, t, tTag, tDuration, tf }}>
       {children}
     </LanguageContext.Provider>
   );

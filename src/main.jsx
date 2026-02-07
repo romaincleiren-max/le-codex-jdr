@@ -86,19 +86,19 @@ const StarRating = ({ rating, label, icon, theme }) => (
 );
 
 const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, hasNextCampaign, hasPreviousCampaign, onAddToCart, onDownloadFree, saga }) => {
-  const { t } = useLanguage();
+  const { t, tTag, tDuration, tf } = useLanguage();
   const colors = theme.colors;
   
   if (side === 'left') {
     return (
       <div className="w-full h-full p-8 pr-4 flex flex-col">
         <div className="mb-4 relative flex-grow">
-          <img src={scenario.imageUrl} alt={scenario.displayName} className="w-full h-full object-cover rounded border-4 border-amber-800 shadow-lg"/>
+          <img src={scenario.imageUrl} alt={tf(scenario, 'displayName')} className="w-full h-full object-cover rounded border-4 border-amber-800 shadow-lg"/>
         </div>
-        <h2 className={`text-2xl font-bold mb-4 ${colors.text} font-serif`}>{scenario.displayName}</h2>
+        <h2 className={`text-2xl font-bold mb-4 ${colors.text} font-serif`}>{tf(scenario, 'displayName')}</h2>
         <div className="flex items-center gap-2 mb-4">
           <Clock size={18} className={colors.textLight} />
-          <span className={`text-base font-semibold ${colors.textLight}`}>{scenario.duration}</span>
+          <span className={`text-base font-semibold ${colors.textLight}`}>{tDuration(scenario.duration)}</span>
         </div>
         <div className="mb-4 grid grid-cols-2 gap-3">
           <div>
@@ -122,7 +122,7 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
       <div className="w-full h-full p-8 pl-4 flex flex-col">
         <div className="mb-6 flex-grow">
           <h3 className={`text-lg font-bold mb-3 ${colors.text}`}>{t('book.summary')}</h3>
-          <p className={`text-base ${colors.textLight} leading-relaxed`}>{scenario.description}</p>
+          <p className={`text-base ${colors.textLight} leading-relaxed`}>{tf(scenario, 'description')}</p>
         </div>
         <div className="mb-4">
           <h3 className={`text-sm font-bold mb-1 ${colors.text}`}>{t('book.author')}</h3>
@@ -131,7 +131,7 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
         <div className="mb-6">
           <h3 className={`text-sm font-bold mb-2 ${colors.text}`}>{t('book.tags')}</h3>
           <div className="flex flex-wrap gap-2">
-            {scenario.tags.map((tag, i) => <span key={i} className={`${colors.tag} px-3 py-1 rounded-full text-sm`}>{tag}</span>)}
+            {scenario.tags.map((tag, i) => <span key={i} className={`${colors.tag} px-3 py-1 rounded-full text-sm`}>{tTag(tag)}</span>)}
           </div>
         </div>
         
@@ -209,12 +209,16 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
     pdfUrl: saga.pdfUrl || saga.pdf_url || '',
     backgroundImageUrl: saga.backgroundImageUrl || saga.background_image_url || '',
     backgroundVideoUrl: saga.backgroundVideoUrl || saga.background_video_url || '',
-    isFree: saga.isFree ?? saga.is_free ?? false
+    isFree: saga.isFree ?? saga.is_free ?? false,
+    nameEn: saga.nameEn || saga.name_en || '',
+    descriptionEn: saga.descriptionEn || saga.description_en || ''
   } : {
     id: Date.now(),
     name: '',
+    nameEn: '',
     themeId: 'medieval',
     description: '',
+    descriptionEn: '',
     price: 24.99,
     isFree: false,
     pdfUrl: '',
@@ -250,12 +254,23 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
             <label className="block text-amber-900 font-bold mb-2">Nom de la campagne *</label>
-            <input 
-              type="text" 
+            <input
+              type="text"
               required
               value={editedSaga.name}
               onChange={(e) => setEditedSaga({...editedSaga, name: e.target.value})}
               className="w-full px-4 py-2 border-2 border-amber-700 rounded focus:outline-none focus:border-amber-900"
+            />
+          </div>
+
+          <div>
+            <label className="block text-blue-800 font-bold mb-2">🇬🇧 Campaign name (English)</label>
+            <input
+              type="text"
+              value={editedSaga.nameEn}
+              onChange={(e) => setEditedSaga({...editedSaga, nameEn: e.target.value})}
+              className="w-full px-4 py-2 border-2 border-blue-400 rounded focus:outline-none focus:border-blue-600 bg-blue-50"
+              placeholder="English name (optional)"
             />
           </div>
 
@@ -280,12 +295,23 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
 
           <div>
             <label className="block text-amber-900 font-bold mb-2">Description *</label>
-            <textarea 
+            <textarea
               required
               rows="4"
               value={editedSaga.description}
               onChange={(e) => setEditedSaga({...editedSaga, description: e.target.value})}
               className="w-full px-4 py-2 border-2 border-amber-700 rounded focus:outline-none focus:border-amber-900"
+            />
+          </div>
+
+          <div>
+            <label className="block text-blue-800 font-bold mb-2">🇬🇧 Description (English)</label>
+            <textarea
+              rows="4"
+              value={editedSaga.descriptionEn}
+              onChange={(e) => setEditedSaga({...editedSaga, descriptionEn: e.target.value})}
+              className="w-full px-4 py-2 border-2 border-blue-400 rounded focus:outline-none focus:border-blue-600 bg-blue-50"
+              placeholder="English description (optional)"
             />
           </div>
 
@@ -399,7 +425,7 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
 };
 
 const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToCart }) => {
-  const { t } = useLanguage();
+  const { t, tTag, tDuration, tf } = useLanguage();
   if (!scenario) return null;
 
   return (
@@ -416,18 +442,18 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
           <div className="flex items-center justify-center bg-black/50 rounded-lg p-2 md:p-4">
             <img
               src={scenario.imageUrl}
-              alt={scenario.displayName}
+              alt={tf(scenario, 'displayName')}
               className="w-full max-h-[50vh] md:max-h-[85vh] object-contain rounded-lg border-2 md:border-4 border-amber-800 shadow-2xl"
             />
           </div>
 
           {/* Colonne droite - Détails */}
           <div className="bg-amber-100 border-2 md:border-4 border-amber-900 rounded-lg p-4 md:p-8 shadow-2xl">
-            <h2 className="text-2xl md:text-4xl font-bold text-amber-900 mb-4 font-serif">{scenario.displayName}</h2>
-            
+            <h2 className="text-2xl md:text-4xl font-bold text-amber-900 mb-4 font-serif">{tf(scenario, 'displayName')}</h2>
+
             <div className="mb-6">
               <h3 className="text-lg font-bold text-amber-900 mb-2">{t('book.summary')}</h3>
-              <p className="text-amber-800 leading-relaxed">{scenario.description}</p>
+              <p className="text-amber-800 leading-relaxed">{tf(scenario, 'description')}</p>
             </div>
 
             <div className="mb-4">
@@ -437,7 +463,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
 
             <div className="flex items-center gap-2 mb-4 text-amber-800">
               <Clock size={18} />
-              <span className="font-semibold">{scenario.duration}</span>
+              <span className="font-semibold">{tDuration(scenario.duration)}</span>
             </div>
 
             <div className="mb-6">
@@ -445,7 +471,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
               <div className="flex flex-wrap gap-2">
                 {scenario.tags.map((tag, i) => (
                   <span key={i} className="bg-amber-200 text-amber-900 px-3 py-1 rounded-full text-sm">
-                    {tag}
+                    {tTag(tag)}
                   </span>
                 ))}
               </div>
@@ -540,12 +566,18 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
 };
 
 const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
-  const [editedScenario, setEditedScenario] = useState(scenario || {
+  const [editedScenario, setEditedScenario] = useState(scenario ? {
+    ...scenario,
+    displayNameEn: scenario.displayNameEn || scenario.display_name_en || '',
+    descriptionEn: scenario.descriptionEn || scenario.description_en || ''
+  } : {
     id: Date.now(),
     title: '',
     displayName: '',
+    displayNameEn: '',
     author: '',
     description: '',
+    descriptionEn: '',
     imageUrl: '',
     backgroundImageUrl: '',
     duration: '4-6 heures',
@@ -607,8 +639,8 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
             </div>
             <div>
               <label className="block text-amber-900 font-bold mb-2">Nom d'affichage *</label>
-              <input 
-                type="text" 
+              <input
+                type="text"
                 required
                 value={editedScenario.displayName}
                 onChange={(e) => setEditedScenario({...editedScenario, displayName: e.target.value})}
@@ -616,6 +648,17 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
                 placeholder="Chapitre I : La Maîtresse des Doigts"
               />
             </div>
+          </div>
+
+          <div>
+            <label className="block text-blue-800 font-bold mb-2">🇬🇧 Display name (English)</label>
+            <input
+              type="text"
+              value={editedScenario.displayNameEn}
+              onChange={(e) => setEditedScenario({...editedScenario, displayNameEn: e.target.value})}
+              className="w-full px-4 py-2 border-2 border-blue-400 rounded focus:outline-none focus:border-blue-600 bg-blue-50"
+              placeholder="Chapter I: The Mistress of Fingers (optional)"
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -644,12 +687,23 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
 
           <div>
             <label className="block text-amber-900 font-bold mb-2">Description *</label>
-            <textarea 
+            <textarea
               required
               rows="4"
               value={editedScenario.description}
               onChange={(e) => setEditedScenario({...editedScenario, description: e.target.value})}
               className="w-full px-4 py-2 border-2 border-amber-700 rounded focus:outline-none focus:border-amber-900"
+            />
+          </div>
+
+          <div>
+            <label className="block text-blue-800 font-bold mb-2">🇬🇧 Description (English)</label>
+            <textarea
+              rows="4"
+              value={editedScenario.descriptionEn}
+              onChange={(e) => setEditedScenario({...editedScenario, descriptionEn: e.target.value})}
+              className="w-full px-4 py-2 border-2 border-blue-400 rounded focus:outline-none focus:border-blue-600 bg-blue-50"
+              placeholder="English description (optional)"
             />
           </div>
 
@@ -862,7 +916,7 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
 };
 
 const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
-  const { t } = useLanguage();
+  const { t, tf } = useLanguage();
   const total = cart.reduce((sum, item) => sum + (item.type === 'saga' ? item.item.price : item.item.price), 0);
   const [isProcessing, setIsProcessing] = useState(false);
 
@@ -934,7 +988,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className="font-bold text-amber-200 text-lg leading-tight">
-                        {cartItem.type === 'saga' ? cartItem.item.name : cartItem.item.displayName}
+                        {cartItem.type === 'saga' ? tf(cartItem.item, 'name') : tf(cartItem.item, 'displayName')}
                       </h3>
                       <button 
                         onClick={() => onRemoveItem(index)} 
@@ -945,7 +999,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
                     
                     {cartItem.type === 'scenario' && (
                       <p className="text-amber-500 text-sm mb-2 flex items-center gap-1">
-                        <span className="opacity-60">{t('cart.from')}</span> {cartItem.saga.name}
+                        <span className="opacity-60">{t('cart.from')}</span> {tf(cartItem.saga, 'name')}
                       </p>
                     )}
                     {cartItem.type === 'saga' && (
@@ -1032,7 +1086,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
 };
 
 const CheckoutPage = ({ cart, onBack, onOrderComplete }) => {
-  const { t } = useLanguage();
+  const { t, tf } = useLanguage();
   const [formData, setFormData] = useState({
     firstName: '', lastName: '', email: '', confirmEmail: '',
     address: '', city: '', postalCode: '', country: 'France',
@@ -1170,7 +1224,7 @@ const handleSubmit = async (e) => {
             <div className="space-y-3 mb-6">
               {cart.map((item, i) => (
                 <div key={i} className="border-b-2 border-amber-700 pb-3">
-                  <div className="font-bold text-amber-900">{item.type === 'saga' ? item.item.name : item.item.displayName}</div>
+                  <div className="font-bold text-amber-900">{item.type === 'saga' ? tf(item.item, 'name') : tf(item.item, 'displayName')}</div>
                   <div className="flex justify-between text-sm">
                     <span className="text-amber-700">{item.type === 'saga' ? `${item.item.scenarios.length} ${t('cart.scenariosIncluded')}` : t('checkout.scenario')}</span>
                     <span className="font-bold text-amber-800">{(item.type === 'saga' ? item.item.price : item.item.price).toFixed(2)} €</span>
@@ -1192,7 +1246,7 @@ const handleSubmit = async (e) => {
 };
 
 const OrderConfirmationPage = ({ orderData, cart, onBackToHome }) => {
-  const { t } = useLanguage();
+  const { t, tf } = useLanguage();
   const total = cart.reduce((sum, item) => sum + (item.type === 'saga' ? item.item.price : item.item.price), 0);
 
   return (
@@ -1211,7 +1265,7 @@ const OrderConfirmationPage = ({ orderData, cart, onBackToHome }) => {
           <h2 className="text-xl font-bold text-amber-900 mb-4">📦 {t('confirmation.order')}</h2>
           {cart.map((item, i) => (
             <div key={i} className="flex justify-between py-2 border-b border-amber-300">
-              <span>{item.type === 'saga' ? item.item.name : item.item.displayName}</span>
+              <span>{item.type === 'saga' ? tf(item.item, 'name') : tf(item.item, 'displayName')}</span>
               <span className="font-bold">{(item.type === 'saga' ? item.item.price : item.item.price).toFixed(2)} €</span>
             </div>
           ))}
@@ -1587,7 +1641,7 @@ const SubmissionsTab = () => {
 
 export default function App() {
   // i18n
-  const { language, toggleLanguage, t } = useLanguage();
+  const { language, toggleLanguage, t, tTag, tDuration, tf } = useLanguage();
 
   // État pour le preloader
   const [showPreloader, setShowPreloader] = useState(true);
