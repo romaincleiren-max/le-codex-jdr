@@ -12,7 +12,7 @@ import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { inject } from '@vercel/analytics';
+import { Analytics } from '@vercel/analytics/react';
 import { LanguageProvider, useLanguage } from './i18n';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
@@ -3821,7 +3821,6 @@ function AppRouter() {
   );
 }
 
-inject();
 
 const rootEl = document.getElementById('root');
 if (rootEl) {
@@ -3829,6 +3828,7 @@ if (rootEl) {
     <LanguageProvider>
       <BrowserRouter>
         <AppRouter />
+        <Analytics />
       </BrowserRouter>
     </LanguageProvider>
   );
