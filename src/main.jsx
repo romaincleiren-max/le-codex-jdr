@@ -12,6 +12,7 @@ import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { inject } from '@vercel/analytics';
 import { LanguageProvider, useLanguage } from './i18n';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
@@ -3819,6 +3820,8 @@ function AppRouter() {
     </Routes>
   );
 }
+
+inject();
 
 const rootEl = document.getElementById('root');
 if (rootEl) {
