@@ -3592,49 +3592,80 @@ export default function App() {
                 if (themeCampaigns.length > 0) {
                   return (
                     <div className="overflow-x-auto scrollbar-hide px-4">
-                      <div className="flex gap-4 pb-4 min-w-max justify-center mx-auto" style={{maxWidth: 'fit-content'}}>
+                      <div className="flex gap-6 pb-4 min-w-max justify-center mx-auto" style={{maxWidth: 'fit-content'}}>
                         {themeCampaigns.map((saga) => {
                           const globalIndex = sagas.findIndex(s => s.id === saga.id);
                           const isActive = currentSagaIndex === globalIndex;
+                          const campaignImage = saga.backgroundImageUrl || saga.scenarios?.[0]?.imageUrl;
                           return (
-                            <button 
+                            <button
                               key={saga.id}
                               onClick={() => { setCurrentSagaIndex(globalIndex); setCurrentScenario(0); }}
-                              className={`px-8 py-4 rounded-2xl font-bold transition-all transform hover:scale-105 whitespace-nowrap relative overflow-hidden border-2 ${
-                                currentTheme.id === 'medieval' 
-                                  ? isActive 
-                                    ? 'bg-gradient-to-r from-amber-700 to-amber-600 text-amber-50 shadow-2xl shadow-amber-900/60 border-amber-500' 
-                                    : 'bg-amber-950/50 backdrop-blur-sm text-amber-300 hover:bg-amber-900/70 border-amber-800/50'
+                              className={`rounded-2xl font-bold transition-all whitespace-nowrap relative overflow-hidden border-2 group ${
+                                currentTheme.id === 'medieval'
+                                  ? isActive
+                                    ? 'shadow-2xl shadow-amber-900/60 border-amber-500'
+                                    : 'border-amber-800/50 hover:border-amber-600/70'
                                   : currentTheme.id === 'lovecraft'
                                   ? isActive
-                                    ? 'bg-gradient-to-r from-emerald-800 to-emerald-700 text-emerald-50 shadow-2xl shadow-emerald-900/60 border-emerald-500'
-                                    : 'bg-emerald-950/50 backdrop-blur-sm text-emerald-300 hover:bg-emerald-900/70 border-emerald-800/50'
+                                    ? 'shadow-2xl shadow-emerald-900/60 border-emerald-500'
+                                    : 'border-emerald-800/50 hover:border-emerald-600/70'
                                   : isActive
-                                    ? 'bg-gradient-to-r from-cyan-800 to-cyan-700 text-cyan-50 shadow-2xl shadow-cyan-900/60 border-cyan-500'
-                                    : 'bg-cyan-950/50 backdrop-blur-sm text-cyan-300 hover:bg-cyan-900/70 border-cyan-800/50'
-                              }`}>
-                              {isActive && (
-                                <div className={`absolute inset-0 bg-gradient-to-r to-transparent animate-pulse ${
-                                  currentTheme.id === 'medieval' ? 'from-amber-500/20' :
-                                  currentTheme.id === 'lovecraft' ? 'from-emerald-500/20' :
-                                  'from-cyan-500/20'
+                                    ? 'shadow-2xl shadow-cyan-900/60 border-cyan-500'
+                                    : 'border-cyan-800/50 hover:border-cyan-600/70'
+                              }`}
+                              style={{ width: '180px', transition: 'all 0.3s ease' }}
+                            >
+                              {/* Image */}
+                              <div className="relative w-full h-24 overflow-hidden">
+                                {campaignImage ? (
+                                  <img
+                                    src={campaignImage}
+                                    alt={tf(saga, 'name')}
+                                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                  />
+                                ) : (
+                                  <div className={`w-full h-full ${
+                                    currentTheme.id === 'medieval' ? 'bg-amber-900/50' :
+                                    currentTheme.id === 'lovecraft' ? 'bg-emerald-900/50' :
+                                    'bg-cyan-900/50'
+                                  }`}></div>
+                                )}
+                                <div className={`absolute inset-0 ${
+                                  currentTheme.id === 'medieval' ? 'bg-gradient-to-t from-amber-950/80 to-transparent' :
+                                  currentTheme.id === 'lovecraft' ? 'bg-gradient-to-t from-emerald-950/80 to-transparent' :
+                                  'bg-gradient-to-t from-cyan-950/80 to-transparent'
                                 }`}></div>
-                              )}
-                              <div className="flex items-center gap-3 relative z-10">
-                                <span className="text-lg" style={{
-                                  fontFamily: currentTheme.id === 'medieval' 
+                                {isActive && (
+                                  <div className={`absolute inset-0 animate-pulse ${
+                                    currentTheme.id === 'medieval' ? 'bg-amber-500/15' :
+                                    currentTheme.id === 'lovecraft' ? 'bg-emerald-500/15' :
+                                    'bg-cyan-500/15'
+                                  }`}></div>
+                                )}
+                                {saga.isFree && (
+                                  <span className="absolute top-2 right-2 bg-green-500/30 text-green-400 px-2 py-0.5 rounded-lg text-xs font-bold border border-green-500/50">
+                                    📥
+                                  </span>
+                                )}
+                              </div>
+                              {/* Nom */}
+                              <div className={`px-4 py-3 text-center ${
+                                currentTheme.id === 'medieval'
+                                  ? isActive ? 'bg-gradient-to-r from-amber-700 to-amber-600 text-amber-50' : 'bg-amber-950/70 text-amber-300'
+                                  : currentTheme.id === 'lovecraft'
+                                  ? isActive ? 'bg-gradient-to-r from-emerald-800 to-emerald-700 text-emerald-50' : 'bg-emerald-950/70 text-emerald-300'
+                                  : isActive ? 'bg-gradient-to-r from-cyan-800 to-cyan-700 text-cyan-50' : 'bg-cyan-950/70 text-cyan-300'
+                              }`}>
+                                <span className="text-sm leading-tight block" style={{
+                                  fontFamily: currentTheme.id === 'medieval'
                                     ? "'Cinzel', serif" :
                                   currentTheme.id === 'lovecraft'
                                     ? "'IM Fell English', serif" :
                                   currentTheme.id === 'scifi'
                                     ? "'Orbitron', sans-serif" :
                                     "'Crimson Text', serif"
-                                }}>{saga.name}</span>
-                                {saga.isFree && (
-                                  <span className="bg-green-500/20 text-green-400 px-2 py-1 rounded-lg text-xs font-bold border border-green-500/50">
-                                    📥
-                                  </span>
-                                )}
+                                }}>{tf(saga, 'name')}</span>
                               </div>
                             </button>
                           );
