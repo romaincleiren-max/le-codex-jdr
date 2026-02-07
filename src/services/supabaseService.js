@@ -113,8 +113,10 @@ export const createCampaign = async (campaign) => {
     .from('campaigns')
     .insert([{
       name: campaign.name,
+      name_en: campaign.nameEn || null,
       theme_id: campaign.themeId,
       description: campaign.description,
+      description_en: campaign.descriptionEn || null,
       price: campaign.price || 0,
       is_free: campaign.isFree || false,
       pdf_url: campaign.pdfUrl || null,
@@ -123,7 +125,7 @@ export const createCampaign = async (campaign) => {
     }])
     .select()
     .single();
-  
+
   if (error) throw error;
   return data;
 };
@@ -133,8 +135,10 @@ export const updateCampaign = async (id, updates) => {
     .from('campaigns')
     .update({
       name: updates.name,
+      name_en: updates.nameEn || null,
       theme_id: updates.themeId,
       description: updates.description,
+      description_en: updates.descriptionEn || null,
       price: updates.price || 0,
       is_free: updates.isFree || false,
       pdf_url: updates.pdfUrl || null,
@@ -200,8 +204,10 @@ export const createScenario = async (campaignId, scenario) => {
       campaign_id: campaignId,
       title: scenario.title,
       display_name: scenario.displayName,
+      display_name_en: scenario.displayNameEn || null,
       author: scenario.author,
       description: scenario.description,
+      description_en: scenario.descriptionEn || null,
       image_url: scenario.imageUrl || null,
       background_image_url: scenario.backgroundImageUrl || null,
       duration: scenario.duration || '4-6 heures',
@@ -224,8 +230,10 @@ export const updateScenario = async (id, updates) => {
   const updateData = {
     title: updates.title,
     display_name: updates.displayName,
+    display_name_en: updates.displayNameEn || null,
     author: updates.author,
     description: updates.description,
+    description_en: updates.descriptionEn || null,
     image_url: updates.imageUrl || null,
     background_image_url: updates.backgroundImageUrl || null,
     duration: updates.duration || '4-6 heures',
