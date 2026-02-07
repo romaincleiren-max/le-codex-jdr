@@ -3601,7 +3601,7 @@ export default function App() {
                             <button
                               key={saga.id}
                               onClick={() => { setCurrentSagaIndex(globalIndex); setCurrentScenario(0); }}
-                              className={`rounded-2xl font-bold transition-all whitespace-nowrap relative overflow-hidden border-2 group ${
+                              className={`rounded-2xl font-bold transition-all relative overflow-hidden border-2 group ${
                                 currentTheme.id === 'medieval'
                                   ? isActive
                                     ? 'shadow-2xl shadow-amber-900/60 border-amber-500'
@@ -3614,10 +3614,10 @@ export default function App() {
                                     ? 'shadow-2xl shadow-cyan-900/60 border-cyan-500'
                                     : 'border-cyan-800/50 hover:border-cyan-600/70'
                               }`}
-                              style={{ width: '180px', transition: 'all 0.3s ease' }}
+                              style={{ width: '270px', transition: 'all 0.3s ease' }}
                             >
-                              {/* Image */}
-                              <div className="relative w-full h-24 overflow-hidden">
+                              {/* Image 16:9 */}
+                              <div className="relative w-full overflow-hidden" style={{ aspectRatio: '16/9' }}>
                                 {campaignImage ? (
                                   <img
                                     src={campaignImage}
