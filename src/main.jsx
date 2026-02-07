@@ -3534,7 +3534,7 @@ export default function App() {
                     {currentTheme.id === 'medieval' && '⚔️ '}
                     {currentTheme.id === 'lovecraft' && '👁️ '}
                     {currentTheme.id === 'scifi' && '🚀 '}
-                    {currentTheme.name}
+                    {t('home.' + currentTheme.id)}
                   </h1>
                   <p className={`text-sm md:text-xl relative z-10 mb-2 md:mb-4 ${
                     currentTheme.id === 'medieval' ? 'text-amber-400 font-serif italic' :
@@ -3681,7 +3681,7 @@ export default function App() {
             <div className="px-6 pb-12 relative z-10">
               {selectedSaga ? null : (
                   <div className="text-center py-20">
-                    <h2 className="text-4xl font-bold text-amber-300 mb-4">{currentTheme.name}</h2>
+                    <h2 className="text-4xl font-bold text-amber-300 mb-4">{t('home.' + currentTheme.id)}</h2>
                     <div className="max-w-2xl mx-auto bg-amber-100 border-4 border-amber-900 rounded-lg p-12 shadow-2xl">
                       <div className="text-8xl mb-6">📚</div>
                       <h3 className="text-3xl font-bold text-amber-900 mb-4">{t('scenarios.noCampaigns')}</h3>
