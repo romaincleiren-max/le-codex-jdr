@@ -2923,15 +2923,16 @@ export default function App() {
                     <form onSubmit={(e) => {
                       e.preventDefault();
                       const formData = new FormData(e.target);
-                      setSiteSettings({
-                        ...siteSettings,
-                        aboutContent: {
-                          section1: formData.get('section1'),
-                          section2: formData.get('section2'),
-                          section3: formData.get('section3'),
-                          contactEmail: formData.get('contactEmail')
-                        }
-                      });
+                      const aboutContent = {
+                        section1: formData.get('section1'),
+                        section1En: formData.get('section1En'),
+                        section2: formData.get('section2'),
+                        section2En: formData.get('section2En'),
+                        section3: formData.get('section3'),
+                        section3En: formData.get('section3En'),
+                        contactEmail: formData.get('contactEmail')
+                      };
+                      setSiteSettings({ ...siteSettings, aboutContent });
                       alert('✅ Page "À propos" sauvegardée !');
                     }} className="space-y-6">
                       
@@ -2944,6 +2945,14 @@ export default function App() {
                           className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
                           placeholder="Présentez qui vous êtes..."
                         />
+                        <h3 className="text-lg font-bold text-blue-400 mt-4 mb-2">🇬🇧 Section 1: Who are we? (English)</h3>
+                        <textarea
+                          name="section1En"
+                          rows="5"
+                          defaultValue={siteSettings.aboutContent?.section1En || ''}
+                          className="w-full px-4 py-3 border-2 border-blue-500/50 rounded-lg bg-blue-950/30 text-blue-100 focus:outline-none focus:border-blue-400"
+                          placeholder="English version (optional)"
+                        />
                       </div>
 
                       <div className="bg-slate-800/50 border-2 border-teal-700/50 rounded-lg p-6">
@@ -2955,6 +2964,14 @@ export default function App() {
                           className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
                           placeholder="Décrivez votre objectif..."
                         />
+                        <h3 className="text-lg font-bold text-blue-400 mt-4 mb-2">🇬🇧 Section 2: Our Goal (English)</h3>
+                        <textarea
+                          name="section2En"
+                          rows="5"
+                          defaultValue={siteSettings.aboutContent?.section2En || ''}
+                          className="w-full px-4 py-3 border-2 border-blue-500/50 rounded-lg bg-blue-950/30 text-blue-100 focus:outline-none focus:border-blue-400"
+                          placeholder="English version (optional)"
+                        />
                       </div>
 
                       <div className="bg-slate-800/50 border-2 border-teal-700/50 rounded-lg p-6">
@@ -2965,6 +2982,14 @@ export default function App() {
                           defaultValue={siteSettings.aboutContent?.section3 || "Maître de jeu depuis plus de dix ans, j'ai exploré de nombreux univers et systèmes de jeu. Ma philosophie : créer des aventures mémorables qui laissent une empreinte durable dans l'esprit des joueurs."}
                           className="w-full px-4 py-3 border-2 border-teal-700 rounded-lg bg-slate-700 text-teal-100 focus:outline-none focus:border-teal-500"
                           placeholder="Parlez de vous..."
+                        />
+                        <h3 className="text-lg font-bold text-blue-400 mt-4 mb-2">🇬🇧 Section 3: The Author (English)</h3>
+                        <textarea
+                          name="section3En"
+                          rows="5"
+                          defaultValue={siteSettings.aboutContent?.section3En || ''}
+                          className="w-full px-4 py-3 border-2 border-blue-500/50 rounded-lg bg-blue-950/30 text-blue-100 focus:outline-none focus:border-blue-400"
+                          placeholder="English version (optional)"
                         />
                       </div>
 
@@ -3342,7 +3367,7 @@ export default function App() {
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">{t('about.whoWeAre')}</h2>
                   <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
-                    {siteSettings.aboutContent?.section1 || t('about.whoWeAreDefault')}
+                    {(language === 'en' && siteSettings.aboutContent?.section1En) ? siteSettings.aboutContent.section1En : (siteSettings.aboutContent?.section1 || t('about.whoWeAreDefault'))}
                   </p>
                 </section>
 
@@ -3352,7 +3377,7 @@ export default function App() {
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">{t('about.ourGoal')}</h2>
                   <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
-                    {siteSettings.aboutContent?.section2 || t('about.ourGoalDefault')}
+                    {(language === 'en' && siteSettings.aboutContent?.section2En) ? siteSettings.aboutContent.section2En : (siteSettings.aboutContent?.section2 || t('about.ourGoalDefault'))}
                   </p>
                 </section>
 
@@ -3362,7 +3387,7 @@ export default function App() {
                   </div>
                   <h2 className="text-2xl md:text-3xl font-bold mb-4 text-amber-300">{t('about.theAuthor')}</h2>
                   <p className="text-base md:text-lg leading-relaxed text-amber-100/90">
-                    {siteSettings.aboutContent?.section3 || t('about.theAuthorDefault')}
+                    {(language === 'en' && siteSettings.aboutContent?.section3En) ? siteSettings.aboutContent.section3En : (siteSettings.aboutContent?.section3 || t('about.theAuthorDefault'))}
                   </p>
                 </section>
 
