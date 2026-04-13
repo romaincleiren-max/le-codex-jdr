@@ -3,7 +3,7 @@
 // Lit les persos depuis localStorage (forge_roster_v1) + PNJ custom
 // ============================================================================
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
 
@@ -19,18 +19,15 @@ const CONDITIONS = [
   { id: 'concentration', label: 'Concentré',   emoji: '🔮',  color: '#2A5A8A' },
 ];
 
-const CLASS_ICONS = {
-  guerrier:'⚔️', barbare:'🪓', rôdeur:'🏹', paladin:'⚜️', roublard:'🗡️',
-  magicien:'📚', sorcier:'👁️', druide:'🌿', clerc:'✝️', barde:'🎵',
-  moine:'👊', ensorceleur:'✨',
-};
-
 function d20() { return Math.floor(Math.random() * 20) + 1; }
 function statMod(v) { return Math.floor(((v || 10) - 10) / 2); }
 
-function clsEmoji(clsName = '') {
-  const key = clsName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
-  return Object.entries(CLASS_ICONS).find(([k]) => key.includes(k))?.[1] || '⚔️';
+// Couleur d'avatar basée sur le nom
+const AVATAR_COLORS = ['#1e3a5f','#3a1e5f','#1e5f3a','#5f3a1e','#5f1e3a','#1e4a4a','#4a3a1e','#3a4a1e'];
+function nameToColor(str = '') {
+  let h = 0;
+  for (let i = 0; i < str.length; i++) h = str.charCodeAt(i) + ((h << 5) - h);
+  return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
 }
 
 // ── Lecture roster forge ─────────────────────────────────────────────────────
@@ -44,7 +41,6 @@ function readForgeRoster() {
 
 function rosterCharToCombatant(r) {
   const clsName = r.cls?.n || '';
-  const emoji = clsEmoji(clsName);
   const dexMod = statMod(r.stats?.dex ?? r.dex ?? 10);
   const hp = r.hp ?? r.maxHp ?? 10;
   return {
@@ -57,8 +53,6 @@ function rosterCharToCombatant(r) {
     level:         r.level || 1,
     raceName:      r.race?.n || '',
     portraitUrl:   r.photo || null,
-    portraitEmoji: emoji,
-    emoji,
     currentHp:     r.currentHp ?? hp,
     maxHp:         hp,
     ac:            r.ac || 10,
@@ -86,11 +80,30 @@ function CombatantCard({ combatant, isActive, rank, onUpdate, onRemove, isAdmin 
     setHpDelta('');
   };
 
+  const rollInit = (e) => {
+    e.stopPropagation();
+    const dexMod = combatant.dexMod ?? statMod(combatant.sheetData?.stats?.dex ?? 10);
+    const roll = d20() + dexMod;
+    onUpdate(combatant.id, { initiative: roll });
+  };
+
   const toggleCondition = (condId) => {
     const cur = combatant.conditions || [];
     const next = cur.includes(condId) ? cur.filter(c => c !== condId) : [...cur, condId];
     onUpdate(combatant.id, { conditions: next });
   };
+
+  // Portrait avec avatar initial si pas de photo
+  const avatarBg = nameToColor(combatant.name);
+  const portraitContent = combatant.portraitUrl
+    ? <img src={combatant.portraitUrl} alt={combatant.name} className="w-full h-full object-cover" />
+    : combatant.type === 'custom'
+      ? <div className="w-full h-full flex items-center justify-center text-xl"
+          style={{ fontSize: 22 }}>{combatant.portraitEmoji || '👹'}</div>
+      : <div className="w-full h-full flex items-center justify-center font-black"
+          style={{ background: avatarBg, color: 'rgba(255,255,255,0.85)', fontFamily: 'Cinzel, serif', fontSize: 20 }}>
+          {(combatant.name || '?')[0].toUpperCase()}
+        </div>;
 
   return (
     <div
@@ -106,19 +119,23 @@ function CombatantCard({ combatant, isActive, rank, onUpdate, onRemove, isAdmin 
     >
       <div className="flex items-center gap-3 p-3">
         {/* Rang */}
-        <div className="w-6 text-center text-xs font-bold"
+        <div className="w-6 text-center text-xs font-bold flex-shrink-0"
           style={{ color: isActive ? '#C9A84C' : '#4B5563' }}>
           {isActive ? '▶' : rank}
         </div>
 
-        {/* Portrait */}
-        <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 border-2"
-          style={{ borderColor: isActive ? '#C9A84C' : '#374151', background: '#1A1208' }}>
-          {combatant.portraitUrl
-            ? <img src={combatant.portraitUrl} alt={combatant.name} className="w-full h-full object-cover" />
-            : <div className="w-full h-full flex items-center justify-center text-2xl">
-                {combatant.portraitEmoji || combatant.emoji || '⚔️'}
-              </div>}
+        {/* Portrait cliquable → lance l'initiative */}
+        <div className="relative flex-shrink-0 cursor-pointer group" onClick={rollInit} title="Lancer l'initiative">
+          <div className="w-12 h-12 rounded-full overflow-hidden border-2 transition-all"
+            style={{ borderColor: isActive ? '#C9A84C' : '#374151', background: '#1A1208' }}>
+            {portraitContent}
+          </div>
+          {/* Overlay 🎲 au hover */}
+          <div className="absolute inset-0 rounded-full flex items-center justify-center bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ fontSize: 18 }}>🎲</div>
+          {/* Badge dé toujours visible */}
+          <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full flex items-center justify-center"
+            style={{ background: '#0F0A06', border: '1px solid #374151', fontSize: 9 }}>🎲</div>
         </div>
 
         {/* Infos */}
@@ -132,16 +149,39 @@ function CombatantCard({ combatant, isActive, rank, onUpdate, onRemove, isAdmin 
             )}
           </div>
 
-          {/* Barre HP */}
+          {/* Barre HP + contrôles */}
           {combatant.maxHp > 0 && (
-            <div className="flex items-center gap-2 mt-1">
-              <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
-                <div className="h-full rounded-full transition-all" style={{ width: `${pct * 100}%`, background: hpColor }} />
+            <>
+              <div className="flex items-center gap-2 mt-1">
+                <div className="flex-1 h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                  <div className="h-full rounded-full transition-all" style={{ width: `${pct * 100}%`, background: hpColor }} />
+                </div>
+                <span className="text-xs font-mono" style={{ color: hpColor }}>
+                  {combatant.currentHp}/{combatant.maxHp}
+                </span>
               </div>
-              <span className="text-xs font-mono" style={{ color: hpColor }}>
-                {combatant.currentHp}/{combatant.maxHp}
-              </span>
-            </div>
+              {/* Contrôles HP — accessibles à tous */}
+              <div className="flex items-center gap-1 mt-1.5" onClick={e => e.stopPropagation()}>
+                <input
+                  type="number"
+                  value={hpDelta}
+                  onChange={e => setHpDelta(e.target.value)}
+                  placeholder="PV"
+                  className="w-12 bg-slate-900 border border-slate-700 rounded px-1 py-0.5 text-xs text-slate-200 text-center focus:outline-none focus:border-red-600"
+                  onKeyDown={e => { if (e.key === 'Enter') applyHp(-(parseInt(hpDelta) || 0)); }}
+                />
+                <button
+                  onClick={() => applyHp(-(parseInt(hpDelta) || 0))}
+                  className="px-2 py-0.5 rounded text-xs font-black border border-red-900/70 bg-red-900/30 hover:bg-red-800/60 text-red-400 transition-colors">
+                  −
+                </button>
+                <button
+                  onClick={() => applyHp(parseInt(hpDelta) || 0)}
+                  className="px-2 py-0.5 rounded text-xs font-black border border-green-900/70 bg-green-900/30 hover:bg-green-800/60 text-green-400 transition-colors">
+                  +
+                </button>
+              </div>
+            </>
           )}
 
           {/* Conditions */}
@@ -172,13 +212,14 @@ function CombatantCard({ combatant, isActive, rank, onUpdate, onRemove, isAdmin 
           </div>
           <div className="flex gap-1">
             {isAdmin && (
-              <button onClick={() => setEditing(e => !e)}
+              <button onClick={e => { e.stopPropagation(); setEditing(v => !v); }}
                 className="w-7 h-7 rounded-lg text-xs transition-all flex items-center justify-center"
-                style={{ background: editing ? '#92400E' : '#1F2937', color: editing ? '#FDE68A' : '#9CA3AF' }}>
+                style={{ background: editing ? '#92400E' : '#1F2937', color: editing ? '#FDE68A' : '#9CA3AF' }}
+                title="Options avancées">
                 ✏️
               </button>
             )}
-            <button onClick={() => onRemove(combatant.id)}
+            <button onClick={e => { e.stopPropagation(); onRemove(combatant.id); }}
               className="w-7 h-7 rounded-lg text-xs text-slate-500 hover:text-red-400 flex items-center justify-center"
               style={{ background: '#1F2937' }}>
               ✕
@@ -187,34 +228,16 @@ function CombatantCard({ combatant, isActive, rank, onUpdate, onRemove, isAdmin 
         </div>
       </div>
 
-      {/* Panneau édition admin */}
+      {/* Panneau admin : conditions + notes + init manuelle */}
       {editing && isAdmin && (
         <div className="border-t border-slate-700 p-3 space-y-3">
-          {/* HP controls */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <input
-              type="number"
-              value={hpDelta}
-              onChange={e => setHpDelta(e.target.value)}
-              placeholder="Valeur"
-              className="w-20 bg-slate-800 border border-slate-600 rounded-lg px-2 py-1.5 text-sm text-slate-200 text-center focus:outline-none focus:border-amber-500"
-              onKeyDown={e => { if (e.key === 'Enter') applyHp(parseInt(hpDelta) || 0); }}
-            />
-            <button onClick={() => applyHp(-(parseInt(hpDelta) || 0))}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-red-900/60 hover:bg-red-800 text-red-300 border border-red-800">
-              💔 Dégâts
-            </button>
-            <button onClick={() => applyHp(parseInt(hpDelta) || 0)}
-              className="px-3 py-1.5 rounded-lg text-xs font-bold bg-green-900/60 hover:bg-green-800 text-green-300 border border-green-800">
-              ❤️ Soin
-            </button>
-            <div className="flex items-center gap-1 ml-auto">
-              <span className="text-xs text-slate-500">Init :</span>
-              <input type="number" defaultValue={combatant.initiative ?? ''}
-                placeholder="—"
-                className="w-14 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-amber-300 text-center focus:outline-none"
-                onChange={e => onUpdate(combatant.id, { initiative: e.target.value !== '' ? parseInt(e.target.value) : null })} />
-            </div>
+          {/* Initiative manuelle */}
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-slate-500">Init. manuelle :</span>
+            <input type="number" defaultValue={combatant.initiative ?? ''}
+              placeholder="—"
+              className="w-14 bg-slate-800 border border-slate-600 rounded px-2 py-1 text-xs text-amber-300 text-center focus:outline-none"
+              onChange={e => onUpdate(combatant.id, { initiative: e.target.value !== '' ? parseInt(e.target.value) : null })} />
           </div>
           {/* Conditions */}
           <div className="flex flex-wrap gap-1">
@@ -249,9 +272,7 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
   const [roster, setRoster] = useState([]);
   const [selected, setSelected] = useState(new Set());
 
-  useEffect(() => {
-    setRoster(readForgeRoster());
-  }, []);
+  useEffect(() => { setRoster(readForgeRoster()); }, []);
 
   const toggle = (id) => setSelected(s => {
     const n = new Set(s);
@@ -269,7 +290,7 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
       <div className="bg-slate-900 border-2 border-amber-700/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[80vh] flex flex-col">
         <div className="flex justify-between items-center mb-4 flex-shrink-0">
           <h3 className="text-xl font-bold text-amber-300" style={{ fontFamily: 'Cinzel, serif' }}>
-            🧙 Mes personnages
+            Mes personnages
           </h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-xl">✕</button>
         </div>
@@ -286,9 +307,8 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
             </div>
           ) : (
             roster.map(r => {
-              const clsName = r.cls?.n || '—';
-              const emoji = clsEmoji(clsName);
               const isSelected = selected.has(r.id);
+              const avatarBg = nameToColor(r.name || '');
               return (
                 <button key={r.id} onClick={() => toggle(r.id)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left"
@@ -296,15 +316,20 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
                     borderColor: isSelected ? '#C9A84C' : '#374151',
                     background: isSelected ? 'rgba(201,168,76,0.08)' : 'rgba(15,10,6,0.6)',
                   }}>
-                  <div className="w-12 h-12 rounded-full flex-shrink-0 bg-slate-800 border-2 flex items-center justify-center text-2xl overflow-hidden"
+                  {/* Portrait */}
+                  <div className="w-12 h-12 rounded-full flex-shrink-0 border-2 overflow-hidden"
                     style={{ borderColor: isSelected ? '#C9A84C' : '#374151' }}>
                     {r.photo
                       ? <img src={r.photo} alt={r.name} className="w-full h-full object-cover" />
-                      : emoji}
+                      : <div className="w-full h-full flex items-center justify-center font-black text-xl"
+                          style={{ background: avatarBg, color: 'rgba(255,255,255,0.85)', fontFamily: 'Cinzel, serif' }}>
+                          {(r.name || '?')[0].toUpperCase()}
+                        </div>
+                    }
                   </div>
                   <div className="flex-1">
                     <div className="font-bold text-slate-200" style={{ fontFamily: 'Cinzel, serif' }}>{r.name}</div>
-                    <div className="text-xs text-slate-500">{emoji} {clsName} · {r.race?.n || '—'} · Niv. {r.level || 1}</div>
+                    <div className="text-xs text-slate-500">{r.cls?.n || '—'} · {r.race?.n || '—'} · Niv. {r.level || 1}</div>
                     <div className="text-xs text-slate-600 mt-0.5">❤️ {r.hp || '?'} PV · 🛡 CA {r.ac || '?'}</div>
                   </div>
                   <div className="w-5 h-5 rounded border flex items-center justify-center flex-shrink-0"
@@ -343,6 +368,7 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
 function AddCustomModal({ onAdd, onClose }) {
   const [form, setForm] = useState({ name: '', emoji: '👹', hp: 20, ac: 12, initiative: '' });
   const h = (k, v) => setForm(f => ({ ...f, [k]: v }));
+
   const submit = () => {
     if (!form.name.trim()) return;
     onAdd({
@@ -369,10 +395,47 @@ function AddCustomModal({ onAdd, onClose }) {
           <h3 className="text-xl font-bold text-amber-300" style={{ fontFamily: 'Cinzel, serif' }}>+ PNJ / Monstre</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200">✕</button>
         </div>
+
         <div className="space-y-4">
+          {/* Initiative — très proéminente, en premier */}
+          <div className="rounded-xl p-4 text-center"
+            style={{ background: 'rgba(201,168,76,0.05)', border: '2px solid rgba(201,168,76,0.35)' }}>
+            <div className="text-xs font-bold uppercase tracking-widest mb-1"
+              style={{ fontFamily: 'Cinzel, serif', color: '#8B6914', letterSpacing: '.2em' }}>
+              🎲 Score d'initiative
+            </div>
+            <div className="text-xs italic mb-3" style={{ color: '#6B7280' }}>
+              Lancez votre d20 et entrez le résultat (1–20)
+            </div>
+            <input
+              type="number"
+              min={1} max={20}
+              value={form.initiative}
+              onChange={e => h('initiative', e.target.value)}
+              placeholder="—"
+              autoFocus
+              className="focus:outline-none focus:border-amber-400"
+              style={{
+                display: 'block',
+                width: '100%',
+                background: 'rgba(0,0,0,0.6)',
+                border: '2px solid rgba(201,168,76,0.5)',
+                borderRadius: 10,
+                padding: '.4rem',
+                fontSize: 48,
+                fontFamily: 'Cinzel Decorative, serif',
+                color: '#C9A84C',
+                textAlign: 'center',
+                outline: 'none',
+              }}
+              onKeyDown={e => e.key === 'Enter' && submit()}
+            />
+          </div>
+
+          {/* Nom + emoji */}
           <div className="flex gap-3">
             <div className="w-20">
-              <label className="text-xs text-slate-400 mb-1 block">Emoji</label>
+              <label className="text-xs text-slate-400 mb-1 block">Icône</label>
               <input type="text" value={form.emoji} onChange={e => h('emoji', e.target.value)} maxLength={2}
                 className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-2xl text-center focus:outline-none focus:border-amber-500" />
             </div>
@@ -383,18 +446,23 @@ function AddCustomModal({ onAdd, onClose }) {
                 onKeyDown={e => e.key === 'Enter' && submit()} />
             </div>
           </div>
-          <div className="grid grid-cols-3 gap-3">
-            {[['hp','PV max'], ['ac','CA'], ['initiative','Initiative']].map(([k,l]) => (
+
+          {/* HP + CA */}
+          <div className="grid grid-cols-2 gap-3">
+            {[['hp','PV max'], ['ac','Classe d\'Armure (CA)']].map(([k, l]) => (
               <div key={k}>
                 <label className="text-xs text-slate-400 mb-1 block">{l}</label>
-                <input type="number" value={form[k]} onChange={e => h(k, e.target.value)} placeholder={k==='initiative'?'auto':''}
+                <input type="number" value={form[k]} onChange={e => h(k, e.target.value)}
                   className="w-full bg-slate-800 border border-slate-600 rounded-lg px-3 py-2 text-slate-200 text-sm focus:outline-none focus:border-amber-500" />
               </div>
             ))}
           </div>
-          <div className="flex gap-3 pt-2">
+
+          <div className="flex gap-3 pt-1">
             <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-slate-600 text-slate-400 text-sm">Annuler</button>
-            <button onClick={submit} className="flex-1 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold text-sm">Ajouter</button>
+            <button onClick={submit} className="flex-1 py-2.5 rounded-xl bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold text-sm">
+              Ajouter au combat
+            </button>
           </div>
         </div>
       </div>
@@ -411,9 +479,7 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
 
-  // Tous les combattants triés par initiative
   const allCombatants = [...combatants].sort((a, b) => (b.initiative ?? -99) - (a.initiative ?? -99));
-
   const aliveCount = allCombatants.filter(c => c.currentHp > 0 || c.maxHp === 0).length;
 
   const handleUpdate = useCallback((id, updates) => {
@@ -427,7 +493,6 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
 
   const handleAdd = useCallback((data) => {
     setCombatants(prev => {
-      // Éviter les doublons (forge_id)
       if (prev.find(c => c.id === data.id)) return prev;
       return [...prev, data];
     });
@@ -499,7 +564,7 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
           <div className="flex flex-wrap gap-2">
             <button onClick={() => setShowSelectModal(true)}
               className="px-3 py-2 rounded-xl bg-violet-800 hover:bg-violet-700 border border-violet-600 text-sm text-violet-100 font-bold transition-all">
-              🧙 Mes persos
+              Mes persos
             </button>
             <button onClick={rollAllInitiative}
               className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-amber-600 text-sm text-slate-300 hover:text-amber-300 transition-all">
@@ -513,7 +578,7 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
             )}
             <button onClick={resetAll}
               className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-sm text-slate-400 hover:text-red-400 transition-all">
-              🗑 Vider
+              Vider
             </button>
           </div>
         </div>
@@ -531,7 +596,7 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
             <div className="flex flex-wrap gap-3 justify-center">
               <button onClick={() => setShowSelectModal(true)}
                 className="px-6 py-2.5 bg-violet-800 hover:bg-violet-700 text-violet-100 rounded-xl font-bold text-sm border border-violet-600">
-                🧙 Sélectionner mes persos
+                Sélectionner mes persos
               </button>
               {isAdmin && (
                 <button onClick={() => setShowAddModal(true)}

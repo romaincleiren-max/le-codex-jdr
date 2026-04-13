@@ -431,6 +431,42 @@ body.printing #ps-print{display:block!important;}
 .hist-status{font-family:'Share Tech Mono',monospace;font-size:9px;padding:1px 6px;}
 .hist-status.done{color:#6BAF4A;border:1px solid #3A5A1A;}
 .hist-status.fail{color:var(--blood-l);border:1px solid var(--blood);}
+/* ── Level buttons ── */
+.lvl-btn{background:#1A1510;color:var(--gold-d);border:1px solid #3A2A10;font-family:'Cinzel Decorative',serif;font-size:15px;padding:.55em 0;cursor:pointer;transition:.12s;border-radius:3px;font-weight:bold;min-height:48px;width:100%;line-height:1;}
+.lvl-btn:hover{border-color:var(--gold);color:var(--gold);background:#221A0E;}
+.lvl-btn.active{border-color:var(--blood);background:var(--blood);color:var(--parch);}
+/* ── Roster Equipment Overlay ── */
+#re-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:9001;display:none;}
+#re-overlay.open{display:flex;}
+.re-panel{display:flex;flex-direction:column;height:100%;overflow:hidden;}
+.re-left{width:340px;min-width:280px;background:#130D06;border-right:1px solid var(--gold-d);flex-shrink:0;}
+.re-right{flex:1;background:#0D0805;}
+.re-panel-body{flex:1;overflow-y:auto;padding:1rem;}
+.re-panel-body::-webkit-scrollbar{width:3px;}.re-panel-body::-webkit-scrollbar-track{background:#0A0704;}.re-panel-body::-webkit-scrollbar-thumb{background:#3A2810;}
+.re-panel-hdr{background:var(--shadow);border-bottom:1px solid var(--gold-d);padding:.5rem .9rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-shrink:0;}
+.re-panel-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;}
+.re-close{background:none;border:1px solid #3A2810;color:#8B6914;padding:3px 10px;font-size:9px;cursor:pointer;font-family:'Cinzel',serif;transition:.1s;letter-spacing:.05em;}
+.re-close:hover{border-color:var(--gold);color:var(--gold);}
+.re-src-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.08em;padding:.25em .6em;border:1px solid #3A2810;color:#8B6914;background:none;cursor:pointer;transition:.1s;}
+.re-src-btn.active{border-color:var(--gold-d);color:var(--gold);}
+.re-avatar{width:72px;height:72px;border-radius:50%;overflow:hidden;border:2px solid var(--gold-d);flex-shrink:0;}
+.re-avatar img{width:100%;height:100%;object-fit:cover;}
+.re-avatar-init{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-size:28px;color:var(--gold);background:#221A08;}
+.re-name{font-family:'Cinzel Decorative',serif;font-size:15px;color:var(--gold);margin-bottom:.2rem;}
+.re-sub{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;color:#8B6914;text-transform:uppercase;margin-bottom:.5rem;}
+.re-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem;margin-bottom:.8rem;}
+.re-stat{background:#1A1208;border:1px solid #3A2810;padding:.35rem .25rem;text-align:center;}
+.re-stat-l{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#8B6914;text-transform:uppercase;display:block;}
+.re-stat-v{font-family:'Cinzel Decorative',serif;font-size:17px;color:var(--blood);}
+.re-stat-m{font-family:'Share Tech Mono',monospace;font-size:9px;color:#5A6070;}
+.re-bag-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid #1A1208;cursor:grab;}
+.re-bag-row:last-child{border-bottom:none;}
+.re-bag-row.dragging{opacity:.4;}
+.re-bag-nm{flex:1;font-family:'IM Fell English',serif;font-size:11px;color:var(--parch);}
+.re-bag-nm:hover{color:var(--gold);}
+.re-bag-del{background:none;border:none;color:#4A2A2A;font-size:10px;cursor:pointer;padding:2px 4px;transition:.1s;flex-shrink:0;}
+.re-bag-del:hover{color:var(--blood-l);}
+.re-rarity{font-family:'Share Tech Mono',monospace;font-size:8px;border-radius:2px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
 
 /* ── SCENARIO RUNNER ── */
 #scn-bar{background:#0D0805;border-bottom:2px solid #3A2810;padding:.4rem 1rem;display:flex;align-items:center;gap:.9rem;flex-shrink:0;}
@@ -520,6 +556,30 @@ body.printing #ps-print{display:block!important;}
       <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.18em;color:#8B6914;text-transform:uppercase;border-bottom:1px solid #3A2810;padding-bottom:.25rem;margin-bottom:.6rem;">Scénarios joués</div>
       <div id="bmo-hist"></div>
     </div>
+  </div>
+</div>
+
+<!-- ROSTER EQUIPMENT OVERLAY -->
+<div id="re-overlay" onclick="if(event.target===this)closeReOverlay()">
+  <div class="re-panel re-left">
+    <div class="re-panel-hdr">
+      <div class="re-panel-title">Fiche &amp; Inventaire</div>
+      <button class="re-close" onclick="closeReOverlay()">✕ Fermer</button>
+    </div>
+    <div class="re-panel-body" id="re-sheet-body"></div>
+  </div>
+  <div class="re-panel re-right">
+    <div class="re-panel-hdr">
+      <div class="re-panel-title">Ajouter des objets</div>
+      <div style="display:flex;gap:.3rem;">
+        <button class="re-src-btn active" data-src="srd" onclick="reSetSrc('srd')">⚔ SRD</button>
+        <button class="re-src-btn" data-src="codex" onclick="reSetSrc('codex')">✦ Codex</button>
+      </div>
+    </div>
+    <div style="padding:.4rem .9rem;background:var(--shadow);border-bottom:1px solid #2A1E0A;flex-shrink:0;">
+      <input class="inv-search" id="re-q" placeholder="Rechercher un objet..." oninput="reSearch(this.value)" style="margin-bottom:0;width:100%;">
+    </div>
+    <div class="re-panel-body" id="re-inv-body" style="padding:.5rem 1rem;"></div>
   </div>
 </div>
 
@@ -1269,14 +1329,12 @@ function applyRace(){
 
 // ─── STEP 2: CLASS ──────────────────────────────────
 function renderClass(){
-  const lvlOpts=Array.from({length:20},(_,i)=>`<option value="${i+1}" ${C.level===(i+1)?'selected':''}>${i+1}</option>`).join('');
+  const lvlBtns=Array.from({length:20},(_,i)=>`<button class="lvl-btn${C.level===(i+1)?' active':''}" onclick="C.level=${i+1};C.profBonus=calcProfBonus();updateRight();renderSubs();document.querySelectorAll('.lvl-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');$('pb-disp').textContent=calcProfBonus();$('hp-disp').textContent=calcHP()||'—';$('asi-disp').textContent=asiAvailable();">${i+1}</button>`).join('');
   $('lp').innerHTML=`<div class="sh">Classe & Archétype</div><div class="ss">Vocation · Style de Jeu · Sous-classe</div>
-  <div style="display:flex;align-items:center;gap:.8rem;margin-bottom:.8rem;flex-wrap:wrap;">
-    <label style="font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--gold-d);white-space:nowrap;">⚔ Niveau de départ</label>
-    <select id="lvl-sel" style="background:#1A1510;color:var(--gold);border:1px solid #3A2A10;font-family:'Share Tech Mono',monospace;font-size:13px;padding:.3em .8em;border-radius:3px;cursor:pointer;" onchange="C.level=parseInt(this.value);C.profBonus=calcProfBonus();updateRight();renderSubs();">
-      ${lvlOpts}
-    </select>
-    <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6A5A3A;">Bonus de maîtrise : +<span id="pb-disp">${calcProfBonus()}</span> · HP de départ (après classe & CON) : <span id="hp-disp">${calcHP()||'—'}</span> · ASI disponibles : <span id="asi-disp">${asiAvailable()}</span></span>
+  <div style="margin-bottom:1.1rem;">
+    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;text-align:center;margin-bottom:.6rem;">⚔ Niveau de départ</div>
+    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.3rem;margin-bottom:.6rem;">${lvlBtns}</div>
+    <div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:#6A5A3A;">Maîtrise : +<span id="pb-disp">${calcProfBonus()}</span> &nbsp;·&nbsp; PV départ : <span id="hp-disp">${calcHP()||'—'}</span> &nbsp;·&nbsp; ASI : <span id="asi-disp">${asiAvailable()}</span></div>
   </div>
   <div class="grid" id="cg"></div>
   <div id="sub-area"></div>
@@ -2712,6 +2770,162 @@ function addScenarioToChar(charId, scenarioName, status){
   renderRoster();
 }
 
+// ══════════════════════════════════════════════════
+// ROSTER EQUIPMENT OVERLAY
+// ══════════════════════════════════════════════════
+let _reChar = null;
+let _reSrc = 'srd';
+let _reQ = '';
+
+function openRosterEquip(id){
+  const roster = getRoster();
+  _reChar = roster.find(r=>r.id===id);
+  if(!_reChar) return;
+  if(!_reChar.bag) _reChar.bag=[];
+  _reSrc='srd'; _reQ='';
+  renderReSheet();
+  renderReInv();
+  $('re-overlay').classList.add('open');
+}
+
+function closeReOverlay(){
+  if(_reChar){
+    const roster = getRoster();
+    const idx = roster.findIndex(r=>r.id===_reChar.id);
+    if(idx>=0){ roster[idx].bag = _reChar.bag; setRoster(roster); }
+  }
+  $('re-overlay').classList.remove('open');
+  _reChar = null;
+  renderRoster();
+}
+
+function renderReSheet(){
+  const r = _reChar;
+  if(!r) return;
+  const el=$('re-sheet-body');
+  if(!el) return;
+  const stats=['str','dex','con','int','wis','cha'];
+  const statLabels=['FOR','DEX','CON','INT','SAG','CHA'];
+  function reMod(v){const m=Math.floor(((v||10)-10)/2);return(m>=0?'+':'')+m;}
+  const statsHtml=stats.map((s,i)=>{
+    const v=r.stats?.[s]||10;
+    return`<div class="re-stat"><span class="re-stat-l">${statLabels[i]}</span><div class="re-stat-v">${v}</div><div class="re-stat-m">${reMod(v)}</div></div>`;
+  }).join('');
+  const RARITY_COLS={"Commun":"#4A5568","Inhabituel":"#2D5016","Rare":"#1A3A5C","Très rare":"#4A1F7A","Légendaire":"#7B4000","Artefact":"#7B1010"};
+  const bagHtml=r.bag&&r.bag.length?r.bag.map((e,i)=>{
+    const rc=e.rarity?RARITY_COLS[e.rarity]:null;
+    const rBadge=rc?`<span class="re-rarity" style="background:${rc}33;color:${rc};border:1px solid ${rc}55;">${e.rarity}</span>`:'';
+    const qtyBadge=e.qty>1?` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);">×${e.qty}</span>`:'';
+    return`<div class="re-bag-row" draggable="true" ondragstart="reDragStart(event,${i})" ondragover="event.preventDefault()" ondrop="reDrop(event,${i})">
+      <span style="font-size:9px;color:#4A3A2A;margin-right:2px;cursor:grab;">⠿</span>
+      <div class="re-bag-nm" onclick="showItemPanel({id:'${e.id}',name:'${(e.n||'').replace(/'/g,"\\'")}',type:'${e.cat||''}',rarity:'${e.rarity||''}',description:'${(e.d||'').replace(/'/g,"\\'").substring(0,300)}',weight:${e.w||0},cost:'${e.c||'—'}'}, false)">${e.n}${rBadge}${qtyBadge}</div>
+      <button class="re-bag-del" onclick="reBagRemove(${i})" title="Retirer un exemplaire">−</button>
+      <button class="re-bag-del" onclick="reBagDelete(${i})" title="Retirer tout">✕</button>
+    </div>`;
+  }).join(''):'<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Sac vide.</div>';
+  const photoEl=r.photo
+    ?`<div class="re-avatar"><img src="${r.photo}" alt="${r.name}"></div>`
+    :`<div class="re-avatar"><div class="re-avatar-init">${(r.name||'?')[0].toUpperCase()}</div></div>`;
+  el.innerHTML=`
+    <div style="display:flex;gap:.9rem;align-items:flex-start;margin-bottom:.8rem;">${photoEl}
+      <div><div class="re-name">${r.name}</div>
+      <div class="re-sub">${r.cls?.n||'—'} · ${r.race?.n||'—'} · Niv.${r.level||1}</div>
+      <div style="display:flex;gap:.7rem;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);"><span>❤ ${r.hp||'?'} PV</span><span>🛡 CA ${r.ac||'?'}</span></div>
+    </div></div>
+    <div class="re-stats-grid">${statsHtml}</div>
+    <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.15em;color:#8B6914;text-transform:uppercase;margin-bottom:.5rem;border-bottom:1px solid #2A1A08;padding-bottom:.3rem;">
+      Inventaire — ${r.bag&&r.bag.length?r.bag.reduce((s,e)=>s+e.qty,0)+' objet(s)':'vide'}
+    </div>
+    <div id="re-bag-list">${bagHtml}</div>`;
+}
+
+function reBagRemove(idx){
+  if(!_reChar||!_reChar.bag)return;
+  if(_reChar.bag[idx].qty>1)_reChar.bag[idx].qty--;
+  else _reChar.bag.splice(idx,1);
+  renderReSheet();
+}
+function reBagDelete(idx){
+  if(!_reChar||!_reChar.bag)return;
+  _reChar.bag.splice(idx,1);
+  renderReSheet();
+}
+
+let _reDragIdx=null;
+function reDragStart(e,idx){_reDragIdx=idx;e.dataTransfer.effectAllowed='move';}
+function reDrop(e,idx){
+  if(_reDragIdx===null||_reDragIdx===idx)return;
+  const arr=_reChar.bag;
+  const item=arr.splice(_reDragIdx,1)[0];
+  arr.splice(idx,0,item);
+  _reDragIdx=null;
+  renderReSheet();
+}
+
+function reSetSrc(src){
+  _reSrc=src;_reQ='';
+  const qEl=$('re-q');if(qEl)qEl.value='';
+  document.querySelectorAll('.re-src-btn').forEach(b=>b.classList.toggle('active',b.dataset.src===src));
+  renderReInv();
+}
+function reSearch(q){_reQ=q;renderReInv();}
+
+function renderReInv(){
+  const el=$('re-inv-body');if(!el)return;
+  if(_reSrc==='codex'){
+    if(!_codexData&&!_codexLoading){loadCodexIndex().then(()=>renderReInv());el.innerHTML='<div class="codex-msg">Chargement...</div>';return;}
+    if(_codexLoading){el.innerHTML='<div class="codex-msg">Chargement...</div>';return;}
+    if(!_codexData){el.innerHTML='<div class="codex-msg">Codex non chargé.</div>';return;}
+    const q=_reQ.toLowerCase().trim();
+    if(!q){el.innerHTML='<div class="codex-msg">✦ Tapez un nom pour chercher dans Sigil Saga.</div>';return;}
+    const filtered=_codexData.filter(e=>e.name.toLowerCase().includes(q)||e.category.toLowerCase().includes(q)).slice(0,40);
+    if(!filtered.length){el.innerHTML='<div class="codex-msg">Aucun résultat.</div>';return;}
+    el.innerHTML=filtered.map(e=>{
+      const idx=_codexData.indexOf(e);
+      const rc=e.rarity?(_IP_RARITY[e.rarity]||null):null;
+      const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:${rc.badge};color:${rc.badgeTxt};padding:1px 4px;margin-left:4px;">${e.rarity}</span>`:'';
+      return`<div class="inv-item" onclick="showCodexItem(${idx})">
+        <button class="inv-item-add" onclick="event.stopPropagation();reAddCodexItem(${idx})" title="Ajouter au sac">+</button>
+        <div class="inv-item-n">${e.name}${rBadge}</div>
+        <div class="inv-item-cat codex-badge">✦ ${e.item_type||e.category||'Codex'}</div>
+        <div class="inv-item-d">${(e.desc||'').substring(0,100)}</div>
+      </div>`;
+    }).join('');
+    return;
+  }
+  const q=_reQ.toLowerCase().trim();
+  const filtered=ITEMS.filter(it=>!q||it.n.toLowerCase().includes(q)||it.cat.toLowerCase().includes(q)).slice(0,80);
+  el.innerHTML=filtered.length?filtered.map(it=>{
+    const rc=it.rarity?(_IP_RARITY[it.rarity]||null):null;
+    const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:${rc.badge};color:${rc.badgeTxt};padding:1px 4px;margin-left:4px;">${it.rarity}</span>`:'';
+    return`<div class="inv-item">
+      <button class="inv-item-add" onclick="reAddItem('${it.id}')" title="Ajouter au sac">+</button>
+      <div class="inv-item-n" onclick="showItemPanel({id:'${it.id}',name:'${it.n.replace(/'/g,"\\'")}',type:'${it.cat}',rarity:'${it.rarity||''}',description:'${it.d.replace(/'/g,"\\'").substring(0,300)}',weight:${it.w},cost:'${it.c}'},false)">${it.n}${rBadge}</div>
+      <div class="inv-item-cat">${it.cat}</div>
+      <div class="inv-item-d">${it.d}</div>
+      <div class="inv-item-meta"><span class="inv-item-cost">⚙ ${it.c}</span><span class="inv-item-w">${it.w>0?it.w+' lb':'—'}</span></div>
+    </div>`;
+  }).join(''):'<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#6A5A3A;padding:.5rem;">Tapez pour chercher...</div>';
+}
+
+function reAddItem(id){
+  if(!_reChar)return;
+  const it=ITEMS.find(x=>x.id===id);if(!it)return;
+  const ex=_reChar.bag.find(b=>b.id===id);
+  if(ex)ex.qty++;
+  else _reChar.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null});
+  renderReSheet();
+}
+function reAddCodexItem(idx){
+  if(!_reChar||!_codexData)return;
+  const e=_codexData[idx];if(!e)return;
+  const bagId='codex-'+(e.id||e.name).replace(/['"\\]/g,'_');
+  const ex=_reChar.bag.find(b=>b.id===bagId);
+  if(ex)ex.qty++;
+  else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',rarity:e.rarity||null});
+  renderReSheet();
+}
+
 function renderRoster(){
   const g = $('roster-grid');
   if(!g) return;
@@ -2739,8 +2953,8 @@ function renderRoster(){
       </div>
       <div class="rc-scenarios">${lastScen?'Dernier : '+lastScen:histCount?'':'Aucun scénario joué'}</div>
       <div class="rc-btns">
-        <button class="rc-btn primary" onclick="openCharFromRoster('${r.id}')">⚔ Ouvrir la fiche</button>
-        <button class="rc-btn" onclick="openBagFromRoster('${r.id}')">🎒 Voir le sac</button>
+        <button class="rc-btn primary" onclick="openRosterEquip('${r.id}')" style="border-color:var(--gold-d);color:var(--gold);">⚔ Fiche &amp; Équip</button>
+        <button class="rc-btn" onclick="openCharFromRoster('${r.id}')">Éditer</button>
         <button class="rc-btn" onclick="openShareModal('${r.id}')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager avec l'Admin du Codex">📤 Partager</button>
       </div>
     </div>`;
