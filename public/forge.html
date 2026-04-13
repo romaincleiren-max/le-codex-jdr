@@ -1506,6 +1506,21 @@ let _invSource='srd',_codexQ='',_codexData=null,_codexLoading=false;
 // état Capacités spéciales
 let _d100Result=null;
 
+// ─── RENDU SORTS PAR NIVEAU ─────────────────────────
+function renderSpellsByLevel(cl, prep, slots){
+  const KEY={wizard:'arcane',sorcerer:'arcane',cleric:'divine',paladin:'divine',druid:'nature',ranger:'nature',bard:'bard',warlock:'warlock'};
+  const key=KEY[cl.id]||'arcane';
+  const POOLS=[{lvl:1,p:SPELLS1},{lvl:2,p:SPELLS2},{lvl:3,p:SPELLS3},{lvl:4,p:SPELLS4},{lvl:5,p:SPELLS5},{lvl:6,p:SPELLS6},{lvl:7,p:SPELLS7},{lvl:8,p:SPELLS8}];
+  const avail=POOLS.filter(({lvl,p})=>slots&&slots[lvl]>0&&(p[key]||[]).length>0);
+  if(!avail.length)return'';
+  let h=`<div class="div"></div><div class="sh" style="font-size:14px;">Sorts</div><div class="ss">${prep.label} · Sélectionnés : ${C.spells.length}/${prep.n}</div>`;
+  avail.forEach(({lvl,p})=>{
+    const pool=p[key]||[];
+    h+=`<div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;color:var(--gold-d);margin:.7rem 0 .3rem;text-transform:uppercase;">Niveau ${lvl} (${slots[lvl]} emplacement${slots[lvl]>1?'s':''})</div><div class="spg">${pool.map(s=>`<div class="spc ${C.spells.includes(s)?'sel':''}" onclick="toggleSp('s','${s.replace(/'/g,"\\'")}',${prep.n})"><div class="sp-nm">${s}</div><div class="sp-mt">NIV.${lvl}</div></div>`).join('')}</div>`;
+  });
+  return h;
+}
+
 function renderEquipSpells(){
   const cl=C.cls;const prep=calcSpellsPrepared();
   let cantPool=[],spellPool=[];
