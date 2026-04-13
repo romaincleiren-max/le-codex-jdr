@@ -21,6 +21,7 @@ import ScenarioCarousel from './components/carousel/ScenarioCarousel';
 import { processCheckout } from './services/stripeService';
 import StatsDisplay from './components/StatsDisplay';
 import InitiativePage from './pages/InitiativePage';
+import CharacterForgePage from './pages/CharacterForgePage';
 import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters } from './services/charactersService';
 import { validateSubmissionForm, validatePDFFile } from './utils/validation';
 import { submissionRateLimiter } from './utils/rateLimiter';
@@ -3461,7 +3462,12 @@ export default function App() {
 
         {/* PAGE INITIATIVE */}
         {!showBook && currentPage === 'initiative' && (
-          <InitiativePage isAdmin={isAuthenticated} />
+          <InitiativePage isAdmin={isAuthenticated} onCreateChar={() => setCurrentPage('forge')} />
+        )}
+
+        {/* PAGE FORGE — Création de personnage joueur */}
+        {!showBook && currentPage === 'forge' && (
+          <CharacterForgePage onBack={() => setCurrentPage('initiative')} />
         )}
 
         {/* PAGE STATS - AVEC VRAIES DONNEES */}

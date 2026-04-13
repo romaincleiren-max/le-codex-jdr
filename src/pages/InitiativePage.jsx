@@ -347,7 +347,7 @@ function AddCustomModal({ onAdd, onClose }) {
 
 // ── Composant principal ──────────────────────────────────────────────────────
 
-export default function InitiativePage({ isAdmin = false }) {
+export default function InitiativePage({ isAdmin = false, onCreateChar }) {
   const [combatants, setCombatants] = useState([]);
   const [customCombatants, setCustomCombatants] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -540,6 +540,12 @@ export default function InitiativePage({ isAdmin = false }) {
               className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-sm text-slate-400 hover:text-slate-200 transition-all">
               🔄 Actualiser
             </button>
+            {onCreateChar && (
+              <button onClick={onCreateChar}
+                className="px-3 py-2 rounded-xl bg-violet-800 hover:bg-violet-700 border border-violet-600 text-sm text-violet-100 font-bold transition-all">
+                ✦ Créer mon perso
+              </button>
+            )}
             {isAdmin && (
               <button onClick={() => setShowAddModal(true)}
                 className="px-3 py-2 rounded-xl bg-amber-800 hover:bg-amber-700 border border-amber-600 text-sm text-amber-100 font-bold transition-all">
@@ -564,17 +570,25 @@ export default function InitiativePage({ isAdmin = false }) {
             <h3 className="text-xl font-bold text-slate-300 mb-2" style={{ fontFamily: 'Cinzel, serif' }}>
               Aucun combattant en session
             </h3>
-            <p className="text-slate-500 text-sm max-w-md mx-auto">
+            <p className="text-slate-500 text-sm max-w-md mx-auto mb-4">
               {isAdmin
                 ? 'Approuvez des personnages et activez-les dans la session via l\'onglet Admin → Personnages.'
                 : 'La session de combat n\'a pas encore démarré. Attendez que le MJ la lance.'}
             </p>
-            {isAdmin && (
-              <button onClick={() => setShowAddModal(true)}
-                className="mt-4 px-6 py-2.5 bg-amber-800 hover:bg-amber-700 text-amber-100 rounded-xl font-bold text-sm">
-                + Ajouter un PNJ custom
-              </button>
-            )}
+            <div className="flex flex-wrap gap-3 justify-center">
+              {onCreateChar && (
+                <button onClick={onCreateChar}
+                  className="px-6 py-2.5 bg-violet-800 hover:bg-violet-700 text-violet-100 rounded-xl font-bold text-sm border border-violet-600">
+                  ✦ Créer mon personnage
+                </button>
+              )}
+              {isAdmin && (
+                <button onClick={() => setShowAddModal(true)}
+                  className="px-6 py-2.5 bg-amber-800 hover:bg-amber-700 text-amber-100 rounded-xl font-bold text-sm">
+                  + Ajouter un PNJ
+                </button>
+              )}
+            </div>
           </div>
         )}
 
