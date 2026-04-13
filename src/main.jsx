@@ -21,7 +21,7 @@ import ScenarioCarousel from './components/carousel/ScenarioCarousel';
 import { processCheckout } from './services/stripeService';
 import StatsDisplay from './components/StatsDisplay';
 import InitiativePage from './pages/InitiativePage';
-import CharacterForgePage from './pages/CharacterForgePage';
+import ForgePage from './pages/ForgePage';
 import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters } from './services/charactersService';
 import { validateSubmissionForm, validatePDFFile } from './utils/validation';
 import { submissionRateLimiter } from './utils/rateLimiter';
@@ -2369,7 +2369,7 @@ export default function App() {
 
               {/* Navigation centrale - cachee sur mobile */}
               <div className="hidden md:flex gap-6 lg:gap-12 items-center flex-1 justify-center">
-                {['home', 'submit', 'initiative', 'admin', 'stats', 'about']
+                {['home', 'submit', 'forge', 'initiative', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
                       return false;
@@ -2381,6 +2381,7 @@ export default function App() {
                     const icons = {
                       home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
                       submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                      forge: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
                       initiative: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                       admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                       stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
@@ -2389,6 +2390,7 @@ export default function App() {
                     const labels = {
                       home: t('nav.home'),
                       submit: t('nav.submit'),
+                      forge: '✦ Forge',
                       initiative: '⚔️ Initiative',
                       admin: t('nav.admin'),
                       stats: t('nav.stats'),
@@ -3462,12 +3464,12 @@ export default function App() {
 
         {/* PAGE INITIATIVE */}
         {!showBook && currentPage === 'initiative' && (
-          <InitiativePage isAdmin={isAuthenticated} onCreateChar={() => setCurrentPage('forge')} />
+          <InitiativePage isAdmin={isAuthenticated} onGoForge={() => setCurrentPage('forge')} />
         )}
 
-        {/* PAGE FORGE — Création de personnage joueur */}
+        {/* PAGE FORGE — Character creator (iframe) */}
         {!showBook && currentPage === 'forge' && (
-          <CharacterForgePage onBack={() => setCurrentPage('initiative')} />
+          <ForgePage onNavigate={setCurrentPage} />
         )}
 
         {/* PAGE STATS - AVEC VRAIES DONNEES */}
