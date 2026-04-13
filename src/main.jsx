@@ -20,6 +20,8 @@ import { supabase } from './lib/supabase';
 import ScenarioCarousel from './components/carousel/ScenarioCarousel';
 import { processCheckout } from './services/stripeService';
 import StatsDisplay from './components/StatsDisplay';
+import InitiativePage from './pages/InitiativePage';
+import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters } from './services/charactersService';
 import { validateSubmissionForm, validatePDFFile } from './utils/validation';
 import { submissionRateLimiter } from './utils/rateLimiter';
 import RateLimiter from './utils/rateLimiter';
@@ -1640,6 +1642,118 @@ const SubmissionsTab = () => {
   );
 };
 
+// ── Composant Admin — Gestion des Personnages ─────────────────────────────────
+const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters }) => {
+  const [pending, setPending] = React.useState([]);
+  const [approved, setApproved] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [tab, setTab] = React.useState('pending');
+
+  const load = async () => {
+    setLoading(true);
+    try {
+      const [p, a] = await Promise.all([getPendingCharacters(), getApprovedCharacters()]);
+      setPending(p || []);
+      setApproved(a || []);
+    } catch(e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  React.useEffect(() => { load(); }, []);
+
+  const handleApprove = async (id) => {
+    await approveCharacter(id);
+    load();
+  };
+  const handleReject = async (id) => {
+    await rejectCharacter(id);
+    load();
+  };
+  const handleDelete = async (id) => {
+    if (!confirm('Supprimer ce personnage définitivement ?')) return;
+    await deleteCharacter(id);
+    load();
+  };
+  const handleToggleSession = async (id, current) => {
+    await toggleSession(id, !current);
+    load();
+  };
+
+  const CharCard = ({ char, isPending }) => (
+    <div className="bg-amber-50 border-2 border-amber-700 rounded-xl p-4 flex gap-4 items-start">
+      <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-amber-200 flex items-center justify-center text-2xl">
+        {char.portrait_url
+          ? <img src={char.portrait_url} alt={char.char_name} className="w-full h-full object-cover" />
+          : char.portrait_emoji || '⚔️'}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-bold text-amber-900 text-lg">{char.char_name}</span>
+          <span className="text-xs bg-amber-200 text-amber-800 px-2 py-0.5 rounded-full">{char.class_name} niv.{char.level}</span>
+          <span className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">{char.race_name}</span>
+        </div>
+        <p className="text-sm text-amber-700 mt-0.5">Joueur : <strong>{char.player_name}</strong></p>
+        {!isPending && (
+          <div className="mt-1">
+            <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${char.is_in_session ? 'bg-green-200 text-green-800' : 'bg-slate-200 text-slate-600'}`}>
+              {char.is_in_session ? '✅ En session' : '💤 Hors session'}
+            </span>
+          </div>
+        )}
+      </div>
+      <div className="flex flex-col gap-2 flex-shrink-0">
+        {isPending ? (
+          <>
+            <button onClick={() => handleApprove(char.id)} className="bg-green-700 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 font-bold text-sm">✅ Approuver</button>
+            <button onClick={() => handleReject(char.id)} className="bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-500 font-bold text-sm">❌ Rejeter</button>
+          </>
+        ) : (
+          <button onClick={() => handleToggleSession(char.id, char.is_in_session)}
+            className={`px-3 py-1.5 rounded-lg font-bold text-sm ${char.is_in_session ? 'bg-slate-600 hover:bg-slate-500 text-white' : 'bg-green-700 hover:bg-green-600 text-white'}`}>
+            {char.is_in_session ? '⬇️ Retirer' : '⬆️ Session'}
+          </button>
+        )}
+        <button onClick={() => handleDelete(char.id)} className="bg-red-700 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 font-bold text-sm">🗑️</button>
+      </div>
+    </div>
+  );
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-3xl font-bold text-amber-900">🧙 Gestion des Personnages</h2>
+        <button onClick={load} className="bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-600 font-bold text-sm">🔄 Rafraîchir</button>
+      </div>
+
+      <div className="flex gap-3 mb-6">
+        <button onClick={() => setTab('pending')}
+          className={`px-5 py-2.5 rounded-xl font-bold transition-all ${tab === 'pending' ? 'bg-pink-700 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>
+          📥 En attente {pending.length > 0 && <span className="ml-1 bg-white text-pink-700 rounded-full px-2 text-xs">{pending.length}</span>}
+        </button>
+        <button onClick={() => setTab('approved')}
+          className={`px-5 py-2.5 rounded-xl font-bold transition-all ${tab === 'approved' ? 'bg-violet-700 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>
+          ✅ Approuvés ({approved.length})
+        </button>
+      </div>
+
+      {loading ? (
+        <div className="text-center py-12 text-amber-700 text-lg">Chargement...</div>
+      ) : tab === 'pending' ? (
+        pending.length === 0
+          ? <p className="text-center py-12 text-amber-700">Aucun personnage en attente d'approbation.</p>
+          : <div className="space-y-3">{pending.map(c => <CharCard key={c.id} char={c} isPending />)}</div>
+      ) : (
+        approved.length === 0
+          ? <p className="text-center py-12 text-amber-700">Aucun personnage approuvé.</p>
+          : <div className="space-y-3">{approved.map(c => <CharCard key={c.id} char={c} isPending={false} />)}</div>
+      )}
+    </div>
+  );
+};
+
 export default function App() {
   // i18n
   const { language, toggleLanguage, t, tTag, tDuration, tf } = useLanguage();
@@ -2254,7 +2368,7 @@ export default function App() {
 
               {/* Navigation centrale - cachee sur mobile */}
               <div className="hidden md:flex gap-6 lg:gap-12 items-center flex-1 justify-center">
-                {['home', 'submit', 'admin', 'stats', 'about']
+                {['home', 'submit', 'initiative', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
                       return false;
@@ -2266,6 +2380,7 @@ export default function App() {
                     const icons = {
                       home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
                       submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                      initiative: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                       admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                       stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
                       about: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Scroll%20logo_wthback.png'
@@ -2273,6 +2388,7 @@ export default function App() {
                     const labels = {
                       home: t('nav.home'),
                       submit: t('nav.submit'),
+                      initiative: '⚔️ Initiative',
                       admin: t('nav.admin'),
                       stats: t('nav.stats'),
                       about: t('nav.about')
@@ -2418,7 +2534,7 @@ export default function App() {
 
             {/* Liens de navigation */}
             <nav className="p-4 space-y-2">
-              {['home', 'submit', 'admin', 'stats', 'about']
+              {['home', 'submit', 'initiative', 'admin', 'stats', 'about']
                 .filter(page => {
                   if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
                     return false;
@@ -2430,6 +2546,7 @@ export default function App() {
                   const icons = {
                     home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
                     submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                    initiative: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                     admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                     stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
                     about: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Scroll%20logo_wthback.png'
@@ -2437,6 +2554,7 @@ export default function App() {
                   const labels = {
                     home: t('nav.home'),
                     submit: t('nav.submit'),
+                    initiative: '⚔️ Initiative',
                     admin: t('nav.admin'),
                     stats: t('nav.statistics'),
                     about: t('nav.about')
@@ -2717,6 +2835,7 @@ export default function App() {
                   {id: 'notations', icon: '⭐', label: 'Notations', color: 'from-yellow-600 to-yellow-700'},
                   {id: 'soumissions', icon: '📥', label: 'Soumissions', color: 'from-pink-600 to-pink-700'},
                   {id: 'tags', icon: '🏷️', label: 'Tags', color: 'from-indigo-600 to-indigo-700'},
+                  {id: 'personnages', icon: '🧙', label: 'Personnages', color: 'from-violet-600 to-violet-700'},
                   {id: 'parametres', icon: '⚙️', label: 'Paramètres', color: 'from-slate-600 to-slate-700'}
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setAdminTab(tab.id)}
@@ -3323,9 +3442,26 @@ export default function App() {
                     </div>
                   </div>
                 )}
+
+                {/* ONGLET PERSONNAGES */}
+                {adminTab === 'personnages' && (
+                  <AdminPersonnagesTab
+                    approveCharacter={approveCharacter}
+                    rejectCharacter={rejectCharacter}
+                    deleteCharacter={deleteCharacter}
+                    toggleSession={toggleSession}
+                    getPendingCharacters={getPendingCharacters}
+                    getApprovedCharacters={getApprovedCharacters}
+                  />
+                )}
               </div>
             </div>
           </div>
+        )}
+
+        {/* PAGE INITIATIVE */}
+        {!showBook && currentPage === 'initiative' && (
+          <InitiativePage isAdmin={isAuthenticated} />
         )}
 
         {/* PAGE STATS - AVEC VRAIES DONNEES */}
