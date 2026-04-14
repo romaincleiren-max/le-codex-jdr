@@ -458,18 +458,18 @@ body.printing #ps-print{display:block!important;}
 .re-bag-del:hover{color:var(--blood-l);}
 .re-rarity{font-family:'Share Tech Mono',monospace;font-size:8px;border-radius:2px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
 /* Doll column */
-#re-doll-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding:1.2rem .5rem;}
+#re-doll-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding:1rem .5rem;}
 #re-doll-col::-webkit-scrollbar{width:3px;}#re-doll-col::-webkit-scrollbar-thumb{background:#3A2810;}
-#re-doll-inner{width:100%;max-width:460px;}
-.doll-grid{display:grid;grid-template-columns:115px 1fr 115px;grid-template-rows:56px 56px 56px 56px 56px 56px;gap:7px;margin-top:.6rem;}
-.re-doll-slot{display:flex;align-items:center;gap:6px;padding:.3rem .4rem;border:1px dashed #3A2810;background:#130D06;border-radius:4px;cursor:default;transition:.12s;overflow:hidden;min-height:52px;}
-.re-doll-slot:hover,.re-doll-slot.drag-over{border-color:var(--gold) !important;background:rgba(201,168,76,.1) !important;border-style:solid !important;}
-.re-doll-slot.equipped{border-style:solid;}
-.re-doll-slot-icon{font-size:18px;width:22px;text-align:center;flex-shrink:0;line-height:1;}
+#re-doll-inner{width:100%;max-width:500px;}
+.doll-grid{display:grid;grid-template-columns:130px 1fr 130px;grid-template-rows:62px 62px 62px 62px 62px 62px;gap:8px;margin-top:.6rem;}
+.re-doll-slot{display:flex;align-items:center;gap:7px;padding:.4rem .5rem;border:1px solid #3A2810;background:#130D06;border-radius:5px;cursor:default;transition:.12s;overflow:hidden;min-height:58px;border-left-width:3px;}
+.re-doll-slot:hover,.re-doll-slot.drag-over{border-color:var(--gold) !important;background:rgba(201,168,76,.12) !important;}
+.re-doll-slot.equipped{background:#1E1408;}
+.re-doll-slot-icon{font-size:20px;width:24px;text-align:center;flex-shrink:0;line-height:1;}
 .re-doll-slot-info{flex:1;min-width:0;}
-.re-doll-slot-lbl{font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.12em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.3;}
-.re-doll-slot-nm{font-family:'IM Fell English',serif;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
-.re-doll-slot-del{background:none;border:none;color:#5A2A2A;font-size:9px;cursor:pointer;padding:1px 3px;flex-shrink:0;transition:.1s;}
+.re-doll-slot-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.4;}
+.re-doll-slot-nm{font-family:'IM Fell English',serif;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
+.re-doll-slot-del{background:none;border:none;color:#5A2A2A;font-size:11px;cursor:pointer;padding:1px 4px;flex-shrink:0;transition:.1s;}
 .re-doll-slot-del:hover{color:var(--blood-l);}
 /* Catalog column */
 #re-cat-col{width:270px;min-width:220px;background:#0D0805;border-left:1px solid #1A1208;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
@@ -2999,18 +2999,20 @@ function reSlotHtml(slot, col, row){
   var r=_reChar; if(!r||!r.equipped) return '';
   var item=r.equipped[slot.id];
   var rc=item&&item.rarity?_RE_RC[item.rarity]:null;
-  var border=item?(rc||'#8B6914'):'#3A2810';
-  var bg=item?(rc?rc+'22':'#1E1408'):'#130D06';
-  var nmCol=item?(rc||'#C9A84C'):'#6A5A3A';
+  var leftBorder=item?(rc||'#8B6914'):'#3A2810';
+  var bg=item?(rc?rc+'44':'#1C1408'):'#130D06';
+  var nmCol=item?(rc||'#C9A84C'):'#5A4A2A';
+  var rarTag=item&&item.rarity&&rc?'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:'+rc+';margin-top:1px;">'+item.rarity+'</div>':'';
   return '<div class="re-doll-slot'+(item?' equipped':'')+'"'+
-    ' style="grid-column:'+col+';grid-row:'+row+';border-color:'+border+';background:'+bg+';"'+
+    ' style="grid-column:'+col+';grid-row:'+row+';border-left-color:'+leftBorder+';border-color:#2A1A08;border-left-color:'+leftBorder+';background:'+bg+';"'+
     ' ondragover="event.preventDefault();this.classList.add(\'drag-over\')"'+
     ' ondragleave="this.classList.remove(\'drag-over\')"'+
     ' ondrop="reDollDrop(event,\''+slot.id+'\')">'+
     '<div class="re-doll-slot-icon">'+slot.icon+'</div>'+
     '<div class="re-doll-slot-info">'+
       '<span class="re-doll-slot-lbl">'+slot.label+'</span>'+
-      '<div class="re-doll-slot-nm" style="color:'+nmCol+';">'+(item?item.n:'vide')+'</div>'+
+      '<div class="re-doll-slot-nm" style="color:'+nmCol+';">'+(item?item.n:'&#8212; vide')+'</div>'+
+      rarTag+
     '</div>'+
     (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
   '</div>';
@@ -3117,8 +3119,9 @@ function renderReInv(){
   el.innerHTML=filtered.length?filtered.map(function(it){
     var rc=it.rarity?(_IP_RARITY[it.rarity]||null):null;
     var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+it.rarity+'</span>':'';
-    return'<div class="inv-item">'+
-      '<button class="inv-item-add" onclick="reAddItem(\''+it.id+'\')" title="Ajouter au sac">+</button>'+
+    var safeN=it.n.replace(/'/g,"\\'"); var safeD=it.d.replace(/'/g,"\\'").substring(0,300);
+    return'<div class="inv-item" onclick="showItemPanel({id:\''+it.id+'\',name:\''+safeN+'\',type:\''+it.cat+'\',rarity:\''+( it.rarity||'')+'\',description:\''+safeD+'\',weight:'+it.w+',cost:\''+it.c+'\'},true)">'+
+      '<button class="inv-item-add" onclick="event.stopPropagation();reAddItem(\''+it.id+'\')" title="Ajouter au sac">+</button>'+
       '<div class="inv-item-n">'+it.n+rBadge+'</div>'+
       '<div class="inv-item-cat">'+it.cat+'</div>'+
       '<div class="inv-item-d">'+it.d+'</div>'+

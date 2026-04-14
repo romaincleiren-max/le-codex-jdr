@@ -2310,7 +2310,7 @@ export default function App() {
         />
       )}
 
-      {!showBook && currentPage !== 'checkout' && currentPage !== 'confirmation' && (
+      {!showBook && currentPage !== 'checkout' && currentPage !== 'confirmation' && currentPage !== 'forge' && (
         <nav className="fixed top-0 left-0 right-0 z-50 shadow-2xl relative overflow-hidden">
           {/* Image de fond avec texture */}
           <div 
