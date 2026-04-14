@@ -435,38 +435,49 @@ body.printing #ps-print{display:block!important;}
 .lvl-btn{background:#1A1510;color:var(--gold-d);border:1px solid #3A2A10;font-family:'Cinzel Decorative',serif;font-size:15px;padding:.55em 0;cursor:pointer;transition:.12s;border-radius:3px;font-weight:bold;min-height:48px;width:100%;line-height:1;}
 .lvl-btn:hover{border-color:var(--gold);color:var(--gold);background:#221A0E;}
 .lvl-btn.active{border-color:var(--blood);background:var(--blood);color:var(--parch);}
-/* ── Roster Equipment Overlay ── */
-#re-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.9);z-index:9001;display:none;}
+/* ── Roster Equipment Overlay — RPG Paper Doll ── */
+#re-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9001;display:none;flex-direction:column;background:#0D0805;}
 #re-overlay.open{display:flex;}
-.re-panel{display:flex;flex-direction:column;height:100%;overflow:hidden;}
-.re-left{width:340px;min-width:280px;background:#130D06;border-right:1px solid var(--gold-d);flex-shrink:0;}
-.re-right{flex:1;background:#0D0805;}
-.re-panel-body{flex:1;overflow-y:auto;padding:1rem;}
-.re-panel-body::-webkit-scrollbar{width:3px;}.re-panel-body::-webkit-scrollbar-track{background:#0A0704;}.re-panel-body::-webkit-scrollbar-thumb{background:#3A2810;}
-.re-panel-hdr{background:var(--shadow);border-bottom:1px solid var(--gold-d);padding:.5rem .9rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-shrink:0;}
-.re-panel-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.2em;color:var(--gold);text-transform:uppercase;}
-.re-close{background:none;border:1px solid #3A2810;color:#8B6914;padding:3px 10px;font-size:9px;cursor:pointer;font-family:'Cinzel',serif;transition:.1s;letter-spacing:.05em;}
+#re-hdr{background:var(--shadow);border-bottom:2px solid var(--gold-d);padding:.5rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;gap:1rem;}
+.re-hdr-t{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.22em;color:var(--gold-d);text-transform:uppercase;margin-right:.5rem;}
+#re-hdr-name{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--gold);}
+.re-close{background:none;border:1px solid #3A2810;color:#8B6914;padding:3px 12px;font-size:9px;cursor:pointer;font-family:'Cinzel',serif;transition:.1s;letter-spacing:.05em;}
 .re-close:hover{border-color:var(--gold);color:var(--gold);}
-.re-src-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.08em;padding:.25em .6em;border:1px solid #3A2810;color:#8B6914;background:none;cursor:pointer;transition:.1s;}
-.re-src-btn.active{border-color:var(--gold-d);color:var(--gold);}
-.re-avatar{width:72px;height:72px;border-radius:50%;overflow:hidden;border:2px solid var(--gold-d);flex-shrink:0;}
-.re-avatar img{width:100%;height:100%;object-fit:cover;}
-.re-avatar-init{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Cinzel Decorative',serif;font-size:28px;color:var(--gold);background:#221A08;}
-.re-name{font-family:'Cinzel Decorative',serif;font-size:15px;color:var(--gold);margin-bottom:.2rem;}
-.re-sub{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.12em;color:#8B6914;text-transform:uppercase;margin-bottom:.5rem;}
-.re-stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:.35rem;margin-bottom:.8rem;}
-.re-stat{background:#1A1208;border:1px solid #3A2810;padding:.35rem .25rem;text-align:center;}
-.re-stat-l{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#8B6914;text-transform:uppercase;display:block;}
-.re-stat-v{font-family:'Cinzel Decorative',serif;font-size:17px;color:var(--blood);}
-.re-stat-m{font-family:'Share Tech Mono',monospace;font-size:9px;color:#5A6070;}
-.re-bag-row{display:flex;align-items:center;gap:.5rem;padding:.3rem 0;border-bottom:1px solid #1A1208;cursor:grab;}
+#re-body{display:flex;flex:1;overflow:hidden;}
+/* Bag column */
+#re-bag-col{width:220px;min-width:180px;background:#130D06;border-right:1px solid #2A1A08;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.re-col-t{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);text-transform:uppercase;padding:.45rem .7rem;border-bottom:1px solid #1E1208;flex-shrink:0;background:#0F0A06;}
+#re-bag-list2{flex:1;overflow-y:auto;padding:.3rem .5rem;}
+#re-bag-list2::-webkit-scrollbar{width:3px;}#re-bag-list2::-webkit-scrollbar-thumb{background:#3A2810;}
+#re-stats-mini{padding:.5rem .6rem;border-top:1px solid #1E1208;flex-shrink:0;background:#0F0A06;}
+.re-bag-row{display:flex;align-items:center;gap:.4rem;padding:.28rem .2rem;border-bottom:1px solid #1A1208;cursor:grab;}
 .re-bag-row:last-child{border-bottom:none;}
+.re-bag-row:hover{background:#1A1208;}
 .re-bag-row.dragging{opacity:.4;}
-.re-bag-nm{flex:1;font-family:'IM Fell English',serif;font-size:11px;color:var(--parch);}
-.re-bag-nm:hover{color:var(--gold);}
-.re-bag-del{background:none;border:none;color:#4A2A2A;font-size:10px;cursor:pointer;padding:2px 4px;transition:.1s;flex-shrink:0;}
+.re-bag-del{background:none;border:none;color:#4A2A2A;font-size:9px;cursor:pointer;padding:1px 3px;transition:.1s;flex-shrink:0;}
 .re-bag-del:hover{color:var(--blood-l);}
 .re-rarity{font-family:'Share Tech Mono',monospace;font-size:8px;border-radius:2px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
+/* Doll column */
+#re-doll-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding:1.2rem .5rem;}
+#re-doll-col::-webkit-scrollbar{width:3px;}#re-doll-col::-webkit-scrollbar-thumb{background:#3A2810;}
+#re-doll-inner{width:100%;max-width:460px;}
+.doll-grid{display:grid;grid-template-columns:115px 1fr 115px;grid-template-rows:56px 56px 56px 56px 56px 56px;gap:7px;margin-top:.6rem;}
+.re-doll-slot{display:flex;align-items:center;gap:6px;padding:.3rem .4rem;border:1px dashed #3A2810;background:#130D06;border-radius:4px;cursor:default;transition:.12s;overflow:hidden;min-height:52px;}
+.re-doll-slot:hover,.re-doll-slot.drag-over{border-color:var(--gold) !important;background:rgba(201,168,76,.1) !important;border-style:solid !important;}
+.re-doll-slot.equipped{border-style:solid;}
+.re-doll-slot-icon{font-size:18px;width:22px;text-align:center;flex-shrink:0;line-height:1;}
+.re-doll-slot-info{flex:1;min-width:0;}
+.re-doll-slot-lbl{font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.12em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.3;}
+.re-doll-slot-nm{font-family:'IM Fell English',serif;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
+.re-doll-slot-del{background:none;border:none;color:#5A2A2A;font-size:9px;cursor:pointer;padding:1px 3px;flex-shrink:0;transition:.1s;}
+.re-doll-slot-del:hover{color:var(--blood-l);}
+/* Catalog column */
+#re-cat-col{width:270px;min-width:220px;background:#0D0805;border-left:1px solid #1A1208;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+.re-src-bar{display:flex;gap:.3rem;padding:.35rem .6rem;background:#0F0A06;border-bottom:1px solid #1E1208;flex-shrink:0;}
+.re-src-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.08em;padding:.25em .6em;border:1px solid #3A2810;color:#8B6914;background:none;cursor:pointer;transition:.1s;}
+.re-src-btn.active{border-color:var(--gold-d);color:var(--gold);}
+#re-inv-body{flex:1;overflow-y:auto;padding:.4rem .6rem;}
+#re-inv-body::-webkit-scrollbar{width:3px;}#re-inv-body::-webkit-scrollbar-thumb{background:#3A2810;}
 /* ── Equipment slots (right panel step 4) ── */
 .equip-slot{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border:1px dashed #4A3820;background:#130D06;border-radius:3px;min-height:36px;transition:.12s;cursor:default;}
 .equip-slot:hover{border-color:#6A5030;background:#1A1008;}
@@ -570,27 +581,36 @@ body.printing #ps-print{display:block!important;}
   </div>
 </div>
 
-<!-- ROSTER EQUIPMENT OVERLAY -->
-<div id="re-overlay" onclick="if(event.target===this)closeReOverlay()">
-  <div class="re-panel re-left">
-    <div class="re-panel-hdr">
-      <div class="re-panel-title">Fiche &amp; Inventaire</div>
-      <button class="re-close" onclick="closeReOverlay()">✕ Fermer</button>
-    </div>
-    <div class="re-panel-body" id="re-sheet-body"></div>
+<!-- ROSTER EQUIPMENT OVERLAY — RPG Paper Doll -->
+<div id="re-overlay">
+  <div id="re-hdr">
+    <div><span class="re-hdr-t">⚔ Fiche &amp; Équipement</span><span id="re-hdr-name"></span></div>
+    <button class="re-close" onclick="closeReOverlay()">✕ Fermer</button>
   </div>
-  <div class="re-panel re-right">
-    <div class="re-panel-hdr">
-      <div class="re-panel-title">Ajouter des objets</div>
-      <div style="display:flex;gap:.3rem;">
+  <div id="re-body">
+    <!-- LEFT: Bag -->
+    <div id="re-bag-col">
+      <div class="re-col-t">🎒 Sac d'aventurier</div>
+      <div id="re-bag-list2"></div>
+      <div class="re-col-t">Statistiques</div>
+      <div id="re-stats-mini"></div>
+    </div>
+    <!-- CENTER: Paper doll -->
+    <div id="re-doll-col">
+      <div id="re-doll-inner"></div>
+    </div>
+    <!-- RIGHT: Catalog -->
+    <div id="re-cat-col">
+      <div class="re-col-t">Ajouter des objets</div>
+      <div class="re-src-bar">
         <button class="re-src-btn active" data-src="srd" onclick="reSetSrc('srd')">⚔ SRD</button>
         <button class="re-src-btn" data-src="codex" onclick="reSetSrc('codex')">✦ Codex</button>
       </div>
+      <div style="padding:.35rem .6rem;background:#0F0A06;border-bottom:1px solid #1E1208;flex-shrink:0;">
+        <input class="inv-search" id="re-q" placeholder="Rechercher un objet..." oninput="reSearch(this.value)" style="margin-bottom:0;width:100%;">
+      </div>
+      <div id="re-inv-body"></div>
     </div>
-    <div style="padding:.4rem .9rem;background:var(--shadow);border-bottom:1px solid #2A1E0A;flex-shrink:0;">
-      <input class="inv-search" id="re-q" placeholder="Rechercher un objet..." oninput="reSearch(this.value)" style="margin-bottom:0;width:100%;">
-    </div>
-    <div class="re-panel-body" id="re-inv-body" style="padding:.5rem 1rem;"></div>
   </div>
 </div>
 
@@ -2877,18 +2897,38 @@ function addScenarioToChar(charId, scenarioName, status){
 }
 
 // ══════════════════════════════════════════════════
-// ROSTER EQUIPMENT OVERLAY
+// ROSTER EQUIPMENT OVERLAY — RPG Paper Doll
 // ══════════════════════════════════════════════════
 let _reChar = null;
 let _reSrc = 'srd';
 let _reQ = '';
+let _reBagDragItem = null;
+
+const RE_SLOTS_LEFT = [
+  {id:'amulet',  label:'Amulette',   icon:'📿'},
+  {id:'ring1',   label:'Anneau I',   icon:'💍'},
+  {id:'ring2',   label:'Anneau II',  icon:'💍'},
+  {id:'mainhand',label:'M. Princip.',icon:'⚔'},
+  {id:'offhand', label:'M. Seconde', icon:'🗡'},
+];
+const RE_SLOTS_RIGHT = [
+  {id:'chest',   label:'Torse',      icon:'🛡'},
+  {id:'hands',   label:'Mains',      icon:'🧤'},
+  {id:'belt',    label:'Ceinture',   icon:'🪢'},
+  {id:'feet',    label:'Pieds',      icon:'👢'},
+  {id:'back',    label:'Cape / Dos', icon:'🧣'},
+];
+const RE_HEAD = {id:'head', label:'Tête', icon:'⛑'};
+const _RE_RC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très rare':'#4A1F7A','Légendaire':'#7B4000','Artefact':'#7B1010'};
 
 function openRosterEquip(id){
-  const roster = getRoster();
-  _reChar = roster.find(r=>r.id===id);
+  var roster = getRoster();
+  _reChar = roster.find(function(r){return r.id===id;});
   if(!_reChar) return;
   if(!_reChar.bag) _reChar.bag=[];
+  if(!_reChar.equipped) _reChar.equipped={};
   _reSrc='srd'; _reQ='';
+  var hn=$('re-hdr-name'); if(hn) hn.textContent=_reChar.name||'—';
   renderReSheet();
   renderReInv();
   $('re-overlay').classList.add('open');
@@ -2896,9 +2936,9 @@ function openRosterEquip(id){
 
 function closeReOverlay(){
   if(_reChar){
-    const roster = getRoster();
-    const idx = roster.findIndex(r=>r.id===_reChar.id);
-    if(idx>=0){ roster[idx].bag = _reChar.bag; setRoster(roster); }
+    var roster = getRoster();
+    var idx = roster.findIndex(function(r){return r.id===_reChar.id;});
+    if(idx>=0){ roster[idx].bag=_reChar.bag; roster[idx].equipped=_reChar.equipped||{}; setRoster(roster); }
   }
   $('re-overlay').classList.remove('open');
   _reChar = null;
@@ -2906,130 +2946,203 @@ function closeReOverlay(){
 }
 
 function renderReSheet(){
-  const r = _reChar;
-  if(!r) return;
-  const el=$('re-sheet-body');
-  if(!el) return;
-  const stats=['str','dex','con','int','wis','cha'];
-  const statLabels=['FOR','DEX','CON','INT','SAG','CHA'];
-  function reMod(v){const m=Math.floor(((v||10)-10)/2);return(m>=0?'+':'')+m;}
-  const statsHtml=stats.map((s,i)=>{
-    const v=r.stats?.[s]||10;
-    return`<div class="re-stat"><span class="re-stat-l">${statLabels[i]}</span><div class="re-stat-v">${v}</div><div class="re-stat-m">${reMod(v)}</div></div>`;
+  var r=_reChar; if(!r)return;
+  if(!r.equipped) r.equipped={};
+  renderReBag();
+  renderReStats();
+  renderReDoll();
+}
+
+function renderReBag(){
+  var r=_reChar; if(!r)return;
+  var el=$('re-bag-list2'); if(!el)return;
+  if(!r.bag||!r.bag.length){
+    el.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#4A3A2A;font-style:italic;padding:.5rem .2rem;">Sac vide.</div>';
+    return;
+  }
+  el.innerHTML=r.bag.map(function(e,i){
+    var rc=e.rarity?_RE_RC[e.rarity]:null;
+    var rBadge=rc?'<span class="re-rarity" style="background:'+rc+'33;color:'+rc+';border:1px solid '+rc+'55;">'+e.rarity+'</span>':'';
+    var qty=e.qty>1?' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);">\xd7'+e.qty+'</span>':'';
+    return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')">'+
+      '<span style="font-size:10px;color:#5A4A3A;cursor:grab;">&#x2837;</span>'+
+      '<div style="flex:1;font-family:\'IM Fell English\',serif;font-size:11px;color:var(--parch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+e.n+rBadge+qty+'</div>'+
+      '<button class="re-bag-del" onclick="reBagRemove('+i+')" title="Retirer un">&#8722;</button>'+
+      '<button class="re-bag-del" onclick="reBagDelete('+i+')" title="Tout retirer">\u2715</button>'+
+    '</div>';
   }).join('');
-  const RARITY_COLS={"Commun":"#4A5568","Inhabituel":"#2D5016","Rare":"#1A3A5C","Très rare":"#4A1F7A","Légendaire":"#7B4000","Artefact":"#7B1010"};
-  const bagHtml=r.bag&&r.bag.length?r.bag.map((e,i)=>{
-    const rc=e.rarity?RARITY_COLS[e.rarity]:null;
-    const rBadge=rc?`<span class="re-rarity" style="background:${rc}33;color:${rc};border:1px solid ${rc}55;">${e.rarity}</span>`:'';
-    const qtyBadge=e.qty>1?` <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);">×${e.qty}</span>`:'';
-    return`<div class="re-bag-row" draggable="true" ondragstart="reDragStart(event,${i})" ondragover="event.preventDefault()" ondrop="reDrop(event,${i})">
-      <span style="font-size:9px;color:#4A3A2A;margin-right:2px;cursor:grab;">⠿</span>
-      <div class="re-bag-nm" onclick="showItemPanel({id:'${e.id}',name:'${(e.n||'').replace(/'/g,"\\'")}',type:'${e.cat||''}',rarity:'${e.rarity||''}',description:'${(e.d||'').replace(/'/g,"\\'").substring(0,300)}',weight:${e.w||0},cost:'${e.c||'—'}'}, false)">${e.n}${rBadge}${qtyBadge}</div>
-      <button class="re-bag-del" onclick="reBagRemove(${i})" title="Retirer un exemplaire">−</button>
-      <button class="re-bag-del" onclick="reBagDelete(${i})" title="Retirer tout">✕</button>
-    </div>`;
-  }).join(''):'<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Sac vide.</div>';
-  const photoEl=r.photo
-    ?`<div class="re-avatar"><img src="${r.photo}" alt="${r.name}"></div>`
-    :`<div class="re-avatar"><div class="re-avatar-init">${(r.name||'?')[0].toUpperCase()}</div></div>`;
-  el.innerHTML=`
-    <div style="display:flex;gap:.9rem;align-items:flex-start;margin-bottom:.8rem;">${photoEl}
-      <div><div class="re-name">${r.name}</div>
-      <div class="re-sub">${r.cls?.n||'—'} · ${r.race?.n||'—'} · Niv.${r.level||1}</div>
-      <div style="display:flex;gap:.7rem;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);"><span>❤ ${r.hp||'?'} PV</span><span>🛡 CA ${r.ac||'?'}</span></div>
-    </div></div>
-    <div class="re-stats-grid">${statsHtml}</div>
-    <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.15em;color:#8B6914;text-transform:uppercase;margin-bottom:.5rem;border-bottom:1px solid #2A1A08;padding-bottom:.3rem;">
-      Inventaire — ${r.bag&&r.bag.length?r.bag.reduce((s,e)=>s+e.qty,0)+' objet(s)':'vide'}
-    </div>
-    <div id="re-bag-list">${bagHtml}</div>`;
+}
+
+function renderReStats(){
+  var r=_reChar; if(!r)return;
+  var el=$('re-stats-mini'); if(!el)return;
+  var keys=['str','dex','con','int','wis','cha'];
+  var lbl=['FOR','DEX','CON','INT','SAG','CHA'];
+  el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:.4rem;">'+
+    keys.map(function(s,i){
+      var v=r.stats&&r.stats[s]?r.stats[s]:10;
+      var m=Math.floor((v-10)/2);
+      return '<div style="background:#1A1208;border:1px solid #2A1808;padding:.2rem .3rem;text-align:center;">'+
+        '<div style="font-family:\'Cinzel\',serif;font-size:7px;color:var(--gold-d);">'+lbl[i]+'</div>'+
+        '<div style="font-family:\'Cinzel Decorative\',serif;font-size:13px;color:var(--blood);">'+v+'</div>'+
+        '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#5A6070;">'+(m>=0?'+':'')+m+'</div>'+
+      '</div>';
+    }).join('')+
+  '</div>'+
+  '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);display:flex;gap:.6rem;">'+
+    '<span>\u2764 '+(r.maxHp||r.hp||'?')+' PV</span>'+
+    '<span>\uD83D\uDEE1 CA '+(r.ac||'?')+'</span>'+
+  '</div>';
+}
+
+function reSlotHtml(slot, col, row){
+  var r=_reChar; if(!r||!r.equipped) return '';
+  var item=r.equipped[slot.id];
+  var rc=item&&item.rarity?_RE_RC[item.rarity]:null;
+  var border=item?(rc||'#8B6914'):'#3A2810';
+  var bg=item?(rc?rc+'22':'#1E1408'):'#130D06';
+  var nmCol=item?(rc||'#C9A84C'):'#6A5A3A';
+  return '<div class="re-doll-slot'+(item?' equipped':'')+'"'+
+    ' style="grid-column:'+col+';grid-row:'+row+';border-color:'+border+';background:'+bg+';"'+
+    ' ondragover="event.preventDefault();this.classList.add(\'drag-over\')"'+
+    ' ondragleave="this.classList.remove(\'drag-over\')"'+
+    ' ondrop="reDollDrop(event,\''+slot.id+'\')">'+
+    '<div class="re-doll-slot-icon">'+slot.icon+'</div>'+
+    '<div class="re-doll-slot-info">'+
+      '<span class="re-doll-slot-lbl">'+slot.label+'</span>'+
+      '<div class="re-doll-slot-nm" style="color:'+nmCol+';">'+(item?item.n:'vide')+'</div>'+
+    '</div>'+
+    (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
+  '</div>';
+}
+
+function renderReDoll(){
+  var r=_reChar; if(!r)return;
+  if(!r.equipped) r.equipped={};
+  var el=$('re-doll-inner'); if(!el)return;
+  var portHtml=r.photo
+    ?'<img src="'+r.photo+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">'
+    :'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:\'Cinzel Decorative\',serif;font-size:60px;color:var(--gold);">'+((r.name||'?')[0].toUpperCase())+'</div>';
+  var leftSlots=RE_SLOTS_LEFT.map(function(s,i){return reSlotHtml(s,1,i+2);}).join('');
+  var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
+  var headSlot=reSlotHtml(RE_HEAD,2,1);
+  el.innerHTML=
+    '<div style="text-align:center;padding:.4rem 0 .1rem;font-family:\'Cinzel Decorative\',serif;font-size:18px;color:var(--gold);">'+r.name+'</div>'+
+    '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:.8rem;">'+(r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' \u00b7 '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' \u00b7 NIV.'+( r.level||1)+'</div>'+
+    '<div class="doll-grid">'+
+      headSlot+
+      leftSlots+
+      '<div style="grid-column:2;grid-row:2/7;display:flex;align-items:center;justify-content:center;">'+
+        '<div style="width:150px;height:195px;border-radius:50%;overflow:hidden;border:3px solid var(--gold-d);background:linear-gradient(160deg,#2A1A08,#110C06);box-shadow:0 0 24px rgba(201,168,76,.15),inset 0 0 20px rgba(0,0,0,.5);">'+
+          portHtml+
+        '</div>'+
+      '</div>'+
+      rightSlots+
+    '</div>'+
+    '<div style="text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#3A2A1A;margin-top:.7rem;letter-spacing:.05em;">'+
+      'Glissez un objet du sac \u25b6 emplacement &nbsp;\u00b7&nbsp; Clic \u2715 pour d\u00e9s\u00e9quiper'+
+    '</div>';
+}
+
+function reBagDragStart(e,idx){
+  _reBagDragItem=_reChar&&_reChar.bag[idx]?Object.assign({},_reChar.bag[idx]):null;
+  if(_reBagDragItem) e.dataTransfer.effectAllowed='copy';
+}
+function reDollDrop(e,slotId){
+  e.preventDefault();
+  document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.remove('drag-over');});
+  if(!_reBagDragItem||!_reChar) return;
+  if(!_reChar.equipped) _reChar.equipped={};
+  _reChar.equipped[slotId]=Object.assign({},_reBagDragItem);
+  _reBagDragItem=null;
+  renderReDoll();
+  var roster=getRoster();
+  var idx=roster.findIndex(function(r){return r.id===_reChar.id;});
+  if(idx>=0){roster[idx].equipped=_reChar.equipped;setRoster(roster);}
+}
+function reDollUnequip(slotId){
+  if(!_reChar||!_reChar.equipped) return;
+  delete _reChar.equipped[slotId];
+  renderReDoll();
+  var roster=getRoster();
+  var idx=roster.findIndex(function(r){return r.id===_reChar.id;});
+  if(idx>=0){roster[idx].equipped=_reChar.equipped;setRoster(roster);}
 }
 
 function reBagRemove(idx){
   if(!_reChar||!_reChar.bag)return;
   if(_reChar.bag[idx].qty>1)_reChar.bag[idx].qty--;
   else _reChar.bag.splice(idx,1);
-  renderReSheet();
+  renderReBag();
 }
 function reBagDelete(idx){
   if(!_reChar||!_reChar.bag)return;
   _reChar.bag.splice(idx,1);
-  renderReSheet();
-}
-
-let _reDragIdx=null;
-function reDragStart(e,idx){_reDragIdx=idx;e.dataTransfer.effectAllowed='move';}
-function reDrop(e,idx){
-  if(_reDragIdx===null||_reDragIdx===idx)return;
-  const arr=_reChar.bag;
-  const item=arr.splice(_reDragIdx,1)[0];
-  arr.splice(idx,0,item);
-  _reDragIdx=null;
-  renderReSheet();
+  renderReBag();
 }
 
 function reSetSrc(src){
   _reSrc=src;_reQ='';
-  const qEl=$('re-q');if(qEl)qEl.value='';
-  document.querySelectorAll('.re-src-btn').forEach(b=>b.classList.toggle('active',b.dataset.src===src));
+  var qEl=$('re-q');if(qEl)qEl.value='';
+  document.querySelectorAll('.re-src-btn').forEach(function(b){b.classList.toggle('active',b.dataset.src===src);});
   renderReInv();
 }
 function reSearch(q){_reQ=q;renderReInv();}
 
 function renderReInv(){
-  const el=$('re-inv-body');if(!el)return;
+  var el=$('re-inv-body');if(!el)return;
   if(_reSrc==='codex'){
-    if(!_codexData&&!_codexLoading){loadCodexIndex().then(()=>renderReInv());el.innerHTML='<div class="codex-msg">Chargement...</div>';return;}
+    if(!_codexData&&!_codexLoading){loadCodexIndex().then(function(){renderReInv();});el.innerHTML='<div class="codex-msg">Chargement...</div>';return;}
     if(_codexLoading){el.innerHTML='<div class="codex-msg">Chargement...</div>';return;}
-    if(!_codexData){el.innerHTML='<div class="codex-msg">Codex non chargé.</div>';return;}
-    const q=_reQ.toLowerCase().trim();
-    if(!q){el.innerHTML='<div class="codex-msg">✦ Tapez un nom pour chercher dans Sigil Saga.</div>';return;}
-    const filtered=_codexData.filter(e=>e.name.toLowerCase().includes(q)||e.category.toLowerCase().includes(q)).slice(0,40);
-    if(!filtered.length){el.innerHTML='<div class="codex-msg">Aucun résultat.</div>';return;}
-    el.innerHTML=filtered.map(e=>{
-      const idx=_codexData.indexOf(e);
-      const rc=e.rarity?(_IP_RARITY[e.rarity]||null):null;
-      const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:${rc.badge};color:${rc.badgeTxt};padding:1px 4px;margin-left:4px;">${e.rarity}</span>`:'';
-      return`<div class="inv-item" onclick="showCodexItem(${idx})">
-        <button class="inv-item-add" onclick="event.stopPropagation();reAddCodexItem(${idx})" title="Ajouter au sac">+</button>
-        <div class="inv-item-n">${e.name}${rBadge}</div>
-        <div class="inv-item-cat codex-badge">✦ ${e.item_type||e.category||'Codex'}</div>
-        <div class="inv-item-d">${(e.desc||'').substring(0,100)}</div>
-      </div>`;
+    if(!_codexData){el.innerHTML='<div class="codex-msg">Codex non charg\u00e9.</div>';return;}
+    var q=_reQ.toLowerCase().trim();
+    if(!q){el.innerHTML='<div class="codex-msg">\u2726 Tapez un nom pour chercher dans Sigil Saga.</div>';return;}
+    var filtered=_codexData.filter(function(e){return e.name.toLowerCase().includes(q)||e.category.toLowerCase().includes(q);}).slice(0,40);
+    if(!filtered.length){el.innerHTML='<div class="codex-msg">Aucun r\u00e9sultat.</div>';return;}
+    el.innerHTML=filtered.map(function(e){
+      var idx2=_codexData.indexOf(e);
+      var rc=e.rarity?(_IP_RARITY[e.rarity]||null):null;
+      var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+e.rarity+'</span>':'';
+      return'<div class="inv-item" onclick="showCodexItem('+idx2+')">'+
+        '<button class="inv-item-add" onclick="event.stopPropagation();reAddCodexItem('+idx2+')" title="Ajouter au sac">+</button>'+
+        '<div class="inv-item-n">'+e.name+rBadge+'</div>'+
+        '<div class="inv-item-cat codex-badge">\u2726 '+(e.item_type||e.category||'Codex')+'</div>'+
+        '<div class="inv-item-d">'+(e.desc||'').substring(0,100)+'</div>'+
+      '</div>';
     }).join('');
     return;
   }
-  const q=_reQ.toLowerCase().trim();
-  const filtered=ITEMS.filter(it=>!q||it.n.toLowerCase().includes(q)||it.cat.toLowerCase().includes(q)).slice(0,80);
-  el.innerHTML=filtered.length?filtered.map(it=>{
-    const rc=it.rarity?(_IP_RARITY[it.rarity]||null):null;
-    const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:${rc.badge};color:${rc.badgeTxt};padding:1px 4px;margin-left:4px;">${it.rarity}</span>`:'';
-    return`<div class="inv-item">
-      <button class="inv-item-add" onclick="reAddItem('${it.id}')" title="Ajouter au sac">+</button>
-      <div class="inv-item-n" onclick="showItemPanel({id:'${it.id}',name:'${it.n.replace(/'/g,"\\'")}',type:'${it.cat}',rarity:'${it.rarity||''}',description:'${it.d.replace(/'/g,"\\'").substring(0,300)}',weight:${it.w},cost:'${it.c}'},false)">${it.n}${rBadge}</div>
-      <div class="inv-item-cat">${it.cat}</div>
-      <div class="inv-item-d">${it.d}</div>
-      <div class="inv-item-meta"><span class="inv-item-cost">⚙ ${it.c}</span><span class="inv-item-w">${it.w>0?it.w+' lb':'—'}</span></div>
-    </div>`;
+  var q=_reQ.toLowerCase().trim();
+  var filtered=ITEMS.filter(function(it){return !q||it.n.toLowerCase().includes(q)||it.cat.toLowerCase().includes(q);}).slice(0,80);
+  el.innerHTML=filtered.length?filtered.map(function(it){
+    var rc=it.rarity?(_IP_RARITY[it.rarity]||null):null;
+    var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+it.rarity+'</span>':'';
+    return'<div class="inv-item">'+
+      '<button class="inv-item-add" onclick="reAddItem(\''+it.id+'\')" title="Ajouter au sac">+</button>'+
+      '<div class="inv-item-n">'+it.n+rBadge+'</div>'+
+      '<div class="inv-item-cat">'+it.cat+'</div>'+
+      '<div class="inv-item-d">'+it.d+'</div>'+
+      '<div class="inv-item-meta"><span class="inv-item-cost">\u2699 '+it.c+'</span><span class="inv-item-w">'+(it.w>0?it.w+' lb':'&#8212;')+'</span></div>'+
+    '</div>';
   }).join(''):'<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#6A5A3A;padding:.5rem;">Tapez pour chercher...</div>';
 }
 
 function reAddItem(id){
   if(!_reChar)return;
-  const it=ITEMS.find(x=>x.id===id);if(!it)return;
-  const ex=_reChar.bag.find(b=>b.id===id);
+  var it=ITEMS.find(function(x){return x.id===id;});if(!it)return;
+  var ex=_reChar.bag.find(function(b){return b.id===id;});
   if(ex)ex.qty++;
   else _reChar.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null});
-  renderReSheet();
+  renderReBag();
 }
 function reAddCodexItem(idx){
   if(!_reChar||!_codexData)return;
-  const e=_codexData[idx];if(!e)return;
-  const bagId='codex-'+(e.id||e.name).replace(/['"\\]/g,'_');
-  const ex=_reChar.bag.find(b=>b.id===bagId);
+  var e=_codexData[idx];if(!e)return;
+  var bagId='codex-'+(e.id||e.name).replace(/['"\\]/g,'_');
+  var ex=_reChar.bag.find(function(b){return b.id===bagId;});
   if(ex)ex.qty++;
   else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',rarity:e.rarity||null});
-  renderReSheet();
+  renderReBag();
 }
 
 function renderRoster(){
