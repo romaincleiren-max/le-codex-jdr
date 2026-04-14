@@ -647,6 +647,12 @@ body.printing #ps-print{display:block!important;}
       <div style="font-family:'Cinzel',serif;font-size:10px;color:#8A7060;" id="rsub">—</div>
       <div class="rsec">SORTS PRÉPARÉS/CONNUS</div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6AAAE8;" id="rspells">—</div>
+      <!-- EQUIPMENT PANEL — shown on steps 4 & 6 -->
+      <div id="equip-rp-sec" style="display:none;margin-top:.4rem;">
+        <div class="rsec" style="margin-top:.4rem;">ÉQUIPEMENT</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8A7050;margin-bottom:.5rem;font-style:italic;">Glissez un objet du sac ▶ slot</div>
+        <div id="equip-slots-container" style="display:flex;flex-direction:column;gap:.3rem;"></div>
+      </div>
     </div>
   </div>
 </div>
@@ -1306,7 +1312,7 @@ function loadChar(e){
   };r.readAsText(f);
 }
 function go(n){
-  if((CUR===4||CUR===6) && n!==4 && n!==6) restoreRp();
+  if(n!==4 && n!==6) hideEquipPanel();
   CUR=n;
   // Show/hide scenario bar vs normal nav
   const scnBar=$('scn-bar');
@@ -2661,9 +2667,8 @@ function endScenario(){
 // ══════════════════════════════════════════════════
 // EQUIPMENT PANEL (step 4 — right panel override)
 // ══════════════════════════════════════════════════
-let _rpOriginalHTML = '';
-function saveRpHTML(){ if(!_rpOriginalHTML){ const rp=$('rp'); if(rp) _rpOriginalHTML=rp.innerHTML; } }
-function restoreRp(){ const rp=$('rp'); if(rp && _rpOriginalHTML) rp.innerHTML=_rpOriginalHTML; }
+function saveRpHTML(){}
+function restoreRp(){ hideEquipPanel(); }
 
 const EQUIP_SLOTS=[
   {id:'head',    label:'Tête',         icon:'⛑'},
@@ -2705,42 +2710,37 @@ function slotUnequip(slotId){
 }
 
 function renderEquipPanel(){
-  saveRpHTML();
-  const rp=$('rp'); if(!rp) return;
   if(!C.equipped) C.equipped={};
+  const sec=$('equip-rp-sec');
+  const container=$('equip-slots-container');
+  if(!sec||!container) return;
   const eq=C.equipped;
-  rp.innerHTML=`
-    <div class="rsec">ÉQUIPEMENT</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8A7050;margin-bottom:.6rem;font-style:italic;">Glissez un objet du sac ▶ emplacement</div>
-    <div style="display:flex;flex-direction:column;gap:.3rem;">
-      ${EQUIP_SLOTS.map(slot=>{
-        const item=eq[slot.id];
-        const rc=item?.rarity?_ERC[item.rarity]:null;
-        const borderCol=item?(rc||'var(--gold-d)'):'#4A3820';
-        const bgCol=item?(rc?rc+'22':'#1E1408'):'#130D06';
-        const nmCol=item?(rc||'var(--parch)'):'#6A5A3A';
-        return`<div id="equip-slot-${slot.id}" class="equip-slot${item?' filled':''}"
-          ondragover="slotDragOver(event,'${slot.id}')"
-          ondragleave="this.classList.remove('drag-over')"
-          ondrop="slotDrop(event,'${slot.id}')"
-          style="border-color:${borderCol};${item?'border-style:solid;':''}background:${bgCol};"
-          title="${item?item.n:slot.label+' — glissez un objet ici'}">
-          <span class="equip-slot-icon">${slot.icon}</span>
-          <div style="flex:1;min-width:0;overflow:hidden;">
-            <span class="equip-slot-lbl">${slot.label}</span>
-            <div class="equip-slot-nm" style="color:${nmCol};">${item?item.n:'vide'}</div>
-            ${item?.rarity?`<div class="equip-slot-rar" style="color:${rc||'var(--gold-d)'};">${item.rarity}</div>`:''}
-          </div>
-          ${item?`<button class="equip-slot-del" onclick="slotUnequip('${slot.id}')" title="Déséquiper">✕</button>`:''}
-        </div>`;
-      }).join('')}
-    </div>
-    <div style="margin-top:.8rem;padding-top:.6rem;border-top:1px solid #3A2810;display:grid;grid-template-columns:1fr 1fr;gap:.3rem;">
-      <div class="rcs"><span class="rcsl">PV MAX</span><div class="rcsv">${calcHP()||'—'}</div></div>
-      <div class="rcs"><span class="rcsl">CA</span><div class="rcsv">${calcCA()}</div></div>
-      <div class="rcs"><span class="rcsl">INIT</span><div class="rcsv">${mods(effStat('dex'))}</div></div>
-      <div class="rcs"><span class="rcsl">PERC. PASS.</span><div class="rcsv">${calcPassivePerc()}</div></div>
-    </div>`;
+  container.innerHTML=EQUIP_SLOTS.map(function(slot){
+    var item=eq[slot.id];
+    var rc=item&&item.rarity?_ERC[item.rarity]:null;
+    var borderCol=item?(rc||'#8B6914'):'#4A3820';
+    var bgCol=item?(rc?rc+'22':'#1E1408'):'#130D06';
+    var nmCol=item?(rc||'#C9A84C'):'#6A5A3A';
+    return '<div id="equip-slot-'+slot.id+'" class="equip-slot'+(item?' filled':'')+'"'+
+      ' ondragover="slotDragOver(event,\''+slot.id+'\')"'+
+      ' ondragleave="this.classList.remove(\'drag-over\')"'+
+      ' ondrop="slotDrop(event,\''+slot.id+'\')"'+
+      ' style="border-color:'+borderCol+';'+(item?'border-style:solid;':'')+'background:'+bgCol+';"'+
+      ' title="'+(item?item.n:slot.label+' \u2014 glissez un objet ici')+'">'+
+      '<span class="equip-slot-icon">'+slot.icon+'</span>'+
+      '<div style="flex:1;min-width:0;overflow:hidden;">'+
+        '<span class="equip-slot-lbl">'+slot.label+'</span>'+
+        '<div class="equip-slot-nm" style="color:'+nmCol+';">'+(item?item.n:'vide')+'</div>'+
+        (item&&item.rarity?'<div class="equip-slot-rar" style="color:'+(rc||'#8B6914')+';">'+item.rarity+'</div>':'')+
+      '</div>'+
+      (item?'<button class="equip-slot-del" onclick="slotUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
+    '</div>';
+  }).join('');
+  sec.style.display='block';
+}
+function hideEquipPanel(){
+  var sec=$('equip-rp-sec');
+  if(sec) sec.style.display='none';
 }
 
 // ─── RIGHT PANEL ────────────────────────────────────
