@@ -463,8 +463,19 @@ body.printing #ps-print{display:block!important;}
 #re-doll-inner{width:100%;max-width:680px;}
 .doll-grid{display:grid;grid-template-columns:160px 1fr 160px;grid-template-rows:72px 72px 72px 72px 72px 72px;gap:10px;margin-top:.7rem;}
 .re-doll-slot{display:flex;align-items:center;gap:9px;padding:.5rem .7rem;border:1px solid #3A2810;background:#130D06;border-radius:6px;cursor:default;transition:.12s;overflow:hidden;min-height:68px;border-left-width:4px;}
-.re-doll-slot:hover,.re-doll-slot.drag-over{border-color:var(--gold) !important;background:rgba(201,168,76,.12) !important;}
-.re-doll-slot.equipped{background:#1E1408;}
+.re-doll-slot:hover{border-color:var(--gold-d) !important;background:rgba(201,168,76,.07) !important;}
+.re-doll-slot.drop-ready{border-color:rgba(201,168,76,.5)!important;background:rgba(201,168,76,.06)!important;animation:re-pulse .9s ease-in-out infinite alternate;}
+@keyframes re-pulse{from{box-shadow:none;}to{box-shadow:inset 0 0 8px rgba(201,168,76,.15);}}
+.re-doll-slot.drop-ready.drag-over{border-color:var(--gold)!important;background:rgba(201,168,76,.2)!important;animation:none;box-shadow:0 0 14px rgba(201,168,76,.35);}
+.re-doll-slot.equipped{background:#1C1408;}
+.re-equipped-badge{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4A9A5A;flex-shrink:0;margin-left:2px;}
+.re-bag-filter{display:flex;gap:.2rem;padding:.3rem .5rem;background:#0D0905;border-bottom:1px solid #1A1208;flex-shrink:0;flex-wrap:wrap;}
+.re-bag-cat{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.07em;padding:.2em .55em;border:1px solid #2A1808;color:#5A4A2A;cursor:pointer;border-radius:2px;transition:.1s;background:none;}
+.re-bag-cat.active,.re-bag-cat:hover{border-color:var(--gold-d);color:var(--gold-d);}
+#re-stats-bar{display:flex;justify-content:center;gap:2rem;padding:.65rem;background:#0F0A06;border:1px solid #2A1808;border-radius:5px;margin-top:.9rem;}
+.re-stat-pill{text-align:center;}
+.re-stat-pill-v{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--parch);display:block;}
+.re-stat-pill-l{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:var(--gold-d);display:block;text-transform:uppercase;margin-top:1px;}
 .re-doll-slot-icon{font-size:24px;width:28px;text-align:center;flex-shrink:0;line-height:1;}
 .re-doll-slot-info{flex:1;min-width:0;}
 .re-doll-slot-lbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.4;}
@@ -591,6 +602,7 @@ body.printing #ps-print{display:block!important;}
     <!-- LEFT: Bag -->
     <div id="re-bag-col">
       <div class="re-col-t">🎒 Sac d'aventurier</div>
+      <div class="re-bag-filter" id="re-bag-filter"></div>
       <div id="re-bag-list2"></div>
       <div class="re-col-t">Statistiques</div>
       <div id="re-stats-mini"></div>
@@ -2903,6 +2915,7 @@ let _reChar = null;
 let _reSrc = 'srd';
 let _reQ = '';
 let _reBagDragItem = null;
+let _reBagCat = 'Tous';
 
 const RE_SLOTS_LEFT = [
   {id:'amulet',  label:'Amulette',   icon:'📿'},
@@ -2955,18 +2968,36 @@ function renderReSheet(){
 
 function renderReBag(){
   var r=_reChar; if(!r)return;
+  // Filter bar
+  var fEl=$('re-bag-filter');
+  if(fEl){
+    var cats=['Tous'];
+    (r.bag||[]).forEach(function(e){if(e.cat&&!cats.includes(e.cat))cats.push(e.cat);});
+    fEl.innerHTML=cats.map(function(c){
+      return '<button class="re-bag-cat'+(c===_reBagCat?' active':'')+'" onclick="_reBagCat=\''+c.replace(/'/g,'\\\'')+ '\';renderReBag()">'+c+'</button>';
+    }).join('');
+  }
   var el=$('re-bag-list2'); if(!el)return;
   if(!r.bag||!r.bag.length){
     el.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#4A3A2A;font-style:italic;padding:.5rem .2rem;">Sac vide.</div>';
     return;
   }
-  el.innerHTML=r.bag.map(function(e,i){
+  var equippedIds=Object.values(r.equipped||{}).map(function(e){return e.id;});
+  var visible=r.bag.filter(function(e){return _reBagCat==='Tous'||e.cat===_reBagCat;});
+  if(!visible.length){
+    el.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#4A3A2A;font-style:italic;padding:.5rem .2rem;">Aucun objet dans cette catégorie.</div>';
+    return;
+  }
+  el.innerHTML=visible.map(function(e){
+    var i=r.bag.indexOf(e);
     var rc=e.rarity?_RE_RC[e.rarity]:null;
     var rBadge=rc?'<span class="re-rarity" style="background:'+rc+'33;color:'+rc+';border:1px solid '+rc+'55;">'+e.rarity+'</span>':'';
     var qty=e.qty>1?' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);">\xd7'+e.qty+'</span>':'';
-    return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')">'+
+    var eqBadge=equippedIds.includes(e.id)?'<span class="re-equipped-badge" title="Équipé">✓</span>':'';
+    return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')" title="Glissez vers un emplacement">'+
       '<span style="font-size:10px;color:#5A4A3A;cursor:grab;">&#x2837;</span>'+
       '<div style="flex:1;font-family:\'IM Fell English\',serif;font-size:11px;color:var(--parch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+e.n+rBadge+qty+'</div>'+
+      eqBadge+
       '<button class="re-bag-del" onclick="reBagRemove('+i+')" title="Retirer un">&#8722;</button>'+
       '<button class="re-bag-del" onclick="reBagDelete('+i+')" title="Tout retirer">\u2715</button>'+
     '</div>';
@@ -3028,27 +3059,53 @@ function renderReDoll(){
   var leftSlots=RE_SLOTS_LEFT.map(function(s,i){return reSlotHtml(s,1,i+2);}).join('');
   var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
   var headSlot=reSlotHtml(RE_HEAD,2,1);
+  // Stats dynamiques depuis l'équipement
+  var eqVals=Object.values(r.equipped||{});
+  var hasArmor=eqVals.find(function(e){return e.cat&&e.cat.toLowerCase().includes('armure');});
+  var baseCA=10+Math.floor(((r.stats&&r.stats.dex?r.stats.dex:10)-10)/2);
+  var dispCA=r.ac||baseCA;
+  var dispHP=r.maxHp||r.hp||'?';
+  var dispInit=(r.stats&&r.stats.dex?Math.floor((r.stats.dex-10)/2):0);
+  var dispSpd=r.race&&r.race.speed?r.race.speed:30;
+  var statsBar=
+    '<div id="re-stats-bar">'+
+      '<div class="re-stat-pill"><span class="re-stat-pill-v">\u2764\ufe0f '+dispHP+'</span><span class="re-stat-pill-l">Points de vie</span></div>'+
+      '<div class="re-stat-pill"><span class="re-stat-pill-v">\uD83D\uDEE1 '+dispCA+'</span><span class="re-stat-pill-l">Classe d\'armure</span></div>'+
+      '<div class="re-stat-pill"><span class="re-stat-pill-v">'+(dispInit>=0?'+':'')+dispInit+'</span><span class="re-stat-pill-l">Initiative</span></div>'+
+      '<div class="re-stat-pill"><span class="re-stat-pill-v">'+dispSpd+' ft</span><span class="re-stat-pill-l">Vitesse</span></div>'+
+    '</div>';
   el.innerHTML=
-    '<div style="text-align:center;padding:.4rem 0 .1rem;font-family:\'Cinzel Decorative\',serif;font-size:18px;color:var(--gold);">'+r.name+'</div>'+
+    '<div style="text-align:center;padding:.4rem 0 .1rem;font-family:\'Cinzel Decorative\',serif;font-size:20px;color:var(--gold);">'+r.name+'</div>'+
     '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:.8rem;">'+(r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' \u00b7 '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' \u00b7 NIV.'+( r.level||1)+'</div>'+
     '<div class="doll-grid">'+
       headSlot+
       leftSlots+
       '<div style="grid-column:2;grid-row:2/7;display:flex;align-items:center;justify-content:center;">'+
-        '<div style="width:190px;height:240px;border-radius:50%;overflow:hidden;border:4px solid var(--gold-d);background:linear-gradient(160deg,#2A1A08,#110C06);box-shadow:0 0 36px rgba(201,168,76,.25),inset 0 0 24px rgba(0,0,0,.6);">'+
+        '<div style="width:190px;height:260px;border-radius:50%/45%;overflow:hidden;border:4px solid var(--gold-d);background:radial-gradient(ellipse at 50% 40%,#3A2010,#0D0805);box-shadow:0 0 40px rgba(201,168,76,.3),inset 0 0 30px rgba(0,0,0,.7);">'+
           portHtml+
         '</div>'+
       '</div>'+
       rightSlots+
     '</div>'+
-    '<div style="text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#3A2A1A;margin-top:.7rem;letter-spacing:.05em;">'+
-      'Glissez un objet du sac \u25b6 emplacement &nbsp;\u00b7&nbsp; Clic \u2715 pour d\u00e9s\u00e9quiper'+
-    '</div>';
+    '<div style="text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#3A2A1A;margin-top:.5rem;letter-spacing:.04em;">'+
+      '\u2637 Glissez du sac ou du catalogue \u25b6 emplacement &nbsp;\u00b7&nbsp; \u2715 d\u00e9s\u00e9quiper'+
+    '</div>'+
+    statsBar;
 }
 
 function reBagDragStart(e,idx){
   _reBagDragItem=_reChar&&_reChar.bag[idx]?Object.assign({},_reChar.bag[idx]):null;
-  if(_reBagDragItem) e.dataTransfer.effectAllowed='copy';
+  if(_reBagDragItem){
+    e.dataTransfer.effectAllowed='copy';
+    setTimeout(function(){document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.add('drop-ready');});},0);
+  }
+}
+function reCatDragStart(e,id){
+  var it=ITEMS.find(function(x){return x.id===id;});
+  if(!it)return;
+  _reBagDragItem={id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null};
+  e.dataTransfer.effectAllowed='copy';
+  setTimeout(function(){document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.add('drop-ready');});},0);
 }
 function reDollDrop(e,slotId){
   e.preventDefault();
@@ -3120,7 +3177,7 @@ function renderReInv(){
     var rc=it.rarity?(_IP_RARITY[it.rarity]||null):null;
     var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+it.rarity+'</span>':'';
     var safeN=it.n.replace(/'/g,"\\'"); var safeD=it.d.replace(/'/g,"\\'").substring(0,300);
-    return'<div class="inv-item" onclick="showItemPanel({id:\''+it.id+'\',name:\''+safeN+'\',type:\''+it.cat+'\',rarity:\''+( it.rarity||'')+'\',description:\''+safeD+'\',weight:'+it.w+',cost:\''+it.c+'\'},true)">'+
+    return'<div class="inv-item" draggable="true" ondragstart="reCatDragStart(event,\''+it.id+'\')" onclick="showItemPanel({id:\''+it.id+'\',name:\''+safeN+'\',type:\''+it.cat+'\',rarity:\''+( it.rarity||'')+'\',description:\''+safeD+'\',weight:'+it.w+',cost:\''+it.c+'\'},true)">'+
       '<button class="inv-item-add" onclick="event.stopPropagation();reAddItem(\''+it.id+'\')" title="Ajouter au sac">+</button>'+
       '<div class="inv-item-n">'+it.n+rBadge+'</div>'+
       '<div class="inv-item-cat">'+it.cat+'</div>'+
@@ -3183,6 +3240,11 @@ function renderRoster(){
   }).join('');
 }
 
+// Nettoyage drag doll
+document.addEventListener('dragend',function(){
+  document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.remove('drop-ready','drag-over');});
+  _reBagDragItem=null;
+});
 // DRAG AND DROP
 document.addEventListener('DOMContentLoaded',()=>{
   // Clic sur fond sombre de l'overlay fiche → fermer
