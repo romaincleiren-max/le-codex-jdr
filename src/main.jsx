@@ -2547,25 +2547,15 @@ export default function App() {
                   )}
                 </button>
 
-                {/* Bouton profil joueur */}
-                {isLoggedIn && !isAuthenticated && (
+                {/* Bouton profil / connexion — visible si pas admin */}
+                {!isAuthenticated && (
                   <a
                     href="/player"
                     className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-amber-100 font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg"
                     style={{ textDecoration: 'none' }}>
                     <span>⚔️</span>
-                    <span className="hidden lg:inline">Mon profil</span>
+                    <span className="hidden lg:inline">{isLoggedIn ? 'Mon profil' : 'Se connecter'}</span>
                   </a>
-                )}
-
-                {/* Bouton connexion (visiteur non connecté) */}
-                {!isLoggedIn && (
-                  <button
-                    onClick={() => navigate('/login')}
-                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-amber-300 font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 border border-amber-700/40 hover:border-amber-500/60">
-                    <Lock size={16} />
-                    <span className="hidden lg:inline">Se connecter</span>
-                  </button>
                 )}
 
                 {/* Bouton Déconnexion admin - caché sur mobile */}
