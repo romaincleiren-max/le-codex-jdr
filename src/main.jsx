@@ -2549,12 +2549,13 @@ export default function App() {
 
                 {/* Bouton profil joueur */}
                 {isLoggedIn && !isAuthenticated && (
-                  <button
-                    onClick={() => navigate('/player')}
-                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-amber-100 font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                  <a
+                    href="/player"
+                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-amber-100 font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    style={{ textDecoration: 'none' }}>
                     <span>⚔️</span>
                     <span className="hidden lg:inline">Mon profil</span>
-                  </button>
+                  </a>
                 )}
 
                 {/* Bouton connexion (visiteur non connecté) */}
