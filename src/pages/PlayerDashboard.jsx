@@ -9,11 +9,28 @@ import { supabase } from '../lib/supabase';
 import { getMyCharacters } from '../services/charactersService';
 import LevelUpOverlay from '../components/LevelUpOverlay';
 
-const STATUS_LABEL = {
-  pending:  { label: 'En attente', color: 'text-amber-400 border-amber-600 bg-amber-900/30' },
-  approved: { label: 'Approuvé',   color: 'text-emerald-400 border-emerald-600 bg-emerald-900/30' },
-  rejected: { label: 'Refusé',     color: 'text-red-400 border-red-600 bg-red-900/30' },
+const STATUS_META = {
+  pending:  {
+    label: 'En attente',
+    hint:  'En attente de validation par le Maître de Jeu',
+    color: 'text-amber-400 border-amber-600/60 bg-amber-900/20',
+  },
+  approved: {
+    label: 'Approuvé',
+    hint:  'Cliquez pour voir la fiche',
+    color: 'text-emerald-400 border-emerald-600/60 bg-emerald-900/20',
+  },
+  rejected: {
+    label: 'Refusé',
+    hint:  'Contactez votre MJ pour plus d\'informations',
+    color: 'text-red-400 border-red-600/60 bg-red-900/20',
+  },
 };
+
+function getDisplayName(email) {
+  if (!email) return 'Aventurier';
+  return email.split('@')[0];
+}
 
 export default function PlayerDashboard() {
   const navigate = useNavigate();
@@ -23,8 +40,7 @@ export default function PlayerDashboard() {
   const [userEmail, setUserEmail] = useState('');
   const [userId, setUserId] = useState(null);
 
-  // Level-up overlay
-  const [levelUpChar, setLevelUpChar] = useState(null); // { id, char_name, level }
+  const [levelUpChar, setLevelUpChar] = useState(null);
   const prevPendingIds = useRef(new Set());
 
   useEffect(() => {
@@ -35,7 +51,6 @@ export default function PlayerDashboard() {
     loadChars();
   }, []);
 
-  // Supabase Realtime — écoute les changements sur les personnages du joueur
   useEffect(() => {
     if (!userId) return;
 
@@ -48,13 +63,9 @@ export default function PlayerDashboard() {
         filter: `user_id=eq.${userId}`,
       }, (payload) => {
         const updated = payload.new;
-
-        // Mettre à jour la liste locale
         setCharacters(prev =>
           prev.map(c => c.id === updated.id ? { ...c, ...updated } : c)
         );
-
-        // Déclencher l'overlay si level_up_pending vient de passer à true
         if (updated.level_up_pending && !prevPendingIds.current.has(updated.id)) {
           prevPendingIds.current.add(updated.id);
           setLevelUpChar({
@@ -72,7 +83,6 @@ export default function PlayerDashboard() {
     return () => { supabase.removeChannel(channel); };
   }, [userId]);
 
-  // Initialiser les IDs déjà en pending au chargement (pas d'overlay pour l'état initial)
   useEffect(() => {
     characters.forEach(c => {
       if (c.level_up_pending) prevPendingIds.current.add(c.id);
@@ -103,10 +113,9 @@ export default function PlayerDashboard() {
   };
 
   return (
-    <div className="min-h-screen px-4 py-12"
+    <div className="min-h-screen px-4 py-10"
       style={{ background: 'linear-gradient(135deg, #080604 0%, #0F0A06 60%, #160E08 100%)' }}>
 
-      {/* Overlay level-up */}
       {levelUpChar && (
         <LevelUpOverlay
           charName={levelUpChar.char_name}
@@ -115,113 +124,135 @@ export default function PlayerDashboard() {
         />
       )}
 
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-2xl mx-auto">
 
         {/* Header */}
-        <div className="flex items-start justify-between mb-10">
-          <div>
-            <h1 className="text-4xl font-black text-amber-300 mb-1"
-              style={{ fontFamily: 'Cinzel Decorative, Cinzel, serif' }}>
-              ✦ Mes Héros
-            </h1>
-            <p className="text-slate-500 text-sm">{userEmail}</p>
+        <div className="flex items-center justify-between mb-8">
+          {/* Retour + titre */}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => navigate('/')}
+              className="text-slate-500 hover:text-amber-400 text-sm transition-colors flex items-center gap-1.5">
+              ← Accueil
+            </button>
+            <div className="w-px h-5 bg-slate-700" />
+            <div>
+              <h1 className="text-2xl font-black text-amber-300 leading-none"
+                style={{ fontFamily: 'Cinzel Decorative, Cinzel, serif' }}>
+                Mes Héros
+              </h1>
+              <p className="text-slate-500 text-xs mt-0.5">{getDisplayName(userEmail)}</p>
+            </div>
           </div>
-          <button onClick={handleLogout}
+
+          <button
+            onClick={handleLogout}
             className="text-xs text-slate-500 hover:text-slate-300 border border-slate-700 hover:border-slate-500 px-3 py-1.5 rounded-lg transition-all">
             Déconnexion
           </button>
         </div>
 
-        {/* Erreur */}
         {error && (
-          <div className="bg-red-900/30 border border-red-600 rounded-xl p-4 mb-6 text-red-300 text-sm">
+          <div className="bg-red-900/20 border border-red-600/60 rounded-xl p-4 mb-6 text-red-300 text-sm">
             {error}
           </div>
         )}
 
-        {/* Liste des personnages */}
         {loading ? (
           <div className="text-center py-20 text-slate-500">Chargement...</div>
+
         ) : characters.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-6xl mb-4">⚔️</div>
-            <p className="text-slate-400 mb-6">Aucun personnage pour l'instant.</p>
+            <div className="text-5xl mb-4">⚔️</div>
+            <p className="text-slate-400 mb-2 font-medium">Aucun personnage pour l'instant.</p>
+            <p className="text-slate-600 text-sm mb-8">Créez votre héros dans la Forge pour commencer l'aventure.</p>
             <button
               onClick={() => navigate('/forge')}
-              className="px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold transition-all">
-              ✦ Créer mon premier héros
+              className="px-6 py-3 rounded-xl font-bold transition-all hover:scale-[1.02]"
+              style={{ background: 'linear-gradient(135deg, #b45309, #d97706)', color: '#fff' }}>
+              ✦ Forger mon premier héros
             </button>
           </div>
+
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {characters.map(char => {
-              const statusMeta = STATUS_LABEL[char.status] || STATUS_LABEL.pending;
+              const meta = STATUS_META[char.status] || STATUS_META.pending;
+              const isClickable = char.status === 'approved';
+
               return (
                 <div key={char.id}
-                  onClick={() => char.status === 'approved' && navigate(`/character/${char.id}`)}
-                  className={`bg-slate-900/80 border rounded-2xl p-5 flex items-center gap-5 transition-all
-                    ${char.level_up_pending
-                      ? 'border-yellow-500 bg-yellow-900/10 shadow-[0_0_20px_rgba(234,179,8,0.15)]'
-                      : char.status === 'approved'
-                        ? 'border-slate-700 hover:border-amber-600 cursor-pointer hover:bg-slate-800/80'
-                        : 'border-slate-700 opacity-70'
-                    }`}>
+                  onClick={() => isClickable && navigate(`/character/${char.id}`)}
+                  title={!isClickable ? meta.hint : ''}
+                  className={[
+                    'bg-slate-900/80 border rounded-2xl p-4 flex items-center gap-4 transition-all',
+                    char.level_up_pending
+                      ? 'border-yellow-500/70 bg-yellow-900/10 shadow-[0_0_20px_rgba(234,179,8,0.1)]'
+                      : isClickable
+                        ? 'border-slate-700 hover:border-amber-600/60 cursor-pointer hover:bg-slate-800/80'
+                        : 'border-slate-800 opacity-60',
+                  ].join(' ')}>
 
                   {/* Portrait */}
-                  <div className="flex-shrink-0 w-16 h-16 rounded-xl overflow-hidden border-2 border-slate-600 flex items-center justify-center bg-slate-800">
+                  <div className="flex-shrink-0 w-14 h-14 rounded-xl overflow-hidden border border-slate-700 flex items-center justify-center bg-slate-800">
                     {char.portrait_url
                       ? <img src={char.portrait_url} alt={char.char_name} className="w-full h-full object-cover" />
-                      : <span className="text-3xl">{char.portrait_emoji || '⚔️'}</span>
+                      : <span className="text-2xl">{char.portrait_emoji || '⚔️'}</span>
                     }
                   </div>
 
                   {/* Infos */}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <h2 className="text-lg font-bold text-amber-200 truncate"
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <h2 className="text-base font-bold text-amber-200 truncate"
                         style={{ fontFamily: 'Cinzel, serif' }}>
                         {char.char_name}
                       </h2>
                       {char.level_up_pending && (
-                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 border border-yellow-500 text-yellow-300 animate-pulse">
-                          ⬆ LEVEL UP !
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-yellow-500/20 border border-yellow-500/60 text-yellow-300 animate-pulse flex-shrink-0">
+                          ⬆ Niveau disponible
                         </span>
                       )}
                     </div>
-                    <p className="text-slate-400 text-sm">
-                      {char.race_name} · {char.class_name} · Niv. {char.level}
+                    <p className="text-slate-400 text-xs">
+                      {char.race_name} · {char.class_name} · Niv.&nbsp;{char.level}
                     </p>
-                    <div className="flex gap-3 mt-2 text-xs text-slate-500">
-                      <span>❤️ {char.current_hp}/{char.max_hp}</span>
-                      <span>🛡 CA {char.ac}</span>
-                    </div>
+                    {isClickable && (
+                      <div className="flex gap-3 mt-1.5 text-xs text-slate-500">
+                        <span>❤ {char.current_hp}/{char.max_hp} PV</span>
+                        <span>🛡 CA {char.ac}</span>
+                      </div>
+                    )}
+                    {!isClickable && !char.level_up_pending && (
+                      <p className="text-xs text-slate-600 mt-1">{meta.hint}</p>
+                    )}
                   </div>
 
-                  {/* Bouton level up ou statut */}
+                  {/* Action droite */}
                   {char.level_up_pending ? (
                     <button
                       onClick={e => { e.stopPropagation(); navigate(`/character/${char.id}/levelup`); }}
-                      className="flex-shrink-0 px-4 py-2 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black text-xs transition-all">
-                      ✦ Monter
+                      className="flex-shrink-0 px-3 py-2 rounded-xl font-black text-xs transition-all hover:scale-[1.04]"
+                      style={{ background: '#eab308', color: '#1c1917' }}>
+                      ⬆ Monter de niveau
                     </button>
                   ) : (
-                    <div className={`flex-shrink-0 text-xs font-bold px-3 py-1.5 rounded-full border ${statusMeta.color}`}>
-                      {statusMeta.label}
+                    <div className={`flex-shrink-0 text-xs font-semibold px-2.5 py-1 rounded-full border ${meta.color}`}>
+                      {meta.label}
                     </div>
                   )}
 
-                  {char.status === 'approved' && !char.level_up_pending && (
-                    <div className="flex-shrink-0 text-slate-600">→</div>
+                  {isClickable && !char.level_up_pending && (
+                    <span className="flex-shrink-0 text-slate-600 text-sm ml-1">›</span>
                   )}
                 </div>
               );
             })}
 
-            {/* Bouton créer un nouveau */}
             <button
               onClick={() => navigate('/forge')}
-              className="w-full py-4 rounded-2xl border-2 border-dashed border-slate-700 hover:border-amber-600 text-slate-500 hover:text-amber-400 font-bold transition-all text-sm">
-              + Créer un nouveau personnage
+              className="w-full py-4 rounded-2xl border-2 border-dashed border-slate-700 hover:border-amber-600/50 text-slate-500 hover:text-amber-400 font-medium transition-all text-sm">
+              + Forger un nouveau personnage
             </button>
           </div>
         )}

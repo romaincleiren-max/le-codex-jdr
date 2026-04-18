@@ -132,15 +132,25 @@ export default function CharacterSheetPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-12"
-      style={{ background: 'linear-gradient(135deg, #080604 0%, #0F0A06 60%, #160E08 100%)' }}>
+    <div className="min-h-screen px-4 py-10 transition-colors"
+      style={{ background: editing
+        ? 'linear-gradient(135deg, #0a0804 0%, #140e06 60%, #1c1409 100%)'
+        : 'linear-gradient(135deg, #080604 0%, #0F0A06 60%, #160E08 100%)'
+      }}>
       <div className="max-w-2xl mx-auto">
 
         {/* Navigation */}
-        <button onClick={() => navigate('/player')}
-          className="flex items-center gap-2 text-slate-500 hover:text-amber-400 text-sm mb-8 transition-colors">
-          ← Mes personnages
-        </button>
+        <div className="flex items-center justify-between mb-8">
+          <button onClick={() => navigate('/player')}
+            className="flex items-center gap-1.5 text-slate-500 hover:text-amber-400 text-sm transition-colors">
+            ← Mes personnages
+          </button>
+          {editing && (
+            <span className="text-xs text-amber-500/70 border border-amber-700/40 bg-amber-900/20 px-2.5 py-1 rounded-full">
+              ✏ Mode édition
+            </span>
+          )}
+        </div>
 
         {/* Bannière Level Up */}
         {char.level_up_pending && (
@@ -182,18 +192,19 @@ export default function CharacterSheetPage() {
             {editing ? (
               <div className="flex gap-2">
                 <button onClick={() => { setEditing(false); loadChar(); }}
-                  className="px-4 py-2 rounded-xl border border-slate-600 text-slate-400 hover:text-slate-200 text-sm transition-all">
+                  className="px-3 py-2 rounded-xl border border-slate-600 text-slate-400 hover:text-slate-200 text-sm transition-all">
                   Annuler
                 </button>
                 <button onClick={handleSave} disabled={saving}
-                  className="px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold text-sm transition-all disabled:opacity-50">
-                  {saving ? '...' : 'Sauvegarder'}
+                  className="px-4 py-2 rounded-xl text-white font-bold text-sm transition-all disabled:opacity-50 hover:scale-[1.02]"
+                  style={{ background: saving ? '#78350f' : 'linear-gradient(135deg, #b45309, #d97706)' }}>
+                  {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
                 </button>
               </div>
             ) : (
               <button onClick={() => setEditing(true)}
-                className="px-4 py-2 rounded-xl border border-amber-700 text-amber-400 hover:bg-amber-900/30 text-sm font-bold transition-all">
-                ✏️ Modifier
+                className="px-4 py-2 rounded-xl border border-amber-700/60 text-amber-400 hover:bg-amber-900/30 hover:border-amber-600 text-sm font-bold transition-all">
+                ✏ Modifier la fiche
               </button>
             )}
           </div>

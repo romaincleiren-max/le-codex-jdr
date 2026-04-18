@@ -88,7 +88,7 @@ export const getMyCharacters = async () => {
 
 export const updateCharacter = async (id, updates) => {
   const allowed = [
-    'char_name', 'race_name', 'level', 'portrait_url', 'portrait_emoji',
+    'char_name', 'race_name', 'portrait_url', 'portrait_emoji',
     'current_hp', 'max_hp', 'ac', 'sheet_data', 'notes',
   ];
   const clean = {};
