@@ -13,10 +13,15 @@ CREATE INDEX IF NOT EXISTS idx_characters_user_id ON public.characters(user_id);
 -- 2. Activer RLS si ce n'est pas déjà fait
 ALTER TABLE public.characters ENABLE ROW LEVEL SECURITY;
 
--- 3. Supprimer les anciennes politiques trop permissives si elles existent
+-- 3. Supprimer toutes les politiques existantes (idempotent)
 DROP POLICY IF EXISTS "Allow all for authenticated" ON public.characters;
 DROP POLICY IF EXISTS "Authenticated users can view characters" ON public.characters;
 DROP POLICY IF EXISTS "Authenticated users can update characters" ON public.characters;
+DROP POLICY IF EXISTS "characters_select" ON public.characters;
+DROP POLICY IF EXISTS "characters_insert" ON public.characters;
+DROP POLICY IF EXISTS "characters_update_player" ON public.characters;
+DROP POLICY IF EXISTS "characters_update_admin" ON public.characters;
+DROP POLICY IF EXISTS "characters_delete" ON public.characters;
 
 -- 4. Politique lecture :
 --    - Admin (dans admin_users) voit tout
