@@ -1,8 +1,13 @@
 // Service Stripe pour gérer les paiements
 import { loadStripe } from '@stripe/stripe-js';
 
-// Initialiser Stripe avec la clé publique
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY);
+// Initialiser Stripe — lazy pour éviter le crash si la clé est absente
+const getStripe = () => {
+  const key = import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY;
+  if (!key) return Promise.resolve(null);
+  return loadStripe(key);
+};
+const stripePromise = getStripe();
 
 /**
  * Créer une session de paiement Stripe Checkout
