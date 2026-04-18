@@ -12,6 +12,11 @@ import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { PlayerRoute } from './components/PlayerRoute';
+import PlayerDashboard from './pages/PlayerDashboard';
+import CharacterSheetPage from './pages/CharacterSheetPage';
+import LevelUpWizardPage from './pages/LevelUpWizardPage';
+import CharacterForgePage from './pages/CharacterForgePage';
 import { inject } from '@vercel/analytics';
 import { LanguageProvider, useLanguage } from './i18n';
 import { useSupabaseData } from './hooks/useSupabaseData';
@@ -4081,6 +4086,17 @@ function AppRouter() {
       <Route path="/test-supabase" element={<TestSupabase />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/payment/success" element={<PaymentSuccessPage />} />
+
+      {/* Routes joueurs */}
+      <Route path="/player" element={<PlayerRoute><PlayerDashboard /></PlayerRoute>} />
+      <Route path="/forge" element={<PlayerRoute><CharacterForgePage onBack={() => window.history.back()} /></PlayerRoute>} />
+      <Route path="/character/:id" element={<PlayerRoute><CharacterSheetPage /></PlayerRoute>} />
+      <Route path="/character/:id/levelup" element={<PlayerRoute><LevelUpWizardPage /></PlayerRoute>} />
+
+      {/* Route admin */}
+      <Route path="/admin" element={<ProtectedRoute><App initialPage="admin" /></ProtectedRoute>} />
+
+      {/* Site principal — catch-all */}
       <Route path="/*" element={<App />} />
     </Routes>
   );
