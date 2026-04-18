@@ -1,7 +1,9 @@
 /* Import des polices thématiques Google Fonts + Police générale élégante */
 @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=IM+Fell+English:ital@0;1&family=Orbitron:wght@400;500;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400&display=swap');
 
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 /* Animation shimmer pour les boutons actifs */
 @keyframes shimmer {
