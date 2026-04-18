@@ -395,24 +395,40 @@ body.printing #ps-print{display:block!important;}
 .import-ta{width:100%;background:#221A08;border:1px solid #3A2810;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.5rem;min-height:72px;resize:vertical;outline:none;}
 .import-ta:focus{border-color:var(--gold-d);}
 /* ── Roster ── */
-#roster-sec{width:100%;max-width:820px;margin-top:1.8rem;}
+#roster-sec{width:100%;max-width:960px;margin-top:1.8rem;}
 .roster-hdr{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.22em;color:var(--gold-d);text-transform:uppercase;margin-bottom:.9rem;display:flex;align-items:center;gap:.7rem;}
 .roster-hdr::after{content:'';flex:1;height:1px;background:#3A2810;}
-.roster-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:.7rem;}
-.rc{background:#130D06;border:1px solid #3A2810;padding:.85rem 1rem;cursor:default;transition:.12s;position:relative;}
-.rc:hover{border-color:#5A3810;}
-.rc-name{font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--gold);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rc-sub{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.14em;color:#8B6914;text-transform:uppercase;margin-bottom:.6rem;}
-.rc-meta{display:flex;gap:.8rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-bottom:.65rem;}
-.rc-meta span{display:flex;align-items:center;gap:.25rem;}
-.rc-scenarios{font-family:'IM Fell English',serif;font-size:10px;color:#5A4A2A;font-style:italic;margin-bottom:.6rem;min-height:14px;}
-.rc-btns{display:flex;gap:.4rem;flex-wrap:wrap;}
-.rc-btn{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.08em;padding:.3em .7em;border:1px solid #3A2810;color:#8B6914;background:none;cursor:pointer;transition:.1s;}
+/* Carousel */
+.roster-carousel{position:relative;padding:0 4px;}
+.roster-grid{display:flex;gap:.85rem;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:.7rem;scrollbar-width:thin;scrollbar-color:var(--gold-d) transparent;}
+.roster-grid::-webkit-scrollbar{height:3px;}
+.roster-grid::-webkit-scrollbar-track{background:transparent;}
+.roster-grid::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px;}
+.rc-nav{position:absolute;top:40%;transform:translateY(-50%);background:rgba(13,8,3,.9);border:1px solid var(--gold-d);color:var(--gold);font-size:18px;width:26px;height:52px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;transition:.15s;line-height:1;}
+.rc-nav:hover{background:rgba(201,168,76,.15);border-color:var(--gold);}
+.rc-nav.prev{left:-13px;}
+.rc-nav.next{right:-13px;}
+/* Tarot card */
+.rc{min-width:152px;width:152px;background:#130D06;border:1px solid #3A2810;cursor:default;transition:.12s;position:relative;scroll-snap-align:start;flex-shrink:0;display:flex;flex-direction:column;}
+.rc:hover{border-color:var(--gold-d);}
+/* Portrait 9:16 */
+.rc-portrait{width:100%;aspect-ratio:9/16;background:linear-gradient(180deg,#1E1408 0%,#0D0806 100%);overflow:hidden;flex-shrink:0;position:relative;}
+.rc-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:.2s;}
+.rc:hover .rc-portrait img{transform:scale(1.03);}
+.rc-portrait-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 25%,rgba(201,168,76,.08),transparent 65%);}
+.rc-portrait-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
+.rc-portrait-icon{font-size:52px;line-height:1;filter:drop-shadow(0 0 12px rgba(201,168,76,.3));}
+/* Card body */
+.rc-body{padding:.65rem .75rem .6rem;display:flex;flex-direction:column;flex:1;border-top:1px solid #2A1A08;}
+.rc-name{font-family:'Cinzel Decorative',serif;font-size:11px;color:var(--gold);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rc-sub{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#8B6914;text-transform:uppercase;margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rc-meta{display:flex;gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4A2A;margin-bottom:.4rem;}
+.rc-scenarios{font-family:'IM Fell English',serif;font-size:9px;color:#5A4A2A;font-style:italic;margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rc-btns{display:flex;gap:.3rem;margin-top:auto;}
+.rc-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.05em;padding:.3em .4em;border:1px solid #3A2810;color:#8B6914;background:none;cursor:pointer;transition:.1s;flex:1;text-align:center;white-space:nowrap;}
 .rc-btn:hover{border-color:var(--gold);color:var(--gold);}
 .rc-btn.primary{border-color:#5A3810;color:var(--gold);}
-.rc-btn.danger{color:#7A3A3A;border-color:#5A2A2A;}
-.rc-btn.danger:hover{color:var(--blood-l);border-color:var(--blood);}
-.rc-del{position:absolute;top:.4rem;right:.4rem;background:none;border:none;color:#4A2A2A;font-size:11px;cursor:pointer;padding:2px 4px;transition:.1s;}
+.rc-del{position:absolute;top:.3rem;right:.3rem;background:rgba(13,8,3,.8);border:1px solid #2A1010;color:#4A2A2A;font-size:10px;cursor:pointer;padding:2px 5px;transition:.1s;z-index:5;}
 .rc-del:hover{color:var(--blood-l);}
 /* Bag overlay (depuis roster) */
 #bag-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9000;display:none;align-items:flex-start;justify-content:center;padding-top:3rem;}
@@ -579,7 +595,13 @@ body.printing #ps-print{display:block!important;}
   </div>
   <div id="roster-sec">
     <div class="roster-hdr">✦ Mes Personnages</div>
-    <div class="roster-grid" id="roster-grid"><div style="font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;">Aucun personnage sauvegardé.</div></div>
+    <div class="roster-carousel">
+      <button class="rc-nav prev" id="rc-prev" onclick="rosterScroll(-1)">‹</button>
+      <div class="roster-grid" id="roster-grid" onscroll="updateRosterNav()">
+        <div style="font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Aucun personnage sauvegardé.</div>
+      </div>
+      <button class="rc-nav next" id="rc-next" onclick="rosterScroll(1)">›</button>
+    </div>
   </div>
 </div>
 
@@ -3253,7 +3275,8 @@ function renderRoster(){
   if(!g) return;
   const roster = getRoster();
   if(!roster.length){
-    g.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#5A4A2A;font-style:italic;">Aucun personnage sauvegardé.</div>';
+    g.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Aucun personnage sauvegardé.</div>';
+    updateRosterNav();
     return;
   }
   const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮'};
@@ -3265,22 +3288,41 @@ function renderRoster(){
     const lastScen = r.scenarioHistory?.length ? r.scenarioHistory[r.scenarioHistory.length-1].name : null;
     const histCount = r.scenarioHistory?.length||0;
     const bagCount = r.bag?.length||0;
+    const portrait = r.photo
+      ? `<img src="${r.photo}" alt="${r.name}">`
+      : `<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${clsIcon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${clsName}</span></div>`;
     return `<div class="rc">
       <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${r.id}')" title="Supprimer">✕</button>
-      <div class="rc-name">${r.name}</div>
-      <div class="rc-sub">${clsIcon} ${clsName} · ${raceName} · Niv ${r.level||1}</div>
-      <div class="rc-meta">
-        <span>🎒 ${bagCount} objet${bagCount!==1?'s':''}</span>
-        <span>📜 ${histCount} scénario${histCount!==1?'s':''}</span>
-      </div>
-      <div class="rc-scenarios">${lastScen?'Dernier : '+lastScen:histCount?'':'Aucun scénario joué'}</div>
-      <div class="rc-btns">
-        <button class="rc-btn primary" onclick="openRosterEquip('${r.id}')" style="border-color:var(--gold-d);color:var(--gold);">⚔ Fiche &amp; Équip</button>
-        <button class="rc-btn" onclick="openCharFromRoster('${r.id}')">Éditer</button>
-        <button class="rc-btn" onclick="openShareModal('${r.id}')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager avec l'Admin du Codex">📤 Partager</button>
+      <div class="rc-portrait">${portrait}</div>
+      <div class="rc-body">
+        <div class="rc-name">${r.name}</div>
+        <div class="rc-sub">${clsName} · ${raceName} · Niv ${r.level||1}</div>
+        <div class="rc-meta"><span>🎒 ${bagCount}</span><span>📜 ${histCount}</span></div>
+        <div class="rc-scenarios">${lastScen||(!histCount?'Aucun scénario':'')}</div>
+        <div class="rc-btns">
+          <button class="rc-btn primary" onclick="openRosterEquip('${r.id}')">⚔ Fiche</button>
+          <button class="rc-btn" onclick="openCharFromRoster('${r.id}')">Éditer</button>
+          <button class="rc-btn" onclick="openShareModal('${r.id}')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager">📤</button>
+        </div>
       </div>
     </div>`;
   }).join('');
+  updateRosterNav();
+}
+
+function updateRosterNav(){
+  const g=$('roster-grid'),prev=$('rc-prev'),next=$('rc-next');
+  if(!g||!prev||!next) return;
+  const scrollable = g.scrollWidth > g.clientWidth+4;
+  prev.style.display = scrollable && g.scrollLeft>8 ? 'flex':'none';
+  next.style.display = scrollable && g.scrollLeft < g.scrollWidth-g.clientWidth-8 ? 'flex':'none';
+}
+
+function rosterScroll(dir){
+  const g=$('roster-grid');
+  if(!g) return;
+  g.scrollBy({left:dir*168,behavior:'smooth'});
+  setTimeout(updateRosterNav,350);
 }
 
 // Nettoyage drag doll
