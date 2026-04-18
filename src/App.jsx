@@ -2,7 +2,11 @@ import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { LoginPage } from './pages/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
+import { PlayerRoute } from './components/PlayerRoute';
 import MainApp from './MainApp';
+import PlayerDashboard from './pages/PlayerDashboard';
+import CharacterSheetPage from './pages/CharacterSheetPage';
+import LevelUpWizardPage from './pages/LevelUpWizardPage';
 
 export default function App() {
   return (
@@ -10,6 +14,25 @@ export default function App() {
       <Routes>
         <Route path="/" element={<MainApp />} />
         <Route path="/login" element={<LoginPage />} />
+
+        {/* Routes joueurs */}
+        <Route path="/player" element={
+          <PlayerRoute>
+            <PlayerDashboard />
+          </PlayerRoute>
+        } />
+        <Route path="/character/:id" element={
+          <PlayerRoute>
+            <CharacterSheetPage />
+          </PlayerRoute>
+        } />
+        <Route path="/character/:id/levelup" element={
+          <PlayerRoute>
+            <LevelUpWizardPage />
+          </PlayerRoute>
+        } />
+
+        {/* Routes admin */}
         <Route path="/admin" element={
           <ProtectedRoute>
             <MainApp initialPage="admin" />

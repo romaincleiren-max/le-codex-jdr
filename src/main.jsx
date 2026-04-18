@@ -22,7 +22,7 @@ import { processCheckout } from './services/stripeService';
 import StatsDisplay from './components/StatsDisplay';
 import InitiativePage from './pages/InitiativePage';
 import ForgePage from './pages/ForgePage';
-import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters } from './services/charactersService';
+import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters, grantLevelUp, revokeLevelUp, getAllCharactersWithUsers } from './services/charactersService';
 import { validateSubmissionForm, validatePDFFile } from './utils/validation';
 import { submissionRateLimiter } from './utils/rateLimiter';
 import RateLimiter from './utils/rateLimiter';
@@ -1644,11 +1644,12 @@ const SubmissionsTab = () => {
 };
 
 // ── Composant Admin — Gestion des Personnages ─────────────────────────────────
-const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters }) => {
+const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters, grantLevelUp, revokeLevelUp, getAllCharactersWithUsers }) => {
   const [pending, setPending] = React.useState([]);
   const [approved, setApproved] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [tab, setTab] = React.useState('pending');
+  const [actionLoading, setActionLoading] = React.useState(null);
 
   const load = async () => {
     setLoading(true);
@@ -1665,25 +1666,35 @@ const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacte
 
   React.useEffect(() => { load(); }, []);
 
-  const handleApprove = async (id) => {
-    await approveCharacter(id);
-    load();
-  };
-  const handleReject = async (id) => {
-    await rejectCharacter(id);
-    load();
-  };
-  const handleDelete = async (id) => {
-    if (!confirm('Supprimer ce personnage définitivement ?')) return;
-    await deleteCharacter(id);
-    load();
-  };
-  const handleToggleSession = async (id, current) => {
-    await toggleSession(id, !current);
-    load();
+  const act = async (fn, ...args) => {
+    setActionLoading(args[0]);
+    try { await fn(...args); await load(); }
+    catch(e) { console.error(e); }
+    finally { setActionLoading(null); }
   };
 
-  const CharCard = ({ char, isPending }) => (
+  const handleApprove        = (id) => act(approveCharacter, id);
+  const handleReject         = (id) => act(rejectCharacter, id);
+  const handleToggleSession  = (id, current) => act(toggleSession, id, !current);
+  const handleGrantLevelUp   = (id) => act(grantLevelUp, id);
+  const handleRevokeLevelUp  = (id) => act(revokeLevelUp, id);
+  const handleDelete = async (id) => {
+    if (!confirm('Supprimer ce personnage définitivement ?')) return;
+    act(deleteCharacter, id);
+  };
+
+  // Grouper les approuvés par joueur
+  const byPlayer = React.useMemo(() => {
+    const map = {};
+    approved.forEach(c => {
+      const key = c.player_name || 'Inconnu';
+      if (!map[key]) map[key] = [];
+      map[key].push(c);
+    });
+    return Object.entries(map).sort(([a], [b]) => a.localeCompare(b));
+  }, [approved]);
+
+  const CharCardPending = ({ char }) => (
     <div className="bg-amber-50 border-2 border-amber-700 rounded-xl p-4 flex gap-4 items-start">
       <div className="w-14 h-14 rounded-full overflow-hidden flex-shrink-0 bg-amber-200 flex items-center justify-center text-2xl">
         {char.portrait_url
@@ -1697,30 +1708,81 @@ const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacte
           <span className="text-xs bg-slate-200 text-slate-700 px-2 py-0.5 rounded-full">{char.race_name}</span>
         </div>
         <p className="text-sm text-amber-700 mt-0.5">Joueur : <strong>{char.player_name}</strong></p>
-        {!isPending && (
-          <div className="mt-1">
-            <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${char.is_in_session ? 'bg-green-200 text-green-800' : 'bg-slate-200 text-slate-600'}`}>
-              {char.is_in_session ? '✅ En session' : '💤 Hors session'}
-            </span>
-          </div>
-        )}
       </div>
       <div className="flex flex-col gap-2 flex-shrink-0">
-        {isPending ? (
-          <>
-            <button onClick={() => handleApprove(char.id)} className="bg-green-700 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 font-bold text-sm">✅ Approuver</button>
-            <button onClick={() => handleReject(char.id)} className="bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-500 font-bold text-sm">❌ Rejeter</button>
-          </>
-        ) : (
-          <button onClick={() => handleToggleSession(char.id, char.is_in_session)}
-            className={`px-3 py-1.5 rounded-lg font-bold text-sm ${char.is_in_session ? 'bg-slate-600 hover:bg-slate-500 text-white' : 'bg-green-700 hover:bg-green-600 text-white'}`}>
-            {char.is_in_session ? '⬇️ Retirer' : '⬆️ Session'}
-          </button>
-        )}
-        <button onClick={() => handleDelete(char.id)} className="bg-red-700 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 font-bold text-sm">🗑️</button>
+        <button onClick={() => handleApprove(char.id)} disabled={actionLoading === char.id}
+          className="bg-green-700 text-white px-3 py-1.5 rounded-lg hover:bg-green-600 font-bold text-sm disabled:opacity-50">
+          ✅ Approuver
+        </button>
+        <button onClick={() => handleReject(char.id)} disabled={actionLoading === char.id}
+          className="bg-orange-600 text-white px-3 py-1.5 rounded-lg hover:bg-orange-500 font-bold text-sm disabled:opacity-50">
+          ❌ Rejeter
+        </button>
+        <button onClick={() => handleDelete(char.id)} disabled={actionLoading === char.id}
+          className="bg-red-700 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 font-bold text-sm disabled:opacity-50">
+          🗑️
+        </button>
       </div>
     </div>
   );
+
+  const CharCardApproved = ({ char }) => (
+    <div className={`bg-white border-2 rounded-xl p-4 flex gap-4 items-center transition-all ${
+      char.level_up_pending ? 'border-yellow-500 bg-yellow-50' : 'border-amber-200'
+    }`}>
+      <div className="w-12 h-12 rounded-full overflow-hidden flex-shrink-0 bg-amber-100 flex items-center justify-center text-xl">
+        {char.portrait_url
+          ? <img src={char.portrait_url} alt={char.char_name} className="w-full h-full object-cover" />
+          : char.portrait_emoji || '⚔️'}
+      </div>
+      <div className="flex-1 min-w-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="font-bold text-amber-900">{char.char_name}</span>
+          <span className="text-xs bg-amber-100 text-amber-800 px-2 py-0.5 rounded-full">{char.class_name} niv.{char.level}</span>
+          {char.level_up_pending && (
+            <span className="text-xs bg-yellow-200 text-yellow-800 px-2 py-0.5 rounded-full font-bold animate-pulse">
+              ⬆ Level up en cours…
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-3 mt-1 text-xs text-slate-500">
+          <span>❤️ {char.current_hp}/{char.max_hp}</span>
+          <span>🛡 CA {char.ac}</span>
+          <span className={char.is_in_session ? 'text-green-600 font-semibold' : ''}>
+            {char.is_in_session ? '✅ En session' : '💤 Hors session'}
+          </span>
+        </div>
+      </div>
+      <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
+        {/* Montée de niveau */}
+        {char.level_up_pending ? (
+          <button onClick={() => handleRevokeLevelUp(char.id)} disabled={actionLoading === char.id}
+            className="bg-yellow-600 hover:bg-yellow-500 text-white px-3 py-1.5 rounded-lg font-bold text-xs disabled:opacity-50">
+            ↩ Annuler lvl up
+          </button>
+        ) : (
+          <button onClick={() => handleGrantLevelUp(char.id)} disabled={actionLoading === char.id}
+            className="bg-yellow-500 hover:bg-yellow-400 text-slate-900 px-3 py-1.5 rounded-lg font-bold text-xs disabled:opacity-50">
+            ⬆ Level Up !
+          </button>
+        )}
+        {/* Session */}
+        <button onClick={() => handleToggleSession(char.id, char.is_in_session)} disabled={actionLoading === char.id}
+          className={`px-3 py-1.5 rounded-lg font-bold text-xs disabled:opacity-50 ${
+            char.is_in_session ? 'bg-slate-400 hover:bg-slate-300 text-white' : 'bg-green-700 hover:bg-green-600 text-white'
+          }`}>
+          {char.is_in_session ? '⬇ Retirer' : '⬆ Session'}
+        </button>
+        {/* Supprimer */}
+        <button onClick={() => handleDelete(char.id)} disabled={actionLoading === char.id}
+          className="bg-red-700 text-white px-3 py-1.5 rounded-lg hover:bg-red-600 font-bold text-xs disabled:opacity-50">
+          🗑
+        </button>
+      </div>
+    </div>
+  );
+
+  const levelUpCount = approved.filter(c => c.level_up_pending).length;
 
   return (
     <div>
@@ -1729,7 +1791,7 @@ const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacte
         <button onClick={load} className="bg-amber-700 text-white px-4 py-2 rounded-lg hover:bg-amber-600 font-bold text-sm">🔄 Rafraîchir</button>
       </div>
 
-      <div className="flex gap-3 mb-6">
+      <div className="flex gap-3 mb-6 flex-wrap">
         <button onClick={() => setTab('pending')}
           className={`px-5 py-2.5 rounded-xl font-bold transition-all ${tab === 'pending' ? 'bg-pink-700 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>
           📥 En attente {pending.length > 0 && <span className="ml-1 bg-white text-pink-700 rounded-full px-2 text-xs">{pending.length}</span>}
@@ -1737,6 +1799,7 @@ const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacte
         <button onClick={() => setTab('approved')}
           className={`px-5 py-2.5 rounded-xl font-bold transition-all ${tab === 'approved' ? 'bg-violet-700 text-white' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'}`}>
           ✅ Approuvés ({approved.length})
+          {levelUpCount > 0 && <span className="ml-1 bg-yellow-400 text-slate-900 rounded-full px-2 text-xs">{levelUpCount} lvl up</span>}
         </button>
       </div>
 
@@ -1745,11 +1808,28 @@ const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacte
       ) : tab === 'pending' ? (
         pending.length === 0
           ? <p className="text-center py-12 text-amber-700">Aucun personnage en attente d'approbation.</p>
-          : <div className="space-y-3">{pending.map(c => <CharCard key={c.id} char={c} isPending />)}</div>
+          : <div className="space-y-3">{pending.map(c => <CharCardPending key={c.id} char={c} />)}</div>
       ) : (
         approved.length === 0
           ? <p className="text-center py-12 text-amber-700">Aucun personnage approuvé.</p>
-          : <div className="space-y-3">{approved.map(c => <CharCard key={c.id} char={c} isPending={false} />)}</div>
+          : (
+            <div className="space-y-6">
+              {byPlayer.map(([playerName, chars]) => (
+                <div key={playerName}>
+                  <h3 className="text-sm font-bold text-amber-700 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <span className="w-6 h-6 rounded-full bg-amber-200 flex items-center justify-center text-amber-900 text-xs">
+                      {playerName[0]?.toUpperCase()}
+                    </span>
+                    {playerName}
+                    <span className="text-amber-400 font-normal">— {chars.length} perso{chars.length > 1 ? 's' : ''}</span>
+                  </h3>
+                  <div className="space-y-2 ml-8">
+                    {chars.map(c => <CharCardApproved key={c.id} char={c} />)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )
       )}
     </div>
   );
@@ -3455,6 +3535,9 @@ export default function App() {
                     toggleSession={toggleSession}
                     getPendingCharacters={getPendingCharacters}
                     getApprovedCharacters={getApprovedCharacters}
+                    grantLevelUp={grantLevelUp}
+                    revokeLevelUp={revokeLevelUp}
+                    getAllCharactersWithUsers={getAllCharactersWithUsers}
                   />
                 )}
               </div>

@@ -73,23 +73,15 @@ export const LoginPage = () => {
       
       console.log('👤 Résultat admin_users:', { adminCheck, adminError });
       
-      if (adminError || !adminCheck) {
-        // Pas un admin, déconnecter
-        console.warn('⚠️ Utilisateur non admin, déconnexion...');
-        await supabase.auth.signOut();
-        setError(t('login.notAdmin'));
-        setPassword('');
-        setIsLoading(false);
-        return;
-      }
-      
-      console.log('🎉 Utilisateur admin confirmé ! Redirection...');
-      
+      const isAdmin = !adminError && !!adminCheck;
+      console.log(isAdmin ? '🎉 Utilisateur admin confirmé !' : '👤 Utilisateur joueur confirmé !');
+
       // Succès : réinitialiser le rate limiter et rediriger
       loginRateLimiter.reset();
-      
-      // Redirige vers la page d'origine ou vers /admin par défaut
-      const from = location.state?.from?.pathname || '/admin';
+
+      // Admin → /admin, joueur → /player (ou page d'origine)
+      const defaultDest = isAdmin ? '/admin' : '/player';
+      const from = location.state?.from?.pathname || defaultDest;
       console.log('🚀 Navigation vers:', from);
       
       try {
