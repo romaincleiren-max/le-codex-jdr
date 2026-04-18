@@ -1847,8 +1847,10 @@ export default function App() {
   const { campaigns, themes: supabaseThemes, siteSettings: supabaseSiteSettings, tags, loading, error, refresh } = useSupabaseData();
   
   // État pour l'authentification
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false); // admin seulement
+  const [isLoggedIn, setIsLoggedIn] = useState(false);           // tout utilisateur connecté
   const [authLoading, setAuthLoading] = useState(true);
+  const navigate = useNavigate();
   
   // Gérer le preloader au chargement initial
   useEffect(() => {
@@ -1900,9 +1902,10 @@ export default function App() {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session?.user) {
+          setIsLoggedIn(true);
           // Vérifier le cache d'abord
           const cachedAdminStatus = sessionStorage.getItem(`admin_status_${session.user.id}`);
-          
+
           if (cachedAdminStatus !== null) {
             // Utiliser le cache pour une réponse instantanée
             setIsAuthenticated(cachedAdminStatus === 'true');
@@ -1914,15 +1917,16 @@ export default function App() {
               .select('*')
               .eq('email', session.user.email)
               .single();
-            
+
             const isAdmin = !!adminCheck;
             setIsAuthenticated(isAdmin);
-            
+
             // Mettre en cache pour 1 heure
             sessionStorage.setItem(`admin_status_${session.user.id}`, isAdmin.toString());
             setAuthLoading(false);
           }
         } else {
+          setIsLoggedIn(false);
           setIsAuthenticated(false);
           setAuthLoading(false);
         }
@@ -1938,13 +1942,12 @@ export default function App() {
     // Écouter les changements d'authentification
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       if (_event === 'SIGNED_OUT') {
-        // Nettoyer le cache lors de la déconnexion
         sessionStorage.clear();
         setIsAuthenticated(false);
+        setIsLoggedIn(false);
       } else if (session?.user) {
-        // Vérifier le cache ou la base
+        setIsLoggedIn(true);
         const cachedAdminStatus = sessionStorage.getItem(`admin_status_${session.user.id}`);
-        
         if (cachedAdminStatus !== null) {
           setIsAuthenticated(cachedAdminStatus === 'true');
         } else {
@@ -1953,13 +1956,13 @@ export default function App() {
             .select('*')
             .eq('email', session.user.email)
             .single();
-          
           const isAdmin = !!adminCheck;
           setIsAuthenticated(isAdmin);
           sessionStorage.setItem(`admin_status_${session.user.id}`, isAdmin.toString());
         }
       } else {
         setIsAuthenticated(false);
+        setIsLoggedIn(false);
       }
     });
 
@@ -2478,9 +2481,16 @@ export default function App() {
                     };
                     
                     return (
-                      <button 
-                        key={page} 
-                        onClick={() => setCurrentPage(page)}
+                      <button
+                        key={page}
+                        onClick={() => {
+                          if (page === 'forge') {
+                            if (isLoggedIn) navigate('/forge');
+                            else navigate('/login', { state: { from: { pathname: '/forge' } } });
+                          } else {
+                            setCurrentPage(page);
+                          }
+                        }}
                         className="nav-button group relative px-5 py-3.5 font-bold text-lg transition-colors duration-300"
                         data-active={isActive}>
                         <span className={`flex items-center gap-3 transition-colors duration-300 whitespace-nowrap ${

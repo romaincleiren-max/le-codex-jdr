@@ -7,6 +7,7 @@ import MainApp from './MainApp';
 import PlayerDashboard from './pages/PlayerDashboard';
 import CharacterSheetPage from './pages/CharacterSheetPage';
 import LevelUpWizardPage from './pages/LevelUpWizardPage';
+import CharacterForgePage from './pages/CharacterForgePage';
 
 export default function App() {
   return (
@@ -16,6 +17,11 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
 
         {/* Routes joueurs */}
+        <Route path="/forge" element={
+          <PlayerRoute>
+            <CharacterForgePage onBack={() => window.history.back()} />
+          </PlayerRoute>
+        } />
         <Route path="/player" element={
           <PlayerRoute>
             <PlayerDashboard />
