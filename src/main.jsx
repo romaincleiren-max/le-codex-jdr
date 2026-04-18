@@ -2484,9 +2484,8 @@ export default function App() {
                       <button
                         key={page}
                         onClick={() => {
-                          if (page === 'forge') {
-                            if (isLoggedIn) navigate('/forge');
-                            else navigate('/login', { state: { from: { pathname: '/forge' } } });
+                          if (page === 'forge' && !isLoggedIn) {
+                            navigate('/login', { state: { from: { pathname: '/', search: '?page=forge' } } });
                           } else {
                             setCurrentPage(page);
                           }
@@ -2548,13 +2547,34 @@ export default function App() {
                   )}
                 </button>
 
-                {/* Bouton Déconnexion - caché sur mobile (dans le menu) */}
+                {/* Bouton profil joueur */}
+                {isLoggedIn && !isAuthenticated && (
+                  <button
+                    onClick={() => navigate('/player')}
+                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-amber-100 font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <span>⚔️</span>
+                    <span className="hidden lg:inline">Mon profil</span>
+                  </button>
+                )}
+
+                {/* Bouton connexion (visiteur non connecté) */}
+                {!isLoggedIn && (
+                  <button
+                    onClick={() => navigate('/login')}
+                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-slate-700 to-slate-800 hover:from-slate-600 hover:to-slate-700 text-amber-300 font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 border border-amber-700/40 hover:border-amber-500/60">
+                    <Lock size={16} />
+                    <span className="hidden lg:inline">Se connecter</span>
+                  </button>
+                )}
+
+                {/* Bouton Déconnexion admin - caché sur mobile */}
                 {isAuthenticated && (
                   <button
                     onClick={async () => {
                       if (confirm(t('nav.logoutConfirm'))) {
                         await supabase.auth.signOut();
                         setIsAuthenticated(false);
+                        setIsLoggedIn(false);
                         setCurrentPage('home');
                         window.location.href = '/';
                       }
@@ -3562,7 +3582,24 @@ export default function App() {
 
         {/* PAGE FORGE — Character creator (iframe) */}
         {!showBook && currentPage === 'forge' && (
-          <ForgePage onNavigate={setCurrentPage} />
+          isLoggedIn
+            ? <ForgePage onNavigate={setCurrentPage} />
+            : <div className="min-h-screen flex flex-col items-center justify-center gap-6"
+                style={{ background: 'linear-gradient(135deg,#080604,#160E08)' }}>
+                <div className="text-5xl">🔒</div>
+                <h2 className="text-2xl font-black text-amber-300" style={{ fontFamily: 'Cinzel, serif' }}>
+                  Connexion requise
+                </h2>
+                <p className="text-slate-400 text-sm">Tu dois être connecté pour accéder à la Forge.</p>
+                <button onClick={() => navigate('/login', { state: { from: { pathname: '/', search: '?page=forge' } } })}
+                  className="px-6 py-3 rounded-xl bg-amber-700 hover:bg-amber-600 text-amber-100 font-bold transition-all">
+                  Se connecter
+                </button>
+                <button onClick={() => setCurrentPage('home')}
+                  className="text-slate-500 hover:text-slate-300 text-sm transition-colors">
+                  ← Retour à l'accueil
+                </button>
+              </div>
         )}
 
         {/* PAGE STATS - AVEC VRAIES DONNEES */}
