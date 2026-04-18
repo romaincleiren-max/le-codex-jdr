@@ -395,41 +395,71 @@ body.printing #ps-print{display:block!important;}
 .import-ta{width:100%;background:#221A08;border:1px solid #3A2810;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.5rem;min-height:72px;resize:vertical;outline:none;}
 .import-ta:focus{border-color:var(--gold-d);}
 /* ── Roster ── */
-#roster-sec{width:100%;max-width:960px;margin-top:1.8rem;}
-.roster-hdr{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.22em;color:var(--gold-d);text-transform:uppercase;margin-bottom:.9rem;display:flex;align-items:center;gap:.7rem;}
-.roster-hdr::after{content:'';flex:1;height:1px;background:#3A2810;}
-/* Carousel */
-.roster-carousel{position:relative;padding:0 4px;}
-.roster-grid{display:flex;gap:.85rem;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:.7rem;scrollbar-width:thin;scrollbar-color:var(--gold-d) transparent;}
-.roster-grid::-webkit-scrollbar{height:3px;}
-.roster-grid::-webkit-scrollbar-track{background:transparent;}
-.roster-grid::-webkit-scrollbar-thumb{background:var(--gold-d);border-radius:2px;}
-.rc-nav{position:absolute;top:40%;transform:translateY(-50%);background:rgba(13,8,3,.9);border:1px solid var(--gold-d);color:var(--gold);font-size:18px;width:26px;height:52px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:10;transition:.15s;line-height:1;}
-.rc-nav:hover{background:rgba(201,168,76,.15);border-color:var(--gold);}
-.rc-nav.prev{left:-13px;}
-.rc-nav.next{right:-13px;}
-/* Tarot card */
-.rc{min-width:152px;width:152px;background:#130D06;border:1px solid #3A2810;cursor:default;transition:.12s;position:relative;scroll-snap-align:start;flex-shrink:0;display:flex;flex-direction:column;}
-.rc:hover{border-color:var(--gold-d);}
+#roster-sec{width:100%;max-width:980px;margin-top:2rem;}
+.roster-hdr{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.22em;color:var(--gold-d);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.7rem;}
+.roster-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#3A2810,transparent);}
+/* Carousel wrapper */
+.roster-carousel{position:relative;padding:10px 40px 0;}
+.roster-grid{display:flex;gap:16px;overflow-x:hidden;padding:8px 2px 20px;cursor:grab;-webkit-user-select:none;user-select:none;}
+.roster-grid.dragging{cursor:grabbing;}
+.roster-grid.dragging .rc{pointer-events:none;}
+/* Nav arrows — cercles flottants */
+.rc-nav{position:absolute;top:calc(50% - 18px);transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:rgba(10,6,2,.92);border:1px solid rgba(201,168,76,.45);color:var(--gold);font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:20;transition:all .2s;
+  box-shadow:0 4px 16px rgba(0,0,0,.6),0 0 0 0 rgba(201,168,76,0);line-height:1;padding-bottom:1px;}
+.rc-nav:hover{background:rgba(201,168,76,.14);border-color:var(--gold);box-shadow:0 4px 20px rgba(0,0,0,.6),0 0 12px rgba(201,168,76,.18);}
+.rc-nav:active{transform:translateY(-50%) scale(.93);}
+.rc-nav.prev{left:0;}
+.rc-nav.next{right:0;}
+/* Dots */
+.roster-dots{display:flex;justify-content:center;gap:6px;padding-top:2px;min-height:12px;}
+.rdot{width:6px;height:6px;border-radius:50%;background:#2A1A08;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer;border:1px solid #3A2810;}
+.rdot.active{background:var(--gold);width:18px;border-radius:4px;border-color:var(--gold-d);}
+/* Tarot card — relief + ombre */
+.rc{min-width:150px;width:150px;
+  background:linear-gradient(170deg,#1C1309 0%,#110C07 55%,#0D0806 100%);
+  border:1px solid rgba(139,105,20,.65);
+  cursor:pointer;
+  transition:transform .25s cubic-bezier(.2,0,.2,1),box-shadow .25s cubic-bezier(.2,0,.2,1),border-color .2s;
+  position:relative;scroll-snap-align:start;flex-shrink:0;display:flex;flex-direction:column;
+  box-shadow:
+    0 2px 4px rgba(0,0,0,.4),
+    0 6px 16px rgba(0,0,0,.55),
+    0 16px 40px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(201,168,76,.1),
+    inset 0 0 0 1px rgba(201,168,76,.04);}
+.rc::after{content:'';position:absolute;inset:0;border:1px solid rgba(201,168,76,.07);pointer-events:none;}
+.rc:hover{
+  transform:translateY(-8px) scale(1.02);
+  border-color:rgba(201,168,76,.7);
+  box-shadow:
+    0 4px 8px rgba(0,0,0,.4),
+    0 12px 32px rgba(0,0,0,.65),
+    0 28px 60px rgba(0,0,0,.5),
+    0 0 28px rgba(201,168,76,.12),
+    inset 0 1px 0 rgba(201,168,76,.2),
+    inset 0 0 0 1px rgba(201,168,76,.1);}
 /* Portrait 9:16 */
-.rc-portrait{width:100%;aspect-ratio:9/16;background:linear-gradient(180deg,#1E1408 0%,#0D0806 100%);overflow:hidden;flex-shrink:0;position:relative;}
-.rc-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:.2s;}
-.rc:hover .rc-portrait img{transform:scale(1.03);}
-.rc-portrait-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 25%,rgba(201,168,76,.08),transparent 65%);}
-.rc-portrait-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.5rem;}
-.rc-portrait-icon{font-size:52px;line-height:1;filter:drop-shadow(0 0 12px rgba(201,168,76,.3));}
+.rc-portrait{width:100%;aspect-ratio:9/16;background:linear-gradient(160deg,#1E1408,#0D0806);overflow:hidden;flex-shrink:0;position:relative;}
+.rc-portrait::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.35),transparent);z-index:2;}
+.rc-portrait::after{content:'';position:absolute;inset:0;background:linear-gradient(180deg,transparent 60%,rgba(10,6,2,.55) 100%);z-index:1;pointer-events:none;}
+.rc-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:transform .45s ease;}
+.rc:hover .rc-portrait img{transform:scale(1.07);}
+.rc-portrait-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(201,168,76,.09),transparent 65%);}
+.rc-portrait-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;z-index:2;}
+.rc-portrait-icon{font-size:52px;line-height:1;filter:drop-shadow(0 0 18px rgba(201,168,76,.22));}
+.rc-portrait-label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:#4A3A1A;text-transform:uppercase;}
 /* Card body */
-.rc-body{padding:.65rem .75rem .6rem;display:flex;flex-direction:column;flex:1;border-top:1px solid #2A1A08;}
+.rc-body{padding:.7rem .8rem .65rem;display:flex;flex-direction:column;flex:1;border-top:1px solid rgba(50,32,10,.9);}
 .rc-name{font-family:'Cinzel Decorative',serif;font-size:11px;color:var(--gold);margin-bottom:.2rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rc-sub{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#8B6914;text-transform:uppercase;margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.rc-meta{display:flex;gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4A2A;margin-bottom:.4rem;}
-.rc-scenarios{font-family:'IM Fell English',serif;font-size:9px;color:#5A4A2A;font-style:italic;margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rc-sub{font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:.1em;color:#7A5A1A;text-transform:uppercase;margin-bottom:.45rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rc-meta{display:flex;gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:8px;color:#4A3A18;margin-bottom:.4rem;}
+.rc-scenarios{font-family:'IM Fell English',serif;font-size:9px;color:#4A3A18;font-style:italic;margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:12px;}
 .rc-btns{display:flex;gap:.3rem;margin-top:auto;}
-.rc-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.05em;padding:.3em .4em;border:1px solid #3A2810;color:#8B6914;background:none;cursor:pointer;transition:.1s;flex:1;text-align:center;white-space:nowrap;}
-.rc-btn:hover{border-color:var(--gold);color:var(--gold);}
-.rc-btn.primary{border-color:#5A3810;color:var(--gold);}
-.rc-del{position:absolute;top:.3rem;right:.3rem;background:rgba(13,8,3,.8);border:1px solid #2A1010;color:#4A2A2A;font-size:10px;cursor:pointer;padding:2px 5px;transition:.1s;z-index:5;}
-.rc-del:hover{color:var(--blood-l);}
+.rc-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.04em;padding:.32em .4em;border:1px solid #3A2810;color:#7A5A1A;background:none;cursor:pointer;transition:all .15s;flex:1;text-align:center;white-space:nowrap;}
+.rc-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.05);}
+.rc-btn.primary{border-color:rgba(139,105,20,.7);color:var(--gold);}
+.rc-del{position:absolute;top:.35rem;right:.35rem;background:rgba(8,5,2,.88);border:1px solid rgba(70,25,25,.7);color:#3A2020;font-size:9px;cursor:pointer;padding:2px 5px;transition:all .15s;z-index:10;border-radius:2px;}
+.rc-del:hover{color:var(--blood-l);border-color:var(--blood);}
 /* Bag overlay (depuis roster) */
 #bag-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.7);z-index:9000;display:none;align-items:flex-start;justify-content:center;padding-top:3rem;}
 #bag-overlay.open{display:flex;}
@@ -596,12 +626,13 @@ body.printing #ps-print{display:block!important;}
   <div id="roster-sec">
     <div class="roster-hdr">✦ Mes Personnages</div>
     <div class="roster-carousel">
-      <button class="rc-nav prev" id="rc-prev" onclick="rosterScroll(-1)">‹</button>
-      <div class="roster-grid" id="roster-grid" onscroll="updateRosterNav()">
+      <button class="rc-nav prev" id="rc-prev" onclick="rosterScroll(-1)" aria-label="Précédent">‹</button>
+      <div class="roster-grid" id="roster-grid">
         <div style="font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Aucun personnage sauvegardé.</div>
       </div>
-      <button class="rc-nav next" id="rc-next" onclick="rosterScroll(1)">›</button>
+      <button class="rc-nav next" id="rc-next" onclick="rosterScroll(1)" aria-label="Suivant">›</button>
     </div>
+    <div class="roster-dots" id="roster-dots"></div>
   </div>
 </div>
 
@@ -3308,21 +3339,97 @@ function renderRoster(){
     </div>`;
   }).join('');
   updateRosterNav();
+  initRosterDrag();
 }
 
+// ── Carousel state ──
+var _rcDrag={active:false,startX:0,sl:0,moved:false,velX:0,lastX:0,lastT:0};
+var _rcCardW = 166; // card width + gap
+
 function updateRosterNav(){
-  const g=$('roster-grid'),prev=$('rc-prev'),next=$('rc-next');
-  if(!g||!prev||!next) return;
-  const scrollable = g.scrollWidth > g.clientWidth+4;
-  prev.style.display = scrollable && g.scrollLeft>8 ? 'flex':'none';
-  next.style.display = scrollable && g.scrollLeft < g.scrollWidth-g.clientWidth-8 ? 'flex':'none';
+  var g=$('roster-grid'),prev=$('rc-prev'),next=$('rc-next'),dots=$('roster-dots');
+  if(!g) return;
+  var scrollable=g.scrollWidth>g.clientWidth+4;
+  if(prev) prev.style.display=scrollable&&g.scrollLeft>8?'flex':'none';
+  if(next) next.style.display=scrollable&&g.scrollLeft<g.scrollWidth-g.clientWidth-8?'flex':'none';
+  // Dots
+  if(dots){
+    var total=Math.ceil(g.scrollWidth/_rcCardW);
+    var cur=Math.round(g.scrollLeft/_rcCardW);
+    if(total>1){
+      dots.innerHTML=Array.from({length:total},(_,i)=>
+        '<div class="rdot'+(i===cur?' active':'')+'" onclick="rosterScrollTo('+i+')"></div>'
+      ).join('');
+    } else {
+      dots.innerHTML='';
+    }
+  }
 }
 
 function rosterScroll(dir){
-  const g=$('roster-grid');
+  var g=$('roster-grid');
   if(!g) return;
-  g.scrollBy({left:dir*168,behavior:'smooth'});
+  var cur=Math.round(g.scrollLeft/_rcCardW);
+  rosterScrollTo(cur+dir);
+}
+
+function rosterScrollTo(idx){
+  var g=$('roster-grid');
+  if(!g) return;
+  var maxIdx=Math.floor((g.scrollWidth-g.clientWidth)/_rcCardW);
+  idx=Math.max(0,Math.min(idx,maxIdx));
+  g.scrollTo({left:idx*_rcCardW,behavior:'smooth'});
   setTimeout(updateRosterNav,350);
+}
+
+function initRosterDrag(){
+  var g=$('roster-grid');
+  if(!g||g._dragInit) return;
+  g._dragInit=true;
+
+  function onDown(e){
+    if(e.target.closest('button')) return;
+    _rcDrag.active=true;
+    _rcDrag.moved=false;
+    _rcDrag.startX=e.clientX||(e.touches&&e.touches[0].clientX)||0;
+    _rcDrag.sl=g.scrollLeft;
+    _rcDrag.velX=0;
+    _rcDrag.lastX=_rcDrag.startX;
+    _rcDrag.lastT=Date.now();
+    g.classList.add('dragging');
+  }
+  function onMove(e){
+    if(!_rcDrag.active) return;
+    var cx=e.clientX||(e.touches&&e.touches[0].clientX)||0;
+    var dx=cx-_rcDrag.startX;
+    if(Math.abs(dx)>4) _rcDrag.moved=true;
+    if(_rcDrag.moved && e.cancelable) e.preventDefault();
+    var now=Date.now(),dt=now-_rcDrag.lastT||1;
+    _rcDrag.velX=(cx-_rcDrag.lastX)/dt*16;
+    _rcDrag.lastX=cx; _rcDrag.lastT=now;
+    g.scrollLeft=_rcDrag.sl-dx;
+  }
+  function onUp(e){
+    if(!_rcDrag.active) return;
+    _rcDrag.active=false;
+    g.classList.remove('dragging');
+    if(_rcDrag.moved){
+      // Snap avec momentum
+      var target=g.scrollLeft-_rcDrag.velX*6;
+      var idx=Math.round(target/_rcCardW);
+      rosterScrollTo(idx);
+    }
+  }
+  // Mouse
+  g.addEventListener('mousedown',onDown);
+  window.addEventListener('mousemove',onMove);
+  window.addEventListener('mouseup',onUp);
+  // Touch
+  g.addEventListener('touchstart',function(e){onDown(e.touches[0]?{clientX:e.touches[0].clientX,target:e.target}:e);},{passive:true});
+  g.addEventListener('touchmove',function(e){onMove({clientX:e.touches[0].clientX,cancelable:e.cancelable,preventDefault:function(){e.preventDefault();}});},{passive:false});
+  g.addEventListener('touchend',onUp);
+  // Scroll natif (molette)
+  g.addEventListener('scroll',function(){if(!_rcDrag.active) updateRosterNav();},{passive:true});
 }
 
 // Nettoyage drag doll
@@ -3338,7 +3445,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   // Retour depuis le Hub : ouvrir la fiche en édition
   const editId = localStorage.getItem('forge_edit_char_id');
   if(editId){ localStorage.removeItem('forge_edit_char_id'); openCharFromRoster(editId); }
-  else renderRoster();
+  else{ renderRoster(); initRosterDrag(); }
   const ts=$('ts');
   ts.addEventListener('dragover',e=>e.preventDefault());
   ts.addEventListener('drop',e=>{
