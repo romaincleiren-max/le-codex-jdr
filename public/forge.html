@@ -496,6 +496,12 @@ body.printing #ps-print{display:block!important;}
 #re-bag-list2{flex:1;overflow-y:auto;padding:.3rem .5rem;}
 #re-bag-list2::-webkit-scrollbar{width:3px;}#re-bag-list2::-webkit-scrollbar-thumb{background:#3A2810;}
 #re-stats-mini{padding:.5rem .6rem;border-top:1px solid #1E1208;flex-shrink:0;background:#0F0A06;}
+#re-slot-tooltip{position:fixed;z-index:99999;pointer-events:none;opacity:0;transition:opacity .12s;background:#130D06;border:1px solid #3A2810;border-radius:6px;padding:.5rem .7rem;max-width:220px;box-shadow:0 6px 24px rgba(0,0,0,.7);}
+#re-slot-tooltip.visible{opacity:1;}
+#re-slot-tooltip .rst-name{font-family:'Cinzel',serif;font-size:12px;color:#C9A84C;margin-bottom:3px;}
+#re-slot-tooltip .rst-type{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;}
+#re-slot-tooltip .rst-rarity{font-family:'Share Tech Mono',monospace;font-size:9px;border-radius:2px;padding:1px 5px;margin-top:4px;display:inline-block;}
+#re-slot-tooltip .rst-desc{font-size:10px;color:#8A7A5A;margin-top:5px;line-height:1.4;}
 .re-bag-row{display:flex;align-items:center;gap:.5rem;padding:clamp(.25rem,.6vh,.5rem) clamp(.2rem,.4vw,.4rem);border-bottom:1px solid #1A1208;cursor:grab;}
 .re-bag-row:last-child{border-bottom:none;}
 .re-bag-row:hover{background:#1A1208;}
@@ -3067,21 +3073,44 @@ function renderReStats(){
   var el=$('re-stats-mini'); if(!el)return;
   var keys=['str','dex','con','int','wis','cha'];
   var lbl=['FOR','DEX','CON','INT','SAG','CHA'];
-  el.innerHTML='<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-bottom:.4rem;">'+
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:.5rem;">'+
     keys.map(function(s,i){
       var v=r.stats&&r.stats[s]?r.stats[s]:10;
       var m=Math.floor((v-10)/2);
-      return '<div style="background:#1A1208;border:1px solid #2A1808;padding:.2rem .3rem;text-align:center;">'+
-        '<div style="font-family:\'Cinzel\',serif;font-size:7px;color:var(--gold-d);">'+lbl[i]+'</div>'+
-        '<div style="font-family:\'Cinzel Decorative\',serif;font-size:13px;color:var(--blood);">'+v+'</div>'+
-        '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#5A6070;">'+(m>=0?'+':'')+m+'</div>'+
+      return '<div style="background:#1A1208;border:1px solid #2A1808;border-radius:4px;padding:.35rem .2rem;text-align:center;">'+
+        '<div style="font-family:\'Cinzel\',serif;font-size:9px;color:var(--gold-d);letter-spacing:.06em;margin-bottom:2px;">'+lbl[i]+'</div>'+
+        '<div style="font-family:\'Cinzel Decorative\',serif;font-size:22px;line-height:1;color:var(--blood);">'+v+'</div>'+
+        '<div style="font-family:\'Share Tech Mono\',monospace;font-size:11px;color:#8A9080;margin-top:2px;">'+(m>=0?'+':'')+m+'</div>'+
       '</div>';
     }).join('')+
   '</div>'+
-  '<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);display:flex;gap:.6rem;">'+
+  '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--gold-d);display:flex;gap:.8rem;padding:.2rem 0;">'+
     '<span>\u2764 '+(r.maxHp||r.hp||'?')+' PV</span>'+
     '<span>\uD83D\uDEE1 CA '+(r.ac||'?')+'</span>'+
   '</div>';
+}
+
+function showSlotTooltip(ev, slotId){
+  var tt=$('re-slot-tooltip'); if(!tt)return;
+  var item=_reChar&&_reChar.equipped&&_reChar.equipped[slotId]; if(!item)return;
+  var rc=item.rarity&&_RE_RC?_RE_RC[item.rarity]:null;
+  var rarHtml=item.rarity?'<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+(rc||'#C9A84C')+';">'+item.rarity+'</div>':'';
+  var desc=(item.description||item.d||'');
+  var descHtml=desc?'<div class="rst-desc">'+desc.substring(0,120)+(desc.length>120?'…':'')+'</div>':'';
+  tt.innerHTML='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+
+    '<div class="rst-type">'+(item.type||item.cat||'Objet')+'</div>'+rarHtml+descHtml;
+  posSlotTooltip(ev);
+  tt.classList.add('visible');
+}
+function posSlotTooltip(ev){
+  var tt=$('re-slot-tooltip'); if(!tt)return;
+  var x=ev.clientX+14, y=ev.clientY+10;
+  if(x+230>window.innerWidth) x=ev.clientX-234;
+  if(y+160>window.innerHeight) y=ev.clientY-164;
+  tt.style.left=x+'px'; tt.style.top=y+'px';
+}
+function hideSlotTooltip(){
+  var tt=$('re-slot-tooltip'); if(tt) tt.classList.remove('visible');
 }
 
 function reSlotHtml(slot, col, row){
@@ -3092,11 +3121,12 @@ function reSlotHtml(slot, col, row){
   var bg=item?(rc?rc+'44':'#1C1408'):'#130D06';
   var nmCol=item?(rc||'#C9A84C'):'#5A4A2A';
   var rarTag=item&&item.rarity&&rc?'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:'+rc+';margin-top:1px;">'+item.rarity+'</div>':'';
+  var hoverAttrs=item?' onmouseenter="showSlotTooltip(event,\''+slot.id+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"':'';
   return '<div class="re-doll-slot'+(item?' equipped':'')+'"'+
     ' style="grid-column:'+col+';grid-row:'+row+';border-left-color:'+leftBorder+';border-color:#2A1A08;border-left-color:'+leftBorder+';background:'+bg+';"'+
     ' ondragover="event.preventDefault();this.classList.add(\'drag-over\')"'+
     ' ondragleave="this.classList.remove(\'drag-over\')"'+
-    ' ondrop="reDollDrop(event,\''+slot.id+'\')">'+
+    ' ondrop="reDollDrop(event,\''+slot.id+'\')"'+hoverAttrs+'>'+
     '<div class="re-doll-slot-icon">'+slot.icon+'</div>'+
     '<div class="re-doll-slot-info">'+
       '<span class="re-doll-slot-lbl">'+slot.label+'</span>'+
@@ -3822,6 +3852,7 @@ async function viewOfficialPDF(){
 
 </script>
 <div id="ip-overlay"><div id="ip-content"></div></div>
+<div id="re-slot-tooltip"></div>
 
 <div id="pdf-viewer-ov">
   <div id="pdf-viewer-bar">
