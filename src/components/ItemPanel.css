@@ -1,0 +1,219 @@
+/* ══════════════════════════════════════
+   ITEM PANEL — Visualisateur de fiche objet
+   ══════════════════════════════════════ */
+
+.item-panel {
+  width: 320px;
+  flex-shrink: 0;
+  background: #0D0805;
+  border-left: 1px solid #3A2810;
+  overflow-y: auto;
+  transition: transform .35s cubic-bezier(.4,0,.2,1), opacity .35s;
+  transform: translateX(0);
+  opacity: 1;
+}
+.item-panel.hidden {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+}
+.item-panel::-webkit-scrollbar { width: 3px; }
+.item-panel::-webkit-scrollbar-track { background: #0D0805; }
+.item-panel::-webkit-scrollbar-thumb { background: #3A2810; }
+
+/* ── Card ── */
+.ip-card { position: relative; animation: ipCardIn .3s ease; }
+@keyframes ipCardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Illustration ── */
+.ip-illus {
+  width: 100%;
+  height: 200px;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(ellipse at 50% 60%, #2A1A08, #0D0805);
+  border-bottom: 2px solid #3A2810;
+}
+.ip-illus img {
+  width: 100%; height: 100%;
+  object-fit: cover; opacity: .85;
+}
+.ip-illus::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: linear-gradient(transparent, #0D0805);
+  pointer-events: none;
+}
+.ip-illus-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: .5rem;
+}
+.ip-illus-placeholder .icon { font-size: 48px; opacity: .4; }
+.ip-illus-placeholder .hint {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: .2em;
+  color: #3A2810; text-transform: uppercase;
+}
+.ip-illus-overlay {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(transparent, #0D0805);
+  padding: .8rem; z-index: 2;
+}
+.ip-illus-overlay span {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: .12em;
+  text-transform: uppercase;
+}
+.ip-rarity-badge {
+  position: absolute; top: 10px; right: 10px;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 3px 8px; border-radius: 2px; z-index: 2;
+}
+
+/* ── Header ── */
+.ip-header { padding: .9rem 1rem .4rem; border-bottom: 1px solid #2A1A08; }
+.ip-name {
+  font-family: 'Cinzel Decorative', serif;
+  font-size: 15px; color: #C9A84C; line-height: 1.2;
+  margin-bottom: .2rem;
+}
+.ip-type {
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: .18em;
+  color: #8B6914; text-transform: uppercase;
+}
+
+/* ── Quick props ── */
+.ip-quick-props {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 1px; background: #2A1A08;
+  border-bottom: 1px solid #2A1A08;
+}
+.ip-qp {
+  background: #0D0805; padding: .45rem .7rem;
+  display: flex; flex-direction: column; gap: .15rem;
+}
+.ip-qp-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 8px; letter-spacing: .12em;
+  color: #5A3A14; text-transform: uppercase;
+}
+.ip-qp-value { font-family: 'Cinzel', serif; font-size: 12px; color: #F2E8D0; }
+.ip-qp-value.danger { color: #C0392B; }
+
+/* ── Description ── */
+.ip-desc {
+  padding: .8rem 1rem; border-bottom: 1px solid #2A1A08;
+  font-size: 12px; line-height: 1.7;
+  color: #C8B88A; font-style: italic;
+  font-family: 'IM Fell English', serif;
+}
+
+/* ── Section ── */
+.ip-section { padding: .6rem 1rem; border-bottom: 1px solid #2A1A08; }
+.ip-section-title {
+  font-family: 'Cinzel', serif;
+  font-size: 9px; letter-spacing: .2em;
+  color: #8B6914; text-transform: uppercase;
+  border-bottom: 1px solid #2A1A08;
+  padding-bottom: .25rem; margin-bottom: .5rem;
+}
+.ip-props-wrap { display: flex; flex-wrap: wrap; gap: 4px; }
+.ip-prop-tag {
+  background: #160E06; border: 1px solid #3A2810;
+  color: #C9A84C;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; padding: 2px 7px; letter-spacing: .06em;
+}
+
+/* ── Stat row ── */
+.ip-stat-row {
+  display: flex; justify-content: space-between; align-items: baseline;
+  padding: .2rem 0; font-size: 11px;
+  border-bottom: 1px solid #1A1208;
+}
+.ip-stat-row:last-child { border-bottom: none; }
+.ip-stat-name { color: #9A8A6A; font-family: 'IM Fell English', serif; }
+.ip-stat-val {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 11px; color: #C9A84C;
+}
+.ip-stat-val.good { color: #6BAF4A; }
+.ip-stat-val.bad  { color: #C0392B; }
+
+/* ── Ability block ── */
+.ip-ability {
+  background: #160E06; border: 1px solid #3A2810;
+  border-left: 3px solid #8B6914;
+  padding: .5rem .7rem; margin: .4rem 0;
+  font-size: 11px; line-height: 1.6;
+}
+.ip-ability-name {
+  font-family: 'Cinzel', serif;
+  font-size: 11px; color: #C9A84C; margin-bottom: .2rem;
+}
+.ip-ability-cost {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: #8B6914; float: right;
+}
+.ip-ability-text { color: #C8B88A; font-family: 'IM Fell English', serif; }
+
+/* ── Accordage ── */
+.ip-attunement { padding: .4rem 1rem; border-bottom: 1px solid #2A1A08; font-size: 11px; }
+.ip-attunement-label {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: #C0392B; letter-spacing: .06em;
+}
+.ip-attunement-note { color: #9A8A6A; }
+
+/* ── Malédiction ── */
+.ip-curse-tag {
+  display: inline-block;
+  background: rgba(139,26,26,.25); border: 1px solid #8B1A1A;
+  color: #C0392B;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; letter-spacing: .1em;
+  padding: 2px 7px; margin: .4rem 1rem .3rem;
+}
+
+/* ── Source ── */
+.ip-source {
+  padding: .5rem 1rem;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 9px; color: #3A2810; letter-spacing: .08em;
+  display: flex; justify-content: space-between;
+}
+
+/* ── Bouton fermer ── */
+.ip-close {
+  position: absolute; top: .5rem; left: .5rem;
+  background: rgba(13,8,5,.8); border: 1px solid #3A2810;
+  color: #8B6914; width: 24px; height: 24px;
+  cursor: pointer; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 10; transition: .1s;
+}
+.ip-close:hover { border-color: #C9A84C; color: #C9A84C; }
+
+/* ── État vide ── */
+.ip-empty {
+  height: 100%; min-height: 300px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 1rem; padding: 2rem; text-align: center;
+}
+.ip-empty .ornament { font-size: 32px; opacity: .15; }
+.ip-empty p {
+  font-family: 'Cinzel', serif;
+  font-size: 10px; letter-spacing: .2em;
+  color: #3A2810; text-transform: uppercase;
+  line-height: 1.8;
+}
