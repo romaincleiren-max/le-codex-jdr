@@ -741,15 +741,17 @@ body.printing #ps-print{display:block!important;}
   </div>
   <div id="dh-nav">
     <div class="pill" id="dh0" onclick="goDH(0)">1 · Caractéristiques</div>
-    <div class="pill" id="dh1" onclick="goDH(1)">2 · Carrière</div>
-    <div class="pill" id="dh2" onclick="goDH(2)">3 · Identité</div>
-    <div class="pill" id="dh3" onclick="goDH(3)">4 · Résumé</div>
+    <div class="pill" id="dh1" onclick="goDH(1)">2 · Monde d'Origine</div>
+    <div class="pill" id="dh2" onclick="goDH(2)">3 · Carrière</div>
+    <div class="pill" id="dh3" onclick="goDH(3)">4 · Identité</div>
+    <div class="pill" id="dh4" onclick="goDH(4)">5 · Résumé</div>
   </div>
   <div id="ct-nav">
     <div class="pill" id="ct0" onclick="goCT(0)">1 · Caractéristiques</div>
     <div class="pill" id="ct1" onclick="goCT(1)">2 · Occupation</div>
-    <div class="pill" id="ct2" onclick="goCT(2)">3 · Identité</div>
-    <div class="pill" id="ct3" onclick="goCT(3)">4 · Résumé</div>
+    <div class="pill" id="ct2" onclick="goCT(2)">3 · Compétences</div>
+    <div class="pill" id="ct3" onclick="goCT(3)">4 · Identité</div>
+    <div class="pill" id="ct4" onclick="goCT(4)">5 · Résumé</div>
   </div>
   <div id="scn-bar" style="display:none;">
     <span class="scn-title" id="scn-title-bar">La Maîtresse des Doigts</span>
@@ -2951,11 +2953,11 @@ function openCharFromRoster(id){
   if(C.system==='dark_heresy'){
     $('nav').style.display='none';$('dh-nav').classList.add('active');$('ct-nav').classList.remove('active');
     if(!C.dh) C.dh={};
-    showGame();goDH(3);
+    showGame();goDH(4);
   } else if(C.system==='cthulhu7'){
     $('nav').style.display='none';$('dh-nav').classList.remove('active');$('ct-nav').classList.add('active');
     if(!C.ct) C.ct={};
-    showGame();goCT(3);
+    showGame();goCT(4);
   } else {
     $('nav').style.display='flex';$('dh-nav').classList.remove('active');$('ct-nav').classList.remove('active');
     showGame();go(6);updateRight();
@@ -3581,15 +3583,54 @@ function selectSystem(id){
 // ══════════════════════════════════════════════════════════════════════════
 // DARK HERESY — Création de personnage
 // ══════════════════════════════════════════════════════════════════════════
+const DH_HOMEWORLDS=[
+  {id:'hive',    n:'Monde-Ruche',     tag:'Hive World',    desc:'Cités-nids surpeuplées, violence quotidienne et hiérarchies criminelles.',
+   bonusStat:'ag', bonusVal:3, malusStat:'wp', malusVal:3, woundBase:10, fateMin:9,
+   skills:['Sens des bas-fonds','Langue (Dialecte de la Ruche)'], traits:['Enfant de la Ruche','Accoutumé aux foules']},
+  {id:'forge',   n:'Monde-Forge',     tag:'Forge World',   desc:'Planètes-usines dédiées à l\'Omnimessie et à la production de guerre.',
+   bonusStat:'int', bonusVal:3, malusStat:'fel', malusVal:3, woundBase:8, fateMin:8,
+   skills:['Connaissance commune (Culte de la Machine)','Techno-Maîtrise'], traits:['Héritage mécanique','Intégration bionique']},
+  {id:'feral',   n:'Monde-Féral',     tag:'Feral World',   desc:'Planètes primitives où la survie prime sur tout.',
+   bonusStat:'s', bonusVal:3, malusStat:'fel', malusVal:3, woundBase:11, fateMin:9,
+   skills:['Survie','Suivi de piste'], traits:['Esprit sauvage','Résistance aux intempéries']},
+  {id:'death',   n:'Monde-Mort',      tag:'Death World',   desc:'Environnements léthaux forgent des guerriers d\'élite.',
+   bonusStat:'wp', bonusVal:3, malusStat:'fel', malusVal:3, woundBase:12, fateMin:9,
+   skills:['Survie','Esquive'], traits:['Survivaliste né','Sens du danger']},
+  {id:'shrine',  n:'Monde-Sanctuaire',tag:'Shrine World',  desc:'Planètes sacrées dédiées à l\'Empereur, bastion de la foi.',
+   bonusStat:'wp', bonusVal:3, malusStat:'ag', malusVal:3, woundBase:9, fateMin:8,
+   skills:['Connaissance commune (Ecclesiarchie)','Lire/Écrire'], traits:['Dévotion ferme','Fierté impériale']},
+  {id:'colony',  n:'Monde-Colonie',   tag:'Colony World',  desc:'Mondes récemment colonisés aux frontières de l\'Imperium.',
+   bonusStat:'t', bonusVal:2, malusStat:null, malusVal:0, woundBase:9, fateMin:9,
+   skills:['Connaissance commune (Mondes Frontières)','Conduite (Véhicule terrestre)'], traits:['Pionnier','Débrouillardise']},
+  {id:'void',    n:'Né dans le Vide', tag:'Void Born',     desc:'Élevé sur des vaisseaux spatiaux, entre les étoiles.',
+   bonusStat:'per', bonusVal:3, malusStat:'s', malusVal:3, woundBase:7, fateMin:8,
+   skills:['Pilotage (Vaisseau spatial)','Navigation (Stellaire)'], traits:['Regard des étoiles','Déracinement']}
+];
 const DH_CAREERS=[
-  {id:'adepte',     n:'Adepte',           tag:'Administratum',          desc:'Scribes et bureaucrates au service de l\'Imperium.'},
-  {id:'arbitre',    n:'Arbitre',           tag:'Adeptus Arbites',        desc:'Gardiens implacables de la loi impériale.'},
-  {id:'assassin',   n:'Assassin',          tag:'Officio Assassinorum',   desc:'Tueurs d\'élite au service de l\'Inquisition.'},
-  {id:'garde',      n:'Garde Impérial',    tag:'Astra Militarum',        desc:'Soldats endurcis par mille guerres stellaires.'},
-  {id:'psyker',     n:'Psyker Sanctionné', tag:'Psyker',                 desc:'Utilisateurs du Warp sous contrôle strict.'},
-  {id:'pretre',     n:'Prêtre',            tag:'Ecclesiarchy',           desc:'Serviteurs fanatiques du Dieu-Empereur.'},
-  {id:'explorateur',n:'Explorateur',       tag:'Rogue Trader',           desc:'Aventuriers des confins de l\'espace connu.'},
-  {id:'techno',     n:'Techno-Prêtre',     tag:'Adeptus Mechanicus',     desc:'Dévots de l\'Omnimessie et du culte de la Machine.'}
+  {id:'adepte',     n:'Adepte',           tag:'Administratum',        desc:'Scribes et bureaucrates au service de l\'Imperium.',
+   skills:['Lire/Écrire','Connaissance commune (Administratum)','Langue (Low Gothic)','Évaluation'],
+   talents:['Maîtrise du pistol','Résistance'], aptitudes:['Intelligence','Savoir','Social','Volonté']},
+  {id:'arbitre',    n:'Arbitre',           tag:'Adeptus Arbites',      desc:'Gardiens implacables de la loi impériale.',
+   skills:['Connaissance commune (Adeptus Arbites)','Enquête','Intimidation','Langue (Low Gothic)'],
+   talents:['Maîtrise du pistolet','Maîtrise de la matraque'], aptitudes:['Résistance','Maîtrise','Social','Perception']},
+  {id:'assassin',   n:'Assassin',          tag:'Officio Assassinorum', desc:'Tueurs d\'élite au service de l\'Inquisition.',
+   skills:['Acrobaties','Discrétion','Filature','Esquive'],
+   talents:['Attaque rapide','Sens du tueur'], aptitudes:['Dextérité','Puissance','Maîtrise','Perception']},
+  {id:'garde',      n:'Garde Impérial',    tag:'Astra Militarum',      desc:'Soldats endurcis par mille guerres stellaires.',
+   skills:['Connaissance commune (Garde Impériale)','Langue (Low Gothic)','Survie','Conduite (Véhicule terrestre)'],
+   talents:['Maîtrise du fusil laser','Résistance à la douleur'], aptitudes:['Puissance','Résistance','Maîtrise','Volonté']},
+  {id:'psyker',     n:'Psyker Sanctionné', tag:'Corps des Psykers',    desc:'Utilisateurs du Warp sous contrôle strict.',
+   skills:['Conscience','Connaissance commune (Corps des Psykers)','Lire/Écrire','Psyinscience'],
+   talents:['Résistance Warp','Maîtrise Warp (Télépathie)'], aptitudes:['Volonté','Savoir','Psyker','Perception']},
+  {id:'pretre',     n:'Prêtre',            tag:'Ecclesiarchy',         desc:'Serviteurs fanatiques du Dieu-Empereur.',
+   skills:['Connaissance commune (Ecclesiarchie)','Lire/Écrire','Langue (Low Gothic)','Interprète (Chant)'],
+   talents:['Résistance à la peur','Maîtrise (Arme de feu)'], aptitudes:['Volonté','Social','Puissance','Résistance']},
+  {id:'explorateur',n:'Explorateur',       tag:'Rogue Trader',         desc:'Aventuriers des confins de l\'espace connu.',
+   skills:['Connaissance commune (Rogue Traders)','Navigation (Surface)','Pilotage (Vaisseau civil)','Langue (Low Gothic)'],
+   talents:['Maîtrise du pistolet','Sens de l\'aventure'], aptitudes:['Dextérité','Intelligence','Social','Perception']},
+  {id:'techno',     n:'Techno-Prêtre',     tag:'Adeptus Mechanicus',   desc:'Dévots de l\'Omnimessie et du culte de la Machine.',
+   skills:['Connaissance commune (Adeptus Mechanicus)','Lire/Écrire','Techno-Maîtrise','Commerce (Technomat)'],
+   talents:['Maîtrise du pistolet','Protocoles Mechanicus'], aptitudes:['Intelligence','Savoir','Maîtrise','Résistance']}
 ];
 const DH_STATS_KEYS=['ws','bs','s','t','ag','int','per','wp','fel'];
 const DH_STAT_LABELS={ws:'CC',bs:'CT',s:'F',t:'E',ag:'Ag',int:'Int',per:'Per',wp:'Vol',fel:'Soc'};
@@ -3601,7 +3642,7 @@ function rollDH(){
 }
 function goDH(n){
   document.querySelectorAll('#dh-nav .pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
-  [renderDHStats,renderDHCareer,renderDHIdentity,renderDHSummary][n]?.();
+  [renderDHStats,renderDHHomeworld,renderDHCareer,renderDHIdentity,renderDHSummary][n]?.();
   $('lp').scrollTop=0;
 }
 function renderDHStats(){
@@ -3615,21 +3656,62 @@ function renderDHStats(){
     </div>`).join('');
   $('lp').innerHTML=`
     <div class="sh" style="color:#8B0000;">Caractéristiques</div>
-    <div class="ss">Warhammer 40,000 · Dark Heresy · Lancez 2D10+25</div>
+    <div class="ss">Warhammer 40,000 · Dark Heresy · Lancez 2D10+25 pour chaque caractéristique</div>
     <button class="btn btn-p" onclick="rollDH()" style="margin-bottom:1.2rem;background:linear-gradient(135deg,#6B0000,#8B0000);">🎲 Lancer les dés</button>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1.2rem;">${rows}</div>
-    <div class="btn-row"><button class="btn btn-p" onclick="if(DH_STATS_KEYS.some(s=>C.dh[s]>0))goDH(1);else alert('Lancez les dés d\'abord.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Carrière →</button></div>`;
+    <div style="font-size:10px;color:#5A3A2A;margin-bottom:.8rem;font-family:'Share Tech Mono',monospace;">Bonus de Caractéristique = valeur ÷ 10 (partie entière)</div>
+    <div class="btn-row"><button class="btn btn-p" onclick="if(DH_STATS_KEYS.some(s=>C.dh[s]>0))goDH(1);else alert('Lancez les dés d\'abord.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Monde d'Origine →</button></div>`;
+}
+function renderDHHomeworld(){
+  $('lp').innerHTML=`<div class="sh" style="color:#8B0000;">Monde d'Origine</div><div class="ss">D'où venez-vous, acolyte ? Votre passé vous a forgé.</div>
+    <div class="grid" id="dh-hwg"></div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goDH(0)">← Caractéristiques</button>
+      <button class="btn btn-p" onclick="if(C.dh.homeworld)goDH(2);else alert('Choisissez un monde d\'origine.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Carrière →</button>
+    </div>`;
+  DH_HOMEWORLDS.forEach(hw=>{
+    const d=document.createElement('div'); d.className='card'+(C.dh.homeworld?.id===hw.id?' sel':'');
+    const bonusLine=(hw.bonusStat?`+${hw.bonusVal} ${DH_STAT_LABELS[hw.bonusStat]||hw.bonusStat}`:'')+(hw.malusStat?` / −${hw.malusVal} ${DH_STAT_LABELS[hw.malusStat]||hw.malusStat}`:'');
+    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${hw.n}</div><div class="ct" style="color:#8B0000;">${hw.tag}</div>
+      <div class="cd">${hw.desc}</div>
+      <div style="margin-top:.4rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:#7A5A2A;">
+        ${bonusLine?`<span style="color:#C9A84C;">Modif. : </span>${bonusLine}<br>`:''}
+        <span style="color:#8B4040;">Compétences : </span>${hw.skills.join(', ')}<br>
+        <span style="color:#6A5A3A;">Traits : </span>${hw.traits.join(', ')}
+      </div>`;
+    d.onclick=()=>{C.dh.homeworld=hw; applyDHHomeworld(hw); renderDHHomeworld();};
+    $('dh-hwg').appendChild(d);
+  });
+}
+function applyDHHomeworld(hw){
+  // Appliquer les modificateurs de stats du homeworld
+  if(hw.bonusStat) C.dh[hw.bonusStat]=(C.dh[hw.bonusStat]||0)+hw.bonusVal;
+  if(hw.malusStat) C.dh[hw.malusStat]=Math.max(15,(C.dh[hw.malusStat]||0)-hw.malusVal);
+  // Calculer blessures et destin
+  const woundRoll=(Math.floor(Math.random()*5)+1);
+  C.dh.wounds=hw.woundBase+woundRoll+Math.floor((C.dh.t||30)/10);
+  const fateRoll=(Math.floor(Math.random()*10)+1);
+  C.dh.fatePoints=fateRoll>=hw.fateMin?3:2;
+  C.dh.movement=Math.floor((C.dh.ag||30)/10);
+  C.dh.hwSkills=hw.skills;
+  C.dh.traits=hw.traits;
 }
 function renderDHCareer(){
   $('lp').innerHTML=`<div class="sh" style="color:#8B0000;">Choisir une Carrière</div><div class="ss">Votre rôle au service de l'Inquisition</div>
     <div class="grid" id="dh-cg"></div>
     <div class="btn-row">
-      <button class="btn btn-s" onclick="goDH(0)">← Caractéristiques</button>
-      <button class="btn btn-p" onclick="if(C.dh.career)goDH(2);else alert('Choisissez une carrière.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Identité →</button>
+      <button class="btn btn-s" onclick="goDH(1)">← Monde d'Origine</button>
+      <button class="btn btn-p" onclick="if(C.dh.career)goDH(3);else alert('Choisissez une carrière.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Identité →</button>
     </div>`;
   DH_CAREERS.forEach(career=>{
     const d=document.createElement('div'); d.className='card'+(C.dh.career?.id===career.id?' sel':'');
-    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${career.n}</div><div class="ct" style="color:#8B0000;">${career.tag}</div><div class="cd">${career.desc}</div>`;
+    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${career.n}</div><div class="ct" style="color:#8B0000;">${career.tag}</div>
+      <div class="cd">${career.desc}</div>
+      <div style="margin-top:.4rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:#7A5A2A;">
+        <span style="color:#8B4040;">Compétences : </span>${career.skills.join(' · ')}<br>
+        <span style="color:#6A5A3A;">Talents : </span>${career.talents.join(' · ')}<br>
+        <span style="color:#4A6A3A;">Aptitudes : </span>${career.aptitudes.join(' · ')}
+      </div>`;
     d.onclick=()=>{C.dh.career=career; renderDHCareer();};
     $('dh-cg').appendChild(d);
   });
@@ -3640,30 +3722,46 @@ function renderDHIdentity(){
     <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${C.player||''}" oninput="C.player=this.value" placeholder="Votre nom"></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${C.age||''}" oninput="C.age=this.value" placeholder="Âge"></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Portrait (URL)</label><input class="inp" value="${C.photo||''}" oninput="C.photo=this.value" placeholder="https://..."></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Genre</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        ${['Masculin','Féminin','Non-binaire','Autre'].map(g=>`<button class="btn btn-s" onclick="C.dh.gender='${g}';renderDHIdentity()" style="${(C.dh.gender||'')=== g?'background:#8B0000;color:#fff;':''}">${g}</button>`).join('')}
+      </div></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, motivations, secrets impériaux...">${C.bg_story||''}</textarea></div>
     <div class="btn-row">
-      <button class="btn btn-s" onclick="goDH(1)">← Carrière</button>
-      <button class="btn btn-p" onclick="if(C.name)goDH(3);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Résumé →</button>
+      <button class="btn btn-s" onclick="goDH(2)">← Carrière</button>
+      <button class="btn btn-p" onclick="if(C.name)goDH(4);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Résumé →</button>
     </div>`;
 }
 function renderDHSummary(){
   const st=C.dh||{};
   const statRows=DH_STATS_KEYS.map(s=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid #2A1208;">
-      <span style="font-family:'Cinzel',serif;font-size:10px;color:#8B0000;">${DH_STAT_LABELS[s]} <span style="color:#5A3A2A;font-size:9px;">— ${DH_STAT_NAMES[s]}</span></span>
-      <span style="font-family:'Cinzel Decorative',serif;font-size:13px;color:#C9A84C;">${st[s]||'—'}</span>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.28rem 0;border-bottom:1px solid #2A1208;">
+      <span style="font-family:'Cinzel',serif;font-size:10px;color:#8B0000;">${DH_STAT_LABELS[s]} <span style="color:#4A2A1A;font-size:9px;">— ${DH_STAT_NAMES[s]}</span></span>
+      <span style="font-family:'Cinzel Decorative',serif;font-size:13px;color:#C9A84C;">${st[s]||'—'} <span style="font-size:9px;color:#5A3A2A;">(B${Math.floor((st[s]||0)/10)})</span></span>
     </div>`).join('');
+  const allSkills=[...(st.hwSkills||[]),...(st.career?.skills||[])];
+  const skillList=allSkills.length?`<div style="margin-top:.6rem;"><div style="font-family:'Cinzel',serif;font-size:9px;color:#8B0000;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Compétences</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem;">${allSkills.map(sk=>`<span style="background:#1A0A06;border:1px solid #3A1208;color:#C9A84C;font-size:9px;padding:2px 6px;border-radius:3px;">${sk}</span>`).join('')}</div></div>`:'';
+  const talentList=st.career?.talents?.length?`<div style="margin-top:.5rem;"><div style="font-family:'Cinzel',serif;font-size:9px;color:#8B0000;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Talents</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem;">${st.career.talents.map(t=>`<span style="background:#1A0A06;border:1px solid #5A2A2A;color:#A08040;font-size:9px;padding:2px 6px;border-radius:3px;">${t}</span>`).join('')}</div></div>`:'';
+  const traitList=st.traits?.length?`<div style="margin-top:.5rem;"><div style="font-family:'Cinzel',serif;font-size:9px;color:#8B0000;letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem;">Traits de Monde</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem;">${st.traits.map(t=>`<span style="background:#0A1A08;border:1px solid #2A4A1A;color:#6A9A3A;font-size:9px;padding:2px 6px;border-radius:3px;">${t}</span>`).join('')}</div></div>`:'';
   $('lp').innerHTML=`
     <div class="sh" style="color:#8B0000;">Résumé</div>
-    <div class="ss">${C.name||'Acolyte'} · ${st.career?.n||'—'} · Dark Heresy</div>
-    <div style="background:#12090A;border:1px solid #3A1208;border-radius:8px;padding:.9rem;margin-bottom:1rem;">${statRows}</div>
+    <div class="ss">${C.name||'Acolyte'} · ${st.career?.n||'—'} · ${st.homeworld?.n||'—'} · Dark Heresy</div>
+    <div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem;padding:.6rem;background:#120608;border:1px solid #3A1208;border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#C9A84C;">
+      <span>❤ Blessures : ${st.wounds||'—'}</span>
+      <span>✦ Destin : ${st.fatePoints||'—'}</span>
+      <span>⚡ Mvt : ${st.movement||'—'} m</span>
+    </div>
+    <div style="background:#12090A;border:1px solid #3A1208;border-radius:8px;padding:.8rem;margin-bottom:.7rem;">${statRows}${skillList}${talentList}${traitList}</div>
     <div class="btn-row">
-      <button class="btn btn-s" onclick="goDH(2)">← Identité</button>
+      <button class="btn btn-s" onclick="goDH(3)">← Identité</button>
       <button class="btn btn-p" onclick="saveDHChar();" style="background:linear-gradient(135deg,#6B0000,#8B0000);">✓ Sauvegarder</button>
     </div>`;
 }
 function saveDHChar(){
-  if(!C.name){ alert('Entrez un nom.'); goDH(2); return; }
+  if(!C.name){ alert('Entrez un nom.'); goDH(3); return; }
   saveToRoster();
   $('dh-nav').classList.remove('active'); $('nav').style.display='flex';
   showTitle();
@@ -3673,16 +3771,77 @@ function saveDHChar(){
 // CALL OF CTHULHU 7e — Création de personnage
 // ══════════════════════════════════════════════════════════════════════════
 const CT_OCCUPATIONS=[
-  {id:'medecin',       n:'Médecin',               skills:['Médecine','Premiers soins','Biologie','Pharmacologie']},
-  {id:'journaliste',   n:'Journaliste',            skills:['Bibliothèque','Persuasion','Écriture','Psychologie']},
-  {id:'detective',     n:'Détective privé',        skills:['Pister','Discrétion','Psychologie','Droit']},
-  {id:'antiquaire',    n:'Antiquaire',             skills:['Évaluation','Histoire','Occultisme','Persuasion']},
-  {id:'archeologue',   n:'Archéologue',            skills:['Archéologie','Histoire','Langues anciennes','Escalade']},
-  {id:'professeur',    n:'Professeur',             skills:['Bibliothèque','Histoire','Occultisme','Enseignement']},
-  {id:'chasseur',      n:'Chasseur',               skills:['Survie','Pister','Armes à feu','Premiers soins']},
-  {id:'ingenieur',     n:'Ingénieur',              skills:['Électronique','Mécanique','Sciences','Mathématiques']},
-  {id:'artiste',       n:'Artiste',                skills:['Art','Charme','Psychologie','Perception']},
-  {id:'clerc',         n:'Clerc',                  skills:['Occultisme','Histoire','Latin','Psychologie']}
+  {id:'medecin',      n:'Médecin',            creditMin:30,creditMax:80, pointBase:'edu',
+   skills:['Médecine','Premiers soins','Sciences (Biologie)','Pharmacologie','Psychologie','Persuasion','Langues étrangères','Bibliothèque']},
+  {id:'journaliste',  n:'Journaliste',         creditMin:9, creditMax:30, pointBase:'edu',
+   skills:['Bibliothèque','Persuasion','Psychologie','Histoire','Photographie','Langues étrangères','Écriture','Charme']},
+  {id:'detective',    n:'Détective privé',     creditMin:20,creditMax:45, pointBase:'edu',
+   skills:['Bibliothèque','Psychologie','Droit','Pister','Discrétion','Persuasion','Intimidation','Perception']},
+  {id:'antiquaire',   n:'Antiquaire',          creditMin:30,creditMax:70, pointBase:'edu',
+   skills:['Évaluation','Histoire','Occultisme','Persuasion','Bibliothèque','Langues anciennes','Comptabilité','Archivistique']},
+  {id:'archeologue',  n:'Archéologue',         creditMin:10,creditMax:40, pointBase:'edu',
+   skills:['Archéologie','Histoire','Langues anciennes','Escalade','Bibliothèque','Navigation','Premiers soins','Conduite']},
+  {id:'professeur',   n:'Professeur',          creditMin:20,creditMax:70, pointBase:'edu',
+   skills:['Bibliothèque','Histoire','Occultisme','Psychologie','Persuasion','Langues étrangères','Langues anciennes','Écriture']},
+  {id:'chasseur',     n:'Chasseur',            creditMin:20,creditMax:50, pointBase:'edu',
+   skills:['Survie','Pister','Armes à feu','Premiers soins','Discrétion','Escalade','Navigation','Sciences naturelles']},
+  {id:'ingenieur',    n:'Ingénieur',           creditMin:30,creditMax:70, pointBase:'edu',
+   skills:['Électronique','Mécanique','Sciences','Bibliothèque','Conduite','Mathématiques','Informatique','Évaluation']},
+  {id:'artiste',      n:'Artiste / Écrivain',  creditMin:9, creditMax:30, pointBase:'edu',
+   skills:['Art (Peinture)','Charme','Psychologie','Perception','Histoire','Langues étrangères','Écriture','Persuasion']},
+  {id:'clerc',        n:'Clerc / Ministre',    creditMin:9, creditMax:60, pointBase:'edu',
+   skills:['Occultisme','Histoire','Latin','Psychologie','Persuasion','Bibliothèque','Premiers soins','Langues anciennes']},
+  {id:'avocat',       n:'Avocat',              creditMin:30,creditMax:80, pointBase:'edu',
+   skills:['Droit','Persuasion','Psychologie','Bibliothèque','Comptabilité','Langues étrangères','Intimidation','Histoire']},
+  {id:'marin',        n:'Marin / Navigateur',  creditMin:9, creditMax:40, pointBase:'edu',
+   skills:['Navigation','Mécanique','Natation','Escalade','Premiers soins','Armes à feu','Météorologie','Survie']}
+];
+
+// Compétences CoC 7e — {id, n, base}
+const CT_SKILLS_LIST=[
+  {id:'arch',   n:'Archéologie',        base:1},
+  {id:'art',    n:'Art & Artisanat',    base:5},
+  {id:'bib',    n:'Bibliothèque',       base:25},
+  {id:'charm',  n:'Charme',             base:15},
+  {id:'compta', n:'Comptabilité',       base:5},
+  {id:'cuerp',  n:'Combat rapproché',   base:25},
+  {id:'cond',   n:'Conduite',           base:20},
+  {id:'deguis', n:'Déguisement',        base:5},
+  {id:'disc',   n:'Discrétion',         base:20},
+  {id:'droit',  n:'Droit',              base:5},
+  {id:'elec',   n:'Électronique',       base:5},
+  {id:'escal',  n:'Escalade',           base:20},
+  {id:'eval',   n:'Évaluation',         base:5},
+  {id:'explos', n:'Explosifs',          base:1},
+  {id:'hist',   n:'Histoire',           base:5},
+  {id:'info',   n:'Informatique',       base:5},
+  {id:'intim',  n:'Intimidation',       base:15},
+  {id:'lang',   n:'Langues étrangères', base:1},
+  {id:'langA',  n:'Langues anciennes',  base:1},
+  {id:'meca',   n:'Mécanique',          base:10},
+  {id:'med',    n:'Médecine',           base:1},
+  {id:'meteo',  n:'Météorologie',       base:1},
+  {id:'navig',  n:'Navigation',         base:10},
+  {id:'natW',   n:'Natation',           base:20},
+  {id:'occu',   n:'Occultisme',         base:5},
+  {id:'percep', n:'Perception',         base:25},
+  {id:'persu',  n:'Persuasion',         base:10},
+  {id:'photo',  n:'Photographie',       base:5},
+  {id:'psych',  n:'Psychologie',        base:10},
+  {id:'prem',   n:'Premiers soins',     base:30},
+  {id:'psyA',   n:'Psychanalyse',       base:1},
+  {id:'sci',    n:'Sciences',           base:1},
+  {id:'sciN',   n:'Sciences naturelles',base:10},
+  {id:'survie', n:'Survie',             base:10},
+  {id:'pister', n:'Pister',             base:10},
+  {id:'tir',    n:'Tir',                base:25},
+  {id:'ecrit',  n:'Écriture',           base:5},
+  {id:'latin',  n:'Latin',              base:1},
+  {id:'math',   n:'Mathématiques',      base:10},
+  {id:'crochet',n:'Crochetage',         base:1},
+  {id:'nage',   n:'Natation',           base:20},
+  {id:'pharm',  n:'Pharmacologie',      base:1},
+  {id:'nav',    n:'Navigation (marine)',base:10}
 ];
 const CT_STATS_KEYS=['for','con','tai','dex','app','int','pou','edu'];
 const CT_STAT_LABELS={for:'FOR',con:'CON',tai:'TAI',dex:'DEX',app:'APP',int:'INT',pou:'POU',edu:'EDU'};
@@ -3696,11 +3855,12 @@ function rollCT(){
   C.ct.pou=r3(); C.ct.edu=r2plus6();
   C.ct.san=C.ct.pou;
   C.ct.luck=r3();
+  if(!C.ct.skills) C.ct.skills={};
   renderCTStats();
 }
 function goCT(n){
   document.querySelectorAll('#ct-nav .pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
-  [renderCTStats,renderCTOccupation,renderCTIdentity,renderCTSummary][n]?.();
+  [renderCTStats,renderCTOccupation,renderCTSkills,renderCTIdentity,renderCTSummary][n]?.();
   $('lp').scrollTop=0;
 }
 function renderCTStats(){
@@ -3711,15 +3871,23 @@ function renderCTStats(){
       <div style="font-family:'Cinzel',serif;font-size:10px;color:#2A6A4A;letter-spacing:.06em;">${CT_STAT_LABELS[s]}</div>
       <div style="font-size:9px;color:#3A5A4A;margin:.1rem 0 .3rem;">${CT_STAT_NAMES[s]}</div>
       <div style="font-family:'Cinzel Decorative',serif;font-size:22px;color:${hasRolled?'#4AB880':'#1A3A2A'};">${st[s]||'—'}</div>
+      <div style="font-size:9px;color:#2A5A3A;">${hasRolled&&st[s]?'Demi : '+Math.floor(st[s]/2)+' / Cin. : '+Math.floor(st[s]/5):''}</div>
     </div>`).join('');
   const pv=st.tai&&st.con?Math.ceil((st.tai+st.con)/10):0;
   const pm=st.pou?Math.floor(st.pou/5):0;
-  const derived=hasRolled?`<div style="display:flex;flex-wrap:wrap;gap:.8rem;margin:.8rem 0;font-size:11px;color:#3A6A4A;font-family:'Share Tech Mono',monospace;">
-    <span>PV : ${pv}</span><span>PM : ${pm}</span><span>SAN : ${st.san||0}</span><span>LUCK : ${st.luck||0}</span></div>`:'';
+  const derived=hasRolled?`<div style="display:flex;flex-wrap:wrap;gap:.8rem;margin:.8rem 0;padding:.5rem .7rem;background:#060E0A;border:1px solid #0F2818;border-radius:5px;font-size:11px;color:#3A6A4A;font-family:'Share Tech Mono',monospace;">
+    <span>PV : <strong style="color:#4AB880">${pv}</strong></span>
+    <span>PM : <strong style="color:#4AB880">${pm}</strong></span>
+    <span>SAN : <strong style="color:#4AB880">${st.san||0}</strong></span>
+    <span>LUCK : <strong style="color:#4AB880">${st.luck||0}</strong></span>
+    <span>Esquive : <strong style="color:#4AB880">${Math.floor((st.dex||0)/2)}</strong></span>
+  </div>`:'';
+  const note=`<div style="font-size:10px;color:#3A5A4A;margin-bottom:.5rem;font-family:'Share Tech Mono',monospace;">Chaque valeur indique aussi sa demi-valeur (½) et son cinquième (⅕) pour les jets de chance.</div>`;
   $('lp').innerHTML=`
     <div class="sh" style="color:#2A6A4A;">Caractéristiques</div>
-    <div class="ss">Call of Cthulhu 7e · Valeurs en pourcentage (15–90)</div>
-    <button class="btn btn-p" onclick="rollCT()" style="margin-bottom:1.2rem;background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">🎲 Lancer les dés</button>
+    <div class="ss">Call of Cthulhu 7e · Valeurs en pourcentage</div>
+    <button class="btn btn-p" onclick="rollCT()" style="margin-bottom:.8rem;background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">🎲 Lancer les dés</button>
+    ${note}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.3rem;">${rows}</div>
     ${derived}
     <div class="btn-row"><button class="btn btn-p" onclick="if(CT_STATS_KEYS.some(s=>C.ct[s]>0))goCT(1);else alert('Lancez les dés d\'abord.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Occupation →</button></div>`;
@@ -3729,50 +3897,161 @@ function renderCTOccupation(){
     <div class="grid" id="ct-og"></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goCT(0)">← Caractéristiques</button>
-      <button class="btn btn-p" onclick="if(C.ct.occupation)goCT(2);else alert('Choisissez une occupation.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Identité →</button>
+      <button class="btn btn-p" onclick="if(C.ct.occupation)goCT(2);else alert('Choisissez une occupation.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Compétences →</button>
     </div>`;
   CT_OCCUPATIONS.forEach(occ=>{
+    const pts=Math.floor((C.ct.edu||60)/5)*4;
     const d=document.createElement('div'); d.className='card'+(C.ct.occupation?.id===occ.id?' sel':'');
-    d.innerHTML=`<div class="cn" style="color:#4AB880;">${occ.n}</div><div class="cd" style="color:#5A7A6A;">Compétences : ${occ.skills.join(', ')}</div>`;
-    d.onclick=()=>{C.ct.occupation=occ; renderCTOccupation();};
+    d.innerHTML=`<div class="cn" style="color:#4AB880;">${occ.n}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#3A6A4A;margin:.2rem 0;">Crédit : ${occ.creditMin}–${occ.creditMax}% · Points : EDU×4 (≈${pts})</div>
+      <div class="cd" style="color:#5A7A6A;font-size:10px;">Compétences : ${occ.skills.slice(0,4).join(', ')}${occ.skills.length>4?'…':''}</div>`;
+    d.onclick=()=>{C.ct.occupation=occ; C.ct.skills={}; renderCTOccupation();};
     $('ct-og').appendChild(d);
   });
+}
+
+// Points d'occupation = EDU×4 ; intérêt personnel = INT×2
+function ctOccPts(){ return Math.floor((C.ct.edu||60)/5)*4; }
+function ctIntPts(){ return Math.floor((C.ct.int||60)/5)*2; }
+function ctSkillVal(skillId){
+  const base=(CT_SKILLS_LIST.find(s=>s.id===skillId)||{base:1}).base;
+  return base+(C.ct.skills?.[skillId]||0);
+}
+function ctPointsUsed(pool){
+  if(!C.ct.skills) return 0;
+  const occSkills=(C.ct.occupation?.skills||[]);
+  return Object.entries(C.ct.skills).filter(([id,v])=>{
+    const sk=CT_SKILLS_LIST.find(s=>s.id===id);
+    const isOcc=sk&&occSkills.includes(sk.n);
+    return pool==='occ'?isOcc:!isOcc;
+  }).reduce((s,[,v])=>s+v,0);
+}
+function ctAddSkill(skillId,delta,pool){
+  if(!C.ct.skills) C.ct.skills={};
+  const cur=C.ct.skills[skillId]||0;
+  const sk=CT_SKILLS_LIST.find(s=>s.id===skillId); if(!sk) return;
+  const isOcc=(C.ct.occupation?.skills||[]).includes(sk.n);
+  if((pool==='occ')!==isOcc) return; // mauvais pool
+  const totalUsed=ctPointsUsed(pool);
+  const maxPts=pool==='occ'?ctOccPts():ctIntPts();
+  if(delta>0 && totalUsed>=maxPts) return;
+  const newVal=Math.max(0,cur+delta);
+  if(sk.base+newVal>99) return;
+  C.ct.skills[skillId]=newVal;
+  renderCTSkills();
+}
+function renderCTSkills(){
+  const st=C.ct||{};
+  if(!st.skills) st.skills={};
+  const occSkillNames=(st.occupation?.skills||[]);
+  const occUsed=ctPointsUsed('occ'), occMax=ctOccPts();
+  const intUsed=ctPointsUsed('int'), intMax=ctIntPts();
+  const BT='background:linear-gradient(135deg,#1A4A2A,#2A6A4A)';
+
+  const makeSkillRow=(sk,pool)=>{
+    const isOcc=pool==='occ';
+    const cur=st.skills?.[sk.id]||0;
+    const total=sk.base+cur;
+    const used=isOcc?occUsed:intUsed;
+    const max=isOcc?occMax:intMax;
+    const canAdd=used<max && total<99;
+    return `<div style="display:flex;align-items:center;gap:.4rem;padding:.25rem 0;border-bottom:1px solid ${isOcc?'#0F2818':'#1A2810'};">
+      <span style="flex:1;font-size:10px;color:${isOcc?'#4AB880':'#8AB870'};">${sk.n}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:${isOcc?'#4AB880':'#6A9A5A'};min-width:28px;text-align:right;">${total}%</span>
+      <button onclick="ctAddSkill('${sk.id}',-5,'${pool}')" style="background:#0A1A10;border:1px solid #1A3A1A;color:#4AB880;padding:1px 5px;cursor:pointer;border-radius:3px;font-size:10px;">−</button>
+      <button onclick="ctAddSkill('${sk.id}',5,'${pool}')" style="background:${canAdd?'#1A4A2A':'#0A0A0A'};border:1px solid ${canAdd?'#2A6A4A':'#1A1A1A'};color:${canAdd?'#4AB880':'#2A3A2A'};padding:1px 5px;cursor:pointer;border-radius:3px;font-size:10px;">+</button>
+    </div>`;
+  };
+
+  const occRows=CT_SKILLS_LIST.filter(sk=>occSkillNames.includes(sk.n)).map(sk=>makeSkillRow(sk,'occ')).join('');
+  const intRows=CT_SKILLS_LIST.filter(sk=>!occSkillNames.includes(sk.n)).map(sk=>makeSkillRow(sk,'int')).join('');
+  const esquive=Math.floor((st.dex||0)/2);
+
+  $('lp').innerHTML=`
+    <div class="sh" style="color:#2A6A4A;">Compétences</div>
+    <div class="ss">${st.occupation?.n||'—'} · Répartissez les points d'occupation et d'intérêt</div>
+    <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;">
+      <div style="flex:1;padding:.5rem .7rem;background:#060E0A;border:1px solid #0F2818;border-radius:6px;min-width:140px;">
+        <div style="font-family:'Cinzel',serif;font-size:9px;color:#2A6A4A;letter-spacing:.1em;margin-bottom:.2rem;">POINTS D'OCCUPATION</div>
+        <div style="font-family:'Cinzel Decorative',serif;font-size:20px;color:#4AB880;">${occMax-occUsed} <span style="font-size:11px;color:#3A5A4A;">/ ${occMax}</span></div>
+        <div style="font-size:9px;color:#3A5A4A;">EDU (${st.edu||'?'}) × 4</div>
+      </div>
+      <div style="flex:1;padding:.5rem .7rem;background:#060E0A;border:1px solid #0F2818;border-radius:6px;min-width:140px;">
+        <div style="font-family:'Cinzel',serif;font-size:9px;color:#2A6A4A;letter-spacing:.1em;margin-bottom:.2rem;">INTÉRÊT PERSONNEL</div>
+        <div style="font-family:'Cinzel Decorative',serif;font-size:20px;color:#6AB860;">${intMax-intUsed} <span style="font-size:11px;color:#3A5A4A;">/ ${intMax}</span></div>
+        <div style="font-size:9px;color:#3A5A4A;">INT (${st.int||'?'}) × 2</div>
+      </div>
+    </div>
+    <div style="font-family:'Cinzel',serif;font-size:10px;color:#4AB880;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;border-bottom:1px solid #0F2818;padding-bottom:.3rem;">
+      ✦ Compétences d'occupation <span style="color:#3A5A4A;font-size:9px;">(points verts)</span>
+    </div>
+    <div style="margin-bottom:.8rem;">${occRows||'<span style="font-size:10px;color:#3A5A4A;">Sélectionnez d\'abord une occupation.</span>'}</div>
+    <div style="font-family:'Cinzel',serif;font-size:10px;color:#6AB860;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.3rem;border-bottom:1px solid #0F2818;padding-bottom:.3rem;">
+      ◆ Intérêt personnel <span style="color:#3A5A4A;font-size:9px;">(autres compétences)</span>
+    </div>
+    <div style="margin-bottom:.8rem;">${intRows}</div>
+    <div style="font-size:10px;color:#3A5A4A;padding:.4rem .6rem;background:#060E0A;border:1px solid #0F2818;border-radius:4px;margin-bottom:.8rem;">
+      Esquive (auto) : <strong style="color:#4AB880">${esquive}%</strong> — Langues maternelles : <strong style="color:#4AB880">${st.edu||'?'}%</strong>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goCT(1)">← Occupation</button>
+      <button class="btn btn-p" onclick="goCT(3);" style="${BT}">Suivant : Identité →</button>
+    </div>`;
 }
 function renderCTIdentity(){
   $('lp').innerHTML=`<div class="sh" style="color:#2A6A4A;">Identité</div><div class="ss">Qui êtes-vous, enquêteur des mystères ?</div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Nom de l'enquêteur</label><input class="inp" value="${C.name||''}" oninput="C.name=this.value" placeholder="Nom complet"></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${C.player||''}" oninput="C.player=this.value" placeholder="Votre nom"></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${C.age||''}" oninput="C.age=this.value" placeholder="Âge"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${C.age||''}" oninput="C.age=this.value" placeholder="Âge (modificateurs à 40+ et 50+)"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Genre</label>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
+        ${['Masculin','Féminin','Non-binaire','Autre'].map(g=>`<button class="btn btn-s" onclick="C.ct.gender='${g}';renderCTIdentity()" style="${(C.ct?.gender||'')=== g?'background:#2A6A4A;color:#fff;':''}">${g}</button>`).join('')}
+      </div></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Portrait (URL)</label><input class="inp" value="${C.photo||''}" oninput="C.photo=this.value" placeholder="https://..."></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, traumas, connexions étranges...">${C.bg_story||''}</textarea></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Idéologie / Croyances</label><input class="inp" value="${C.ct?.beliefs||''}" oninput="C.ct.beliefs=this.value" placeholder="Ce en quoi vous croyez fermement..."></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Personne significative</label><input class="inp" value="${C.ct?.keyPerson||''}" oninput="C.ct.keyPerson=this.value" placeholder="Qui compte le plus pour vous ?"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, traumas, connexions avec l'occulte...">${C.bg_story||''}</textarea></div>
     <div class="btn-row">
-      <button class="btn btn-s" onclick="goCT(1)">← Occupation</button>
-      <button class="btn btn-p" onclick="if(C.name)goCT(3);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Résumé →</button>
+      <button class="btn btn-s" onclick="goCT(2)">← Compétences</button>
+      <button class="btn btn-p" onclick="if(C.name)goCT(4);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Résumé →</button>
     </div>`;
 }
 function renderCTSummary(){
   const st=C.ct||{};
   const pv=st.tai&&st.con?Math.ceil((st.tai+st.con)/10):0;
   const pm=st.pou?Math.floor(st.pou/5):0;
+  const esquive=Math.floor((st.dex||0)/2);
   const statRows=CT_STATS_KEYS.map(s=>`
-    <div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid #0F2818;">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.25rem 0;border-bottom:1px solid #0F2818;">
       <span style="font-family:'Cinzel',serif;font-size:10px;color:#2A6A4A;">${CT_STAT_LABELS[s]} <span style="color:#3A5A4A;font-size:9px;">— ${CT_STAT_NAMES[s]}</span></span>
-      <span style="font-family:'Share Tech Mono',monospace;font-size:13px;color:#4AB880;">${st[s]||'—'} %</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#4AB880;">${st[s]||'—'}% <span style="color:#2A4A3A;font-size:9px;">½${Math.floor((st[s]||0)/2)} ⅕${Math.floor((st[s]||0)/5)}</span></span>
     </div>`).join('');
+  const skillsWithPoints=Object.entries(st.skills||{}).filter(([,v])=>v>0);
+  const occNames=(st.occupation?.skills||[]);
+  const skillsHtml=skillsWithPoints.length?`<div style="margin-top:.6rem;"><div style="font-family:'Cinzel',serif;font-size:9px;color:#2A6A4A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;">Compétences développées</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem;">${skillsWithPoints.map(([id,v])=>{
+      const sk=CT_SKILLS_LIST.find(s=>s.id===id);
+      if(!sk)return'';
+      const total=sk.base+v;
+      const isOcc=occNames.includes(sk.n);
+      return `<span style="background:#060E0A;border:1px solid ${isOcc?'#1A5A2A':'#0F3A18'};color:${isOcc?'#4AB880':'#6A9A5A'};font-size:9px;padding:2px 7px;border-radius:3px;">${sk.n} ${total}%</span>`;
+    }).join('')}</div></div>`:'';
   $('lp').innerHTML=`
     <div class="sh" style="color:#2A6A4A;">Résumé</div>
     <div class="ss">${C.name||'Enquêteur'} · ${st.occupation?.n||'—'} · Call of Cthulhu 7e</div>
-    <div style="background:#060E0A;border:1px solid #0F2818;border-radius:8px;padding:.9rem;margin-bottom:.7rem;">${statRows}</div>
-    <div style="display:flex;gap:1.2rem;padding:.5rem .9rem;background:#060E0A;border:1px solid #0F2818;border-radius:6px;margin-bottom:1rem;font-size:11px;color:#3A6A4A;font-family:'Share Tech Mono',monospace;">
-      <span>PV : ${pv}</span><span>PM : ${pm}</span><span>SAN : ${st.san||0}</span><span>LUCK : ${st.luck||0}</span>
+    <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;padding:.6rem;background:#060E0A;border:1px solid #0F2818;border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#4AB880;">
+      <span>❤ PV : ${pv}</span><span>✦ PM : ${pm}</span>
+      <span>🧠 SAN : ${st.san||0}</span><span>🍀 LUCK : ${st.luck||0}</span>
+      <span>↩ Esquive : ${esquive}%</span>
     </div>
+    <div style="background:#060E0A;border:1px solid #0F2818;border-radius:8px;padding:.8rem;margin-bottom:.7rem;">${statRows}${skillsHtml}</div>
     <div class="btn-row">
-      <button class="btn btn-s" onclick="goCT(2)">← Identité</button>
+      <button class="btn btn-s" onclick="goCT(3)">← Identité</button>
       <button class="btn btn-p" onclick="saveCTChar();" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">✓ Sauvegarder</button>
     </div>`;
 }
 function saveCTChar(){
-  if(!C.name){ alert('Entrez un nom.'); goCT(2); return; }
+  if(!C.name){ alert('Entrez un nom.'); goCT(3); return; }
   saveToRoster();
   $('ct-nav').classList.remove('active'); $('nav').style.display='flex';
   showTitle();
