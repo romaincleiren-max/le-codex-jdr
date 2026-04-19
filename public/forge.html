@@ -3636,6 +3636,18 @@ const DH_STATS_KEYS=['ws','bs','s','t','ag','int','per','wp','fel'];
 const DH_STAT_LABELS={ws:'CC',bs:'CT',s:'F',t:'E',ag:'Ag',int:'Int',per:'Per',wp:'Vol',fel:'Soc'};
 const DH_STAT_NAMES={ws:'Comp. Combat',bs:'Comp. Tir',s:'Force',t:'Endurance',ag:'Agilité',int:'Intelligence',per:'Perception',wp:'Volonté',fel:'Sociabilité'};
 
+// Helpers de navigation sans apostrophes dans les attributs HTML
+function dhNav(n){
+  const ok={1:DH_STATS_KEYS.some(s=>C.dh[s]>0),2:!!C.dh.homeworld,3:!!C.dh.career,4:!!C.name};
+  const msg={1:'Lancez les dés.',2:'Choisissez un monde.',3:'Choisissez une carrière.',4:'Entrez un nom.'};
+  if(ok[n])goDH(n); else alert(msg[n]);
+}
+function ctNav(n){
+  const ok={1:CT_STATS_KEYS.some(s=>C.ct[s]>0),2:!!C.ct.occupation,3:true,4:!!C.name};
+  const msg={1:'Lancez les dés.',2:'Choisissez une occupation.',3:'',4:'Entrez un nom.'};
+  if(ok[n])goCT(n); else alert(msg[n]);
+}
+
 function rollDH(){
   DH_STATS_KEYS.forEach(s=>{ C.dh[s]=(Math.floor(Math.random()*10)+1)+(Math.floor(Math.random()*10)+1)+25; });
   // Sauvegarder les stats brutes pour que le homeworld puisse être changé sans empiler les bonus
@@ -3664,14 +3676,14 @@ function renderDHStats(){
     <button class="btn btn-p" onclick="rollDH()" style="margin-bottom:1.2rem;background:linear-gradient(135deg,#6B0000,#8B0000);">🎲 Lancer les dés</button>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1.2rem;">${rows}</div>
     <div style="font-size:10px;color:#5A3A2A;margin-bottom:.8rem;font-family:'Share Tech Mono',monospace;">Bonus de Caractéristique = valeur ÷ 10 (partie entière)</div>
-    <div class="btn-row"><button class="btn btn-p" onclick="if(DH_STATS_KEYS.some(s=>C.dh[s]>0))goDH(1);else alert('Lancez les dés d\'abord.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Monde d'Origine →</button></div>`;
+    <div class="btn-row"><button class="btn btn-p" onclick="dhNav(1)" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Monde d'Origine →</button></div>`;
 }
 function renderDHHomeworld(){
   $('lp').innerHTML=`<div class="sh" style="color:#8B0000;">Monde d'Origine</div><div class="ss">D'où venez-vous, acolyte ? Votre passé vous a forgé.</div>
     <div class="grid" id="dh-hwg"></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goDH(0)">← Caractéristiques</button>
-      <button class="btn btn-p" onclick="if(C.dh.homeworld)goDH(2);else alert('Choisissez un monde d\'origine.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Carrière →</button>
+      <button class="btn btn-p" onclick="dhNav(2)" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Carrière →</button>
     </div>`;
   DH_HOMEWORLDS.forEach(hw=>{
     const d=document.createElement('div'); d.className='card'+(C.dh.homeworld?.id===hw.id?' sel':'');
@@ -3707,7 +3719,7 @@ function renderDHCareer(){
     <div class="grid" id="dh-cg"></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goDH(1)">← Monde d'Origine</button>
-      <button class="btn btn-p" onclick="if(C.dh.career)goDH(3);else alert('Choisissez une carrière.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Identité →</button>
+      <button class="btn btn-p" onclick="dhNav(3)" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Identité →</button>
     </div>`;
   DH_CAREERS.forEach(career=>{
     const d=document.createElement('div'); d.className='card'+(C.dh.career?.id===career.id?' sel':'');
@@ -3735,7 +3747,7 @@ function renderDHIdentity(){
     <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, motivations, secrets impériaux...">${C.bg_story||''}</textarea></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goDH(2)">← Carrière</button>
-      <button class="btn btn-p" onclick="if(C.name)goDH(4);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Résumé →</button>
+      <button class="btn btn-p" onclick="dhNav(4)" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Résumé →</button>
     </div>`;
 }
 function renderDHSummary(){
@@ -3896,14 +3908,14 @@ function renderCTStats(){
     ${note}
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.3rem;">${rows}</div>
     ${derived}
-    <div class="btn-row"><button class="btn btn-p" onclick="if(CT_STATS_KEYS.some(s=>C.ct[s]>0))goCT(1);else alert('Lancez les dés d\'abord.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Occupation →</button></div>`;
+    <div class="btn-row"><button class="btn btn-p" onclick="ctNav(1)" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Occupation →</button></div>`;
 }
 function renderCTOccupation(){
   $('lp').innerHTML=`<div class="sh" style="color:#2A6A4A;">Occupation</div><div class="ss">Qui étiez-vous avant de croiser l'indicible ?</div>
     <div class="grid" id="ct-og"></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goCT(0)">← Caractéristiques</button>
-      <button class="btn btn-p" onclick="if(C.ct.occupation)goCT(2);else alert('Choisissez une occupation.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Compétences →</button>
+      <button class="btn btn-p" onclick="ctNav(2)" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Compétences →</button>
     </div>`;
   CT_OCCUPATIONS.forEach(occ=>{
     const pts=Math.floor((C.ct.edu||60)/5)*4;
@@ -4019,7 +4031,7 @@ function renderCTIdentity(){
     <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, traumas, connexions avec l'occulte...">${C.bg_story||''}</textarea></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goCT(2)">← Compétences</button>
-      <button class="btn btn-p" onclick="if(C.name)goCT(4);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Résumé →</button>
+      <button class="btn btn-p" onclick="ctNav(4)" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Résumé →</button>
     </div>`;
 }
 function renderCTSummary(){
