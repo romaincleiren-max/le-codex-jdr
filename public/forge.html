@@ -3638,6 +3638,10 @@ const DH_STAT_NAMES={ws:'Comp. Combat',bs:'Comp. Tir',s:'Force',t:'Endurance',ag
 
 function rollDH(){
   DH_STATS_KEYS.forEach(s=>{ C.dh[s]=(Math.floor(Math.random()*10)+1)+(Math.floor(Math.random()*10)+1)+25; });
+  // Sauvegarder les stats brutes pour que le homeworld puisse être changé sans empiler les bonus
+  C.dh._base={};
+  DH_STATS_KEYS.forEach(s=>{ C.dh._base[s]=C.dh[s]; });
+  C.dh.homeworld=null;
   renderDHStats();
 }
 function goDH(n){
@@ -3684,10 +3688,12 @@ function renderDHHomeworld(){
   });
 }
 function applyDHHomeworld(hw){
-  // Appliquer les modificateurs de stats du homeworld
+  // Repartir toujours des stats brutes (évite l'accumulation si l'utilisateur change de monde)
+  if(C.dh._base) DH_STATS_KEYS.forEach(s=>{ C.dh[s]=C.dh._base[s]; });
+  // Appliquer les modificateurs du monde choisi
   if(hw.bonusStat) C.dh[hw.bonusStat]=(C.dh[hw.bonusStat]||0)+hw.bonusVal;
   if(hw.malusStat) C.dh[hw.malusStat]=Math.max(15,(C.dh[hw.malusStat]||0)-hw.malusVal);
-  // Calculer blessures et destin
+  // Calculer blessures, destin et mouvement
   const woundRoll=(Math.floor(Math.random()*5)+1);
   C.dh.wounds=hw.woundBase+woundRoll+Math.floor((C.dh.t||30)/10);
   const fateRoll=(Math.floor(Math.random()*10)+1);
