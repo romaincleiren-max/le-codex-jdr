@@ -83,7 +83,8 @@
       "Bash(node -e ' *)",
       "Bash(git push *)",
       "Bash(head -n 4118 \"c:\\\\Users\\\\User\\\\Documents\\\\le-codex\\\\src\\\\main.jsx\")",
-      "Bash(mv /tmp/main_trimmed.jsx \"c:\\\\Users\\\\User\\\\Documents\\\\le-codex\\\\src\\\\main.jsx\")"
+      "Bash(mv /tmp/main_trimmed.jsx \"c:\\\\Users\\\\User\\\\Documents\\\\le-codex\\\\src\\\\main.jsx\")",
+      "Bash(grep \"^[0-9]*:\\\\..*{\")"
     ],
     "additionalDirectories": [
       "d:\\Projets\\Projet - Jeux vidéo\\TavernGame",

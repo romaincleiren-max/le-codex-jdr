@@ -612,6 +612,24 @@ body.printing #ps-print{display:block!important;}
 .scn-end{background:#0D0806;border:2px solid var(--gold);padding:1.5rem;text-align:center;margin:1rem 0;}
 .scn-end-t{font-family:'Cinzel Decorative',serif;font-size:18px;color:var(--gold);margin-bottom:.5rem;}
 .scn-end-sub{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-d);margin-bottom:1rem;}
+/* ── System Selection ─────────────────────────────── */
+#sys-sel{position:fixed;inset:0;z-index:9500;display:none;align-items:center;justify-content:center;background:rgba(4,2,0,.93);backdrop-filter:blur(6px);}
+#sys-sel.open{display:flex;}
+.sys-inner{text-align:center;padding:1.5rem;max-width:780px;width:100%;}
+.sys-title{font-family:'Cinzel Decorative',serif;font-size:clamp(18px,3.5vw,32px);color:var(--gold);margin-bottom:.3rem;}
+.sys-sub{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-d);letter-spacing:.2em;text-transform:uppercase;margin-bottom:1.8rem;}
+.sys-tiles{display:flex;gap:1.2rem;flex-wrap:wrap;justify-content:center;margin-bottom:1.5rem;}
+.sys-tile{width:200px;background:#0F0A06;border:2px solid #2A1A08;border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .18s,border-color .18s,box-shadow .18s;text-align:left;flex-shrink:0;}
+.sys-tile:hover{transform:translateY(-6px);box-shadow:0 16px 40px rgba(0,0,0,.7);}
+.sys-tile-img{width:100%;height:130px;object-fit:cover;}
+.sys-tile-ph{width:100%;height:130px;display:flex;align-items:center;justify-content:center;font-size:52px;background:#1A1208;}
+.sys-tile-body{padding:.75rem .8rem .9rem;}
+.sys-tile-name{font-family:'Cinzel Decorative',serif;font-size:13px;margin-bottom:2px;}
+.sys-tile-sub{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.13em;color:var(--gold-d);text-transform:uppercase;margin-bottom:.45rem;}
+.sys-tile-desc{font-size:10px;color:#7A6A4A;line-height:1.5;}
+/* DH & CT nav bars */
+#dh-nav,#ct-nav{display:none;flex-wrap:wrap;gap:4px;padding:.4rem .6rem;background:#0A0604;border-bottom:1px solid #2A1808;}
+#dh-nav.active,#ct-nav.active{display:flex;}
 </style>
 </head>
 <body>
@@ -639,6 +657,16 @@ body.printing #ps-print{display:block!important;}
       <button class="rc-nav next" id="rc-next" onclick="rosterScroll(1)" aria-label="Suivant">›</button>
     </div>
     <div class="roster-dots" id="roster-dots"></div>
+  </div>
+</div>
+
+<!-- SYSTEM SELECTION OVERLAY -->
+<div id="sys-sel">
+  <div class="sys-inner">
+    <div class="sys-title">⚔ Choisir votre Univers</div>
+    <div class="sys-sub">Sélectionnez votre système de jeu de rôle</div>
+    <div class="sys-tiles" id="sys-tiles"></div>
+    <button class="btn btn-s" onclick="hideSysSel()">← Annuler</button>
   </div>
 </div>
 
@@ -710,6 +738,18 @@ body.printing #ps-print{display:block!important;}
     <div class="pill" id="p5" onclick="go(5)">6 · Identité</div>
     <div class="pill" id="p6" onclick="go(6)">7 · Résumé & PDF</div>
     <div class="pill" id="p8" onclick="go(8)" style="display:none;">⚔ Scénario</div>
+  </div>
+  <div id="dh-nav">
+    <div class="pill" id="dh0" onclick="goDH(0)">1 · Caractéristiques</div>
+    <div class="pill" id="dh1" onclick="goDH(1)">2 · Carrière</div>
+    <div class="pill" id="dh2" onclick="goDH(2)">3 · Identité</div>
+    <div class="pill" id="dh3" onclick="goDH(3)">4 · Résumé</div>
+  </div>
+  <div id="ct-nav">
+    <div class="pill" id="ct0" onclick="goCT(0)">1 · Caractéristiques</div>
+    <div class="pill" id="ct1" onclick="goCT(1)">2 · Occupation</div>
+    <div class="pill" id="ct2" onclick="goCT(2)">3 · Identité</div>
+    <div class="pill" id="ct3" onclick="goCT(3)">4 · Résumé</div>
   </div>
   <div id="scn-bar" style="display:none;">
     <span class="scn-title" id="scn-title-bar">La Maîtresse des Doigts</span>
@@ -1374,11 +1414,11 @@ function getLanguages(){
 function showTitle(){$('ts').style.display='flex';$('gs').style.display='none';}
 function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';}
 function newChar(){
-  C={name:'',player:'',age:'',bg_story:'',race:null,cls:null,sub:null,background:null,alignment:null,
+  C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null,background:null,alignment:null,
     stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
     level:1,xp:0,profBonus:2,traits:[],alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
-    asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null};
-  showGame();go(0);updateRight();
+    asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e'};
+  showSysSel();
 }
 function loadChar(e){
   const f=e.target.files[0];if(!f)return;
@@ -2907,7 +2947,19 @@ function openCharFromRoster(id){
   if(!C.asi) C.asi={str:0,dex:0,con:0,int:0,wis:0,cha:0};
   if(!C.equippedArmorId) C.equippedArmorId=null;
   if(!C.equipped) C.equipped={};
-  showGame(); go(6); updateRight();
+  if(!C.system) C.system='dnd5e';
+  if(C.system==='dark_heresy'){
+    $('nav').style.display='none';$('dh-nav').classList.add('active');$('ct-nav').classList.remove('active');
+    if(!C.dh) C.dh={};
+    showGame();goDH(3);
+  } else if(C.system==='cthulhu7'){
+    $('nav').style.display='none';$('dh-nav').classList.remove('active');$('ct-nav').classList.add('active');
+    if(!C.ct) C.ct={};
+    showGame();goCT(3);
+  } else {
+    $('nav').style.display='flex';$('dh-nav').classList.remove('active');$('ct-nav').classList.remove('active');
+    showGame();go(6);updateRight();
+  }
 }
 
 function openBagFromRoster(id){
@@ -3468,6 +3520,264 @@ document.addEventListener('dragend',function(){
   _reBagDragItem=null;
 });
 // DRAG AND DROP
+// ══════════════════════════════════════════════════════════════════════════
+// SÉLECTION DU SYSTÈME DE JEU
+// ══════════════════════════════════════════════════════════════════════════
+let _gameSystems = [
+  {id:'dnd5e',       name:'D&D 5e',          subtitle:'Donjons & Dragons',   description:'Le système fantasy le plus populaire. Races, classes, sorts et épopées héroïques.', color:'#C9A84C', emoji:'⚔️'},
+  {id:'dark_heresy', name:'Dark Heresy',      subtitle:'Warhammer 40,000',    description:'Servez l\'Imperium dans les ombres du 41ème millénaire. Enquêtes, hérésies et guerres stellaires.', color:'#8B0000', emoji:'🔱'},
+  {id:'cthulhu7',    name:'Call of Cthulhu',  subtitle:'7ème Édition',        description:'Horreur cosmique lovecraftienne. Santé mentale, occulte et terreurs indicibles.', color:'#2A6A4A', emoji:'🐙'}
+];
+
+async function fetchGameSystemImages(){
+  try{
+    const sc=getSupaClient(); if(!sc) return;
+    const {data}=await sc.from('game_systems').select('id,image_url,color,enabled').order('sort_order');
+    if(data) data.forEach(s=>{
+      const gs=_gameSystems.find(x=>x.id===s.id);
+      if(gs){ if(s.image_url) gs.image_url=s.image_url; if(s.color) gs.color=s.color; if(s.enabled===false) gs.disabled=true; }
+    });
+  }catch(e){}
+  renderSysTiles();
+}
+
+function showSysSel(){ $('sys-sel').classList.add('open'); renderSysTiles(); }
+function hideSysSel(){ $('sys-sel').classList.remove('open'); }
+
+function renderSysTiles(){
+  const c=$('sys-tiles'); if(!c) return;
+  c.innerHTML=_gameSystems.filter(s=>!s.disabled).map(s=>`
+    <div class="sys-tile" onclick="selectSystem('${s.id}')" style="border-color:${s.color}60;">
+      ${s.image_url
+        ? `<img src="${s.image_url}" class="sys-tile-img" alt="${s.name}">`
+        : `<div class="sys-tile-ph">${s.emoji}</div>`}
+      <div class="sys-tile-body">
+        <div class="sys-tile-name" style="color:${s.color}">${s.name}</div>
+        <div class="sys-tile-sub">${s.subtitle}</div>
+        <div class="sys-tile-desc">${s.description}</div>
+      </div>
+    </div>`).join('');
+}
+
+function selectSystem(id){
+  hideSysSel();
+  C.system=id;
+  $('dh-nav').classList.remove('active');
+  $('ct-nav').classList.remove('active');
+  if(id==='dnd5e'){
+    $('nav').style.display='flex';
+    showGame(); go(0); updateRight();
+  } else if(id==='dark_heresy'){
+    $('nav').style.display='none'; $('dh-nav').classList.add('active');
+    if(!C.dh) C.dh={ws:0,bs:0,s:0,t:0,ag:0,int:0,per:0,wp:0,fel:0,career:null};
+    showGame(); goDH(0);
+  } else if(id==='cthulhu7'){
+    $('nav').style.display='none'; $('ct-nav').classList.add('active');
+    if(!C.ct) C.ct={for:0,con:0,tai:0,dex:0,app:0,int:0,pou:0,edu:0,occupation:null,san:0,luck:0};
+    showGame(); goCT(0);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// DARK HERESY — Création de personnage
+// ══════════════════════════════════════════════════════════════════════════
+const DH_CAREERS=[
+  {id:'adepte',     n:'Adepte',           tag:'Administratum',          desc:'Scribes et bureaucrates au service de l\'Imperium.'},
+  {id:'arbitre',    n:'Arbitre',           tag:'Adeptus Arbites',        desc:'Gardiens implacables de la loi impériale.'},
+  {id:'assassin',   n:'Assassin',          tag:'Officio Assassinorum',   desc:'Tueurs d\'élite au service de l\'Inquisition.'},
+  {id:'garde',      n:'Garde Impérial',    tag:'Astra Militarum',        desc:'Soldats endurcis par mille guerres stellaires.'},
+  {id:'psyker',     n:'Psyker Sanctionné', tag:'Psyker',                 desc:'Utilisateurs du Warp sous contrôle strict.'},
+  {id:'pretre',     n:'Prêtre',            tag:'Ecclesiarchy',           desc:'Serviteurs fanatiques du Dieu-Empereur.'},
+  {id:'explorateur',n:'Explorateur',       tag:'Rogue Trader',           desc:'Aventuriers des confins de l\'espace connu.'},
+  {id:'techno',     n:'Techno-Prêtre',     tag:'Adeptus Mechanicus',     desc:'Dévots de l\'Omnimessie et du culte de la Machine.'}
+];
+const DH_STATS_KEYS=['ws','bs','s','t','ag','int','per','wp','fel'];
+const DH_STAT_LABELS={ws:'CC',bs:'CT',s:'F',t:'E',ag:'Ag',int:'Int',per:'Per',wp:'Vol',fel:'Soc'};
+const DH_STAT_NAMES={ws:'Comp. Combat',bs:'Comp. Tir',s:'Force',t:'Endurance',ag:'Agilité',int:'Intelligence',per:'Perception',wp:'Volonté',fel:'Sociabilité'};
+
+function rollDH(){
+  DH_STATS_KEYS.forEach(s=>{ C.dh[s]=(Math.floor(Math.random()*10)+1)+(Math.floor(Math.random()*10)+1)+25; });
+  renderDHStats();
+}
+function goDH(n){
+  document.querySelectorAll('#dh-nav .pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
+  [renderDHStats,renderDHCareer,renderDHIdentity,renderDHSummary][n]?.();
+  $('lp').scrollTop=0;
+}
+function renderDHStats(){
+  const st=C.dh||{};
+  const hasRolled=DH_STATS_KEYS.some(s=>st[s]>0);
+  const rows=DH_STATS_KEYS.map(s=>`
+    <div style="background:#1A0A06;border:1px solid #3A1208;border-radius:5px;padding:.5rem .3rem;text-align:center;">
+      <div style="font-family:'Cinzel',serif;font-size:10px;color:#8B0000;letter-spacing:.06em;">${DH_STAT_LABELS[s]}</div>
+      <div style="font-size:9px;color:#5A3A2A;margin:.1rem 0 .3rem;">${DH_STAT_NAMES[s]}</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:22px;color:${hasRolled?'#C9A84C':'#3A2810'};">${st[s]||'—'}</div>
+    </div>`).join('');
+  $('lp').innerHTML=`
+    <div class="sh" style="color:#8B0000;">Caractéristiques</div>
+    <div class="ss">Warhammer 40,000 · Dark Heresy · Lancez 2D10+25</div>
+    <button class="btn btn-p" onclick="rollDH()" style="margin-bottom:1.2rem;background:linear-gradient(135deg,#6B0000,#8B0000);">🎲 Lancer les dés</button>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1.2rem;">${rows}</div>
+    <div class="btn-row"><button class="btn btn-p" onclick="if(DH_STATS_KEYS.some(s=>C.dh[s]>0))goDH(1);else alert('Lancez les dés d\'abord.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Carrière →</button></div>`;
+}
+function renderDHCareer(){
+  $('lp').innerHTML=`<div class="sh" style="color:#8B0000;">Choisir une Carrière</div><div class="ss">Votre rôle au service de l'Inquisition</div>
+    <div class="grid" id="dh-cg"></div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goDH(0)">← Caractéristiques</button>
+      <button class="btn btn-p" onclick="if(C.dh.career)goDH(2);else alert('Choisissez une carrière.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Identité →</button>
+    </div>`;
+  DH_CAREERS.forEach(career=>{
+    const d=document.createElement('div'); d.className='card'+(C.dh.career?.id===career.id?' sel':'');
+    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${career.n}</div><div class="ct" style="color:#8B0000;">${career.tag}</div><div class="cd">${career.desc}</div>`;
+    d.onclick=()=>{C.dh.career=career; renderDHCareer();};
+    $('dh-cg').appendChild(d);
+  });
+}
+function renderDHIdentity(){
+  $('lp').innerHTML=`<div class="sh" style="color:#8B0000;">Identité</div><div class="ss">Qui êtes-vous, serviteur de l'Imperium ?</div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Nom de l'acolyte</label><input class="inp" value="${C.name||''}" oninput="C.name=this.value" placeholder="Nom de l'acolyte"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${C.player||''}" oninput="C.player=this.value" placeholder="Votre nom"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${C.age||''}" oninput="C.age=this.value" placeholder="Âge"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Portrait (URL)</label><input class="inp" value="${C.photo||''}" oninput="C.photo=this.value" placeholder="https://..."></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, motivations, secrets impériaux...">${C.bg_story||''}</textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goDH(1)">← Carrière</button>
+      <button class="btn btn-p" onclick="if(C.name)goDH(3);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Résumé →</button>
+    </div>`;
+}
+function renderDHSummary(){
+  const st=C.dh||{};
+  const statRows=DH_STATS_KEYS.map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid #2A1208;">
+      <span style="font-family:'Cinzel',serif;font-size:10px;color:#8B0000;">${DH_STAT_LABELS[s]} <span style="color:#5A3A2A;font-size:9px;">— ${DH_STAT_NAMES[s]}</span></span>
+      <span style="font-family:'Cinzel Decorative',serif;font-size:13px;color:#C9A84C;">${st[s]||'—'}</span>
+    </div>`).join('');
+  $('lp').innerHTML=`
+    <div class="sh" style="color:#8B0000;">Résumé</div>
+    <div class="ss">${C.name||'Acolyte'} · ${st.career?.n||'—'} · Dark Heresy</div>
+    <div style="background:#12090A;border:1px solid #3A1208;border-radius:8px;padding:.9rem;margin-bottom:1rem;">${statRows}</div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goDH(2)">← Identité</button>
+      <button class="btn btn-p" onclick="saveDHChar();" style="background:linear-gradient(135deg,#6B0000,#8B0000);">✓ Sauvegarder</button>
+    </div>`;
+}
+function saveDHChar(){
+  if(!C.name){ alert('Entrez un nom.'); goDH(2); return; }
+  saveToRoster();
+  $('dh-nav').classList.remove('active'); $('nav').style.display='flex';
+  showTitle();
+}
+
+// ══════════════════════════════════════════════════════════════════════════
+// CALL OF CTHULHU 7e — Création de personnage
+// ══════════════════════════════════════════════════════════════════════════
+const CT_OCCUPATIONS=[
+  {id:'medecin',       n:'Médecin',               skills:['Médecine','Premiers soins','Biologie','Pharmacologie']},
+  {id:'journaliste',   n:'Journaliste',            skills:['Bibliothèque','Persuasion','Écriture','Psychologie']},
+  {id:'detective',     n:'Détective privé',        skills:['Pister','Discrétion','Psychologie','Droit']},
+  {id:'antiquaire',    n:'Antiquaire',             skills:['Évaluation','Histoire','Occultisme','Persuasion']},
+  {id:'archeologue',   n:'Archéologue',            skills:['Archéologie','Histoire','Langues anciennes','Escalade']},
+  {id:'professeur',    n:'Professeur',             skills:['Bibliothèque','Histoire','Occultisme','Enseignement']},
+  {id:'chasseur',      n:'Chasseur',               skills:['Survie','Pister','Armes à feu','Premiers soins']},
+  {id:'ingenieur',     n:'Ingénieur',              skills:['Électronique','Mécanique','Sciences','Mathématiques']},
+  {id:'artiste',       n:'Artiste',                skills:['Art','Charme','Psychologie','Perception']},
+  {id:'clerc',         n:'Clerc',                  skills:['Occultisme','Histoire','Latin','Psychologie']}
+];
+const CT_STATS_KEYS=['for','con','tai','dex','app','int','pou','edu'];
+const CT_STAT_LABELS={for:'FOR',con:'CON',tai:'TAI',dex:'DEX',app:'APP',int:'INT',pou:'POU',edu:'EDU'};
+const CT_STAT_NAMES={for:'Force',con:'Constitution',tai:'Taille',dex:'Dextérité',app:'Apparence',int:'Intelligence',pou:'Pouvoir',edu:'Éducation'};
+
+function rollCT(){
+  const r3=()=>((Math.floor(Math.random()*6)+1)+(Math.floor(Math.random()*6)+1)+(Math.floor(Math.random()*6)+1))*5;
+  const r2plus6=()=>((Math.floor(Math.random()*6)+1)+(Math.floor(Math.random()*6)+1)+6)*5;
+  C.ct.for=r3(); C.ct.con=r3(); C.ct.tai=r2plus6();
+  C.ct.dex=r3(); C.ct.app=r3(); C.ct.int=r2plus6();
+  C.ct.pou=r3(); C.ct.edu=r2plus6();
+  C.ct.san=C.ct.pou;
+  C.ct.luck=r3();
+  renderCTStats();
+}
+function goCT(n){
+  document.querySelectorAll('#ct-nav .pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
+  [renderCTStats,renderCTOccupation,renderCTIdentity,renderCTSummary][n]?.();
+  $('lp').scrollTop=0;
+}
+function renderCTStats(){
+  const st=C.ct||{};
+  const hasRolled=CT_STATS_KEYS.some(s=>st[s]>0);
+  const rows=CT_STATS_KEYS.map(s=>`
+    <div style="background:#060E0A;border:1px solid #0F2818;border-radius:5px;padding:.5rem .3rem;text-align:center;">
+      <div style="font-family:'Cinzel',serif;font-size:10px;color:#2A6A4A;letter-spacing:.06em;">${CT_STAT_LABELS[s]}</div>
+      <div style="font-size:9px;color:#3A5A4A;margin:.1rem 0 .3rem;">${CT_STAT_NAMES[s]}</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:22px;color:${hasRolled?'#4AB880':'#1A3A2A'};">${st[s]||'—'}</div>
+    </div>`).join('');
+  const pv=st.tai&&st.con?Math.ceil((st.tai+st.con)/10):0;
+  const pm=st.pou?Math.floor(st.pou/5):0;
+  const derived=hasRolled?`<div style="display:flex;flex-wrap:wrap;gap:.8rem;margin:.8rem 0;font-size:11px;color:#3A6A4A;font-family:'Share Tech Mono',monospace;">
+    <span>PV : ${pv}</span><span>PM : ${pm}</span><span>SAN : ${st.san||0}</span><span>LUCK : ${st.luck||0}</span></div>`:'';
+  $('lp').innerHTML=`
+    <div class="sh" style="color:#2A6A4A;">Caractéristiques</div>
+    <div class="ss">Call of Cthulhu 7e · Valeurs en pourcentage (15–90)</div>
+    <button class="btn btn-p" onclick="rollCT()" style="margin-bottom:1.2rem;background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">🎲 Lancer les dés</button>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.3rem;">${rows}</div>
+    ${derived}
+    <div class="btn-row"><button class="btn btn-p" onclick="if(CT_STATS_KEYS.some(s=>C.ct[s]>0))goCT(1);else alert('Lancez les dés d\'abord.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Occupation →</button></div>`;
+}
+function renderCTOccupation(){
+  $('lp').innerHTML=`<div class="sh" style="color:#2A6A4A;">Occupation</div><div class="ss">Qui étiez-vous avant de croiser l'indicible ?</div>
+    <div class="grid" id="ct-og"></div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goCT(0)">← Caractéristiques</button>
+      <button class="btn btn-p" onclick="if(C.ct.occupation)goCT(2);else alert('Choisissez une occupation.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Identité →</button>
+    </div>`;
+  CT_OCCUPATIONS.forEach(occ=>{
+    const d=document.createElement('div'); d.className='card'+(C.ct.occupation?.id===occ.id?' sel':'');
+    d.innerHTML=`<div class="cn" style="color:#4AB880;">${occ.n}</div><div class="cd" style="color:#5A7A6A;">Compétences : ${occ.skills.join(', ')}</div>`;
+    d.onclick=()=>{C.ct.occupation=occ; renderCTOccupation();};
+    $('ct-og').appendChild(d);
+  });
+}
+function renderCTIdentity(){
+  $('lp').innerHTML=`<div class="sh" style="color:#2A6A4A;">Identité</div><div class="ss">Qui êtes-vous, enquêteur des mystères ?</div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Nom de l'enquêteur</label><input class="inp" value="${C.name||''}" oninput="C.name=this.value" placeholder="Nom complet"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${C.player||''}" oninput="C.player=this.value" placeholder="Votre nom"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${C.age||''}" oninput="C.age=this.value" placeholder="Âge"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Portrait (URL)</label><input class="inp" value="${C.photo||''}" oninput="C.photo=this.value" placeholder="https://..."></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, traumas, connexions étranges...">${C.bg_story||''}</textarea></div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goCT(1)">← Occupation</button>
+      <button class="btn btn-p" onclick="if(C.name)goCT(3);else alert('Entrez un nom.');" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Résumé →</button>
+    </div>`;
+}
+function renderCTSummary(){
+  const st=C.ct||{};
+  const pv=st.tai&&st.con?Math.ceil((st.tai+st.con)/10):0;
+  const pm=st.pou?Math.floor(st.pou/5):0;
+  const statRows=CT_STATS_KEYS.map(s=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:.3rem 0;border-bottom:1px solid #0F2818;">
+      <span style="font-family:'Cinzel',serif;font-size:10px;color:#2A6A4A;">${CT_STAT_LABELS[s]} <span style="color:#3A5A4A;font-size:9px;">— ${CT_STAT_NAMES[s]}</span></span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:13px;color:#4AB880;">${st[s]||'—'} %</span>
+    </div>`).join('');
+  $('lp').innerHTML=`
+    <div class="sh" style="color:#2A6A4A;">Résumé</div>
+    <div class="ss">${C.name||'Enquêteur'} · ${st.occupation?.n||'—'} · Call of Cthulhu 7e</div>
+    <div style="background:#060E0A;border:1px solid #0F2818;border-radius:8px;padding:.9rem;margin-bottom:.7rem;">${statRows}</div>
+    <div style="display:flex;gap:1.2rem;padding:.5rem .9rem;background:#060E0A;border:1px solid #0F2818;border-radius:6px;margin-bottom:1rem;font-size:11px;color:#3A6A4A;font-family:'Share Tech Mono',monospace;">
+      <span>PV : ${pv}</span><span>PM : ${pm}</span><span>SAN : ${st.san||0}</span><span>LUCK : ${st.luck||0}</span>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-s" onclick="goCT(2)">← Identité</button>
+      <button class="btn btn-p" onclick="saveCTChar();" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">✓ Sauvegarder</button>
+    </div>`;
+}
+function saveCTChar(){
+  if(!C.name){ alert('Entrez un nom.'); goCT(2); return; }
+  saveToRoster();
+  $('ct-nav').classList.remove('active'); $('nav').style.display='flex';
+  showTitle();
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   // Clic sur fond sombre de l'overlay fiche → fermer
   const psOv=$('ps-overlay');
@@ -3476,6 +3786,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   const editId = localStorage.getItem('forge_edit_char_id');
   if(editId){ localStorage.removeItem('forge_edit_char_id'); openCharFromRoster(editId); }
   else{ renderRoster(); initRosterDrag(); }
+  fetchGameSystemImages();
   const ts=$('ts');
   ts.addEventListener('dragover',e=>e.preventDefault());
   ts.addEventListener('drop',e=>{

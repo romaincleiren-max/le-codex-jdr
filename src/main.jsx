@@ -1839,6 +1839,117 @@ const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacte
   );
 };
 
+// ============================================================================
+// ADMIN — SYSTÈMES DE JEU
+// ============================================================================
+const SYSTEM_DEFAULTS = [
+  { id: 'dnd5e',       name: 'D&D 5e',          subtitle: 'Donjons & Dragons 5ème Édition', color: '#C9A84C', emoji: '⚔️' },
+  { id: 'dark_heresy', name: 'Dark Heresy',      subtitle: 'Warhammer 40,000',               color: '#8B0000', emoji: '🔱' },
+  { id: 'cthulhu7',    name: 'Call of Cthulhu',  subtitle: '7ème Édition',                   color: '#2A6A4A', emoji: '🐙' },
+];
+
+function AdminGameSystemsTab({ supabase }) {
+  const [systems, setSystems] = React.useState(SYSTEM_DEFAULTS);
+  const [saving, setSaving] = React.useState(null);
+  const [msg, setMsg] = React.useState('');
+
+  React.useEffect(() => {
+    supabase.from('game_systems').select('*').order('sort_order').then(({ data }) => {
+      if (data && data.length > 0) {
+        setSystems(prev => prev.map(s => {
+          const row = data.find(r => r.id === s.id);
+          return row ? { ...s, ...row } : s;
+        }));
+      }
+    });
+  }, []);
+
+  const uploadImage = async (systemId, file) => {
+    setSaving(systemId);
+    setMsg('');
+    try {
+      const ext = file.name.split('.').pop();
+      const path = `game-systems/${systemId}.${ext}`;
+      const { error: upErr } = await supabase.storage.from('images').upload(path, file, { upsert: true });
+      if (upErr) throw upErr;
+      const { data: { publicUrl } } = supabase.storage.from('images').getPublicUrl(path);
+      await supabase.from('game_systems').upsert({ id: systemId, image_url: publicUrl }, { onConflict: 'id' });
+      setSystems(prev => prev.map(s => s.id === systemId ? { ...s, image_url: publicUrl } : s));
+      setMsg(`✓ Image mise à jour pour ${systems.find(s => s.id === systemId)?.name}`);
+    } catch (e) {
+      setMsg(`Erreur : ${e.message}`);
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  const saveUrl = async (systemId, url) => {
+    setSaving(systemId);
+    setMsg('');
+    try {
+      await supabase.from('game_systems').upsert({ id: systemId, image_url: url || null }, { onConflict: 'id' });
+      setSystems(prev => prev.map(s => s.id === systemId ? { ...s, image_url: url } : s));
+      setMsg('✓ URL enregistrée');
+    } catch (e) {
+      setMsg(`Erreur : ${e.message}`);
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  return (
+    <div>
+      <h2 className="text-3xl font-bold mb-2 text-amber-900">🎲 Systèmes de Jeu de Rôle</h2>
+      <p className="text-amber-700 mb-6">Configurez les images de couverture des systèmes affichés dans la Forge.</p>
+      {msg && <div className="mb-4 px-4 py-2 rounded-lg bg-green-50 border border-green-600 text-green-800 text-sm">{msg}</div>}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {systems.map(sys => (
+          <div key={sys.id} className="bg-slate-900 border-2 rounded-xl overflow-hidden"
+            style={{ borderColor: sys.color + '60' }}>
+            <div className="relative h-40 bg-slate-800 flex items-center justify-center overflow-hidden">
+              {sys.image_url
+                ? <img src={sys.image_url} alt={sys.name} className="w-full h-full object-cover" />
+                : <span className="text-6xl opacity-60">{sys.emoji}</span>}
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 to-transparent" />
+              <div className="absolute bottom-2 left-3">
+                <div className="font-black text-lg" style={{ color: sys.color, fontFamily: 'Cinzel Decorative, serif' }}>{sys.name}</div>
+                <div className="text-xs text-slate-400">{sys.subtitle}</div>
+              </div>
+            </div>
+            <div className="p-4 space-y-3">
+              <div>
+                <label className="block text-xs text-slate-400 mb-1 uppercase tracking-wider">URL de l'image</label>
+                <div className="flex gap-2">
+                  <input type="text" defaultValue={sys.image_url || ''}
+                    id={`url-${sys.id}`}
+                    placeholder="https://..."
+                    className="flex-1 px-3 py-2 bg-slate-800 border border-slate-600 rounded-lg text-sm text-slate-200 focus:outline-none focus:border-amber-500" />
+                  <button disabled={saving === sys.id}
+                    onClick={() => saveUrl(sys.id, document.getElementById(`url-${sys.id}`).value)}
+                    className="px-3 py-2 bg-amber-700 hover:bg-amber-600 text-white rounded-lg text-sm font-bold transition-colors disabled:opacity-50">
+                    {saving === sys.id ? '…' : '✓'}
+                  </button>
+                </div>
+              </div>
+              <div>
+                <label className="block text-xs text-slate-400 mb-1 uppercase tracking-wider">Ou uploader un fichier</label>
+                <label className="flex items-center justify-center gap-2 px-3 py-2 bg-slate-700 hover:bg-slate-600 border border-slate-500 rounded-lg text-sm text-slate-300 cursor-pointer transition-colors">
+                  {saving === sys.id ? 'Upload…' : '📁 Choisir une image'}
+                  <input type="file" accept="image/*" className="hidden"
+                    onChange={e => e.target.files[0] && uploadImage(sys.id, e.target.files[0])} />
+                </label>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="mt-6 p-4 bg-amber-50 border border-amber-300 rounded-lg text-sm text-amber-800">
+        <strong>Note :</strong> Si la table <code>game_systems</code> n'existe pas encore, exécutez d'abord <code>supabase/game_systems.sql</code> dans Supabase.
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   // i18n
   const { language, toggleLanguage, t, tTag, tDuration, tf } = useLanguage();
@@ -2944,6 +3055,7 @@ export default function App() {
                   {id: 'soumissions', icon: '📥', label: 'Soumissions', color: 'from-pink-600 to-pink-700'},
                   {id: 'tags', icon: '🏷️', label: 'Tags', color: 'from-indigo-600 to-indigo-700'},
                   {id: 'personnages', icon: '🧙', label: 'Personnages', color: 'from-violet-600 to-violet-700'},
+                  {id: 'systemes',   icon: '🎲', label: 'Systèmes JDR', color: 'from-amber-700 to-amber-800'},
                   {id: 'parametres', icon: '⚙️', label: 'Paramètres', color: 'from-slate-600 to-slate-700'}
                 ].map(tab => (
                   <button key={tab.id} onClick={() => setAdminTab(tab.id)}
@@ -3363,6 +3475,11 @@ export default function App() {
                       </div>
                     )}
                   </div>
+                )}
+
+                {/* ONGLET SYSTÈMES JDR */}
+                {adminTab === 'systemes' && (
+                  <AdminGameSystemsTab supabase={supabase} />
                 )}
 
                 {/* ONGLET PARAMETRES */}
