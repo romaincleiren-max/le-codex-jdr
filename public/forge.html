@@ -1477,9 +1477,11 @@ function getLanguages(){
 function showTitle(){$('ts').style.display='flex';$('gs').style.display='none';updateLoginStatus();}
 function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';}
 function newChar(){
-  C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null,background:null,alignment:null,
+  C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',race:null,cls:null,sub:null,background:null,alignment:null,
     stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
-    level:1,xp:0,profBonus:2,traits:[],alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
+    level:1,xp:0,profBonus:2,traits:[],ideals:'',bonds:'',flaws:'',
+    height:'',weight:'',eyes:'',hair:'',skin:'',
+    alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
     asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e'};
   showSysSel();
 }
@@ -2120,44 +2122,88 @@ function toggleSp(type,s,max){
 
 // ─── STEP 6: IDENTITY ───────────────────────────────
 function renderIdentity(){
-  $('lp').innerHTML=`<div class="sh">Identité du Personnage</div><div class="ss">Nom · Alignement · Traits · Histoire</div>
+  const photoSrc = C.photo || C.portrait_url || '';
+  $('lp').innerHTML=`
+  <div class="sh">Identité du Personnage</div>
+  <div class="ss">Nom · Portrait · Description · Alignement · Personnalité</div>
+  <div class="div"></div>
 
-  <div style="display:grid;grid-template-columns:120px 1fr;gap:1rem;align-items:start;margin-bottom:.8rem;">
-    <!-- Portrait -->
+  <div style="display:grid;grid-template-columns:130px 1fr;gap:1.2rem;align-items:start;margin-bottom:1rem;">
     <div>
       <label class="ilb">Portrait</label>
       <div id="portrait-preview" onclick="$('portrait-file').click()" style="
-        width:110px;height:140px;border:1px dashed #4A3A20;border-radius:3px;
-        background:#12100C;cursor:pointer;display:flex;flex-direction:column;
-        align-items:center;justify-content:center;overflow:hidden;position:relative;
-        transition:border-color .2s;">
-        ${C.photo
-          ? `<img src="${C.photo}" style="width:100%;height:100%;object-fit:cover;object-position:center top;">`
-          : `<span style="font-size:22px;opacity:.3;">🖼</span><span style="font-size:9px;color:#5A4A2A;margin-top:6px;text-align:center;font-family:'Courier New',monospace;">Cliquer pour<br>ajouter</span>`}
+        width:120px;height:150px;border:1px dashed rgba(201,168,76,.3);border-radius:6px;
+        background:#0F0A06;cursor:pointer;display:flex;flex-direction:column;
+        align-items:center;justify-content:center;overflow:hidden;position:relative;transition:.2s;"
+        onmouseover="this.style.borderColor='rgba(201,168,76,.6)'" onmouseout="this.style.borderColor='rgba(201,168,76,.3)'">
+        ${photoSrc
+          ? `<img src="${photoSrc}" style="width:100%;height:100%;object-fit:cover;object-position:center top;">`
+          : `<span style="font-size:28px;opacity:.25;">🖼</span><span style="font-size:8px;color:#5A4A2A;margin-top:8px;text-align:center;font-family:'Cinzel',serif;letter-spacing:.08em;">Cliquer<br>pour ajouter</span>`}
       </div>
       <input type="file" id="portrait-file" accept="image/*" style="display:none" onchange="loadPortrait(this)">
-      ${C.photo ? `<button onclick="C.photo='';renderIdentity()" style="margin-top:4px;background:none;border:none;color:#5A3A2A;font-size:9px;cursor:pointer;font-family:'Courier New',monospace;">✕ Retirer</button>` : ''}
+      <div style="margin-top:5px;display:flex;gap:.3rem;flex-wrap:wrap;">
+        <button onclick="$('portrait-file').click()" class="btn btn-s" style="padding:.2em .6em;font-size:8px;">📁 Fichier</button>
+        ${photoSrc?`<button onclick="C.photo='';C.portrait_url='';renderIdentity()" class="btn btn-s" style="padding:.2em .6em;font-size:8px;border-color:#5A2A2A;color:#8A4A4A;">✕</button>`:''}
+      </div>
+      <div style="margin-top:.5rem;">
+        <label class="ilb" style="font-size:7px;">Ou URL d'image</label>
+        <input class="ifl" style="font-size:10px;padding:.3rem .5rem;" value="${C.portrait_url||''}" placeholder="https://..." oninput="C.portrait_url=this.value;if(this.value){C.photo='';const pp=$('portrait-preview');pp.innerHTML='<img src='+JSON.stringify(this.value)+' style=&quot;width:100%;height:100%;object-fit:cover;object-position:center top;&quot;>';}">
+      </div>
     </div>
-    <!-- Nom + Joueur + Âge -->
     <div>
       <label class="ilb">Nom du personnage *</label>
       <input class="ifl" id="fn" value="${C.name}" placeholder="Le nom que portera votre héros..." oninput="C.name=this.value;updateRight()">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.6rem;margin-top:.5rem;">
-        <div><label class="ilb">Joueur</label><input class="ifl" value="${C.player}" placeholder="Votre nom" oninput="C.player=this.value"></div>
-        <div><label class="ilb">Âge</label><input class="ifl" value="${C.age}" placeholder="Ex : 28 ans" oninput="C.age=this.value"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;">
+        <div><label class="ilb">Joueur</label><input class="ifl" value="${C.player||''}" placeholder="Votre prénom" oninput="C.player=this.value"></div>
+        <div><label class="ilb">Âge</label><input class="ifl" value="${C.age||''}" placeholder="Ex : 28 ans" oninput="C.age=this.value"></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;">
+        <div><label class="ilb">Taille</label><input class="ifl" value="${C.height||''}" placeholder="Ex : 1m75" oninput="C.height=this.value"></div>
+        <div><label class="ilb">Poids</label><input class="ifl" value="${C.weight||''}" placeholder="Ex : 70 kg" oninput="C.weight=this.value"></div>
       </div>
     </div>
   </div>
+
+  <div class="sh" style="font-size:14px;">Description physique</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin:.5rem 0 1rem;">
+    <div><label class="ilb">Yeux</label><input class="ifl" value="${C.eyes||''}" placeholder="Ex : ambre" oninput="C.eyes=this.value"></div>
+    <div><label class="ilb">Cheveux</label><input class="ifl" value="${C.hair||''}" placeholder="Ex : noirs" oninput="C.hair=this.value"></div>
+    <div><label class="ilb">Peau</label><input class="ifl" value="${C.skin||''}" placeholder="Ex : hâlée" oninput="C.skin=this.value"></div>
+  </div>
+
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">Alignement</div>
+  <div class="ss" style="margin-bottom:.7rem;">Quelle est la boussole morale de votre personnage ?</div>
   <div class="ag">${ALIGNS.map(a=>`<div class="ac ${C.alignment===a.id?'sel':''}" onclick="C.alignment='${a.id}';renderIdentity()"><div class="ac-n">${a.n}</div><div class="ac-d">${a.d}</div></div>`).join('')}</div>
+
   <div class="div"></div>
-  <div class="sh" style="font-size:14px;">Traits de Personnalité</div>
-  ${C.background?`<div class="notice">Suggestions (cliquez pour sélectionner) :</div>${C.background.traits.map(t=>`<div class="traitbox" onclick="C.traits=['${t.replace(/'/g,"\\'")}'];$('ft').value='${t.replace(/'/g,"\\'")}';">${t}</div>`).join('')}`:''}
-  <label class="ilb">Trait(s) de personnalité</label>
-  <textarea class="ifl" id="ft" placeholder="Ce qui définit votre comportement en jeu..." oninput="C.traits=[this.value]">${C.traits.join('\n')}</textarea>
-  <label class="ilb">Histoire & Motivations</label>
-  <textarea class="ifl" placeholder="Votre passé, vos buts, ce qui vous a conduit à l'aventure..." oninput="C.bg_story=this.value">${C.bg_story}</textarea>
+  <div class="sh" style="font-size:14px;">Personnalité</div>
+  <div class="ss" style="margin-bottom:.8rem;">Les quatre piliers du background D&D 5e</div>
+
+  ${C.background?.traits?.length?`<div class="notice" style="margin-bottom:.5rem;">💡 Suggestions — background <strong>${C.background.n}</strong> (cliquez pour utiliser) :</div>${C.background.traits.map(t=>`<div class="traitbox" onclick="C.traits=[${JSON.stringify(t)}];$('ft').value=${JSON.stringify(t)};">${t}</div>`).join('')}`:''}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.7rem;">
+    <div>
+      <label class="ilb">⚡ Traits de personnalité</label>
+      <textarea class="ifl" id="ft" style="min-height:75px;" placeholder="Ce qui définit votre comportement au quotidien…&#10;Ex : Je ris fort et parle plus fort encore." oninput="C.traits=[this.value]">${C.traits.join('\n')}</textarea>
+    </div>
+    <div>
+      <label class="ilb">🌟 Idéaux</label>
+      <textarea class="ifl" style="min-height:75px;" placeholder="Ce en quoi vous croyez profondément…&#10;Ex : Liberté. Les chaînes, qu'elles soient de fer ou de loi, doivent être brisées." oninput="C.ideals=this.value">${C.ideals||''}</textarea>
+    </div>
+    <div>
+      <label class="ilb">⚓ Liens</label>
+      <textarea class="ifl" style="min-height:75px;" placeholder="Ce qui vous attache au monde…&#10;Ex : Ma famille au village vit sous la menace d'un seigneur." oninput="C.bonds=this.value">${C.bonds||''}</textarea>
+    </div>
+    <div>
+      <label class="ilb">💀 Défauts</label>
+      <textarea class="ifl" style="min-height:75px;" placeholder="Votre talon d'Achille…&#10;Ex : Je ne résiste pas à l'appel de l'alcool et du jeu." oninput="C.flaws=this.value">${C.flaws||''}</textarea>
+    </div>
+  </div>
+
+  <label class="ilb">📖 Histoire & Motivations</label>
+  <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.bg_story=this.value">${C.bg_story||''}</textarea>
+
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(4)">← Équipement</button>
     <button class="btn btn-p" onclick="if(!C.name){alert('Donnez un nom à votre personnage.');}else{finalizeChar();go(6);}">Suivant : Résumé & PDF →</button>
@@ -2222,7 +2268,14 @@ function renderSummary(){
     ${C.sub?`<div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">ARCHÉTYPE</div><div style="font-size:12px;margin-bottom:.7rem;">${C.sub.n}<br><span style="font-size:10px;color:#8A7A5A;font-style:italic;">${C.sub.fs[0]}</span></div>`:''}
     <div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">LANGUES</div>
     <div style="font-size:11px;margin-bottom:.7rem;">${getLanguages().join(' · ')||'—'}</div>
-    ${C.traits.length&&C.traits[0]?`<div style="background:var(--parch2);border-left:3px solid var(--gold-d);padding:.5rem .7rem;font-size:11px;font-style:italic;margin-bottom:.5rem;">${C.traits.join('<br>')}</div>`:''}
+    ${(C.traits[0]||C.ideals||C.bonds||C.flaws)?`
+    <div class="div"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem;">
+      ${C.traits[0]?`<div class="sumbl"><div class="sumbl-t">⚡ TRAITS</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.traits.join('<br>')}</div></div>`:''}
+      ${C.ideals?`<div class="sumbl"><div class="sumbl-t">🌟 IDÉAUX</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.ideals}</div></div>`:''}
+      ${C.bonds?`<div class="sumbl"><div class="sumbl-t">⚓ LIENS</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.bonds}</div></div>`:''}
+      ${C.flaws?`<div class="sumbl"><div class="sumbl-t">💀 DÉFAUTS</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.flaws}</div></div>`:''}
+    </div>`:''}
   </div>
   ${C.bag.length?`<div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin:.5rem 0 3px;">SAC D'AVENTURIER</div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 1rem;margin-bottom:.5rem;">${C.bag.map(e=>`<div style="font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--parch2);">▸ ${e.n}${e.qty>1?' ×'+e.qty:''} <span style="color:var(--gold-d);">${e.w>0?'('+e.w*e.qty+' lb)':''}</span></div>`).join('')}</div>
