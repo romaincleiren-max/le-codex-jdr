@@ -630,6 +630,48 @@ body.printing #ps-print{display:block!important;}
 /* DH & CT nav bars */
 #dh-nav,#ct-nav{display:none;flex-wrap:wrap;gap:4px;padding:.4rem .6rem;background:#0A0604;border-bottom:1px solid #2A1808;}
 #dh-nav.active,#ct-nav.active{display:flex;}
+
+/* ════ VISUAL REFRESH ════ */
+/* Topbar */
+#tb{background:rgba(6,4,2,.98);backdrop-filter:blur(8px);border-bottom:1px solid rgba(201,168,76,.2);}
+/* Nav pills */
+#nav{background:rgba(6,4,2,.95);border-bottom:1px solid rgba(201,168,76,.12);padding:.6rem 1rem;gap:.25rem;justify-content:center;}
+.pill{border-radius:2px;background:rgba(255,255,255,.02);border:1px solid rgba(201,168,76,.1);transition:.15s;}
+.pill:hover{color:var(--gold-d);border-color:rgba(201,168,76,.3);background:rgba(201,168,76,.05);}
+.pill.done{border-color:rgba(45,80,22,.5);color:#5AB030;background:rgba(45,80,22,.08);}
+.pill.done::after{content:' ✓';font-size:8px;}
+.pill.active{border-color:rgba(201,168,76,.55);color:var(--gold);background:rgba(201,168,76,.1);box-shadow:0 0 10px rgba(201,168,76,.1);}
+/* Cards dark redesign */
+.card{background:#100C06;border:1px solid #2A1A0A;border-radius:6px;overflow:hidden;transition:.18s;}
+.card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.5);background:#181008;}
+.card.sel{border-color:rgba(201,168,76,.7);background:#1A1008;}
+.card.sel::after{color:var(--gold);text-shadow:0 0 8px rgba(201,168,76,.5);}
+.card-accent{height:3px;margin:-.85rem -.85rem .65rem;display:block;}
+.card-icon{font-size:24px;display:block;margin-bottom:.4rem;line-height:1;}
+.cn{color:var(--parch);font-size:14px;}
+.cd{color:#7A6A4A;}
+.cb{color:var(--gold-d);border-top:1px solid rgba(201,168,76,.12);padding-top:.5rem;margin-top:.45rem;}
+/* Step headers */
+.sh{font-family:'Cinzel Decorative',serif;font-size:20px;color:var(--gold);text-shadow:0 0 30px rgba(201,168,76,.15);}
+/* Stats */
+.sbox{background:#100C06;border:1px solid #2A1A0A;border-radius:6px;transition:.15s;padding:.7rem .3rem;}
+.sbox:hover{border-color:rgba(201,168,76,.3);}
+.sv{font-size:28px;}
+.sm{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;}
+.pts{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.18);border-radius:4px;font-size:12px;color:var(--parch2);}
+.pts span{font-family:'Cinzel Decorative',serif;font-size:22px;}
+/* Sidebar */
+#rp{background:rgba(8,5,3,.92);border-left:1px solid rgba(201,168,76,.15);}
+.rstat{background:rgba(255,255,255,.04);border:1px solid rgba(201,168,76,.1);border-radius:4px;}
+.rsv{font-size:18px;color:var(--parch);}
+.rcs{background:rgba(255,255,255,.03);border:1px solid rgba(201,168,76,.08);border-radius:3px;}
+.rcsv{font-size:13px;color:var(--parch2);}
+/* Summary banner */
+.sum-banner-hdr{background:linear-gradient(160deg,rgba(139,26,26,.4),rgba(74,31,122,.3),rgba(8,5,3,.9));border-bottom:1px solid rgba(201,168,76,.2);padding:1.5rem 1.2rem 1.2rem;text-align:center;margin:-1.2rem -1.2rem 1rem;position:relative;overflow:hidden;}
+.sum-banner-hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.07),transparent 70%);}
+.sum-banner-icon{font-size:52px;display:block;margin-bottom:.6rem;filter:drop-shadow(0 0 16px rgba(201,168,76,.25));position:relative;z-index:1;}
+.sum-title{font-size:24px;position:relative;z-index:1;text-shadow:0 2px 20px rgba(201,168,76,.2);}
+.sum-sub{position:relative;z-index:1;}
 </style>
 </head>
 <body>
@@ -639,6 +681,7 @@ body.printing #ps-print{display:block!important;}
   <div class="t1">Forge du Héros</div>
   <div class="t2">D&D 5e · SRD Ouvert · v3.0</div>
   <div class="t3">Créez votre personnage. Vivez votre légende.</div>
+  <div id="forge-login-status" style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.08em;margin:.4rem 0 .5rem;min-height:1.2em;"></div>
   <div class="tdiv"></div>
   <div class="tbtns">
     <button class="btn btn-p" onclick="newChar()">✦ Créer un Personnage</button>
@@ -906,6 +949,24 @@ const SLOTS_WARLOCK={
 };
 
 // ═══════════════════════════════════════════════════
+// ── Visuels par race / classe ─────────────────────────────────────────────────
+const RACE_STYLE={
+  human:{icon:'👤',color:'#8B7A50'},'elf-high':{icon:'✦',color:'#2D6A4A'},
+  'elf-wood':{icon:'🌲',color:'#3D7A2A'},'elf-drow':{icon:'🌑',color:'#4A1A6A'},
+  'dwarf-hill':{icon:'⛏',color:'#8B5A14'},'dwarf-mountain':{icon:'🪨',color:'#6A5A4A'},
+  halfling:{icon:'🌾',color:'#4A8B20'},gnome:{icon:'⚙',color:'#1A5A8B'},
+  'half-elf':{icon:'🌟',color:'#7A4A8B'},'half-orc':{icon:'💪',color:'#5A7A20'},
+  tiefling:{icon:'🔥',color:'#8B1A1A'},dragonborn:{icon:'🐉',color:'#8B4A14'},
+};
+const CLASS_STYLE={
+  barbarian:{icon:'🪓',color:'#8B2A14'},bard:{icon:'🎶',color:'#7A4A8B'},
+  cleric:{icon:'☩',color:'#8B7A10'},druid:{icon:'🌿',color:'#2D6A4A'},
+  fighter:{icon:'⚔',color:'#5A3A14'},monk:{icon:'👊',color:'#2D5A6A'},
+  paladin:{icon:'🛡',color:'#8B7A10'},ranger:{icon:'🏹',color:'#3D7A2A'},
+  rogue:{icon:'🗡',color:'#4A3A6A'},sorcerer:{icon:'🔮',color:'#4A1F7A'},
+  warlock:{icon:'🌑',color:'#2A1A4A'},wizard:{icon:'✦',color:'#1A3A7A'},
+};
+
 // DATA — RACES
 // ═══════════════════════════════════════════════════
 const RACES=[
@@ -1413,7 +1474,7 @@ function getLanguages(){
 // ═══════════════════════════════════════════════════
 // UI
 // ═══════════════════════════════════════════════════
-function showTitle(){$('ts').style.display='flex';$('gs').style.display='none';}
+function showTitle(){$('ts').style.display='flex';$('gs').style.display='none';updateLoginStatus();}
 function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';}
 function newChar(){
   C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null,background:null,alignment:null,
@@ -1466,7 +1527,8 @@ function renderRace(){
   RACES.forEach(r=>{
     const d=document.createElement('div');d.className='card'+(C.race?.id===r.id?' sel':'');
     const bs=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>k.toUpperCase()+' +'+v).join(', ');
-    d.innerHTML=`<div class="cn">${r.n}</div><div class="ct">${r.tag}</div><div class="cd">${r.desc}</div><div class="cb">✦ ${bs}${r.bonus._ch?` + ${r.bonus._ch} au choix`:''} · ${(r.langs||[]).join(', ')}</div>`;
+    const rs=RACE_STYLE[r.id]||{icon:'🧝',color:'var(--gold-d)'};
+    d.innerHTML=`<div class="card-accent" style="background:${rs.color}"></div><span class="card-icon">${rs.icon}</span><div class="cn">${r.n}</div><div class="ct">${r.tag}</div><div class="cd">${r.desc}</div><div class="cb">✦ ${bs}${r.bonus._ch?` + ${r.bonus._ch} au choix`:''} · ${(r.langs||[]).join(', ')}</div>`;
     d.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
     $('rg').appendChild(d);
   });
@@ -1494,7 +1556,8 @@ function renderClass(){
   </div>`;
   CLASSES.forEach(cl=>{
     const d=document.createElement('div');d.className='card'+(C.cls?.id===cl.id?' sel':'');
-    d.innerHTML=`<div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Lanceur de sorts':''}</div>`;
+    const cs=CLASS_STYLE[cl.id]||{icon:'⚔',color:'var(--gold-d)'};
+    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><span class="card-icon">${cs.icon}</span><div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
     d.onclick=()=>{if(C.cls?.id!==cl.id){C.sub=null;C.skills=[];C.cantrips=[];C.spells=[];}C.cls=cl;renderClass();updateRight();};
     $('cg').appendChild(d);
   });
@@ -1652,11 +1715,15 @@ function renderStatBoxes(){
     const cell=document.createElement('div');cell.className='sbox';
     const eff=effStat(s);
     const asiBonus=C.asi?.[s]||0;
-    cell.innerHTML=`<span class="sl">${STAT_LABELS[s].substring(0,3)}</span><div class="sv" id="sv-${s}">${eff}${asiBonus?`<span style="font-size:8px;color:#6A9A5A;display:block;">+${asiBonus}</span>`:''}` +`</div><div class="sm">${mods(eff)}</div>
+    const modV=Math.floor((eff-10)/2);
+    const modBg=modV>0?'rgba(107,175,74,.18)':modV<0?'rgba(192,57,43,.15)':'rgba(90,74,42,.1)';
+    const modTxt=modV>0?'#6BAF4A':modV<0?'#C0392B':'#5A4A2A';
+    cell.innerHTML=`<span class="sl">${STAT_LABELS[s].substring(0,3)}</span><div class="sv" id="sv-${s}">${eff}${asiBonus?`<span style="font-size:8px;color:#6A9A5A;display:block;">+${asiBonus}</span>`:''}` +`</div><div class="sm" style="background:${modBg};color:${modTxt};">${mods(eff)}</div>
     ${!usingDice?`<div class="sc2"><button class="sbtn" ${canDn?'':'disabled'} onclick="adj('${s}',-1)">−</button><button class="sbtn" ${canUp?'':'disabled'} onclick="adj('${s}',1)">+</button></div>`:''}`;
     sg.appendChild(cell);
   });
-  if($('pl'))$('pl').textContent=ptsLeft();
+  const left=ptsLeft();
+  if($('pl')){ $('pl').textContent=left; $('pl').style.color=left>=15?'#6BAF4A':left>=8?'#D4861A':'#C0392B'; }
 }
 function adj(s,d){
   const v=C.stats[s],nv=v+d;
@@ -2119,10 +2186,14 @@ function renderSummary(){
   const alignLine=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
   const allEq=[...C.equipment.map(e=>e.replace(/_g\d+$/,'')),...(C.background?.equipment||[])];
   const slots=getSlots();
+  const _clsIconSum=(CLASS_STYLE[C.cls?.id]||{icon:'⚔'}).icon;
   $('lp').innerHTML=`<div class="orn">✦ · ✦ · ✦</div>
   <div class="sumcard">
-    <div class="sum-title">${C.name||'Héros Sans Nom'}</div>
-    <div class="sum-sub">${C.race?.n||'?'} ${C.cls?.n||'?'}${subLine} · Niv.${C.level} · ${alignLine}</div>
+    <div class="sum-banner-hdr">
+      <span class="sum-banner-icon">${_clsIconSum}</span>
+      <div class="sum-title">${C.name||'Héros Sans Nom'}</div>
+      <div class="sum-sub">${C.race?.n||'?'} ${C.cls?.n||'?'}${subLine} · Niv.${C.level} · ${alignLine}</div>
+    </div>
     <div style="text-align:center;margin-bottom:1rem;"><div class="sumhp">${C.maxHp||calcHP()||'?'} PV</div></div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.8rem;">
       <div class="cstat"><span class="cstat-l">CA</span><div class="cstat-v">${calcCA()}</div></div>
@@ -2926,10 +2997,13 @@ function saveToRoster(){
   if(idx>=0) roster[idx]=entry; else roster.push(entry);
   setRoster(roster);
   renderRoster();
+  syncCharToSupabase(entry); // fire-and-forget
 }
 
 function deleteFromRoster(id){
   if(!confirm('Supprimer ce personnage ?')) return;
+  const entry = getRoster().find(r=>r.id===id);
+  if(entry?.supabaseId) deleteCharFromSupabase(entry.supabaseId);
   setRoster(getRoster().filter(r=>r.id!==id));
   renderRoster();
 }
@@ -4075,6 +4149,97 @@ function saveCTChar(){
   showTitle();
 }
 
+// ── Forge → Supabase character sync ──────────────────────────────────────────
+async function getForgeSession(){
+  const sc=getSupaClient(); if(!sc) return null;
+  try{ const {data:{session}}=await sc.auth.getSession(); return session; }catch{ return null; }
+}
+
+function _forgeCharPayload(entry,userId){
+  const sys=entry.system||'dnd5e';
+  let raceName='',className='';
+  if(sys==='dnd5e'){ raceName=entry.race?.n||''; className=entry.cls?.n||''; }
+  else if(sys==='dark_heresy'){ raceName=entry.dh?.homeworld?.n||''; className=entry.dh?.career?.n||''; }
+  else if(sys==='cthulhu7'){ raceName=''; className=entry.ct?.occupation?.n||''; }
+  const SYS_EMOJI={dnd5e:'⚔',dark_heresy:'☠',cthulhu7:'🐙'};
+  return{
+    user_id:userId,char_name:entry.name||'—',race_name:raceName,class_name:className,
+    level:entry.level||1,current_hp:entry.hp||0,max_hp:entry.hp||0,ac:entry.ac||10,
+    portrait_url:entry.photo||null,portrait_emoji:SYS_EMOJI[sys]||'⚔',
+    status:'approved',is_in_session:false
+  };
+}
+
+async function syncCharToSupabase(entry){
+  const session=await getForgeSession(); if(!session?.user) return;
+  const sc=getSupaClient();
+  const payload=_forgeCharPayload(entry,session.user.id);
+  try{
+    if(entry.supabaseId){
+      const {error}=await sc.from('characters')
+        .update({...payload,sheet_data:{...entry,supabaseId:entry.supabaseId}})
+        .eq('id',entry.supabaseId).eq('user_id',session.user.id);
+      if(error) console.error('Sync update error:',error);
+    } else {
+      const {data,error}=await sc.from('characters')
+        .insert({...payload,sheet_data:entry})
+        .select('id').single();
+      if(error){ console.error('Sync insert error:',error); return; }
+      const roster=getRoster();
+      const idx=roster.findIndex(r=>r.id===entry.id);
+      if(idx>=0){
+        roster[idx].supabaseId=data.id;
+        roster[idx].sheet_data={...entry,supabaseId:data.id};
+        setRoster(roster);
+        if(C.id===entry.id) C.supabaseId=data.id;
+      }
+    }
+  } catch(err){ console.error('Sync error:',err); }
+}
+
+async function deleteCharFromSupabase(supabaseId){
+  const session=await getForgeSession(); if(!session?.user||!supabaseId) return;
+  const sc=getSupaClient();
+  // Soft-delete: players can't DELETE (admin-only), so archive instead
+  try{ await sc.from('characters').update({status:'archived'}).eq('id',supabaseId).eq('user_id',session.user.id); }
+  catch(err){ console.error('Sync delete error:',err); }
+}
+
+async function loadForgeFromSupabase(){
+  const session=await getForgeSession(); if(!session?.user) return;
+  const sc=getSupaClient();
+  try{
+    const {data,error}=await sc.from('characters')
+      .select('id,sheet_data,char_name').eq('user_id',session.user.id).eq('status','approved');
+    if(error||!data) return;
+    const roster=getRoster();
+    let changed=false;
+    data.forEach(row=>{
+      if(!row.sheet_data) return;
+      const forgeId=row.sheet_data.id;
+      const existing=forgeId?roster.find(r=>r.id===forgeId):null;
+      if(existing){
+        if(!existing.supabaseId){ existing.supabaseId=row.id; changed=true; }
+      } else {
+        roster.push({...row.sheet_data,supabaseId:row.id});
+        changed=true;
+      }
+    });
+    if(changed){ setRoster(roster); renderRoster(); }
+  } catch(err){ console.error('Load from Supabase error:',err); }
+  updateLoginStatus();
+}
+
+async function updateLoginStatus(){
+  const session=await getForgeSession();
+  const el=document.getElementById('forge-login-status'); if(!el) return;
+  if(session?.user){
+    el.innerHTML=`<span style="color:#6ABF6A;">● Connecté</span> <span style="color:#7A6A4A;font-size:9px;">${session.user.email}</span>`;
+  } else {
+    el.innerHTML=`<a href="/login" style="color:#C9A84C;text-decoration:none;" title="Se connecter pour synchroniser vos personnages entre appareils">Se connecter</a> <span style="color:#5A4A2A;font-size:9px;">pour synchroniser vos persos</span>`;
+  }
+}
+
 document.addEventListener('DOMContentLoaded',()=>{
   // Clic sur fond sombre de l'overlay fiche → fermer
   const psOv=$('ps-overlay');
@@ -4084,6 +4249,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   if(editId){ localStorage.removeItem('forge_edit_char_id'); openCharFromRoster(editId); }
   else{ renderRoster(); initRosterDrag(); }
   fetchGameSystemImages();
+  loadForgeFromSupabase();
   const ts=$('ts');
   ts.addEventListener('dragover',e=>e.preventDefault());
   ts.addEventListener('drop',e=>{
