@@ -3667,14 +3667,15 @@ export default function App() {
                       onClick={async () => {
                         setSavingSettings(true);
                         setSettingsSaved(false);
+                        const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('Timeout réseau (6s)')), 6000));
                         try {
-                          await supabaseService.updateSiteSettings(siteSettings);
+                          await Promise.race([supabaseService.updateSiteSettings(siteSettings), timeout]);
                           setSettingsSaved(true);
                           setTimeout(() => setSettingsSaved(false), 3000);
                           refresh();
                         } catch (e) {
-                          console.error('updateSiteSettings error:', e);
-                          setSettingsSaved(false);
+                          console.error('updateSiteSettings error:', e.message);
+                          window.alert('❌ Erreur sauvegarde : ' + e.message + '\n\nVérifiez la console (F12) ou utilisez le SQL Editor de Supabase.');
                         } finally {
                           setSavingSettings(false);
                         }
