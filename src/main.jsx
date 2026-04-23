@@ -2103,7 +2103,12 @@ export default function App() {
 
   useEffect(() => {
     if (supabaseSiteSettings?.siteName) {
-      setSiteSettings(prev => ({ ...prev, ...supabaseSiteSettings }));
+      setSiteSettings(prev => ({
+        ...prev,
+        siteName: supabaseSiteSettings.siteName || prev.siteName,
+        tagline: supabaseSiteSettings.tagline || prev.tagline,
+        logoUrl: supabaseSiteSettings.logoUrl || prev.logoUrl,
+      }));
     }
   }, [supabaseSiteSettings]);
 
@@ -2122,6 +2127,9 @@ export default function App() {
     localStorage.setItem('le-codex-site-settings', JSON.stringify(siteSettings));
   }, [siteSettings]);
   
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsSaved, setSettingsSaved] = useState(false);
+
   const [currentTheme, setCurrentTheme] = useState(themes[0]);
   const [showBook, setShowBook] = useState(false);
   const [bookOpen, setBookOpen] = useState(false);
@@ -3655,15 +3663,24 @@ export default function App() {
                       </div>
                     </div>
                     <button
+                      disabled={savingSettings}
                       onClick={async () => {
+                        setSavingSettings(true);
+                        setSettingsSaved(false);
                         try {
                           await supabaseService.updateSiteSettings(siteSettings);
-                          alert('✅ Paramètres sauvegardés !');
+                          await refresh();
+                          setSettingsSaved(true);
+                          setTimeout(() => setSettingsSaved(false), 3000);
                         } catch (e) {
-                          alert('❌ Erreur : ' + e.message);
+                          console.error('updateSiteSettings error:', e);
+                        } finally {
+                          setSavingSettings(false);
                         }
                       }}
-                      className="w-full mt-6 bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 font-bold text-lg">💾 Sauvegarder</button>
+                      className={`w-full mt-6 px-6 py-4 rounded-lg font-bold text-lg transition-colors ${savingSettings ? 'bg-gray-500 cursor-not-allowed' : settingsSaved ? 'bg-green-500' : 'bg-green-700 hover:bg-green-600'} text-white`}>
+                      {savingSettings ? '⏳ Sauvegarde…' : settingsSaved ? '✅ Sauvegardé !' : '💾 Sauvegarder'}
+                    </button>
 
                     <div className="bg-red-50 border-2 border-red-700 rounded-lg p-6 mt-8">
                       <h3 className="text-2xl font-bold text-red-900 mb-3">⚠️ Zone Dangereuse</h3>
