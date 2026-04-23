@@ -2100,7 +2100,13 @@ export default function App() {
       setThemes(supabaseThemes);
     }
   }, [supabaseThemes]);
-  
+
+  useEffect(() => {
+    if (supabaseSiteSettings?.siteName) {
+      setSiteSettings(prev => ({ ...prev, ...supabaseSiteSettings }));
+    }
+  }, [supabaseSiteSettings]);
+
   // Charger les paramètres du site (logo, etc.)
   const [siteSettings, setSiteSettings] = useState(() => {
     const savedSettings = localStorage.getItem('le-codex-site-settings');
