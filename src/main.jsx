@@ -3669,11 +3669,12 @@ export default function App() {
                         setSettingsSaved(false);
                         try {
                           await supabaseService.updateSiteSettings(siteSettings);
-                          await refresh();
                           setSettingsSaved(true);
                           setTimeout(() => setSettingsSaved(false), 3000);
+                          refresh();
                         } catch (e) {
                           console.error('updateSiteSettings error:', e);
+                          setSettingsSaved(false);
                         } finally {
                           setSavingSettings(false);
                         }
