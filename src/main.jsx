@@ -3654,8 +3654,17 @@ export default function App() {
                         </label>
                       </div>
                     </div>
-                    <button className="w-full mt-6 bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 font-bold text-lg">💾 Sauvegarder</button>
-                    
+                    <button
+                      onClick={async () => {
+                        try {
+                          await supabaseService.updateSiteSettings(siteSettings);
+                          alert('✅ Paramètres sauvegardés !');
+                        } catch (e) {
+                          alert('❌ Erreur : ' + e.message);
+                        }
+                      }}
+                      className="w-full mt-6 bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 font-bold text-lg">💾 Sauvegarder</button>
+
                     <div className="bg-red-50 border-2 border-red-700 rounded-lg p-6 mt-8">
                       <h3 className="text-2xl font-bold text-red-900 mb-3">⚠️ Zone Dangereuse</h3>
                       <p className="text-red-800 mb-4">
