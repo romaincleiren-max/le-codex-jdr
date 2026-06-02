@@ -1436,10 +1436,23 @@ function calcPassivePerc(){
 }
 
 // HP (niveau 1 : dé max + CON mod ; niveaux suivants : dé/2+1 + CON mod chacun)
+function primaryLvl(){
+  const multiTotal=(C.multiclasses||[]).reduce((s,m)=>s+(m.lvl||1),0);
+  return Math.max(1,(C.level||1)-multiTotal);
+}
 function calcHP(){
   if(!C.cls)return 0;
-  const hd=C.cls.hd, conM=mod(effStat('con')), lvl=C.level||1;
-  return (hd+conM)+Math.max(0,lvl-1)*(Math.floor(hd/2)+1+conM);
+  const conM=mod(effStat('con'));
+  // Niveau 1 : max du dé de la classe principale
+  let hp=C.cls.hd+conM;
+  // Niveaux suivants de la classe principale
+  const pLvl=primaryLvl();
+  hp+=Math.max(0,pLvl-1)*(Math.floor(C.cls.hd/2)+1+conM);
+  // Niveaux des multiclasses
+  (C.multiclasses||[]).forEach(m=>{
+    if(m.cls&&m.lvl>0) hp+=m.lvl*(Math.floor(m.cls.hd/2)+1+conM);
+  });
+  return hp;
 }
 
 // Spell prep
@@ -1480,7 +1493,7 @@ function getLanguages(){
 function showTitle(){$('ts').style.display='flex';$('gs').style.display='none';updateLoginStatus();}
 function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';}
 function newChar(){
-  C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',race:null,cls:null,sub:null,background:null,alignment:null,
+  C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',race:null,cls:null,sub:null,multiclasses:[],background:null,alignment:null,
     stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
     level:1,xp:0,profBonus:2,traits:[],ideals:'',bonds:'',flaws:'',
     height:'',weight:'',eyes:'',hair:'',skin:'',
@@ -1555,6 +1568,7 @@ function renderClass(){
   </div>
   <div class="grid" id="cg"></div>
   <div id="sub-area"></div>
+  <div id="multi-area"></div>
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(0)">← Race</button>
     <button class="btn btn-p" onclick="if(!C.cls){alert('Choisissez une classe.');}else if(C.cls.subclassLvl===1&&!C.sub){alert('Cette classe nécessite un archétype dès le niveau 1.');}else{go(2);}">Suivant : Caractéristiques →</button>
@@ -1567,7 +1581,69 @@ function renderClass(){
     $('cg').appendChild(d);
   });
   if(C.cls)renderSubs();
+  renderMulti();
 }
+
+const MC_PREREQS={
+  barbarian:{str:13},bard:{cha:13},cleric:{wis:13},druid:{wis:13},
+  fighter:{str:13},monk:{dex:13,wis:13},paladin:{str:13,cha:13},
+  ranger:{dex:13,wis:13},rogue:{dex:13},sorcerer:{cha:13},
+  warlock:{cha:13},wizard:{int:13}
+};
+function mcPrereqOk(clsId){
+  const req=MC_PREREQS[clsId];
+  if(!req)return true;
+  return Object.entries(req).every(([stat,min])=>effStat(stat)>=min);
+}
+
+function renderMulti(){
+  const el=document.getElementById('multi-area');
+  if(!el)return;
+  if(!C.cls||(C.level||1)<2){el.innerHTML='';return;}
+  C.multiclasses=C.multiclasses||[];
+  const maxMcLvl=(C.level||1)-1;
+
+  let html=`<div style="margin-top:1.2rem;border-top:1px solid #3A3020;padding-top:1rem;">
+    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;margin-bottom:.6rem;">⚔ Multiclassage</div>
+    <div style="font-size:10px;color:#7A6A4A;margin-bottom:.8rem;">Niveau total : ${C.level} — Classe principale : <b style="color:var(--gold)">${C.cls.n} Niv.${primaryLvl()}</b></div>`;
+
+  (C.multiclasses||[]).forEach((mc,i)=>{
+    const cs=CLASS_STYLE[mc.cls?.id]||{icon:'⚔',color:'#6A5A3A'};
+    const lvlBtns=Array.from({length:maxMcLvl},(_,j)=>{
+      const l=j+1;
+      const totalOther=(C.multiclasses||[]).reduce((s,m,mi)=>mi===i?s:s+(m.lvl||1),0);
+      const available=l<=(C.level||1)-1-totalOther;
+      return `<button class="lvl-btn${mc.lvl===l?' active':''}" ${available?'':'disabled style="opacity:.35;"'}
+        onclick="C.multiclasses[${i}].lvl=${l};renderClass();">${l}</button>`;
+    }).join('');
+    html+=`<div style="background:#1A1710;border:1px solid #3A3020;border-radius:8px;padding:.7rem;margin-bottom:.6rem;">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
+        <span style="font-size:12px;color:var(--gold);">${cs.icon} ${mc.cls?mc.cls.n:'—'} <span style="color:#8A7A5A;">Niv.${mc.lvl||1}</span></span>
+        <button onclick="C.multiclasses.splice(${i},1);renderClass();" style="background:#3A1A1A;border:none;color:#CA5A5A;border-radius:4px;padding:2px 7px;cursor:pointer;font-size:11px;">✕ Retirer</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.25rem;margin-bottom:.5rem;">${lvlBtns}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+        ${CLASSES.filter(cl=>cl.id!==C.cls.id&&!(C.multiclasses||[]).some((m,mi)=>mi!==i&&m.cls?.id===cl.id)).map(cl=>{
+          const ok=mcPrereqOk(cl.id);
+          const cst=CLASS_STYLE[cl.id]||{icon:'⚔',color:'#6A5A3A'};
+          return `<button onclick="C.multiclasses[${i}].cls=${JSON.stringify(cl).replace(/"/g,"'")};C.multiclasses[${i}].sub=null;renderClass();"
+            style="font-size:10px;padding:3px 7px;border-radius:5px;cursor:${ok?'pointer':'not-allowed'};opacity:${ok?1:.4};
+            background:${mc.cls?.id===cl.id?cst.color+'44':'#2A2410'};border:1px solid ${mc.cls?.id===cl.id?cst.color:'#3A3020'};color:${ok?'#D4B483':'#6A5A3A'};"
+            title="${ok?'':'Prérequis non remplis'}">
+            ${cst.icon} ${cl.n}</button>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+
+  const canAdd=(C.multiclasses||[]).length<2&&maxMcLvl>=(C.multiclasses||[]).reduce((s,m)=>s+(m.lvl||1),0)+1;
+  html+=canAdd?`<button onclick="C.multiclasses=[...(C.multiclasses||[]),{cls:null,sub:null,lvl:1}];renderClass();"
+    style="width:100%;padding:.5rem;background:#1A1A10;border:1px dashed #4A4020;border-radius:8px;color:#8A7A5A;cursor:pointer;font-size:11px;margin-top:.3rem;">
+    ➕ Ajouter une classe (max 2 multiclasses)</button>`:'';
+  html+='</div>';
+  el.innerHTML=html;
+}
+
 function renderSubs(){
   const cl=C.cls,subs=SUBS[cl.id]||[];
   const isL1=cl.subclassLvl===1;
@@ -2236,12 +2312,17 @@ function renderSummary(){
   const allEq=[...C.equipment.map(e=>e.replace(/_g\d+$/,'')),...(C.background?.equipment||[])];
   const slots=getSlots();
   const _clsIconSum=(CLASS_STYLE[C.cls?.id]||{icon:'⚔'}).icon;
+  const multiLine=(C.multiclasses||[]).filter(m=>m.cls).map(m=>{
+    const icon=(CLASS_STYLE[m.cls.id]||{icon:'⚔'}).icon;
+    return `${icon} ${m.cls.n}${m.sub?' ('+m.sub.n+')':''} Niv.${m.lvl}`;
+  }).join(' / ');
+  const classDisplay=C.cls?(C.cls.n+(subLine)+' Niv.'+primaryLvl()+(multiLine?' / '+multiLine:'')):'?';
   $('lp').innerHTML=`<div class="orn">✦ · ✦ · ✦</div>
   <div class="sumcard">
     <div class="sum-banner-hdr">
       <span class="sum-banner-icon">${_clsIconSum}</span>
       <div class="sum-title">${C.name||'Héros Sans Nom'}</div>
-      <div class="sum-sub">${C.race?.n||'?'} ${C.cls?.n||'?'}${subLine} · Niv.${C.level} · ${alignLine}</div>
+      <div class="sum-sub">${C.race?.n||'?'} · ${classDisplay} · ${alignLine}</div>
     </div>
     <div style="text-align:center;margin-bottom:1rem;"><div class="sumhp">${C.maxHp||calcHP()||'?'} PV</div></div>
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.8rem;">
