@@ -957,6 +957,7 @@ const RACE_STYLE={
   halfling:{icon:'🌾',color:'#4A8B20'},gnome:{icon:'⚙',color:'#1A5A8B'},
   'half-elf':{icon:'🌟',color:'#7A4A8B'},'half-orc':{icon:'💪',color:'#5A7A20'},
   tiefling:{icon:'🔥',color:'#8B1A1A'},dragonborn:{icon:'🐉',color:'#8B4A14'},
+  aarakocra:{icon:'🦅',color:'#2A6A8B'},
 };
 const CLASS_STYLE={
   barbarian:{icon:'🪓',color:'#8B2A14'},bard:{icon:'🎶',color:'#7A4A8B'},
@@ -1008,6 +1009,8 @@ const RACES=[
   {id:'tabaxi',n:'Tabaxi',tag:'FÉE · FÉLIN',bonus:{dex:2,cha:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Griffes : attaque sans arme 1d4 + DEX / avantage Athlétisme et Acrobaties sur grimper','Vitesse féline (1×/repos court) : vitesse ×2 pendant 1 round'],desc:'Humanoïdes félins curieux et nomades, natifs des jungles tropicales.'},
   // ── KENKU (Volo's Guide) ──
   {id:'kenku',n:'Kenku',tag:'OISEAU · MIMIC',bonus:{dex:2,wis:1},speed:30,langs:['Commun (compris mais ne parle qu\'en imitant)'],armor:'—',traits:['Imitation parfaite : reproduire sons, voix et textes entendus','Souvenir du Kenku : expertise double sur 2 compétences parmi DEX et SAG','Maîtrise : 2 outils/instruments (expertise double sur imitation artistique)'],desc:'Humanoïdes à plumes maudits de la perte de la parole — ils ne communiquent qu\'en imitant.'},
+  // ── AARAKOCRA (Elemental Evil) ──
+  {id:'aarakocra',n:'Aarakocra',tag:'OISEAU · VOLANT',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Aarakocra','Auran'],armor:'Incompatible avec armures standard (ailes)',traits:['Vol 15m (inaccessible en armure lourde ou intermédiaire)','Serres : attaque sans arme 1d4 dégâts tranchants + mod DEX','Enfant du ciel : avantage sur jets de SAG (Perception) pour repérer au loin'],desc:'Humanoïdes aviaires des montagnes isolées — les Aarakocra sont des chasseurs solitaires dotés d\'un vol naturel, gardiens jaloux de leurs territoires et messagers des divinités de l\'air.'},
 ];
 
 // ═══════════════════════════════════════════════════
