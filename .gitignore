@@ -30,3 +30,6 @@ Thumbs.db
 # Temporary
 *.tmp
 *.temp
+
+# CODEX source (42 MB, géré manuellement)
+data/CODEX.json
