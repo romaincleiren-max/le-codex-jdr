@@ -173,6 +173,16 @@ textarea.ifl{min-height:65px;resize:vertical;}
 .r-name{font-family:'Cinzel Decorative',serif;font-size:13px;color:var(--gold);margin-bottom:.18rem;min-height:1em;}
 .r-line{font-family:'Cinzel',serif;font-size:9px;color:#8A7060;letter-spacing:.07em;margin-bottom:.6rem;}
 .rsec{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);border-bottom:1px solid var(--gold-d);padding-bottom:2px;margin:.7rem 0 .35rem;}
+/* ── Portraits race/classe ── */
+.rp-portraits{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid rgba(201,168,76,.12);}
+.rp-portrait{aspect-ratio:9/16;overflow:hidden;background:#12100A;border:1px solid #3A2810;border-radius:5px;position:relative;}
+.rp-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:.3s;}
+.rp-phl{display:flex;align-items:center;justify-content:center;height:100%;font-size:22px;color:#3A2810;font-family:'Cinzel',serif;}
+.rp-portrait-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#5A4A2A;text-align:center;margin-top:2px;text-transform:uppercase;}
+/* ── Multi selection pills ── */
+.mc-cls-btn{font-size:10px;padding:3px 7px;border-radius:5px;cursor:pointer;background:#2A2410;border:1px solid #3A3020;color:#D4B483;transition:.1s;}
+.mc-cls-btn:hover{border-color:var(--gold);background:#3A2A14;}
+.mc-cls-btn.active{border-color:var(--gold);background:rgba(201,168,76,.15);color:var(--gold);}
 .rstats{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;}
 .rstat{background:#221A08;padding:.3rem;text-align:center;border:1px solid #3A2810;}
 .rsl{font-family:'Cinzel',serif;font-size:7px;color:var(--gold-d);letter-spacing:.08em;display:block;}
@@ -809,6 +819,16 @@ body.printing #ps-print{display:block!important;}
   <div id="layout">
     <div id="lp"></div>
     <div id="rp">
+      <div class="rp-portraits">
+        <div>
+          <div class="rp-portrait" id="rp-race-portrait"><div class="rp-phl">✕</div></div>
+          <div class="rp-portrait-lbl">Race</div>
+        </div>
+        <div>
+          <div class="rp-portrait" id="rp-cls-portrait"><div class="rp-phl">✕</div></div>
+          <div class="rp-portrait-lbl">Classe</div>
+        </div>
+      </div>
       <div class="rsec">PERSONNAGE</div>
       <div class="r-name" id="rn">—</div>
       <div class="r-line" id="rl">Race · Classe · Niveau 1</div>
@@ -1444,6 +1464,35 @@ function primaryLvl(){
   const multiTotal=(C.multiclasses||[]).reduce((s,m)=>s+(m.lvl||1),0);
   return Math.max(1,(C.level||1)-multiTotal);
 }
+function recomputeLevel(){
+  if(C.cls_lvl===undefined) C.cls_lvl=primaryLvl();
+  // Cap mc levels so total stays ≤ 20
+  let rem=20-(C.cls_lvl||1);
+  (C.multiclasses||[]).forEach(mc=>{mc.lvl=Math.min(Math.max(mc.lvl||1,1),Math.max(rem,1));rem-=mc.lvl;});
+  C.level=(C.cls_lvl||1)+(C.multiclasses||[]).reduce((s,m)=>s+(m.lvl||0),0);
+  C.profBonus=calcProfBonus();
+}
+function setPrimaryLevel(n){
+  C.cls_lvl=n;
+  recomputeLevel();
+  renderSubs();renderMulti();updateRight();
+  if($('pb-disp'))$('pb-disp').textContent=C.profBonus;
+  if($('hp-disp'))$('hp-disp').textContent=calcHP()||'—';
+  if($('asi-disp'))$('asi-disp').textContent=asiAvailable();
+  if($('asi-left'))$('asi-left').textContent=asiLeft();
+  // Re-highlight active level button
+  document.querySelectorAll('#cls-lvl-row .lvl-btn').forEach((b,i)=>{b.classList.toggle('active',i+1===n);});
+}
+function setPortrait(id,bucket,fileId,fallbackIcon){
+  const el=$(id);if(!el)return;
+  if(!fileId){el.innerHTML=`<div class="rp-phl">${fallbackIcon}</div>`;return;}
+  const img=document.createElement('img');
+  img.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
+  img.src=`${SUPA_URL}/storage/v1/object/public/${bucket}/${fileId}.jpg`;
+  img.onerror=function(){this.onerror=null;this.src=`${SUPA_URL}/storage/v1/object/public/${bucket}/${fileId}.webp`;
+    this.onerror=function(){this.parentElement.innerHTML=`<div class="rp-phl">${fallbackIcon}</div>`;};};
+  el.innerHTML='';el.appendChild(img);
+}
 function clsLevelStr(){
   if(!C.cls)return'—';
   const mcs=(C.multiclasses||[]).filter(m=>m.cls&&(m.lvl||0)>0);
@@ -1512,7 +1561,7 @@ function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display
 function newChar(){
   C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',race:null,cls:null,sub:null,multiclasses:[],background:null,alignment:null,
     stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
-    level:1,xp:0,profBonus:2,traits:[],ideals:'',bonds:'',flaws:'',
+    level:1,cls_lvl:1,xp:0,profBonus:2,traits:[],ideals:'',bonds:'',flaws:'',
     height:'',weight:'',eyes:'',hair:'',skin:'',
     alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
     asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e'};
@@ -1534,6 +1583,7 @@ function loadChar(e){
       if(!C.scenarioHistory)C.scenarioHistory=[];
       if(!C.asi)C.asi={str:0,dex:0,con:0,int:0,wis:0,cha:0};
       if(C.equippedArmorId===undefined)C.equippedArmorId=null;
+      if(C.cls_lvl===undefined)C.cls_lvl=primaryLvl();
       showGame();go(6);updateRight();
       alert('Personnage chargé : '+C.name);
     }catch{alert('Fichier JSON invalide.');}
@@ -1576,11 +1626,16 @@ function applyRace(){
 
 // ─── STEP 2: CLASS ──────────────────────────────────
 function renderClass(){
-  const lvlBtns=Array.from({length:20},(_,i)=>`<button class="lvl-btn${C.level===(i+1)?' active':''}" onclick="C.level=${i+1};C.profBonus=calcProfBonus();updateRight();renderSubs();document.querySelectorAll('.lvl-btn').forEach(b=>b.classList.remove('active'));this.classList.add('active');$('pb-disp').textContent=calcProfBonus();$('hp-disp').textContent=calcHP()||'—';$('asi-disp').textContent=asiAvailable();">${i+1}</button>`).join('');
+  if(C.cls_lvl===undefined)C.cls_lvl=primaryLvl();
+  const maxPrimaryLvl=20-(C.multiclasses||[]).reduce((s,m)=>s+(m.lvl||0),0);
+  const lvlBtns=Array.from({length:20},(_,i)=>{
+    const l=i+1,ok=l<=maxPrimaryLvl;
+    return `<button class="lvl-btn${C.cls_lvl===l?' active':''}" id="clb-${l}" ${ok?'':'disabled style="opacity:.25;"'} onclick="setPrimaryLevel(${l})">${l}</button>`;
+  }).join('');
   $('lp').innerHTML=`<div class="sh">Classe & Archétype</div><div class="ss">Vocation · Style de Jeu · Sous-classe</div>
   <div style="margin-bottom:1.1rem;">
-    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;text-align:center;margin-bottom:.6rem;">⚔ Niveau de départ</div>
-    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.3rem;margin-bottom:.6rem;">${lvlBtns}</div>
+    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;text-align:center;margin-bottom:.6rem;">⚔ Niveau — ${C.cls?.n||'Classe principale'}</div>
+    <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.3rem;margin-bottom:.6rem;" id="cls-lvl-row">${lvlBtns}</div>
     <div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:#6A5A3A;">Maîtrise : +<span id="pb-disp">${calcProfBonus()}</span> &nbsp;·&nbsp; PV départ : <span id="hp-disp">${calcHP()||'—'}</span> &nbsp;·&nbsp; ASI : <span id="asi-disp">${asiAvailable()}</span></div>
   </div>
   <div class="grid" id="cg"></div>
@@ -1616,46 +1671,50 @@ function mcPrereqOk(clsId){
 function renderMulti(){
   const el=document.getElementById('multi-area');
   if(!el)return;
-  if(!C.cls||(C.level||1)<2){el.innerHTML='';return;}
+  if(!C.cls){el.innerHTML='';return;}
   C.multiclasses=C.multiclasses||[];
-  const maxMcLvl=(C.level||1)-1;
+  if(C.cls_lvl===undefined)C.cls_lvl=primaryLvl();
+
+  const mcTotal=(C.multiclasses||[]).filter(m=>m.cls).reduce((s,m)=>s+(m.lvl||1),0);
+  const totalLvl=(C.cls_lvl||1)+mcTotal;
 
   let html=`<div style="margin-top:1.2rem;border-top:1px solid #3A3020;padding-top:1rem;">
-    <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;margin-bottom:.6rem;">⚔ Multiclassage</div>
-    <div style="font-size:10px;color:#7A6A4A;margin-bottom:.8rem;">Niveau total : ${C.level} — Classe principale : <b style="color:var(--gold)">${C.cls.n} Niv.${primaryLvl()}</b></div>`;
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.8rem;">
+      <div style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.15em;color:var(--gold-d);text-transform:uppercase;">⚔ Multiclassage</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);background:#2A1A08;padding:2px 8px;border:1px solid #4A3018;border-radius:3px;">Niv.<b>${totalLvl}</b> total</div>
+    </div>`;
 
   (C.multiclasses||[]).forEach((mc,i)=>{
     const cs=CLASS_STYLE[mc.cls?.id]||{icon:'⚔',color:'#6A5A3A'};
-    const lvlBtns=Array.from({length:maxMcLvl},(_,j)=>{
+    const otherMcLvl=(C.multiclasses||[]).reduce((s,m,mi)=>mi===i?s:s+(m.lvl||1),0);
+    const maxThis=Math.max(1,20-(C.cls_lvl||1)-otherMcLvl);
+    const lvlBtns=Array.from({length:Math.min(19,maxThis)},(_,j)=>{
       const l=j+1;
-      const totalOther=(C.multiclasses||[]).reduce((s,m,mi)=>mi===i?s:s+(m.lvl||1),0);
-      const available=l<=(C.level||1)-1-totalOther;
-      return `<button class="lvl-btn${mc.lvl===l?' active':''}" ${available?'':'disabled style="opacity:.35;"'}
-        onclick="C.multiclasses[${i}].lvl=${l};renderClass();">${l}</button>`;
+      return `<button class="lvl-btn${mc.lvl===l?' active':''}" onclick="C.multiclasses[${i}].lvl=${l};recomputeLevel();renderClass();">${l}</button>`;
     }).join('');
-    html+=`<div style="background:#1A1710;border:1px solid #3A3020;border-radius:8px;padding:.7rem;margin-bottom:.6rem;">
+    html+=`<div style="background:#1A1710;border:1px solid ${mc.cls?cs.color+'44':'#3A3020'};border-radius:8px;padding:.7rem;margin-bottom:.6rem;transition:.2s;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
-        <span style="font-size:12px;color:var(--gold);">${cs.icon} ${mc.cls?mc.cls.n:'—'} <span style="color:#8A7A5A;">Niv.${mc.lvl||1}</span></span>
-        <button onclick="C.multiclasses.splice(${i},1);renderClass();" style="background:#3A1A1A;border:none;color:#CA5A5A;border-radius:4px;padding:2px 7px;cursor:pointer;font-size:11px;">✕ Retirer</button>
+        <span style="font-size:12px;color:var(--gold);">${cs.icon} <b>${mc.cls?mc.cls.n:'— choisir une classe'}</b> <span style="color:#8A7A5A;font-family:'Share Tech Mono',monospace;">Niv.${mc.lvl||1}</span></span>
+        <button onclick="C.multiclasses.splice(${i},1);recomputeLevel();renderClass();" style="background:#3A1A1A;border:none;color:#CA5A5A;border-radius:4px;padding:2px 7px;cursor:pointer;font-size:11px;" title="Retirer cette classe">✕</button>
       </div>
-      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.25rem;margin-bottom:.5rem;">${lvlBtns}</div>
-      <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+      <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.25rem;margin-bottom:.6rem;">${lvlBtns}</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.25rem;">
         ${CLASSES.filter(cl=>cl.id!==C.cls.id&&!(C.multiclasses||[]).some((m,mi)=>mi!==i&&m.cls?.id===cl.id)).map(cl=>{
-          const ok=mcPrereqOk(cl.id);
           const cst=CLASS_STYLE[cl.id]||{icon:'⚔',color:'#6A5A3A'};
-          return `<button onclick="C.multiclasses[${i}].cls=${JSON.stringify(cl).replace(/"/g,"'")};C.multiclasses[${i}].sub=null;renderClass();"
-            style="font-size:10px;padding:3px 7px;border-radius:5px;cursor:${ok?'pointer':'not-allowed'};opacity:${ok?1:.4};
-            background:${mc.cls?.id===cl.id?cst.color+'44':'#2A2410'};border:1px solid ${mc.cls?.id===cl.id?cst.color:'#3A3020'};color:${ok?'#D4B483':'#6A5A3A'};"
-            title="${ok?'':'Prérequis non remplis'}">
+          const active=mc.cls?.id===cl.id;
+          return `<button class="mc-cls-btn${active?' active':''}"
+            style="${active?'border-color:'+cst.color+';background:'+cst.color+'33;color:var(--gold);':''}"
+            onclick="C.multiclasses[${i}].cls=${JSON.stringify(cl).replace(/"/g,"'")};C.multiclasses[${i}].sub=null;renderClass();">
             ${cst.icon} ${cl.n}</button>`;
         }).join('')}
       </div>
     </div>`;
   });
 
-  const canAdd=(C.multiclasses||[]).length<2&&maxMcLvl>=(C.multiclasses||[]).reduce((s,m)=>s+(m.lvl||1),0)+1;
-  html+=canAdd?`<button onclick="C.multiclasses=[...(C.multiclasses||[]),{cls:null,sub:null,lvl:1}];renderClass();"
-    style="width:100%;padding:.5rem;background:#1A1A10;border:1px dashed #4A4020;border-radius:8px;color:#8A7A5A;cursor:pointer;font-size:11px;margin-top:.3rem;">
+  const canAdd=(C.multiclasses||[]).length<2&&(C.cls_lvl||1)<20;
+  html+=canAdd?`<button onclick="C.multiclasses=[...(C.multiclasses||[]),{cls:null,sub:null,lvl:1}];recomputeLevel();renderClass();"
+    style="width:100%;padding:.5rem;background:#1A1A10;border:1px dashed #4A4020;border-radius:8px;color:#8A7A5A;cursor:pointer;font-size:11px;margin-top:.3rem;transition:.15s;"
+    onmouseover="this.style.borderColor='var(--gold-d)'" onmouseout="this.style.borderColor='#4A4020'">
     ➕ Ajouter une classe (max 2 multiclasses)</button>`:'';
   html+='</div>';
   el.innerHTML=html;
@@ -3138,6 +3197,11 @@ function updateRight(){
   });
   if($('rn'))$('rn').textContent=C.name||'—';
   if($('rl'))$('rl').textContent=`${C.race?.n||'?'} · ${clsShortStr()} · Niv.${C.level}`;
+  // Portraits race / classe
+  const raceStyle=C.race?(RACE_STYLE[C.race.id]||{icon:'🧝'}):null;
+  const clsStyle=C.cls?(CLASS_STYLE[C.cls.id]||{icon:'⚔'}):null;
+  setPortrait('rp-race-portrait','races',C.race?.id,raceStyle?.icon||'✕');
+  setPortrait('rp-cls-portrait','classes',C.cls?.id,clsStyle?.icon||'✕');
   if($('rhp'))$('rhp').textContent=calcHP()||'—';
   if($('rca'))$('rca').textContent=calcCA();
   if($('rinit'))$('rinit').textContent=mods(effStat('dex'));
