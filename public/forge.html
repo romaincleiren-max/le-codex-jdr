@@ -54,6 +54,15 @@ body{background:var(--shadow);color:var(--ink);font-family:'IM Fell English',Geo
 
 /* ── CARDS ── */
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.65rem;margin-bottom:1.1rem;}
+/* ── Race carousel 4 colonnes ── */
+.race-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-bottom:1.1rem;}
+.race-card{padding:.5rem!important;display:flex;flex-direction:column;}
+.race-card-head{display:flex;align-items:flex-start;gap:.35rem;margin-bottom:.2rem;}
+.race-card-icon{font-size:18px;line-height:1;flex-shrink:0;margin-top:1px;}
+.race-card-stats{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);margin:.25rem 0 .3rem;letter-spacing:.03em;line-height:1.4;}
+.race-portrait-wrap{aspect-ratio:9/16;overflow:hidden;background:#12100A;border-radius:4px;flex-shrink:0;}
+.race-portrait-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;transition:opacity .35s;}
+.race-desc{font-size:9.5px;line-height:1.45;color:#7A6A4A;font-style:italic;margin-top:.3rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;}
 .card{background:var(--parch);border:2px solid var(--parch3);padding:.85rem;cursor:pointer;transition:.1s;position:relative;}
 .card:hover{border-color:var(--gold);background:var(--parch2);}
 .card.sel{border-color:var(--blood);background:var(--parch2);}
@@ -1605,15 +1614,41 @@ function go(n){
 }
 
 // ─── STEP 1: RACE ───────────────────────────────────
+function raceImgFallback(el){
+  const id=el.dataset.id;
+  const webp=`${SUPA_URL}/storage/v1/object/public/races/${id}.webp`;
+  if(el.src!==webp){el.onerror=function(){raceImgFallback(el);};el.src=webp;return;}
+  const rs=RACE_STYLE[id]||{icon:'🧝'};
+  el.parentElement.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;
+}
 function renderRace(){
   $('lp').innerHTML=`<div class="sh">Choisir une Race</div><div class="ss">Héritage · Traits · Bonus de Caractéristiques · Langues</div>
-  <div class="grid" id="rg"></div>
+  <div class="race-grid" id="rg"></div>
   <div class="btn-row"><button class="btn btn-p" onclick="if(C.race)go(1);else alert('Choisissez une race.')">Suivant : Classe & Archétype →</button></div>`;
   RACES.forEach(r=>{
-    const d=document.createElement('div');d.className='card'+(C.race?.id===r.id?' sel':'');
-    const bs=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>k.toUpperCase()+' +'+v).join(', ');
+    const d=document.createElement('div');
+    d.className='card race-card'+(C.race?.id===r.id?' sel':'');
     const rs=RACE_STYLE[r.id]||{icon:'🧝',color:'var(--gold-d)'};
-    d.innerHTML=`<div class="card-accent" style="background:${rs.color}"></div><span class="card-icon">${rs.icon}</span><div class="cn">${r.n}</div><div class="ct">${r.tag}</div><div class="cd">${r.desc}</div><div class="cb">✦ ${bs}${r.bonus._ch?` + ${r.bonus._ch} au choix`:''} · ${(r.langs||[]).join(', ')}</div>`;
+    const bs=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>k.toUpperCase()+' +'+v).join('  ');
+    const extra=r.bonus._ch?` +${r.bonus._ch}✦`:'';
+    const imgUrl=`${SUPA_URL}/storage/v1/object/public/races/${r.id}.jpg`;
+    // Header : icon + nom + tag
+    const head=document.createElement('div');head.className='race-card-head';
+    head.innerHTML=`<span class="race-card-icon">${rs.icon}</span><div><div class="cn" style="font-size:11px;">${r.n}</div><div class="ct">${r.tag}</div></div>`;
+    // Stats
+    const stats=document.createElement('div');stats.className='race-card-stats';
+    stats.textContent=bs+extra+(r.langs?.length?'  '+r.langs.join('/'):'');
+    // Portrait
+    const wrap=document.createElement('div');wrap.className='race-portrait-wrap';
+    const img=document.createElement('img');
+    img.dataset.id=r.id;img.alt=r.n;img.loading='lazy';
+    img.src=imgUrl;img.onerror=function(){raceImgFallback(this);};
+    wrap.appendChild(img);
+    // Description
+    const desc=document.createElement('div');desc.className='race-desc';desc.textContent=r.desc;
+    // Accent
+    const acc=document.createElement('div');acc.className='card-accent';acc.style.background=rs.color;
+    d.appendChild(acc);d.appendChild(head);d.appendChild(stats);d.appendChild(wrap);d.appendChild(desc);
     d.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
     $('rg').appendChild(d);
   });
