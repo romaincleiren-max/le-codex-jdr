@@ -512,6 +512,24 @@ body.printing #ps-print{display:block!important;}
 #re-hdr-name{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--gold);}
 .re-close{background:none;border:1px solid #3A2810;color:#8B6914;padding:3px 12px;font-size:9px;cursor:pointer;font-family:'Cinzel',serif;transition:.1s;letter-spacing:.05em;}
 .re-close:hover{border-color:var(--gold);color:var(--gold);}
+.re-view-btn{background:none;border:1px solid #3A2810;color:#8B6914;padding:4px 14px;font-size:9px;cursor:pointer;font-family:'Cinzel',serif;transition:.15s;letter-spacing:.06em;border-radius:3px;}
+.re-view-btn:hover{border-color:var(--gold-d);color:var(--gold-d);}
+.re-view-btn.active{background:rgba(201,168,76,.15);border-color:var(--gold);color:var(--gold);}
+/* Spell panel */
+#re-spell-panel{display:none;flex:1;overflow-y:auto;padding:1rem 1.5rem;flex-direction:column;gap:.4rem;}
+#re-spell-panel::-webkit-scrollbar{width:4px;}#re-spell-panel::-webkit-scrollbar-thumb{background:#3A2810;}
+.re-sp-summary{display:flex;gap:1rem;flex-wrap:wrap;padding:.5rem .8rem;background:#130D06;border:1px solid #2A1A08;border-radius:6px;margin-bottom:.6rem;}
+.re-sp-badge{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);padding:2px 8px;border:1px solid #3A2810;border-radius:3px;}
+.re-sp-badge.full{border-color:var(--gold);color:var(--gold);}
+.re-sp-lvl-hdr{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;padding:.5rem 0 .3rem;border-top:1px solid #2A1A08;display:flex;align-items:center;gap:.7rem;}
+.re-sp-slots{font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4A2A;margin-left:auto;}
+.re-sp-grid{display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.3rem;}
+.re-sp-card{font-family:'Cinzel',serif;font-size:10px;padding:.3rem .6rem;border-radius:4px;border:1px solid #3A2810;background:#1A1208;color:#C9A84C;cursor:pointer;transition:.12s;display:flex;align-items:center;gap:.4rem;}
+.re-sp-card:hover{border-color:var(--gold-d);background:#221608;}
+.re-sp-card.active{border-color:var(--gold);background:rgba(201,168,76,.15);color:var(--gold);}
+.re-sp-card.active.prepared-cls{border-color:#4A9A5A;background:rgba(74,154,90,.12);color:#7ADA8A;}
+.re-sp-card.grayed{opacity:.45;color:#6A5A3A;}
+.re-sp-notice{font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;}
 #re-body{display:flex;flex:1;overflow:hidden;}
 /* Bag column */
 #re-bag-col{width:clamp(200px,20vw,380px);min-width:180px;background:#130D06;border-right:1px solid #2A1A08;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
@@ -754,8 +772,13 @@ body.printing #ps-print{display:block!important;}
 <div id="re-overlay">
   <div id="re-hdr">
     <div><span class="re-hdr-t">⚔ Fiche &amp; Équipement</span><span id="re-hdr-name"></span></div>
-    <button class="re-close" onclick="closeReOverlay()">✕ Fermer</button>
+    <div style="display:flex;gap:.5rem;align-items:center;">
+      <button class="re-view-btn active" data-v="equip" onclick="toggleReView('equip')">⚔ Équipement</button>
+      <button class="re-view-btn" data-v="spells" id="re-spell-btn" onclick="toggleReView('spells')" style="display:none;">📖 Sorts</button>
+      <button class="re-close" onclick="closeReOverlay()">✕ Fermer</button>
+    </div>
   </div>
+  <div id="re-spell-panel"></div>
   <div id="re-body">
     <!-- LEFT: Bag -->
     <div id="re-bag-col">
@@ -3495,8 +3518,12 @@ function openRosterEquip(id){
   if(!_reChar) return;
   if(!_reChar.bag) _reChar.bag=[];
   if(!_reChar.equipped) _reChar.equipped={};
-  _reSrc='srd'; _reQ='';
+  _reSrc='srd'; _reQ=''; _reView='equip';
   var hn=$('re-hdr-name'); if(hn) hn.textContent=_reChar.name||'—';
+  // Afficher le bouton "Sorts" seulement si le perso est lanceur de sorts
+  var spBtn=$('re-spell-btn');
+  if(spBtn) spBtn.style.display=(_reChar.cls&&_reChar.cls.spellcaster)?'':'none';
+  toggleReView('equip');
   renderReSheet();
   renderReInv();
   $('re-overlay').classList.add('open');
@@ -3506,11 +3533,125 @@ function closeReOverlay(){
   if(_reChar){
     var roster = getRoster();
     var idx = roster.findIndex(function(r){return r.id===_reChar.id;});
-    if(idx>=0){ roster[idx].bag=_reChar.bag; roster[idx].equipped=_reChar.equipped||{}; setRoster(roster); }
+    if(idx>=0){
+      roster[idx].bag=_reChar.bag;
+      roster[idx].equipped=_reChar.equipped||{};
+      roster[idx].cantrips=_reChar.cantrips||[];
+      roster[idx].spells=_reChar.spells||[];
+      setRoster(roster);
+    }
   }
   $('re-overlay').classList.remove('open');
   _reChar = null;
   renderRoster();
+}
+
+var _reView='equip';
+
+function toggleReView(v){
+  _reView=v;
+  document.querySelectorAll('.re-view-btn').forEach(function(b){b.classList.toggle('active',b.dataset.v===v);});
+  var body=$('re-body'), panel=$('re-spell-panel');
+  if(v==='spells'){body.style.display='none';panel.style.display='flex';renderReSpells();}
+  else{body.style.display='';panel.style.display='none';}
+}
+
+function getReSpellInfo(){
+  var r=_reChar; if(!r||!r.cls||!r.cls.spellcaster)return null;
+  var lvl=r.cls_lvl||r.level||1;
+  var cls=r.cls;
+  var cntMax=getCantripsKnown(cls.id,lvl);
+  var isPrepared=cls.prepared;
+  var spellMax;
+  if(isPrepared){
+    var statVal=(r.stats&&cls.spellStat)?r.stats[cls.spellStat]:10;
+    var m=mod(statVal);
+    spellMax=cls.id==='paladin'?Math.max(1,Math.floor(lvl/2)+m):Math.max(1,lvl+m);
+  }else{
+    spellMax=getSpellsKnown(cls.id,lvl);
+  }
+  var slotsT=cls.slotsTable==='full'?SLOTS_FULL:cls.slotsTable==='half'?SLOTS_HALF:SLOTS_WARLOCK;
+  var slots=slotsT[lvl]||null;
+  var KEY={wizard:'arcane',sorcerer:'arcane',cleric:'divine',paladin:'divine',druid:'nature',ranger:'nature',bard:'bard',warlock:'warlock'};
+  return{lvl,cls,cntMax,spellMax,isPrepared,slots,key:KEY[cls.id]||'arcane'};
+}
+
+function renderReSpells(){
+  var panel=$('re-spell-panel'); if(!panel)return;
+  var r=_reChar; if(!r){panel.innerHTML='<div class="re-sp-notice">Aucun personnage chargé.</div>';return;}
+  var info=getReSpellInfo();
+  if(!info){panel.innerHTML='<div class="re-sp-notice">'+((r.cls&&r.cls.n)||'Ce personnage')+' ne lance pas de sorts.</div>';return;}
+  var cants=r.cantrips||[];
+  var spells=r.spells||[];
+  var cantPool=CANTRIPS[info.key==='arcane'||info.key==='bard'||info.key==='warlock'?'arcane':info.key==='divine'?'divine':'nature']||[];
+  var POOLS=[{lvl:1,p:SPELLS1},{lvl:2,p:SPELLS2},{lvl:3,p:SPELLS3},{lvl:4,p:SPELLS4},{lvl:5,p:SPELLS5},{lvl:6,p:SPELLS6},{lvl:7,p:SPELLS7},{lvl:8,p:SPELLS8},{lvl:9,p:SPELLS9}];
+  var availPools=POOLS.filter(function(pl){return info.slots&&info.slots[pl.lvl-1]>0&&(pl.p[info.key]||[]).length>0;});
+  var typeLabel=info.isPrepared
+    ?'<span style="color:#4A9A5A;">Préparés</span> — quotidiennement · max '+info.spellMax
+    :'<span style="color:var(--gold);">Connus</span> — liste fixe · '+info.spellMax+' au niv.'+info.lvl;
+  var cntFull=cants.length>=info.cntMax,spFull=spells.length>=info.spellMax;
+  var html='<div class="re-sp-summary">';
+  if(info.cntMax>0)html+='<span class="re-sp-badge'+(cntFull?' full':'')+'">🌀 Sorts mineurs : '+cants.length+'/'+info.cntMax+'</span>';
+  html+='<span class="re-sp-badge'+(spFull?' full':'')+'">✦ '+typeLabel+' : '+spells.length+'/'+info.spellMax+'</span>';
+  html+='<span class="re-sp-badge" style="color:#5A7AA0;">📖 '+info.cls.n+' · Niv.'+info.lvl+'</span>';
+  html+='</div>';
+  // Cantrips
+  if(info.cntMax>0&&cantPool.length){
+    html+='<div class="re-sp-lvl-hdr">🌀 Sorts Mineurs <span class="re-sp-slots">À volonté</span></div>';
+    html+='<div class="re-sp-grid">';
+    cantPool.forEach(function(s){
+      var active=cants.includes(s);
+      var disabled=!active&&cntFull;
+      html+='<div class="re-sp-card'+(active?' active':'')+(disabled?' grayed':'')+'"'
+        +' onclick="reToggleSpell(\'c\',\''+s.replace(/'/g,"\\'")+'\')">'
+        +(active?'✓ ':'')+'<span>'+s+'</span>'
+        +(active?'<span style="color:#8A3A3A;font-size:10px;margin-left:2px;">✕</span>':'')+'</div>';
+    });
+    html+='</div>';
+  }
+  // Sorts par niveau
+  if(availPools.length){
+    var prepLabel=info.isPrepared?'Marquez ceux préparés aujourd\'hui':'Choisissez ceux que vous connaissez';
+    html+='<div class="re-sp-notice" style="margin:0 0 .3rem;">'+prepLabel+'</div>';
+    availPools.forEach(function(pl){
+      var pool=pl.p[info.key]||[];
+      if(!pool.length)return;
+      var sl=info.slots[pl.lvl-1];
+      html+='<div class="re-sp-lvl-hdr">Niveau '+pl.lvl+' <span class="re-sp-slots">'+sl+' emplacement'+(sl>1?'s':'')+'</span></div>';
+      html+='<div class="re-sp-grid">';
+      pool.forEach(function(s){
+        var active=spells.includes(s);
+        var disabled=!active&&spFull;
+        var cls=info.isPrepared?(active?'active prepared-cls':''):(active?'active':'');
+        html+='<div class="re-sp-card '+cls+(disabled?' grayed':'')+'"'
+          +' onclick="reToggleSpell(\'s\',\''+s.replace(/'/g,"\\'")+'\')">'
+          +(active?(info.isPrepared?'✓ ':'✓ '):'')+'<span>'+s+'</span>'
+          +(active?'<span style="color:#8A3A3A;font-size:10px;margin-left:2px;">✕</span>':'')+'</div>';
+      });
+      html+='</div>';
+    });
+  }else if(!info.isPrepared&&info.lvl<2&&(info.cls.id==='ranger'||info.cls.id==='paladin')){
+    html+='<div class="re-sp-notice">'+info.cls.n+' obtient ses sorts au niveau 2.</div>';
+  }
+  panel.innerHTML=html;
+}
+
+function reToggleSpell(type,s){
+  if(!_reChar)return;
+  if(!_reChar.cantrips)_reChar.cantrips=[];
+  if(!_reChar.spells)_reChar.spells=[];
+  var info=getReSpellInfo();
+  if(!info)return;
+  if(type==='c'){
+    var i=_reChar.cantrips.indexOf(s);
+    if(i>=0)_reChar.cantrips.splice(i,1);
+    else if(_reChar.cantrips.length<info.cntMax)_reChar.cantrips.push(s);
+  }else{
+    var i=_reChar.spells.indexOf(s);
+    if(i>=0)_reChar.spells.splice(i,1);
+    else if(_reChar.spells.length<info.spellMax)_reChar.spells.push(s);
+  }
+  renderReSpells();
 }
 
 function renderReSheet(){
