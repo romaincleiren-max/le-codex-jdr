@@ -982,6 +982,27 @@ const SLOTS_WARLOCK={
 };
 
 // ═══════════════════════════════════════════════════
+// CANTRIPS CONNUS PAR NIVEAU (index 0 inutilisé)
+// ═══════════════════════════════════════════════════
+const CANTRIPS_TABLE={
+  bard:    [0,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
+  cleric:  [0,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5],
+  druid:   [0,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
+  sorcerer:[0,4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6],
+  warlock: [0,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
+  wizard:  [0,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5],
+};
+// SORTS CONNUS PAR NIVEAU — classes "known" uniquement
+const SPELLS_KNOWN_TABLE={
+  bard:    [0,4,5,6,7,8,9,10,11,12,14,15,15,16,18,19,19,20,22,22,22],
+  sorcerer:[0,2,3,4,5,6,7, 8, 9,10,11,12,12,13,13,14,14,15,15,15,15],
+  warlock: [0,2,3,4,5,6,7, 8, 9,10,10,11,11,12,12,13,13,14,14,15,15],
+  ranger:  [0,0,2,3,3,4,4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9,10,10,11,11],
+};
+function getCantripsKnown(clsId,lvl){const t=CANTRIPS_TABLE[clsId];return t?t[Math.min(lvl,20)]||0:0;}
+function getSpellsKnown(clsId,lvl){const t=SPELLS_KNOWN_TABLE[clsId];return t?t[Math.min(lvl,20)]||0:0;}
+
+// ═══════════════════════════════════════════════════
 // ── Mapping fichiers Supabase → race IDs ──────────────────────────────────────
 const RACE_IMG_MAP={
   'aarakocra':          'Race - Aaracockra.png',
@@ -1564,20 +1585,30 @@ function calcHP(){
   return hp;
 }
 
-// Spell prep
+// Spell prep / known
 function calcSpellsPrepared(){
   const cl=C.cls;
-  if(!cl||!cl.spellcaster)return{n:0,label:'Non-magicien'};
+  if(!cl||!cl.spellcaster)return{n:0,label:'Non-magicien',type:'none'};
+  const lvl=C.cls_lvl||C.level;
   const m=mod(effStat(cl.spellStat));
   const statLabel=cl.spellStat.toUpperCase();
   if(cl.prepared){
-    if(cl.id==='paladin'){const n=Math.max(1,Math.floor(C.level/2)+m);return{n,label:`Préparés = niv÷2 (${Math.floor(C.level/2)}) + mod ${statLabel} (${m}) = ${n}`};}
-    const n=Math.max(1,C.level+m);
-    return{n,label:`Préparés = niv (${C.level}) + mod ${statLabel} (${m}) = ${n}`};
+    if(cl.id==='wizard'){
+      const n=Math.max(1,lvl+m);
+      return{n,label:`Sorts préparés = niv (${lvl}) + mod ${statLabel} (${m}) = ${n}`,type:'prepared'};
+    }
+    if(cl.id==='paladin'){
+      if(lvl<2)return{n:0,label:'Sorts disponibles dès le niveau 2',type:'prepared'};
+      const n=Math.max(1,Math.floor(lvl/2)+m);
+      return{n,label:`Sorts préparés = niv÷2 (${Math.floor(lvl/2)}) + mod ${statLabel} (${m}) = ${n}`,type:'prepared'};
+    }
+    const n=Math.max(1,lvl+m);
+    return{n,label:`Sorts préparés = niv (${lvl}) + mod ${statLabel} (${m}) = ${n}`,type:'prepared'};
   }
-  if(cl.id==='ranger'&&C.level<2)return{n:0,label:'Sorts disponibles dès le niveau 2'};
-  if(cl.id==='paladin'&&C.level<2)return{n:0,label:'Sorts disponibles dès le niveau 2'};
-  return{n:cl.spellsKnown||0,label:`Sorts connus (fixe) = ${cl.spellsKnown||0}`};
+  // Sorts connus (liste fixe par niveau)
+  if(cl.id==='ranger'&&lvl<2)return{n:0,label:'Sorts disponibles dès le niveau 2',type:'known'};
+  const n=getSpellsKnown(cl.id,lvl);
+  return{n,label:`Sorts connus à niv.${lvl} = ${n}`,type:'known'};
 }
 
 // Slot table
@@ -2028,15 +2059,25 @@ let _d100Result=null;
 function renderSpellsByLevel(cl, prep, slots){
   const KEY={wizard:'arcane',sorcerer:'arcane',cleric:'divine',paladin:'divine',druid:'nature',ranger:'nature',bard:'bard',warlock:'warlock'};
   const key=KEY[cl.id]||'arcane';
-  // slots est un tableau indexé 0 : slots[0]=niv1, slots[1]=niv2, …
   const POOLS=[{lvl:1,p:SPELLS1},{lvl:2,p:SPELLS2},{lvl:3,p:SPELLS3},{lvl:4,p:SPELLS4},{lvl:5,p:SPELLS5},{lvl:6,p:SPELLS6},{lvl:7,p:SPELLS7},{lvl:8,p:SPELLS8}];
   const avail=POOLS.filter(({lvl,p})=>slots&&slots[lvl-1]>0&&(p[key]||[]).length>0);
   if(!avail.length)return'';
-  let h=`<div class="div"></div><div class="sh" style="font-size:14px;">Sorts</div><div class="ss">${prep.label} · Sélectionnés : ${C.spells.length}/${prep.n}</div>`;
+  const isPrepared=prep.type==='prepared';
+  const title=isPrepared
+    ?`Sorts disponibles <span style="color:#8A7A5A;font-size:9px;">(à préparer quotidiennement)</span>`
+    :`Sorts connus <span style="color:#8A7A5A;font-size:9px;">(liste fixe par niveau)</span>`;
+  const subtitle=isPrepared
+    ?`${prep.label} — cochez ceux que vous préparez`
+    :`${prep.label} — Choisis : ${C.spells.length}/${prep.n}`;
+  let h=`<div class="div"></div><div class="sh" style="font-size:14px;">${title}</div><div class="ss">${subtitle}</div>`;
   avail.forEach(({lvl,p})=>{
     const pool=p[key]||[];
     const n=slots[lvl-1];
-    h+=`<div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;color:var(--gold-d);margin:.7rem 0 .3rem;text-transform:uppercase;">Niveau ${lvl} (${n} emplacement${n>1?'s':''})</div><div class="spg">${pool.map(s=>`<div class="spc ${C.spells.includes(s)?'sel':''}" onclick="toggleSp('s','${s.replace(/'/g,"\\'")}',${prep.n})"><div class="sp-nm">${s}</div><div class="sp-mt">NIV.${lvl}</div></div>`).join('')}</div>`;
+    h+=`<div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;color:var(--gold-d);margin:.7rem 0 .3rem;text-transform:uppercase;">Niveau ${lvl} — ${n} emplacement${n>1?'s':''}</div>
+    <div class="spg">${pool.map(s=>`<div class="spc ${C.spells.includes(s)?'sel':''}" onclick="toggleSp('s','${s.replace(/'/g,"\\'")}',${prep.n})">
+      <div class="sp-nm">${s}</div>
+      <div class="sp-mt">NIV.${lvl}${isPrepared?'':' · CONNU'}</div>
+    </div>`).join('')}</div>`;
   });
   return h;
 }
@@ -2081,10 +2122,15 @@ function renderEquipSpells(){
     <textarea class="import-ta" id="import-ta" placeholder='[{"id":"epee-magique","n":"Épée +1","qty":1,"w":3,"c":"—","d":"Arme magique : +1 aux jets d\'attaque et de dégâts.","cat":"Arme"}]'></textarea>
     <div class="btn-row" style="margin-top:.5rem;"><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="importItems()">⬇ Importer</button><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="exportBagJSON()">⬆ Exporter le sac</button></div>
   </div>
-  ${cl?.spellcaster&&cl.cantripsKnown>0?`<div class="div"></div><div class="sh" style="font-size:14px;">Sorts Mineurs</div><div class="ss">Choisissez ${cl.cantripsKnown} sort(s) mineur(s) — à volonté · Sélectionnés : ${C.cantrips.length}/${cl.cantripsKnown}</div>
-  <div class="spg">${cantPool.map(s=>`<div class="spc ${C.cantrips.includes(s)?'sel':''}" onclick="toggleSp('c','${s}',${cl.cantripsKnown})"><div class="sp-nm">${s}</div><div class="sp-mt">CANTRIP · À VOLONTÉ</div></div>`).join('')}</div>`:''}
-  ${cl?.spellcaster&&prep.n>0?renderSpellsByLevel(cl,prep,slots):''}
-  ${cl?.spellcaster&&prep.n===0&&(cl.id==='ranger'||cl.id==='paladin')?`<div class="div"></div><div class="notice notice-i">ℹ ${cl.n} obtient ses sorts au niveau 2.</div>`:''}
+  ${(()=>{
+    if(!cl?.spellcaster)return'';
+    const lvl=C.cls_lvl||C.level;
+    const cntK=getCantripsKnown(cl.id,lvl);
+    const cantSection=cntK>0?`<div class="div"></div><div class="sh" style="font-size:14px;">Sorts Mineurs (${cntK})</div><div class="ss">À volonté · Choisissez ${cntK} — Sélectionnés : ${C.cantrips.length}/${cntK}</div>
+  <div class="spg">${cantPool.map(s=>`<div class="spc ${C.cantrips.includes(s)?'sel':''}" onclick="toggleSp('c','${s}',${cntK})"><div class="sp-nm">${s}</div><div class="sp-mt">CANTRIP · À VOLONTÉ</div></div>`).join('')}</div>`:'';
+    const spellSection=prep.n>0?renderSpellsByLevel(cl,prep,slots):(cl.id==='ranger'||cl.id==='paladin'?`<div class="div"></div><div class="notice notice-i">ℹ ${cl.n} obtient ses sorts au niveau 2.</div>`:'');
+    return cantSection+spellSection;
+  })()}
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">✦ Capacités Spéciales</div>
   <div class="ss">Capacités hors SRD · Nommez-la et lancez 1D100 pour en déterminer la valeur</div>
@@ -3289,7 +3335,7 @@ function updateRight(){
   if($('rperc'))$('rperc').textContent=calcPassivePerc();
   if($('rsub'))$('rsub').textContent=C.sub?C.sub.n:'—';
   const prep=calcSpellsPrepared();
-  if($('rspells'))$('rspells').textContent=C.cls?.spellcaster?prep.label:'—';
+  if($('rspells'))$('rspells').textContent=C.cls?.spellcaster?(prep.type==='prepared'?`Préparés max : ${prep.n}`:`Sorts connus : ${prep.n}`):'—';
   // Mettre à jour les indicateurs du sélecteur de niveau
   if($('pb-disp'))$('pb-disp').textContent=C.profBonus;
   if($('hp-disp'))$('hp-disp').textContent=calcHP()||'—';
