@@ -982,6 +982,40 @@ const SLOTS_WARLOCK={
 };
 
 // ═══════════════════════════════════════════════════
+// ── Mapping fichiers Supabase → race IDs ──────────────────────────────────────
+const RACE_IMG_MAP={
+  'aarakocra':          'Race - Aaracockra.png',
+  'half-elf':           'Race - Demi-elfe.png',
+  'goliath':            'Race - Demi-geants.png',
+  'half-orc':           'Race - Demi-orque.png',
+  'dragonborn':         'Race - Drakeide.png',
+  'elf-drow':           'Race - Drow.png',
+  'elf-high':           'Race - Elfe.png',
+  'elf-wood':           'Race - Elfe.png',
+  'genasi-water':       "Race - Genasi de l'eau.png",
+  'genasi-earth':       'Race - Genasi de la terre.png',
+  'genasi-fire':        'Race - Genasi du feu.png',
+  'gnome-forest':       'Race - Gnome.png',
+  'gnome-rock':         'Race - Gnomes des profondeurs.png',
+  'halfling-lf':        'Race - Halfelin.png',
+  'halfling-stout':     'Race - Halfelins des Lochs.png',
+  'human':              'Race - Humain.png',
+  'dwarf-hill':         'Race - Nain.png',
+  'dwarf-mountain':     'Race - Nains des Montagnes.png',
+  'tiefling':           'Race - Teiffelin.png',
+  'tiefling-zariel':    'Race - Teiffelin.png',
+  'tiefling-baalzebul': 'Race - Teiffelin.png',
+  'tiefling-dispater':  'Race - Teiffelin.png',
+  'tiefling-fierna':    'Race - Teiffelin.png',
+  'tiefling-glasya':    'Race - Teiffelin.png',
+  'tiefling-levistus':  'Race - Teiffelin.png',
+  'tiefling-mammon':    'Race - Teiffelin.png',
+  'tiefling-mephistopheles': 'Race - Teiffelin.png',
+};
+function getRaceImgUrl(id){
+  const f=RACE_IMG_MAP[id];
+  return f?`${SUPA_URL}/storage/v1/object/public/races/${encodeURIComponent(f)}`:null;
+}
 // ── Visuels par race / classe ─────────────────────────────────────────────────
 const RACE_STYLE={
   human:{icon:'👤',color:'#8B7A50'},'elf-high':{icon:'✦',color:'#2D6A4A'},
@@ -1616,9 +1650,8 @@ function go(n){
 // ─── STEP 1: RACE ───────────────────────────────────
 function raceImgFallback(el){
   const id=el.dataset.id;
-  const webp=`${SUPA_URL}/storage/v1/object/public/races/${id}.webp`;
-  if(el.src!==webp){el.onerror=function(){raceImgFallback(el);};el.src=webp;return;}
   const rs=RACE_STYLE[id]||{icon:'🧝'};
+  el.onerror=null;
   el.parentElement.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;
 }
 function renderRace(){
@@ -1631,7 +1664,7 @@ function renderRace(){
     const rs=RACE_STYLE[r.id]||{icon:'🧝',color:'var(--gold-d)'};
     const bs=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>k.toUpperCase()+' +'+v).join('  ');
     const extra=r.bonus._ch?` +${r.bonus._ch}✦`:'';
-    const imgUrl=`${SUPA_URL}/storage/v1/object/public/races/${r.id}.jpg`;
+    const imgUrl=getRaceImgUrl(r.id);
     // Header : icon + nom + tag
     const head=document.createElement('div');head.className='race-card-head';
     head.innerHTML=`<span class="race-card-icon">${rs.icon}</span><div><div class="cn" style="font-size:11px;">${r.n}</div><div class="ct">${r.tag}</div></div>`;
@@ -1642,8 +1675,8 @@ function renderRace(){
     const wrap=document.createElement('div');wrap.className='race-portrait-wrap';
     const img=document.createElement('img');
     img.dataset.id=r.id;img.alt=r.n;img.loading='lazy';
-    img.src=imgUrl;img.onerror=function(){raceImgFallback(this);};
-    wrap.appendChild(img);
+    if(imgUrl){img.src=imgUrl;img.dataset.id=r.id;img.onerror=function(){raceImgFallback(this);};wrap.appendChild(img);}
+    else{wrap.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;}
     // Description
     const desc=document.createElement('div');desc.className='race-desc';desc.textContent=r.desc;
     // Accent
@@ -3235,7 +3268,20 @@ function updateRight(){
   // Portraits race / classe
   const raceStyle=C.race?(RACE_STYLE[C.race.id]||{icon:'🧝'}):null;
   const clsStyle=C.cls?(CLASS_STYLE[C.cls.id]||{icon:'⚔'}):null;
-  setPortrait('rp-race-portrait','races',C.race?.id,raceStyle?.icon||'✕');
+  // Portrait race via mapping fichier bucket
+  const racePortEl=$('rp-race-portrait');
+  if(racePortEl){
+    if(C.race){
+      const rUrl=getRaceImgUrl(C.race.id);
+      if(rUrl){
+        const ri=document.createElement('img');
+        ri.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
+        ri.src=rUrl;ri.alt=C.race.n;
+        ri.onerror=function(){this.onerror=null;racePortEl.innerHTML=`<div class="rp-phl">${raceStyle?.icon||'🧝'}</div>`;};
+        racePortEl.innerHTML='';racePortEl.appendChild(ri);
+      }else{racePortEl.innerHTML=`<div class="rp-phl">${raceStyle?.icon||'🧝'}</div>`;}
+    }else{racePortEl.innerHTML='<div class="rp-phl">✕</div>';}
+  }
   setPortrait('rp-cls-portrait','classes',C.cls?.id,clsStyle?.icon||'✕');
   if($('rhp'))$('rhp').textContent=calcHP()||'—';
   if($('rca'))$('rca').textContent=calcCA();
