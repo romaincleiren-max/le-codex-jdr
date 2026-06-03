@@ -21,23 +21,26 @@ VALUES (
 )
 ON CONFLICT (id) DO UPDATE SET public = true;
 
--- 3. Policies : lecture publique (SELECT)
-CREATE POLICY IF NOT EXISTS "Public read races"
-ON storage.objects FOR SELECT TO public
-USING (bucket_id = 'races');
-
-CREATE POLICY IF NOT EXISTS "Public read classes"
-ON storage.objects FOR SELECT TO public
-USING (bucket_id = 'classes');
-
--- 4. Policies : upload (INSERT) — anon + authenticated
-CREATE POLICY IF NOT EXISTS "Upload races"
-ON storage.objects FOR INSERT TO anon, authenticated
-WITH CHECK (bucket_id = 'races');
-
-CREATE POLICY IF NOT EXISTS "Upload classes"
-ON storage.objects FOR INSERT TO anon, authenticated
-WITH CHECK (bucket_id = 'classes');
+-- 3. Policies (DROP IF EXISTS avant CREATE pour éviter les doublons)
+DO $$
+BEGIN
+  -- Lecture publique races
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND policyname='Public read races') THEN
+    CREATE POLICY "Public read races" ON storage.objects FOR SELECT TO public USING (bucket_id = 'races');
+  END IF;
+  -- Lecture publique classes
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND policyname='Public read classes') THEN
+    CREATE POLICY "Public read classes" ON storage.objects FOR SELECT TO public USING (bucket_id = 'classes');
+  END IF;
+  -- Upload races
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND policyname='Upload races') THEN
+    CREATE POLICY "Upload races" ON storage.objects FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'races');
+  END IF;
+  -- Upload classes
+  IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='storage' AND tablename='objects' AND policyname='Upload classes') THEN
+    CREATE POLICY "Upload classes" ON storage.objects FOR INSERT TO anon, authenticated WITH CHECK (bucket_id = 'classes');
+  END IF;
+END $$;
 
 -- ═══════════════════════════════════════════════════════════
 -- NOMS DE FICHIERS ATTENDUS (format : <id>.jpg ou <id>.webp)
