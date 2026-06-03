@@ -97,6 +97,10 @@ body{background:var(--shadow);color:var(--ink);font-family:'IM Fell English',Geo
 .dr-box{background:#1E1408;border:1px solid #3A2810;padding:.4rem;text-align:center;cursor:pointer;transition:.1s;}
 .dr-box:hover{border-color:var(--gold-d);}
 .dr-box.assigned{border-color:var(--forest);background:#1A3010;}
+.dr-box.rolling{border-color:var(--gold)!important;background:#2A2010!important;animation:diceShake .12s infinite alternate;}
+.dr-box.settled{animation:diceSettle .32s cubic-bezier(.2,.6,.3,1) forwards;}
+@keyframes diceShake{from{transform:rotate(-6deg) scale(1.08);}to{transform:rotate(5deg) scale(1.12);}}
+@keyframes diceSettle{0%{transform:scale(1.35);opacity:.6;}65%{transform:scale(.93);}100%{transform:scale(1);opacity:1;}}
 .dr-val{font-family:'Cinzel Decorative',serif;font-size:20px;color:var(--gold);}
 .dr-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;}
 .assign-mode{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);margin-bottom:.4rem;}
@@ -1440,6 +1444,19 @@ function primaryLvl(){
   const multiTotal=(C.multiclasses||[]).reduce((s,m)=>s+(m.lvl||1),0);
   return Math.max(1,(C.level||1)-multiTotal);
 }
+function clsLevelStr(){
+  if(!C.cls)return'—';
+  const mcs=(C.multiclasses||[]).filter(m=>m.cls&&(m.lvl||0)>0);
+  if(!mcs.length)return C.cls.n+' — Niveau '+(C.level||1);
+  let s=C.cls.n+' Niv.'+primaryLvl();
+  mcs.forEach(m=>{s+=' / '+m.cls.n+' Niv.'+m.lvl;});
+  return s+' — Niveau '+(C.level||1);
+}
+function clsShortStr(){
+  if(!C.cls)return'?';
+  const mcs=(C.multiclasses||[]).filter(m=>m.cls&&(m.lvl||0)>0);
+  return mcs.length?[C.cls.n,...mcs.map(m=>m.cls.n)].join('/'):C.cls.n;
+}
 function calcHP(){
   if(!C.cls)return 0;
   const conM=mod(effStat('con'));
@@ -1738,8 +1755,26 @@ function rollDice(){
     rolls.push({d,sum});
   }
   rolls.sort((a,b)=>b.sum-a.sum);
-  C.diceRolls=rolls;C.diceAssigned={};
-  renderDiceArea();renderStatBoxes();
+  C.diceAssigned={};pendingDice=null;
+  if($('pts-disp'))$('pts-disp').style.display='none';
+  const w=$('dice-area-wrap');
+  if(!w){C.diceRolls=rolls;renderDiceArea();renderStatBoxes();return;}
+  w.innerHTML=`<div class="dice-area">
+    <div class="dice-h">🎲 Lancer en cours...</div>
+    <div class="dice-result">${Array.from({length:6},(_,i)=>`<div class="dr-box rolling" id="danim-${i}">
+      <div class="dr-val" id="danim-v${i}">—</div><div class="dr-sub">· · ·</div>
+      <div style="font-family:'Cinzel',serif;font-size:8px;color:var(--gold-d);">—</div>
+    </div>`).join('')}</div></div>`;
+  const t0=Date.now(),dur=850;
+  const iv=setInterval(()=>{
+    for(let i=0;i<6;i++){const el=$('danim-v'+i);if(el)el.textContent=Math.ceil(Math.random()*18);}
+    if(Date.now()-t0>dur){
+      clearInterval(iv);
+      C.diceRolls=rolls;
+      renderDiceArea();renderStatBoxes();
+      document.querySelectorAll('.dr-box').forEach((b,i)=>setTimeout(()=>b.classList.add('settled'),i*70));
+    }
+  },55);
 }
 function resetDice(){C.diceRolls=[];C.diceAssigned={};applyRace();renderStats();}
 function assignDice(rollIdx,stat){
@@ -2411,7 +2446,7 @@ function buildPrint(){
   const s=C.stats;
   // Header
   $('pn-name').textContent=C.name||'Héros Sans Nom';
-  $('pn-clslvl').textContent=(C.cls?.n||'—')+' — Niveau '+(C.level||1)+(C.sub?' · '+C.sub.n:'');
+  $('pn-clslvl').textContent=clsLevelStr()+(C.sub?' · '+C.sub.n:'');
   $('pn-bg').textContent=C.background?.n||'—';
   $('pn-race').textContent=C.race?.n||'—';
   $('pn-align').textContent=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
@@ -3102,7 +3137,7 @@ function updateRight(){
     if($(mids[i]))$(mids[i]).textContent=mods(eff);
   });
   if($('rn'))$('rn').textContent=C.name||'—';
-  if($('rl'))$('rl').textContent=`${C.race?.n||'?'} · ${C.cls?.n||'?'} · Niv.${C.level}`;
+  if($('rl'))$('rl').textContent=`${C.race?.n||'?'} · ${clsShortStr()} · Niv.${C.level}`;
   if($('rhp'))$('rhp').textContent=calcHP()||'—';
   if($('rca'))$('rca').textContent=calcCA();
   if($('rinit'))$('rinit').textContent=mods(effStat('dex'));
