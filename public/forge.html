@@ -420,6 +420,21 @@ body.printing #ps-print{display:block!important;}
 /* ── Roster ── */
 #roster-sec{width:100%;max-width:980px;margin-top:2rem;}
 .roster-hdr{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.22em;color:var(--gold-d);text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.7rem;}
+/* Admin panel */
+#admin-panel{display:none;width:100%;max-width:900px;margin-top:1.5rem;padding-top:1.2rem;border-top:1px solid rgba(201,168,76,.2);}
+.admin-hdr{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.22em;color:#A080D0;text-transform:uppercase;margin-bottom:1rem;display:flex;align-items:center;gap:.7rem;}
+.admin-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#4A3060,transparent);}
+.admin-grid{display:flex;flex-wrap:wrap;gap:.6rem;}
+.admin-card{background:#120A1A;border:1px solid #3A2060;border-radius:8px;padding:.7rem .9rem;min-width:200px;max-width:260px;cursor:pointer;transition:.15s;}
+.admin-card:hover{border-color:#7A50C0;background:#1A1025;}
+.admin-card-name{font-family:'Cinzel Decorative',serif;font-size:12px;color:#D0A8F0;margin-bottom:.25rem;}
+.admin-card-sub{font-family:'Cinzel',serif;font-size:9px;color:#7A60A0;letter-spacing:.08em;}
+.admin-card-player{font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4A70;margin-top:.4rem;}
+.admin-empty{font-family:'IM Fell English',serif;font-size:11px;color:#5A4A6A;font-style:italic;}
+/* Bouton partager admin sur roster card */
+.rc-share-admin{font-family:'Cinzel',serif;font-size:7px;padding:.2em .4em;border:1px dashed #4A3060;color:#6A50A0;background:none;cursor:pointer;border-radius:3px;transition:.12s;white-space:nowrap;}
+.rc-share-admin:hover{border-color:#9A70E0;color:#C090F0;}
+.rc-share-admin.shared{border-color:#7A50C0;border-style:solid;color:#C090F0;background:rgba(122,80,192,.12);}
 .roster-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#3A2810,transparent);}
 /* Carousel wrapper */
 .roster-carousel{position:relative;padding:10px 40px 0;}
@@ -741,6 +756,12 @@ body.printing #ps-print{display:block!important;}
       <button class="rc-nav next" id="rc-next" onclick="rosterScroll(1)" aria-label="Suivant">›</button>
     </div>
     <div class="roster-dots" id="roster-dots"></div>
+  </div>
+  <div id="admin-panel">
+    <div class="admin-hdr">👑 Personnages partagés avec moi</div>
+    <div class="admin-grid" id="admin-char-grid">
+      <div class="admin-empty">Chargement...</div>
+    </div>
   </div>
 </div>
 
@@ -3995,8 +4016,10 @@ function renderRoster(){
         <div class="rc-btns">
           <button class="rc-btn primary" onclick="openRosterEquip('${r.id}')">⚔ Fiche</button>
           <button class="rc-btn" onclick="openCharFromRoster('${r.id}')">Éditer</button>
-          <button class="rc-btn" onclick="openShareModal('${r.id}')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager">📤</button>
+          <button class="rc-btn" onclick="openShareModal('${r.id}')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager sur le site">📤</button>
         </div>
+        ${r.supabaseId?`<button class="rc-share-admin${r.sharedWithAdmin?' shared':''}" onclick="shareCharWithAdmin('${r.id}')" title="${r.sharedWithAdmin?'Partagé avec l\'Admin — cliquer pour annuler':'Partager avec l\'Admin'}">
+          ${r.sharedWithAdmin?'👑 Partagé ✓':'👑 Partager avec l\'Admin'}</button>`:'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#3A2A1A;margin-top:.25rem;">💾 Sauvegardez d\'abord pour partager</div>'}
       </div>
     </div>`;
   }).join('');
@@ -4714,7 +4737,7 @@ async function loadForgeFromSupabase(){
   const sc=getSupaClient();
   try{
     const {data,error}=await sc.from('characters')
-      .select('id,sheet_data,char_name').eq('user_id',session.user.id).eq('status','approved');
+      .select('id,sheet_data,char_name,shared_with_admin').eq('user_id',session.user.id).eq('status','approved');
     if(error||!data) return;
     const roster=getRoster();
     let changed=false;
@@ -4724,6 +4747,7 @@ async function loadForgeFromSupabase(){
       const existing=forgeId?roster.find(r=>r.id===forgeId):null;
       if(existing){
         if(!existing.supabaseId){ existing.supabaseId=row.id; changed=true; }
+        if(existing.sharedWithAdmin!==!!row.shared_with_admin){ existing.sharedWithAdmin=!!row.shared_with_admin; changed=true; }
       } else {
         roster.push({...row.sheet_data,supabaseId:row.id});
         changed=true;
@@ -4734,14 +4758,93 @@ async function loadForgeFromSupabase(){
   updateLoginStatus();
 }
 
+var _isAdmin=false;
+
 async function updateLoginStatus(){
   const session=await getForgeSession();
   const el=document.getElementById('forge-login-status'); if(!el) return;
   if(session?.user){
-    el.innerHTML=`<span style="color:#6ABF6A;">● Connecté</span> <span style="color:#7A6A4A;font-size:9px;">${session.user.email}</span>`;
+    // Vérifier si admin
+    const sc=getSupaClient();
+    _isAdmin=false;
+    try{
+      const {data}=await sc.from('admin_users').select('email').eq('email',session.user.email).maybeSingle();
+      _isAdmin=!!data;
+    }catch(e){}
+    const adminBadge=_isAdmin?` <span style="font-family:'Cinzel',serif;font-size:8px;background:rgba(122,80,192,.2);border:1px solid #6A40A0;color:#C090F0;padding:1px 6px;border-radius:3px;letter-spacing:.06em;">👑 ADMIN</span>`:'';
+    el.innerHTML=`<span style="color:#6ABF6A;">● Connecté</span> <span style="color:#7A6A4A;font-size:9px;">${session.user.email}</span>${adminBadge}`;
+    if(_isAdmin) loadAdminPanel();
+    else{const ap=$('admin-panel');if(ap)ap.style.display='none';}
   } else {
+    _isAdmin=false;
+    const ap=$('admin-panel');if(ap)ap.style.display='none';
     el.innerHTML=`<a href="/login" style="color:#C9A84C;text-decoration:none;" title="Se connecter pour synchroniser vos personnages entre appareils">Se connecter</a> <span style="color:#5A4A2A;font-size:9px;">pour synchroniser vos persos</span>`;
   }
+}
+
+async function loadAdminPanel(){
+  const ap=$('admin-panel');
+  if(!ap)return;
+  ap.style.display='block';
+  const sc=getSupaClient();
+  try{
+    const {data,error}=await sc.from('characters')
+      .select('id,char_name,race_name,class_name,level,sheet_data,user_id')
+      .eq('shared_with_admin',true)
+      .neq('status','archived');
+    if(error||!data){$('admin-char-grid').innerHTML='<div class="admin-empty">Erreur de chargement.</div>';return;}
+    if(!data.length){$('admin-char-grid').innerHTML='<div class="admin-empty">Aucun personnage partagé pour l\'instant.</div>';return;}
+    $('admin-char-grid').innerHTML=data.map(function(row){
+      var sd=row.sheet_data||{};
+      var name=row.char_name||sd.name||'—';
+      var cls=(row.class_name||sd.cls?.n||'—');
+      var race=(row.race_name||sd.race?.n||'—');
+      var lvl=row.level||sd.level||1;
+      var player=sd.player||'';
+      return '<div class="admin-card" onclick="adminOpenChar(\''+row.id+'\')" title="Ouvrir la fiche">'
+        +'<div class="admin-card-name">'+name+'</div>'
+        +'<div class="admin-card-sub">'+cls+' · '+race+' · Niv.'+lvl+'</div>'
+        +(player?'<div class="admin-card-player">Joueur : '+player+'</div>':'')
+        +'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#5A4A70;margin-top:.3rem;">Cliquer pour ouvrir la fiche</div>'
+        +'</div>';
+    }).join('');
+  }catch(e){$('admin-char-grid').innerHTML='<div class="admin-empty">Erreur : '+e.message+'</div>';}
+}
+
+async function adminOpenChar(supabaseId){
+  const sc=getSupaClient();
+  try{
+    const {data,error}=await sc.from('characters').select('sheet_data').eq('id',supabaseId).single();
+    if(error||!data?.sheet_data){alert('Impossible de charger ce personnage.');return;}
+    const sd=data.sheet_data;
+    sd.race=RACES.find(function(x){return x.id===sd.race?.id;})||sd.race;
+    sd.cls=CLASSES.find(function(x){return x.id===sd.cls?.id;})||sd.cls;
+    sd.background=BACKGROUNDS.find(function(x){return x.id===sd.background?.id;})||sd.background;
+    if(!sd.diceRolls)sd.diceRolls=[];if(!sd.bag)sd.bag=[];if(!sd.equipped)sd.equipped={};
+    _reChar=sd;
+    var spBtn=$('re-spell-btn');
+    if(spBtn)spBtn.style.display=(sd.cls&&sd.cls.spellcaster)?'':'none';
+    toggleReView('equip');
+    renderReSheet();renderReInv();
+    $('re-overlay').classList.add('open');
+  }catch(e){alert('Erreur : '+e.message);}
+}
+
+async function shareCharWithAdmin(charId){
+  const roster=getRoster();
+  const entry=roster.find(function(r){return r.id===charId;});
+  if(!entry||!entry.supabaseId){alert('Sauvegardez d\'abord le personnage (bouton 💾).');return;}
+  const sc=getSupaClient();
+  const newState=!entry.sharedWithAdmin;
+  try{
+    const {error}=await sc.from('characters')
+      .update({shared_with_admin:newState})
+      .eq('id',entry.supabaseId);
+    if(error){console.error(error);alert('Erreur : '+error.message);return;}
+    entry.sharedWithAdmin=newState;
+    setRoster(roster);
+    renderRoster();
+  }catch(e){alert('Erreur : '+e.message);}
 }
 
 document.addEventListener('DOMContentLoaded',()=>{
