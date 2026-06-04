@@ -10,10 +10,16 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
-  --ink:#1A1208;--parch:#F2E8D0;--parch2:#E8D5A8;--parch3:#D4B870;
-  --blood:#8B1A1A;--blood-l:#C0392B;--gold:#C9A84C;--gold-d:#8B6914;
-  --forest:#2D5016;--ocean:#1A3A5C;--shadow:#110C06;--mid:#1E1408;
-  --purple:#4A1F7A;--teal:#1A4A4A;--border:#8B6914;
+  /* refined dark / gold / blood system */
+  --ink:#2A1E0E;--parch:#EDE0C8;--parch2:#E2D2B0;--parch3:#CDB272;
+  --blood:#8B1F1F;--blood-l:#C0392B;--gold:#C9983A;--gold-d:#8A6A2A;
+  --forest:#2D5016;--ocean:#1A3A5C;--shadow:#07050A;--mid:#1C1510;
+  --purple:#4A1F7A;--teal:#1A4A4A;--border:#8A6A2A;
+  /* extended tokens */
+  --bg:#07050A;--surf-d:#110D07;--surf-m:#1C1510;--gold-soft:#8A6A2A;
+  --blood-grad-a:#A02020;--blood-grad-b:#6A1515;
+  --bd-subtle:rgba(201,168,76,.14);--bd-soft:rgba(201,168,76,.22);
+  --bd-strong:rgba(201,168,76,.55);--gold-glow:rgba(201,168,76,.15);
 }
 body{background:var(--shadow);color:var(--ink);font-family:'IM Fell English',Georgia,serif;min-height:100vh;}
 ::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--shadow);}::-webkit-scrollbar-thumb{background:var(--gold-d);}
@@ -728,6 +734,176 @@ body.printing #ps-print{display:block!important;}
 .sum-banner-icon{font-size:52px;display:block;margin-bottom:.6rem;filter:drop-shadow(0 0 16px rgba(201,168,76,.25));position:relative;z-index:1;}
 .sum-title{font-size:24px;position:relative;z-index:1;text-shadow:0 2px 20px rgba(201,168,76,.2);}
 .sum-sub{position:relative;z-index:1;}
+
+/* ════════════════════════════════════════════════════════
+   VISUAL REFRESH v2 — palette cohérente sombre / or / sang
+   (cascade par-dessus les règles précédentes, rien supprimé)
+   ════════════════════════════════════════════════════════ */
+body{background:var(--bg);}
+::-webkit-scrollbar{width:3px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:rgba(201,168,76,.3);border-radius:3px;}
+::-webkit-scrollbar-thumb:hover{background:rgba(201,168,76,.5);}
+
+/* ── Title screen ── */
+#ts{background:radial-gradient(ellipse at 50% 42%,#1A1322 0%,#0C0810 45%,#07050A 100%);}
+.t1{letter-spacing:.01em;text-shadow:0 2px 28px rgba(201,168,76,.18);}
+.t2{letter-spacing:.26em;}
+.tdiv{background:linear-gradient(90deg,transparent,var(--gold-d),transparent);}
+.dz{border-radius:6px;transition:.18s ease;}
+
+/* ── Topbar / nav ── */
+#tb{background:rgba(7,5,10,.97);border-bottom:1px solid var(--bd-soft);backdrop-filter:blur(10px);}
+.tb-t{letter-spacing:.02em;}
+#nav,#dh-nav,#ct-nav{background:rgba(7,5,10,.96);border-bottom:1px solid var(--bd-subtle);}
+/* Pills → capsules */
+.pill{border-radius:999px;padding:.42em 1em;font-size:9.5px;letter-spacing:.12em;background:rgba(255,255,255,.015);border:1px solid var(--bd-subtle);color:#7A6A4A;transition:.18s ease;border-bottom:2px solid transparent;}
+.pill:hover{color:var(--gold);border-color:var(--bd-soft);background:rgba(201,168,76,.05);}
+.pill.active{color:var(--gold);background:rgba(201,168,76,.1);border-color:var(--bd-strong);border-bottom-color:var(--gold);box-shadow:0 2px 14px rgba(201,168,76,.1);}
+.pill.done{color:#6FB048;border-color:rgba(45,80,22,.45);background:rgba(45,80,22,.08);}
+.pill.done::after{content:' ✓';font-size:8px;opacity:.85;}
+
+/* ── Step headers ── */
+.sh{font-size:20px;color:var(--gold);letter-spacing:.005em;text-shadow:0 0 30px rgba(201,168,76,.14);}
+.ss{letter-spacing:.2em;color:var(--gold-d);}
+
+/* ── Cards ── */
+.card{background:var(--surf-d);border:1px solid var(--bd-subtle);border-radius:7px;overflow:hidden;transition:.18s ease;}
+.card:hover{border-color:var(--bd-soft);transform:translateY(-2px);background:#17110A;box-shadow:inset 0 0 0 1px var(--gold-glow),0 4px 20px rgba(0,0,0,.4);}
+.card.sel{border-color:var(--bd-strong);background:#1D150C;box-shadow:inset 0 0 0 1px rgba(201,168,76,.3),0 0 0 1px rgba(201,168,76,.18);}
+.card.sel::after{color:var(--gold);text-shadow:0 0 8px rgba(201,168,76,.5);}
+.card-accent{height:2px;margin:-.85rem -.85rem .65rem;display:block;filter:saturate(1.4) brightness(1.1);}
+.cn{color:var(--parch);font-size:14px;}
+.cd{color:#8A795A;}
+.cb{color:var(--gold-d);border-top:1px solid var(--bd-subtle);padding-top:.5rem;margin-top:.45rem;}
+
+/* ── Subclass ── */
+.sub-sec{background:var(--surf-d);border:1px solid var(--bd-subtle);border-radius:7px;}
+.subc{background:var(--surf-m);border:1px solid var(--bd-subtle);border-radius:6px;transition:.18s ease;}
+.subc:hover{border-color:var(--bd-soft);background:#221A12;}
+.subc.sel{border-color:var(--bd-strong);box-shadow:inset 0 0 0 1px rgba(201,168,76,.2);}
+
+/* ── Stat boxes ── */
+.sbox{background:var(--surf-d);border:1px solid var(--bd-subtle);border-radius:7px;transition:.15s ease;}
+.sbox:hover{border-color:var(--bd-soft);}
+.sl{font-size:8.5px;}
+.sv{font-size:28px;}
+.sm{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;color:#5A6878;}
+.sbtn{border-radius:4px;transition:.15s ease;}
+.pts{background:rgba(255,255,255,.025);border:1px solid var(--bd-soft);border-radius:5px;color:var(--parch2);}
+.pts span{font-family:'Cinzel Decorative',serif;font-size:22px;color:var(--gold);}
+
+/* ── Dice roller ── */
+.dice-area,.cap-result-box,.bag-sec,.import-zone{background:var(--surf-d);border:1px solid var(--bd-subtle);border-radius:7px;}
+.import-zone{border-style:dashed;}
+.dr-box{background:var(--surf-m);border:1px solid var(--bd-subtle);border-radius:5px;transition:.15s ease;}
+.dr-box:hover{border-color:var(--bd-soft);}
+.dr-box.assigned{border-color:rgba(45,80,22,.6);}
+
+/* ── Skills / saves / combat (parchment rows) ── */
+.sk-r,.save-row,.cstat,.spc,.eqi,.inv-item,.traitbox,.ac,.ifl,.cap-item,.spell-info{transition:.15s ease;}
+.sk-r{border-radius:4px;}
+.sk-r:hover:not(.locked){border-color:var(--bd-soft);}
+.cstat,.sbox{border-radius:7px;}
+
+/* ── Spells (.spg / .spc) ── */
+.spc{border:1px solid var(--parch3);border-radius:5px;}
+.spc:hover{border-color:var(--ocean);box-shadow:0 0 0 1px rgba(26,58,92,.25),0 2px 10px rgba(0,0,0,.25);}
+.spc.sel{border-color:var(--ocean);background:var(--parch2);box-shadow:inset 0 0 0 1px rgba(26,58,92,.3);}
+
+/* ── Buttons ── */
+.btn{border-radius:5px;transition:.18s ease;}
+.btn-p{background:linear-gradient(180deg,var(--gold) 0%,var(--gold-d) 100%);color:#1A1208;border:1px solid var(--gold);box-shadow:0 2px 10px rgba(201,152,58,.22);font-weight:600;}
+.btn-p:hover{background:linear-gradient(180deg,#E0B250 0%,#9A7A2E 100%);box-shadow:0 4px 16px rgba(201,152,58,.32);transform:translateY(-1px);}
+.btn-s{background:transparent;color:var(--gold);border:1px solid var(--bd-soft);}
+.btn-s:hover{background:rgba(201,168,76,.07);border-color:var(--bd-strong);color:var(--gold);}
+.btn-d{background:linear-gradient(180deg,#5A2A92 0%,#3A1860 100%);color:var(--parch);border:1px solid #6A3AAA;}
+.btn-d:hover{background:linear-gradient(180deg,#6A38A8 0%,#451E72 100%);box-shadow:0 0 16px rgba(122,80,200,.4);transform:translateY(-1px);}
+.btn-g{background:linear-gradient(180deg,#3A6A1E 0%,#244010 100%);border:1px solid #4A8020;}
+.btn-g:hover{background:linear-gradient(180deg,#4A8020 0%,#2D5016 100%);box-shadow:0 0 14px rgba(74,128,32,.3);}
+.btn-b{background:linear-gradient(180deg,#23507E 0%,#15324E 100%);border:1px solid #2A5A8C;}
+.btn-b:hover{box-shadow:0 0 14px rgba(42,90,140,.3);}
+
+/* ── Level buttons ── */
+.lvl-btn{background:var(--surf-m);border:1px solid var(--bd-subtle);border-radius:5px;font-size:14px;min-height:44px;transition:.18s ease;}
+.lvl-btn:hover{border-color:var(--bd-strong);color:var(--gold);background:#241A10;}
+.lvl-btn.active{border-color:#A02020;background:linear-gradient(180deg,var(--blood-grad-a),var(--blood-grad-b));color:var(--parch);box-shadow:0 2px 12px rgba(139,31,31,.35);}
+.mc-cls-btn{background:var(--surf-m);border:1px solid var(--bd-subtle);transition:.18s ease;}
+.mc-cls-btn:hover{border-color:var(--bd-soft);}
+.mc-cls-btn.active{border-color:var(--bd-strong);background:rgba(201,168,76,.13);}
+
+/* ── Sidebar ── */
+#rp{background:rgba(11,8,5,.94);border-left:1px solid var(--bd-subtle);}
+.rstat{background:rgba(255,255,255,.035);border:1px solid var(--bd-subtle);border-radius:4px;}
+.rsv{font-size:18px;color:var(--parch);}
+.rcs{background:rgba(255,255,255,.025);border:1px solid var(--bd-subtle);border-radius:4px;}
+.rcsv{font-size:13px;color:var(--parch2);}
+.rsec{color:var(--gold-d);border-bottom-color:var(--bd-subtle);}
+.rp-portrait{border:1px solid var(--bd-subtle);border-radius:6px;transition:.18s ease;}
+.rp-portrait:hover{border-color:var(--bd-soft);}
+
+/* ── Inputs ── */
+.ifl,.inv-search,.import-ta,.scn-libre-in{background:rgba(0,0,0,.35);border:1px solid var(--bd-soft);border-radius:5px;color:var(--parch);transition:.15s ease;}
+.ifl{color:var(--ink);background:var(--parch2);border-color:var(--parch3);}
+.inv-search,.import-ta{color:var(--parch);}
+.ifl:focus,.inv-search:focus,.import-ta:focus,.scn-libre-in:focus{border-color:var(--bd-strong);box-shadow:0 0 0 3px rgba(201,168,76,.07);outline:none;}
+
+/* ── Inventory / equip ── */
+.inv-item{border-radius:5px;}
+.inv-item:hover{border-color:var(--gold-d);box-shadow:0 2px 12px rgba(0,0,0,.3);}
+.inv-cat,.inv-src-btn,.re-bag-cat,.re-src-btn{border-radius:999px;transition:.15s ease;}
+.eqi{border-radius:4px;}
+.eqi:hover{border-color:var(--gold-d);}
+
+/* ── Race grid ── */
+.race-card{border-radius:7px;}
+.race-portrait-wrap{border-radius:5px;border:1px solid var(--bd-subtle);transition:.18s ease;}
+.race-card:hover .race-portrait-wrap{border-color:var(--bd-soft);}
+.race-desc{color:#8A795A;}
+
+/* ── Roster carousel ── */
+.rc:hover{box-shadow:0 4px 8px rgba(0,0,0,.45),0 14px 36px rgba(0,0,0,.7),0 30px 64px rgba(0,0,0,.55),0 0 30px rgba(201,168,76,.14),inset 0 1px 0 rgba(201,168,76,.22),inset 0 0 0 1px rgba(201,168,76,.12);}
+.rc-name{color:var(--gold);}
+.rc-sub{color:#8A6A2A;}
+.rc-btn:hover{border-color:var(--gold);color:var(--gold);}
+
+/* ── Paper doll overlay ── */
+#re-overlay{background:var(--bg);}
+#re-hdr{background:linear-gradient(100deg,#14100A 0%,#0C0906 60%,#0C0906 100%);border-bottom:1px solid var(--bd-soft);}
+#re-hdr-name{color:var(--gold);}
+.re-view-btn{border-radius:999px;transition:.18s ease;}
+.re-view-btn.active{background:rgba(201,168,76,.14);border-color:var(--bd-strong);color:var(--gold);}
+.re-doll-slot{border-radius:7px;border-color:var(--bd-subtle);transition:.18s ease;}
+.re-doll-slot:hover{border-color:var(--bd-strong)!important;box-shadow:inset 0 0 0 1px var(--gold-glow);}
+#re-stats-bar{background:rgba(255,255,255,.02);border:1px solid var(--bd-subtle);border-radius:7px;}
+.re-stat-pill-v{color:var(--parch);}
+.re-stat-pill-l{color:var(--gold-d);}
+
+/* ── Spell panel ── */
+.re-sp-card{border-radius:999px;border:1px solid var(--bd-subtle);background:var(--surf-m);transition:.15s ease;padding:.32rem .7rem;}
+.re-sp-card:hover{border-color:var(--bd-soft);background:#221A0E;}
+.re-sp-card.active{border-color:var(--bd-strong);background:rgba(201,168,76,.14);box-shadow:0 0 12px rgba(201,168,76,.18);}
+.re-sp-summary{background:var(--surf-d);border:1px solid var(--bd-subtle);}
+.re-sp-badge{border-radius:999px;}
+.re-sp-badge.full{border-color:var(--gold);color:var(--gold);}
+
+/* ── Fiche personnage overlay (parchment) ── */
+#ps{background:#F5E9C8;background-image:radial-gradient(rgba(138,106,42,.05) 1px,transparent 1px);background-size:14px 14px;}
+.ps-hdr{background:linear-gradient(180deg,#1C140A,#120C06);padding:11px 14px;}
+.ps-hdr-name{color:#F0D080;}
+.ps-sec{color:#8B1F1F;border-bottom-color:#C9983A;}
+.ps-stat-v{color:#8B1F1F;}
+.ps-hp-block{border-color:#8B1F1F;}
+.ps-hp-v,.ps-hp-l{color:#8B1F1F;}
+#ps-toolbar{background:#14100A;border-bottom:1px solid var(--bd-soft);}
+
+/* ── Scenario runner accents ── */
+.scn-title{color:var(--gold);}
+.scn-choice{border-radius:5px;transition:.18s ease;}
+.scn-nb,.scn-sk-roll{border-radius:5px;transition:.15s ease;}
+
+/* ── Notices ── */
+.notice{border-radius:5px;}
 </style>
 </head>
 <body>
