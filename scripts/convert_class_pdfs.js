@@ -102,7 +102,7 @@ async function convertPdf(pdfPath, outputName) {
   const pages = await pdfToPng(pdfPath, {
     disableFontFace:      false,
     useSystemFonts:       true,
-    viewportScale:        4.0,
+    viewportScale:        8.0,
     pagesToProcess:       [1],
     strictPagesToProcess: false,
     verbosityLevel:       0,
