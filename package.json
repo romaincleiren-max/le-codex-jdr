@@ -7,7 +7,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "codex": "node scripts/build_codex_index.js",
-    "convert-classes": "node scripts/convert_class_pdfs.js"
+    "convert-classes": "node scripts/convert_class_pdfs.js",
+    "upload-classes": "node scripts/upload_class_icons.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.5.3",
