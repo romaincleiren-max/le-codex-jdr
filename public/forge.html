@@ -3024,7 +3024,7 @@ function addCodexToBag(safeId){
   const bagId='codex-'+safeId;
   const ex=C.bag.find(b=>b.id===bagId);
   if(ex)ex.qty++;
-  else C.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
+  else C.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,dnd_type:e.dnd_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
   renderBagList();
 }
 
@@ -4144,19 +4144,33 @@ function canEquipInSlot(item, slotId){
   const type=norm(item.item_type||item.type||'');
   const name=norm(item.n||item.name||'')+' '+norm(item.id||'');
 
-  // item_type Codex en priorité (string exacte ou partielle)
-  if(type){
-    if(/\barme\b|melee|corps.a.corps|distance/.test(type)) return slotId==='mainhand'||slotId==='offhand';
-    if(/\barmure\b|cuirasse|cotte|harnois|ecailles/.test(type)) return slotId==='chest';
-    if(/bouclier|egide|targe/.test(type)) return slotId==='offhand';
+  // dnd_type Codex (extrait du début de la desc : "Arme, Légendaire..." → "Arme")
+  const dndT=norm(item.dnd_type||'');
+  if(dndT){
+    if(/\barme\b/.test(dndT)) return slotId==='mainhand'||slotId==='offhand';
+    if(/\barmure\b/.test(dndT)) return slotId==='chest';
+    if(/bouclier|egide|targe/.test(dndT)) return slotId==='offhand';
+    if(/\banneau\b|bague/.test(dndT)) return slotId==='ring1'||slotId==='ring2';
+    if(/amulette/.test(dndT)) return slotId==='amulet';
+    if(/cape|manteau/.test(dndT)) return slotId==='back';
+    if(/botte|chaussure/.test(dndT)) return slotId==='feet';
+    if(/casque|chapeau|heaume|coiffe|couronne/.test(dndT)) return slotId==='head';
+    if(/gants?|gantelets?|brassards?/.test(dndT)) return slotId==='hands';
+    if(/ceinture/.test(dndT)) return slotId==='belt';
+    if(/sceptre|baton|baguette|instrument|grimoire|atlas/.test(dndT)) return slotId==='mainhand';
+  }
+  // item_type générique (fallback secondaire)
+  if(type&&type!=='objet magique'&&type!=='codex'){
+    if(/\barme\b|melee|corps.a.corps/.test(type)) return slotId==='mainhand'||slotId==='offhand';
+    if(/\barmure\b/.test(type)) return slotId==='chest';
     if(/anneau|bague/.test(type)) return slotId==='ring1'||slotId==='ring2';
-    if(/amulette|collier|pendentif|medaillon|talisman/.test(type)) return slotId==='amulet';
-    if(/cape|manteau|capote/.test(type)) return slotId==='back';
-    if(/botte|chaussure|sandal|sabot/.test(type)) return slotId==='feet';
-    if(/casque|chapeau|tiare|couronne|heaume|coiffe|bonnet|capuche/.test(type)) return slotId==='head';
-    if(/gant|brassard|mitaine|gantelets/.test(type)) return slotId==='hands';
-    if(/ceinture|ceinturon/.test(type)) return slotId==='belt';
-    if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(type)) return slotId==='mainhand';
+    if(/amulette|collier/.test(type)) return slotId==='amulet';
+    if(/cape|manteau/.test(type)) return slotId==='back';
+    if(/botte|chaussure/.test(type)) return slotId==='feet';
+    if(/casque|chapeau/.test(type)) return slotId==='head';
+    if(/gant|brassard/.test(type)) return slotId==='hands';
+    if(/ceinture/.test(type)) return slotId==='belt';
+    if(/sceptre|baton|baguette/.test(type)) return slotId==='mainhand';
   }
   // Dernier recours : inférence par le nom de l'item
   if(/botte|chaussure|sandal|sabot|greve|soleret|pantoufle/.test(name)) return slotId==='feet';
@@ -4932,7 +4946,7 @@ function reAddCodexItem(idx){
   var bagId='codex-'+(e.id||e.name).replace(/['"\\]/g,'_');
   var ex=_reChar.bag.find(function(b){return b.id===bagId;});
   if(ex)ex.qty++;
-  else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
+  else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,dnd_type:e.dnd_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
   renderReBag();
 }
 

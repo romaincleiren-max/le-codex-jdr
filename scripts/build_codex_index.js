@@ -177,6 +177,20 @@ function extractItem(resource, categoryName) {
     rarity = extractRarity(paragraphs[0]);
   }
 
+  // Extract D&D5e item type from first paragraph: "Arme, Légendaire..." → "Arme"
+  // Pattern: word(s) before first comma or parenthesis
+  var dnd_type = null;
+  if (categoryName === 'Objets magiques' && paragraphs[0]) {
+    var tm = paragraphs[0].match(/^([A-Za-zÀ-ÿ][A-Za-zÀ-ÿ\s\-]*?)(?:\s*[,(]|$)/);
+    if (tm) {
+      var candidate = tm[1].trim();
+      // Ignore if it looks like a sentence (too long or contains common words)
+      if (candidate.length <= 30 && !/\b(le|la|les|un|une|des|du|de)\b/i.test(candidate)) {
+        dnd_type = candidate;
+      }
+    }
+  }
+
   // Attunement detection
   var fullText = paragraphs.join(' ').toLowerCase();
   var attunement = fullText.includes('harmonisation') || fullText.includes('s\'harmoniser') || fullText.includes('nécessite une harmonisation');
@@ -186,6 +200,7 @@ function extractItem(resource, categoryName) {
     name: resource.name,
     category: categoryName,
     item_type: CATEGORY_ITEM_TYPE[categoryName] || categoryName,
+    dnd_type: dnd_type || null,
     desc: desc,
     citation: citation,
     image: image || '',
