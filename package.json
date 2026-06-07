@@ -6,7 +6,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "codex": "node scripts/build_codex_index.js"
+    "codex": "node scripts/build_codex_index.js",
+    "convert-classes": "node scripts/convert_class_pdfs.js"
   },
   "dependencies": {
     "@stripe/stripe-js": "^8.5.3",
@@ -24,7 +25,9 @@
     "@tailwindcss/vite": "^4.2.2",
     "@vitejs/plugin-react": "^4.2.0",
     "autoprefixer": "^10.4.22",
+    "pdf-to-png-converter": "^4.1.0",
     "postcss": "^8.5.6",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.1.17",
     "vite": "^5.0.0"
   }
