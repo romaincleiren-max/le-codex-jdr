@@ -603,6 +603,7 @@ body.printing #ps-print{display:block!important;}
 .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.5)!important;background:rgba(201,168,76,.06)!important;animation:re-pulse .9s ease-in-out infinite alternate;}
 @keyframes re-pulse{from{box-shadow:none;}to{box-shadow:inset 0 0 8px rgba(201,168,76,.15);}}
 .re-doll-slot.drop-ready.drag-over{border-color:var(--gold)!important;background:rgba(201,168,76,.2)!important;animation:none;box-shadow:0 0 14px rgba(201,168,76,.35);}
+.re-doll-slot.drag-invalid{border-color:#8B1A1A!important;background:rgba(139,26,26,.15)!important;cursor:not-allowed;}
 .re-doll-slot.equipped{background:#1C1408;}
 .re-equipped-badge{font-family:'Share Tech Mono',monospace;font-size:9px;color:#4A9A5A;flex-shrink:0;margin-left:2px;}
 .re-bag-filter{display:flex;gap:.2rem;padding:.3rem .5rem;background:#0D0905;border-bottom:1px solid #1A1208;flex-shrink:0;flex-wrap:wrap;}
@@ -633,6 +634,7 @@ body.printing #ps-print{display:block!important;}
 .equip-slot{display:flex;align-items:center;gap:.5rem;padding:.35rem .5rem;border:1px dashed #4A3820;background:#130D06;border-radius:3px;min-height:36px;transition:.12s;cursor:default;}
 .equip-slot:hover{border-color:#6A5030;background:#1A1008;}
 .equip-slot.drag-over{border-color:var(--gold) !important;background:rgba(201,168,76,.1) !important;border-style:solid !important;}
+.equip-slot.drag-invalid{border-color:#8B1A1A !important;background:rgba(139,26,26,.12) !important;border-style:solid !important;cursor:not-allowed;}
 .equip-slot-icon{font-size:13px;width:18px;text-align:center;flex-shrink:0;line-height:1;filter:drop-shadow(0 0 2px rgba(201,168,76,.3));}
 .equip-slot-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.14em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.4;}
 .equip-slot-nm{font-family:'IM Fell English',serif;font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
@@ -926,6 +928,51 @@ body{background:var(--bg);}
 
 /* ── Notices ── */
 .notice{border-radius:5px;}
+
+/* ── FEATS (Dons) ── */
+.feat-tag{display:inline-flex;align-items:center;background:#1E1508;border:1px solid #6A4A14;border-radius:12px;padding:2px 8px;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold);cursor:default;}
+.feat-picker-sum{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);cursor:pointer;padding:.3rem 0;list-style:none;user-select:none;}
+.feat-picker-sum:hover{color:var(--gold);}
+.feat-picker-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:.3rem;margin-top:.4rem;max-height:240px;overflow-y:auto;padding:.2rem;}
+.feat-pick-card{background:#130D06;border:1px solid #2A1A08;border-radius:4px;padding:.4rem .5rem;cursor:pointer;transition:.12s;}
+.feat-pick-card:hover{border-color:var(--gold-d);background:#1C1208;}
+.feat-pick-name{font-family:'Cinzel',serif;font-size:10px;color:var(--gold);margin-bottom:2px;}
+.feat-pick-desc{font-size:9px;color:#6A5A3A;line-height:1.35;}
+
+/* ── DICE ROLLER ── */
+.dr-tabs{display:flex;gap:.3rem;margin-bottom:.5rem;}
+.dr-tab-btn{background:#1A1510;border:1px solid #3A2A10;color:#8A7A5A;padding:.35em .8em;font-family:'Share Tech Mono',monospace;font-size:10px;cursor:pointer;border-radius:3px;transition:.12s;}
+.dr-tab-btn:hover{border-color:var(--gold-d);color:var(--gold);}
+.dr-tab-btn.active{background:var(--blood);border-color:var(--blood-l);color:#EDE0C8;}
+.dr-list{display:flex;flex-direction:column;gap:.25rem;max-height:220px;overflow-y:auto;padding-right:.2rem;}
+.dr-action-btn{display:flex;justify-content:space-between;align-items:center;width:100%;background:#130D06;border:1px solid #2A1A08;border-radius:3px;padding:.3rem .5rem;cursor:pointer;transition:.12s;font-family:inherit;}
+.dr-action-btn:hover{border-color:var(--gold-d);background:#1C1208;}
+.dr-action-label{font-family:'IM Fell English',serif;font-size:11px;color:var(--parch);text-align:left;}
+.dr-action-bonus{font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:bold;}
+.dr-result{background:#0E0A04;border:1px solid #3A2810;border-radius:5px;padding:.6rem .7rem;min-height:100px;display:flex;flex-direction:column;justify-content:center;}
+.dr-header{font-family:'Cinzel',serif;font-size:11px;color:var(--gold-d);margin-bottom:.4rem;letter-spacing:.08em;}
+.dr-roll-row{display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;}
+.dr-d20{font-family:'Cinzel Decorative',serif;font-size:36px;line-height:1;min-width:44px;}
+.dr-plus,.dr-eq{color:#4A3A20;font-size:16px;}
+.dr-mod{font-family:'Share Tech Mono',monospace;font-size:18px;color:#8A9080;}
+.dr-total{font-family:'Cinzel Decorative',serif;font-size:36px;line-height:1;font-weight:bold;}
+.dr-detail{font-family:'Share Tech Mono',monospace;font-size:9px;color:#5A4A2A;margin-bottom:.3rem;}
+.dr-dmg{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blood-l);margin-top:.3rem;}
+
+/* ── CLASS FEATURES TIMELINE ── */
+.cls-feat-timeline{display:flex;flex-direction:column;gap:.2rem;margin-bottom:.5rem;}
+.cft-row{display:flex;gap:.5rem;align-items:flex-start;}
+.cft-lvl{font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);min-width:36px;padding-top:2px;flex-shrink:0;}
+.cft-feats{display:flex;flex-wrap:wrap;gap:.2rem;}
+.cft-tag{background:#1A1208;border:1px solid #2A1A08;border-radius:3px;padding:1px 6px;font-size:9.5px;color:var(--parch2);font-family:'Share Tech Mono',monospace;}
+.cft-tag:contains('⬆'){background:#1A1E12;border-color:#2A3A1A;color:#6A9A5A;}
+
+/* ── CURRENCY ── */
+.currency-row{display:flex;gap:.5rem;margin-bottom:.5rem;}
+.currency-cell{flex:1;display:flex;flex-direction:column;align-items:center;background:#130D06;border:1px solid #2A1A08;border-radius:4px;padding:.4rem .2rem;}
+.currency-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;margin-bottom:.25rem;}
+.currency-inp{background:none;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:14px;width:100%;text-align:center;outline:none;padding:0;}
+.currency-inp:focus{border-bottom-color:var(--gold-d);}
 </style>
 </head>
 <body>
@@ -1663,6 +1710,214 @@ const SPELLS9={
 const SPELLS_BY_LEVEL=[null,SPELLS1,SPELLS2,SPELLS3,SPELLS4,SPELLS5,SPELLS6,SPELLS7,SPELLS8,SPELLS9];
 
 // ═══════════════════════════════════════════════════
+// FEATS (Dons D&D 5e SRD)
+// ═══════════════════════════════════════════════════
+const FEATS=[
+  {id:'alert',n:'Alerte',bonus:null,d:'Initiative +5. Jamais surpris. Les ennemis masqués n\'ont pas l\'avantage.'},
+  {id:'athlete',n:'Athlète',bonus:'str_or_dex',d:'+1 FOR ou DEX. Se relever coûte 5 ft. Escalade sans malus de vitesse. Saut sans élan.'},
+  {id:'actor',n:'Acteur',bonus:'cha',d:'+1 CHA. Avantage Tromperie/Représentation en déguisement. Imiter voix/sons (Perspicacité CD 16).'},
+  {id:'charger',n:'Chargeur',d:'Après Foncer, bonus action : +5 dégâts ou pousser de 3m.'},
+  {id:'crossbow-expert',n:'Expert en arbalète',d:'Ignorer le rechargement. Pas de désavantage en mêlée. Attaque de bonus action (main).'},
+  {id:'defensive-duelist',n:'Duelliste défensif',req:'dex13',d:'Réaction avec arme à finesse : +bonus maîtrise à la CA contre une attaque.'},
+  {id:'dual-wielder',n:'Combattant à deux armes',bonus:'str_or_dex',d:'+1 CA avec 2 armes. Combat deux armes sans armes légères. Dégainer 2 armes en 1 action.'},
+  {id:'dungeon-delver',n:'Explorateur de donjons',d:'Avantage Perception (portes secrètes). Résistance pièges. Pas de ralentissement (terrain difficile, lié aux portes).'},
+  {id:'durable',n:'Résistant',bonus:'con',d:'+1 CON. Dé de vie récupère au minimum 2×mod CON.'},
+  {id:'great-weapon-master',n:'Maîtrise des grandes armes',d:'Critique ou tuer → attaque bonus. Option : −5 toucher pour +10 dégâts avec arme lourde.'},
+  {id:'heavily-armored',n:'Armure lourde',bonus:'str',req:'medium_armor',d:'+1 FOR. Maîtrise des armures lourdes.'},
+  {id:'heavy-armor-master',n:'Maître de l\'armure lourde',bonus:'str',req:'heavy_armor',d:'+1 FOR. Armure lourde : −3 aux dégâts contondants/perforants/tranchants des attaques non-magiques.'},
+  {id:'inspiring-leader',n:'Chef inspirant',req:'cha13',d:'10 min : jusqu\'à 6 alliés gagnent mod CHA+niveau bonus PV temporaires.'},
+  {id:'keen-mind',n:'Esprit aiguisé',bonus:'int',d:'+1 INT. Toujours savoir direction du nord/heure. Mémoriser tout ce vu/entendu depuis 1 mois.'},
+  {id:'lucky',n:'Chanceux',d:'3 points de chance (repos long). Lancer d20 supplémentaire, choisir résultat. Ou forcer un ennemi à relancer.'},
+  {id:'mage-slayer',n:'Tueur de mages',d:'Réaction : attaquer un lanceur de sorts adjacent. Il a désavantage à sa concentration. Avantage save contre sorts au corps à corps.'},
+  {id:'magic-initiate',n:'Initié en magie',d:'2 tours de magie + 1 sort niv.1 (1×/repos long) d\'une classe au choix.'},
+  {id:'martial-adept',n:'Adepte martial',d:'1 dé de supériorité d6. 2 manœuvres de Maître de bataille. Recharge au repos court.'},
+  {id:'mobile',n:'Mobile',d:'+3m de vitesse. Après une attaque, pas d\'attaque d\'opportunité ce tour. Foncer ignore terrain difficile.'},
+  {id:'polearm-master',n:'Maître d\'armes d\'hast',d:'Attaque bonus (d4) avec le bout de haste/bâton/lance. Attaque d\'opportunité quand ennemi entre à portée.'},
+  {id:'resilient',n:'Résilient',bonus:'choice',d:'+1 à la carac choisie. Maîtrise du jet de sauvegarde associé.'},
+  {id:'sentinel',n:'Sentinelle',d:'Attaque d\'opportunité stoppe le mouvement. Attaque d\'opportunité même après Désengagement. Réaction si allié attaqué.'},
+  {id:'sharpshooter',n:'Tireur d\'élite',d:'Pas de désavantage (longue portée). Ignore couverture 3/4. Option : −5 toucher pour +10 dégâts.'},
+  {id:'shield-master',n:'Maître du bouclier',d:'Bonus action pousser (si Attaque). +bonus bouclier aux saves DEX. Réaction : annuler dégâts save DEX réussie.'},
+  {id:'skilled',n:'Qualifié',d:'Maîtrise en 3 compétences ou outils de ton choix.'},
+  {id:'tavern-brawler',n:'Bagarreur de taverne',bonus:'str_or_con',d:'+1 FOR ou CON. Maîtrise armes improvisées/poings. Tentative de saisie bonus après toucher au corps à corps.'},
+  {id:'tough',n:'Coriace',d:'+2 PV par niveau (et niveaux passés). PV maximum augmenté de 2×niveau.'},
+  {id:'war-caster',n:'Mage guerrier',d:'Avantage concentration. Composantes somatiques les mains pleines. Attaques d\'opportunité avec des sorts.'},
+  {id:'weapon-master',n:'Maître d\'armes',bonus:'str_or_dex',d:'+1 FOR ou DEX. Maîtrise de 4 armes au choix.'},
+];
+
+// ═══════════════════════════════════════════════════
+// WEAPON PROPERTIES (pour calcul auto des attaques)
+// ═══════════════════════════════════════════════════
+const WEAPON_PROPS={
+  'dagger':         {dice:'1d4', type:'Perf.',  finesse:true,  thrown:true},
+  'handaxe':        {dice:'1d6', type:'Tranch.', thrown:true},
+  'javelin':        {dice:'1d6', type:'Perf.',  thrown:true},
+  'club':           {dice:'1d4', type:'Cont.'},
+  'greatclub':      {dice:'1d8', type:'Cont.',  twohand:true},
+  'mace':           {dice:'1d6', type:'Cont.'},
+  'quarterstaff':   {dice:'1d6', type:'Cont.',  versatile:'1d8'},
+  'spear':          {dice:'1d6', type:'Perf.',  thrown:true,   versatile:'1d8'},
+  'shortsword':     {dice:'1d6', type:'Perf.',  finesse:true},
+  'rapier':         {dice:'1d8', type:'Perf.',  finesse:true},
+  'scimitar':       {dice:'1d6', type:'Tranch.',finesse:true},
+  'longsword':      {dice:'1d8', type:'Tranch.',versatile:'1d10'},
+  'warhammer':      {dice:'1d8', type:'Cont.',  versatile:'1d10'},
+  'battleaxe':      {dice:'1d8', type:'Tranch.',versatile:'1d10'},
+  'greataxe':       {dice:'1d12',type:'Tranch.',twohand:true},
+  'greatsword':     {dice:'2d6', type:'Tranch.',twohand:true},
+  'shortbow':       {dice:'1d6', type:'Perf.',  ranged:true},
+  'longbow':        {dice:'1d8', type:'Perf.',  ranged:true},
+  'crossbow-light': {dice:'1d8', type:'Perf.',  ranged:true},
+  'crossbow-heavy': {dice:'1d10',type:'Perf.',  ranged:true},
+};
+function getWeaponAtkBonus(w){
+  const pb=calcProfBonus();
+  const strM=mod(effStat('str')), dexM=mod(effStat('dex'));
+  const props=WEAPON_PROPS[w.id]||{};
+  const usesDex=props.ranged||(props.finesse&&dexM>strM);
+  const statMod=usesDex?dexM:strM;
+  const magicBonus=w.bonus||0;
+  return {atk:statMod+pb+magicBonus, dmgMod:statMod+magicBonus, dice:props.dice||'1d4', type:props.type||'', statUsed:usesDex?'DEX':'FOR', pb, statMod, magicBonus};
+}
+
+// ═══════════════════════════════════════════════════
+// CLASS FEATURES PAR NIVEAU
+// ═══════════════════════════════════════════════════
+const CLS_LVL_FEAT={
+  barbarian:{
+    1:['Rage 2× (repL) : +2 dmg, résist. physique, avantage FOR','Défense sans armure : CA=10+DEX+CON'],
+    2:['Téméraire : avantage attaque, les ennemis aussi','Sens du danger : avantage DEX save (pièges, sorts)'],
+    3:['Archétype de Primal Path','3 rages'],4:['⬆ ASI'],
+    5:['Attaque supplémentaire','Mouvement rapide : +3m sans armure'],
+    6:['4 rages','Capacité Archétype'],7:['Instinct sauvage : +Init, rage si surpris','Farouche'],
+    8:['⬆ ASI'],9:['Critique brutal (+1 dé extra)'],10:['Capacité Archétype'],
+    11:['Fureur implacable : reste à 1 PV si rage active'],12:['⬆ ASI','5 rages'],
+    13:['Critique brutal (+2 dés)'],14:['Capacité Archétype'],15:['Rage persistante'],
+    16:['⬆ ASI','5 rages'],17:['Critique brutal (+3 dés)','6 rages'],18:['Esprit indomptable'],
+    19:['⬆ ASI'],20:['Champion primitif : +4 FOR, +4 CON'],
+  },
+  bard:{
+    1:['Sorts (CHA) : 2 cantrips, 4 sorts niv.1','Inspiration bardique d6 (CHA mod×/repL)'],
+    2:['Couteau suisse : +3 maîtrises supplémentaires','Sort de récup. de 2 empl. niv.1 (repC)'],
+    3:['Archétype (Collège)','Expertise (×2 prof sur 2 compétences)','Maître des secrets : 2 sorts de n\'importe quelle classe'],
+    4:['⬆ ASI'],5:['Inspiration bardique d8','Inspiration : recharge au repC','Attaque supplémentaire (Épées/Vaillance)'],
+    6:['Capacité Archétype','Contre-charme : réaction vs charme/effroi'],
+    7:['Sorts niv.4'],8:['⬆ ASI'],9:['Maître des secrets (2 sorts supp.)'],
+    10:['Inspiration bardique d10','Magie magique : 3 sorts supplémentaires','Expertise ×2 sur 2 compétences supplémentaires'],
+    11:['Sorts niv.6'],12:['⬆ ASI'],14:['Capacité Archétype','Maître des secrets (sorts niv.7)'],
+    15:['Inspiration bardique d12'],16:['⬆ ASI'],18:['Maître des secrets (sorts niv.9)'],
+    19:['⬆ ASI'],20:['Inspiration supérieure : regagner une inspiration si d20 ≤ mod CHA'],
+  },
+  cleric:{
+    1:['Sorts divins (SAG) : préparés=niv+mod SAG','Domaine divin (sorts bonus + capacité)','Canalisation divine : 1×/repC'],
+    2:['Canalisation divine : 2×/repC (lv6: 3×)','Capacité de Domaine'],
+    3:['Sorts niv.2'],4:['⬆ ASI'],5:['Destruction des morts-vivants (IND 1/2)'],
+    6:['Capacité de Domaine'],7:['Sorts niv.4'],8:['⬆ ASI','Frappe divine (capacité Domaine)'],
+    9:['Sorts niv.5'],10:['Intervention divine : 10% de chance (lv20: automatique)'],
+    11:['Destruction des morts-vivants (IND 2)'],12:['⬆ ASI'],14:['Destruction (IND 3)'],
+    15:['Sorts niv.8'],16:['⬆ ASI'],17:['Destruction (IND 4)','Sorts niv.9'],
+    18:['Canalisation divine 3×'],19:['⬆ ASI'],20:['Intervention divine automatique'],
+  },
+  druid:{
+    1:['Sorts naturels (SAG) : préparés=niv+mod SAG','Druidique (langue secrète)'],
+    2:['Métamorphose (CR ≤ 1/4, 2×/repC)','Cercle druidique (Archétype)'],
+    3:['Sorts niv.2'],4:['⬆ ASI','Métamorphose (CR ≤ 1/2)'],5:['Sorts niv.3'],
+    6:['Capacité de Cercle','Métamorphose améliorée'],7:['Sorts niv.4'],8:['⬆ ASI','Métamorphose (CR ≤ 1)'],
+    9:['Sorts niv.5'],10:['Capacité de Cercle'],11:['Sorts niv.6'],12:['⬆ ASI'],
+    13:['Sorts niv.7'],14:['Capacité de Cercle'],15:['Sorts niv.8'],16:['⬆ ASI'],
+    17:['Sorts niv.9','Forme bestiale (CR ≤ 3)'],18:['Sorts éternels : 2 sorts à volonté','Âme Bête'],
+    19:['⬆ ASI'],20:['Archidruide : Métamorphose illimitée'],
+  },
+  fighter:{
+    1:['Style de combat','Second souffle : 1d10+niv PV (1×/repC)'],
+    2:['Action d\'Éclat (1×/repC) : action bonus d\'action'],3:['Archétype martial'],
+    4:['⬆ ASI'],5:['Attaque supplémentaire (2 attaques/action)'],6:['⬆ ASI'],
+    7:['Capacité Archétype'],8:['⬆ ASI'],9:['Indomptable (1×/repL) : relancer un save'],
+    10:['Capacité Archétype'],11:['Attaque supplémentaire (3 attaques/action)'],12:['⬆ ASI'],
+    13:['Indomptable 2×'],14:['⬆ ASI'],15:['Capacité Archétype'],16:['⬆ ASI'],
+    17:['Action d\'Éclat 2×/repC','Indomptable 3×'],18:['Capacité Archétype'],
+    19:['⬆ ASI'],20:['Attaque supplémentaire (4 attaques/action)'],
+  },
+  monk:{
+    1:['Arts martiaux (d4)','CA sans armure = 10+DEX+SAG','Points de ki : niveau'],
+    2:['Ki : Déluge de coups, Défense patient, Pas du vent','Chute amortie'],
+    3:['Tradition monastique (Archétype)','Déflexion des projectiles'],4:['⬆ ASI','Chute lente'],
+    5:['Arts martiaux d6','Attaque supplémentaire','Frappe étourdissante (ki, CON save)'],
+    6:['Frappe ki : attaques magiques','Capacité Archétype'],7:['Esquive totale','Tranquillité d\'esprit'],
+    8:['⬆ ASI'],9:['Arts martiaux d6','Pas du vent amélioré'],
+    10:['Corps de pur ki : immunité poison/maladie'],11:['Arts martiaux d8'],12:['⬆ ASI'],
+    13:['Langue du soleil et de la lune : comprendre toutes les langues'],14:['Âme du diamant : tous les sauvegardes maîtrisés'],
+    15:['Corps sans âge'],16:['⬆ ASI'],17:['Arts martiaux d10'],18:['Corps vide'],
+    19:['⬆ ASI'],20:['Parangon de perfection : +4 DEX, +4 SAG'],
+  },
+  paladin:{
+    1:['Sens divin (1+CHA mod×/repL) : détecter célestes/fiélons','Imposition des mains (niv×5 PV/repL)'],
+    2:['Style de combat','Sorts (CHA, préparés=niv÷2+CHA)','Smite divin : dépenser un emplacement pour 2d8+ radiant'],
+    3:['Serment sacré (Archétype)','Santé divine : immunité maladie'],
+    4:['⬆ ASI'],5:['Attaque supplémentaire','Smite divin extra'],
+    6:['Aura de protection : alliés + CHA mod aux saves (3m)'],7:['Aura de courage : alliés immunisés peur (3m)'],
+    8:['⬆ ASI'],9:['Sorts niv.3'],10:['Aura de protection (9m)'],
+    11:['Smite amélioré : +1d8 radiant à toutes attaques en mêlée'],12:['⬆ ASI'],
+    13:['Sorts niv.4'],14:['Purification au toucher : guérir 1 état'],15:['Sorts niv.5'],16:['⬆ ASI'],
+    17:['Sorts niv.6'],18:['Aura de protection (18m)'],19:['⬆ ASI'],
+    20:['Capacité Archétype (transformation divine)'],
+  },
+  ranger:{
+    1:['Ennemi juré (1 type créature)','Explorateur-né (1 type terrain)'],
+    2:['Style de combat','Sorts naturels (SAG, sorts connus)'],3:['Archétype (Conclave)'],
+    4:['⬆ ASI'],5:['Attaque supplémentaire','Sorts niv.2'],6:['Ennemi juré supplémentaire','Exploration supplémentaire'],
+    7:['Capacité de Conclave'],8:['⬆ ASI','Déplacement des terres : terrains difficiles ignorés'],
+    9:['Sorts niv.3'],10:['Camouflage naturel : se cacher dans la nature sans couvert'],
+    11:['Capacité de Conclave'],12:['⬆ ASI'],13:['Sorts niv.4'],
+    14:['Ennemi juré 3e','Disparaître dans la nature'],15:['Capacité de Conclave'],16:['⬆ ASI'],
+    17:['Sorts niv.5'],18:['Sens sauvageon : voir/entendre invisible/éthéré dans 18m'],
+    19:['⬆ ASI'],20:['Tueur de prime : doublement des dégâts sur ennemi juré 1×/tour'],
+  },
+  rogue:{
+    1:['Attaque sournoise 1d6 (avantage ou allié adjacent)','Jargon des voleurs','Expertise (×2 sur 2 comp.)'],
+    2:['Action rusée : Désengagement/Foncer/Se cacher en action bonus'],
+    3:['Archétype (sous-classe)','Pas de loup'],4:['⬆ ASI'],
+    5:['Attaque sournoise 3d6','Esquive totale'],6:['Expertise (2 comp. supp.)'],
+    7:['Sens du danger : ne peut pas être surpris, avantage saves si alerte'],8:['⬆ ASI'],
+    9:['Attaque sournoise 5d6','Capacité Archétype'],10:['⬆ ASI'],
+    11:['Attaque sournoise 6d6','Talent fiable : min 10 sur compétences maîtrisées'],12:['⬆ ASI'],
+    13:['Attaque sournoise 7d6','Capacité Archétype'],14:['Sens clair-voyant'],
+    15:['Attaque sournoise 8d6','Esprit glissant : résistance charme/peur'],16:['⬆ ASI'],
+    17:['Attaque sournoise 9d6','Capacité Archétype'],18:['Insaisissable'],
+    19:['⬆ ASI','Attaque sournoise 10d6'],20:['Coup de chance : rater → toucher (1×)'],
+  },
+  sorcerer:{
+    1:['Sorts (CHA, connus)','Origine sorcière (Archétype, dès niv.1)'],
+    2:['Points de sorcellerie (niveau) : Conversion empl.↔pts (Métamagie dès niv.3)'],
+    3:['Métamagie (2 options) : Sort distant, Sort discret, Sort étendu, Sort intensifié, Sort jumeau, Sort rapide, Sort prudent, Sort retouché'],
+    4:['⬆ ASI'],5:['Sorts niv.3'],6:['Capacité d\'Origine'],7:['Sorts niv.4'],8:['⬆ ASI'],
+    9:['Sorts niv.5'],10:['Métamagie (3e option)'],11:['Sorts niv.6'],12:['⬆ ASI'],
+    13:['Sorts niv.7'],14:['Capacité d\'Origine'],15:['Sorts niv.8'],16:['⬆ ASI'],
+    17:['Sorts niv.9','Métamagie (4e option)'],18:['Capacité d\'Origine'],
+    19:['⬆ ASI'],20:['Restauration sorcière : regagner 4 pts sorcellerie (1×/repC)'],
+  },
+  warlock:{
+    1:['Sorts (CHA, connus) — empl. récup. au repC','Patron (Archétype) + Invocations dès niv.2'],
+    2:['Invocations occultes (2) : Œil du rune-keeper, Armure d\'ombres, Soif de connaissance…'],
+    3:['Don du Pacte : Chaîne du Pacte, Lame du Pacte, ou Tome du Pacte'],
+    4:['⬆ ASI'],5:['Sorts niv.3','3 invocations'],6:['Capacité de Patron'],
+    7:['Sorts niv.4','4 invocations'],8:['⬆ ASI'],9:['Sorts niv.5','5 invocations'],
+    10:['Capacité de Patron'],11:['Arcane mystique (sort niv.6, 1×/repL)'],12:['⬆ ASI'],
+    13:['Arcane mystique (sort niv.7)'],14:['Capacité de Patron'],15:['Arcane mystique (sort niv.8)'],
+    16:['⬆ ASI'],17:['Arcane mystique (sort niv.9)'],18:['6 invocations'],
+    19:['⬆ ASI'],20:['Maître Évocateur : CHA mod×/repL (sorts connus gratuitement)'],
+  },
+  wizard:{
+    1:['Sorts (INT, préparés=niv+mod INT)','Grimoire : 6 sorts niv.1 + 2/niveau','Récupération arcanique (repC) : regagner empl. ≤ niv/2'],
+    2:['Tradition arcanique (Archétype)'],3:['Sorts niv.2'],4:['⬆ ASI'],5:['Sorts niv.3'],
+    6:['Capacité Archétype'],7:['Sorts niv.4'],8:['⬆ ASI'],9:['Sorts niv.5'],
+    10:['Capacité Archétype'],11:['Sorts niv.6'],12:['⬆ ASI'],13:['Sorts niv.7'],
+    14:['Capacité Archétype'],15:['Sorts niv.8'],16:['⬆ ASI'],17:['Sorts niv.9'],
+    18:['Maîtrise des sorts : Cantrip + sort niv.1 sans emplacement'],
+    19:['⬆ ASI'],20:['Sort unique : 1 sort niv.2 sans emplacement'],
+  },
+};
+
+// ═══════════════════════════════════════════════════
 // ITEMS DATABASE (SRD D&D 5e)
 // ═══════════════════════════════════════════════════
 const ITEMS=[
@@ -1748,19 +2003,27 @@ const ITEMS=[
   {id:'alchemist-supplies',n:'Matériel d\'alchimiste',cat:'Outil',d:'Alambics, fioles, réactifs. Créer des potions et identifier substances.',w:8,c:'50 po'},
   {id:'calligrapher-tools',n:'Matériel de calligraphie',cat:'Outil',d:'Plumes, encres de couleur, pinceaux. Utile pour copier des parchemins.',w:5,c:'10 po'},
   // ── FOCALISATEURS MAGIQUES ──
-  {id:'arcane-focus-wand',n:'Baguette (focalisateur)',cat:'Magie',d:'Focalisateur arcanique fin et léger. Idéal pour Magicien ou Ensorceleur.',w:1,c:'10 po'},
-  {id:'arcane-focus-staff',n:'Bâton de sorts',cat:'Magie',d:'Focalisateur arcanique. Double usage : arme (1d6) + canalisation de magie.',w:4,c:'10 po'},
-  {id:'arcane-focus-orb',n:'Orbe de cristal',cat:'Magie',d:'Focalisateur arcanique sphérique. Ensorceleurs et Occultistes le préfèrent.',w:3,c:'20 po'},
-  {id:'holy-symbol',n:'Symbole sacré (amulette)',cat:'Magie',d:'Focalisateur divin pour Clerc et Paladin. Porté au cou, libère les deux mains.',w:1,c:'5 po'},
-  {id:'holy-symbol-shield',n:'Symbole sacré (bouclier)',cat:'Magie',d:'Symbole sacré gravé sur bouclier. Focalisateur divin : main bouclier utilisable.',w:6,c:'10 po'},
-  {id:'druidic-focus',n:'Fétiche druidique',cat:'Magie',d:'Branche sacrée, baguette de buis ou bâton gravé. Focalisateur naturel Druide.',w:1,c:'1 po'},
-  {id:'component-pouch',n:'Sacoche de composantes',cat:'Magie',d:'Contient toutes les composantes matérielles communes (sans coût en po).',w:2,c:'25 po'},
+  {id:'arcane-focus-wand',n:'Baguette (focalisateur)',cat:'Magie',slot:'mainhand',d:'Focalisateur arcanique fin et léger. Idéal pour Magicien ou Ensorceleur.',w:1,c:'10 po'},
+  {id:'arcane-focus-staff',n:'Bâton de sorts',cat:'Magie',slot:'mainhand',d:'Focalisateur arcanique. Double usage : arme (1d6) + canalisation de magie.',w:4,c:'10 po'},
+  {id:'arcane-focus-orb',n:'Orbe de cristal',cat:'Magie',slot:'mainhand',d:'Focalisateur arcanique sphérique. Ensorceleurs et Occultistes le préfèrent.',w:3,c:'20 po'},
+  {id:'holy-symbol',n:'Symbole sacré (amulette)',cat:'Magie',slot:'amulet',d:'Focalisateur divin pour Clerc et Paladin. Porté au cou, libère les deux mains.',w:1,c:'5 po'},
+  {id:'holy-symbol-shield',n:'Symbole sacré (bouclier)',cat:'Magie',slot:'offhand',d:'Symbole sacré gravé sur bouclier. Focalisateur divin : main bouclier utilisable.',w:6,c:'10 po'},
+  {id:'druidic-focus',n:'Fétiche druidique',cat:'Magie',slot:'mainhand',d:'Branche sacrée, baguette de buis ou bâton gravé. Focalisateur naturel Druide.',w:1,c:'1 po'},
+  {id:'component-pouch',n:'Sacoche de composantes',cat:'Magie',slot:'belt',d:'Contient toutes les composantes matérielles communes (sans coût en po).',w:2,c:'25 po'},
   // ── RÉCIPIENTS & CONTENANTS ──
   {id:'chest',n:'Coffre',cat:'Contenant',d:'Contient 300 lb / 12 pi³. Peut être verrouillé. Solide et résistant.',w:25,c:'5 po'},
   {id:'pouch',n:'Bourse',cat:'Contenant',d:'Contient 6 lb / 1/5 pi³ ou jusqu\'à 100 gemmes standard.',w:1,c:'5 pa'},
   {id:'sack',n:'Sac',cat:'Contenant',d:'Contient 30 lb / 1 pi³. Durable, en toile épaisse.',w:0.5,c:'1 pc'},
   {id:'vial',n:'Fioles (×10)',cat:'Contenant',d:'Petits flacons de verre. Pour potions, poisons et substances alchimiques.',w:0,c:'1 po (lot)'},
   {id:'flask',n:'Flasque',cat:'Contenant',d:'Contient 0,5 l. Métal ou cuir. Idéale pour les alcools et huiles.',w:1,c:'2 pa'},
+  // ── OBJETS MAGIQUES (bonus:{stat}) ──
+  {id:'ring-protection',n:'Anneau de protection',cat:'Magie',slot:'ring',rarity:'Inhabituel',bonus:{ac:1},d:'+1 à la CA et aux jets de sauvegarde. Magie d\'abjuration permanente.',w:0,c:'—'},
+  {id:'cloak-protection',n:'Cape de protection',cat:'Magie',slot:'back',rarity:'Inhabituel',bonus:{ac:1},d:'+1 à la CA et aux jets de sauvegarde. Légère comme une plume.',w:1,c:'—'},
+  {id:'bracers-defense',n:'Brassards de défense',cat:'Magie',slot:'hands',rarity:'Rare',bonus:{ac:2},d:'+2 CA si aucune armure ni bouclier portés. Récompense la confiance en soi.',w:1,c:'—'},
+  {id:'amulet-health',n:'Amulette de santé',cat:'Magie',slot:'amulet',rarity:'Rare',bonus:{con:4},d:'Constitution fixée à 19 si inférieure. Puissance vitale conférée par cet objet ancien.',w:0,c:'—'},
+  {id:'gauntlets-str',n:'Gantelets de puissance d\'ogre',cat:'Magie',slot:'hands',rarity:'Rare',bonus:{str:9},d:'Force fixée à 19 si inférieure. Mains fermes comme du fer.',w:2,c:'—'},
+  {id:'belt-giant-str',n:'Ceinturon de force géante',cat:'Magie',slot:'belt',rarity:'Très rare',bonus:{str:10},d:'Force fixée à 21 (colline) ou plus selon variante. Puissance titanesque.',w:4,c:'—'},
+  {id:'headband-int',n:'Bandeau d\'intelligence',cat:'Magie',slot:'head',rarity:'Rare',bonus:{int:4},d:'Intelligence fixée à 19 si inférieure. Pensées claires, mémoire parfaite.',w:0,c:'—'},
   // ── POTIONS ──
   {id:'potion-healing',n:'Potion de soins',cat:'Potion',rarity:'Commun',d:'Restaure 2d4+2 PV. Action pour boire, action bonus pour donner à un allié.',w:0.5,c:'50 po'},
   {id:'potion-climbing',n:'Potion d\'escalade',cat:'Potion',rarity:'Commun',d:'Vitesse d\'escalade = vitesse de marche pendant 1 heure. Avantage Athlétisme.',w:0.5,c:'75 po'},
@@ -1776,7 +2039,8 @@ const ITEM_RARITIES=['Tous',..._RARITY_ORDER.filter(r=>ITEMS.some(i=>i.rarity===
 let C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null,background:null,alignment:null,
   stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
   level:1,xp:0,profBonus:2,traits:[],alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
-  asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,dice3d6:{},dice3d6RerollUsed:false};
+  asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,dice3d6:{},dice3d6RerollUsed:false,
+  feats:[],currency:{gp:0,sp:0,cp:0,ep:0},notes:''};
 let CUR=0;
 
 // ═══════════════════════════════════════════════════
@@ -1790,8 +2054,19 @@ const pbcost=v=>PBC[v]||0;
 const totalCost=()=>Object.values(C.stats).reduce((s,v)=>s+pbcost(v),0);
 const ptsLeft=()=>27-totalCost();
 
-// Stat effective (base + ASI bonus, capped at 20)
-const effStat=k=>Math.min(20, C.stats[k] + (C.asi?.[k]||0));
+// Somme les bonus:{stat:n} de tous les items équipés (paper doll C.equipped)
+function getEquipBonuses(){
+  if(!C.equipped) return {};
+  const totals={};
+  Object.values(C.equipped).forEach(item=>{
+    if(!item?.bonus) return;
+    Object.entries(item.bonus).forEach(([k,v])=>{totals[k]=(totals[k]||0)+v;});
+  });
+  return totals;
+}
+
+// Stat effective (base + ASI + bonus équipement, capped à 20)
+const effStat=k=>Math.min(20, C.stats[k] + (C.asi?.[k]||0) + (getEquipBonuses()[k]||0));
 
 // Bonus de maîtrise selon niveau
 function calcProfBonus(lvl){ return Math.floor(((lvl||C.level||1)-1)/4)+2; }
@@ -1800,7 +2075,8 @@ function calcProfBonus(lvl){ return Math.floor(((lvl||C.level||1)-1)/4)+2; }
 const ASI_LEVELS=[4,8,12,16,19];
 function asiAvailable(lvl){ return ASI_LEVELS.filter(l=>l<=(lvl||C.level||1)).length; }
 function asiUsed(){ return Object.values(C.asi||{}).reduce((s,v)=>s+v,0); }
-function asiLeft(){ return asiAvailable()*2 - asiUsed(); }
+// Chaque don coûte un slot entier (2 points)
+function asiLeft(){ return asiAvailable()*2 - asiUsed() - (C.feats||[]).length*2; }
 
 // Table armures pour calcCA
 const ARMOR_CA={
@@ -1819,24 +2095,30 @@ const ARMOR_CA={
 function calcCA(){
   const cl=C.cls;
   const dexM=mod(effStat('dex'));
-  const hasShield=C.bag?.some(e=>e.id==='shield'&&e.qty>0);
-  const shieldBonus=hasShield?2:0;
-  // Armure équipée depuis le sac
-  if(C.equippedArmorId && ARMOR_CA[C.equippedArmorId]){
-    const a=ARMOR_CA[C.equippedArmorId];
-    const dex=a.dexCap===null?dexM:Math.min(dexM,a.dexCap);
-    return a.base+dex+shieldBonus;
+  // Bouclier : uniquement si équipé dans le paper doll (main principale ou secondaire)
+  const SHIELD_IDS=['shield','holy-symbol-shield'];
+  const shieldInDoll=SHIELD_IDS.includes(C.equipped?.offhand?.id)||SHIELD_IDS.includes(C.equipped?.mainhand?.id);
+  const shieldBonus=shieldInDoll?2:0;
+  // Bonus CA magiques (anneaux, amulettes… avec bonus:{ac:n})
+  const magicAC=getEquipBonuses().ac||0;
+  // Armure : slot Torse paper doll prioritaire sur sélecteur d'étape
+  const chestId=C.equipped?.chest?.id;
+  const armorId=(chestId&&ARMOR_CA[chestId])?chestId:C.equippedArmorId;
+  if(armorId && ARMOR_CA[armorId]){
+    const a=ARMOR_CA[armorId];
+    const dex=a.dexCap===null?dexM:(a.dexCap===0?0:Math.min(dexM,a.dexCap));
+    return a.base+dex+shieldBonus+magicAC;
   }
-  if(!cl)return 10+dexM+shieldBonus;
+  if(!cl)return 10+dexM+shieldBonus+magicAC;
   const base=cl.armorBase;
-  if(base==='noarmor_con')return 10+dexM+mod(effStat('con'));
-  if(base==='noarmor_wis')return 10+dexM+mod(effStat('wis'));
-  if(base==='none')return 10+dexM;
-  if(base==='light')return 11+dexM+shieldBonus;
-  if(base==='medium')return 14+Math.min(dexM,2)+shieldBonus;
-  if(base==='medium_shield')return 14+Math.min(dexM,2)+2;
-  if(base==='heavy')return 16+shieldBonus;
-  return 10+dexM+shieldBonus;
+  if(base==='noarmor_con')return 10+dexM+mod(effStat('con'))+magicAC;
+  if(base==='noarmor_wis')return 10+dexM+mod(effStat('wis'))+magicAC;
+  if(base==='none')return 10+dexM+magicAC;
+  if(base==='light')return 11+dexM+shieldBonus+magicAC;
+  if(base==='medium')return 14+Math.min(dexM,2)+shieldBonus+magicAC;
+  if(base==='medium_shield')return 14+Math.min(dexM,2)+2+magicAC;
+  if(base==='heavy')return 16+shieldBonus+magicAC;
+  return 10+dexM+shieldBonus+magicAC;
 }
 
 // Passive Perception
@@ -1962,7 +2244,8 @@ function newChar(){
     level:1,cls_lvl:1,xp:0,profBonus:2,traits:[],ideals:'',bonds:'',flaws:'',
     height:'',weight:'',eyes:'',hair:'',skin:'',
     alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
-    asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e',dice3d6:{},dice3d6RerollUsed:false};
+    asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e',dice3d6:{},dice3d6RerollUsed:false,
+    feats:[],currency:{gp:0,sp:0,cp:0,ep:0},notes:''};
   showSysSel();
 }
 function loadChar(e){
@@ -2186,10 +2469,11 @@ function renderStats(){
   <div class="ss">Choisissez ${C.cls?.numSk||2} parmi celles de votre classe · Bonus = +${pb}</div>
   <div class="sk-full" id="sk2"></div>
   ${asiCount>0?`<div class="div"></div>
-  <div class="sh" style="font-size:14px;">⬆ Améliorations de Caractéristique (ASI)</div>
-  <div class="ss">${asiCount} ASI disponible(s) au niveau ${C.level} · Points restants : <strong id="asi-left">${asiLeft()}</strong> / ${asiCount*2}</div>
+  <div class="sh" style="font-size:14px;">⬆ Améliorations de Caractéristique & Dons</div>
+  <div class="ss">${asiCount} slot(s) disponible(s) · Points stats restants : <strong id="asi-left">${asiLeft()}</strong> · Dons pris : <strong id="feat-count">${(C.feats||[]).length}</strong></div>
   <div id="asi-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.5rem;"></div>
-  <button class="btn btn-s" style="font-size:10px;" onclick="C.asi={str:0,dex:0,con:0,int:0,wis:0,cha:0};renderStats();updateRight();">↺ Réinitialiser ASI</button>`:''}
+  <div id="feat-section"></div>
+  <button class="btn btn-s" style="font-size:10px;" onclick="C.asi={str:0,dex:0,con:0,int:0,wis:0,cha:0};C.feats=[];renderStats();updateRight();">↺ Réinitialiser ASI & Dons</button>`:''}
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(1)">← Classe</button>
     <button class="btn btn-p" onclick="go(3)">Suivant : Background →</button>
@@ -2198,7 +2482,7 @@ function renderStats(){
   render3d6Area();
   renderStatBoxes();
   renderSkillList();
-  if(asiCount>0)renderASIGrid();
+  if(asiCount>0){renderASIGrid();renderFeatSection();}
 }
 
 const STAT_LABELS_FULL={str:'Force',dex:'Dextérité',con:'Constitution',int:'Intelligence',wis:'Sagesse',cha:'Charisme'};
@@ -2229,6 +2513,52 @@ function adjASI(k,d){
   C.asi[k]=newVal;
   renderASIGrid();
   if($('asi-left'))$('asi-left').textContent=asiLeft();
+  if($('feat-count'))$('feat-count').textContent=(C.feats||[]).length;
+  updateRight();
+}
+function renderFeatSection(){
+  const sec=$('feat-section');if(!sec)return;
+  if(!C.feats)C.feats=[];
+  const slotsTotal=asiAvailable();
+  const slotsUsedStats=Math.ceil(asiUsed()/2||0);
+  const slotsUsedFeats=C.feats.length;
+  const canTakeFeat=slotsUsedStats+slotsUsedFeats<slotsTotal&&asiLeft()>=2;
+  const activeFeatIds=new Set(C.feats);
+  sec.innerHTML=`
+  <div style="margin:.6rem 0 .3rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.12em;color:var(--gold-d);">DONS — 1 slot entier par don</div>
+  ${C.feats.length?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem;">${C.feats.map(fid=>{
+    const f=FEATS.find(x=>x.id===fid)||{id:fid,n:fid,d:''};
+    return `<div class="feat-tag" title="${f.d}">${f.n} <button onclick="removeFeat('${fid}')" style="background:none;border:none;color:#CA5A5A;cursor:pointer;padding:0 0 0 4px;font-size:11px;">✕</button></div>`;
+  }).join('')}</div>`:''}
+  ${canTakeFeat?`<details><summary class="feat-picker-sum">+ Ajouter un don (coûte 1 slot ASI complet)</summary>
+  <div class="feat-picker-grid" id="feat-picker-grid"></div></details>`:'<div style="font-size:10px;color:#5A4A2A;font-style:italic;">Plus de slots disponibles — réinitialisez les ASI pour libérer un slot.</div>'}`;
+  if(canTakeFeat)renderFeatPicker();
+}
+function renderFeatPicker(){
+  const g=$('feat-picker-grid');if(!g)return;
+  const taken=new Set(C.feats);
+  g.innerHTML=FEATS.filter(f=>!taken.has(f.id)).map(f=>
+    `<div class="feat-pick-card" onclick="addFeat('${f.id}')" title="${f.d}">
+      <div class="feat-pick-name">${f.n}</div>
+      <div class="feat-pick-desc">${f.d.substring(0,70)}${f.d.length>70?'…':''}</div>
+    </div>`
+  ).join('');
+}
+function addFeat(id){
+  if(!C.feats)C.feats=[];
+  if(asiLeft()<2)return;
+  if(!C.feats.includes(id))C.feats.push(id);
+  renderASIGrid();renderFeatSection();
+  if($('asi-left'))$('asi-left').textContent=asiLeft();
+  if($('feat-count'))$('feat-count').textContent=C.feats.length;
+  updateRight();
+}
+function removeFeat(id){
+  if(!C.feats)return;
+  C.feats=C.feats.filter(x=>x!==id);
+  renderASIGrid();renderFeatSection();
+  if($('asi-left'))$('asi-left').textContent=asiLeft();
+  if($('feat-count'))$('feat-count').textContent=C.feats.length;
   updateRight();
 }
 
@@ -2763,7 +3093,7 @@ function addToBag(itemId){
   const it=ITEMS.find(x=>x.id===itemId);if(!it)return;
   const ex=C.bag.find(e=>e.id===itemId);
   if(ex)ex.qty++;
-  else C.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null});
+  else C.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,bonus:it.bonus||null});
   renderBagList();
 }
 function bagQty(i,d){
@@ -2915,6 +3245,102 @@ function finalizeChar(){
 }
 
 // ─── STEP 7: SUMMARY ────────────────────────────────
+// ─── DICE ROLLER ─────────────────────────────────────
+let _diceTab='attacks';
+function getDiceActions(){
+  const pb=calcProfBonus();
+  const acts=[];
+  // Attaques : mainhand équipé + armes du sac
+  const weaponItems=[];
+  if(C.equipped?.mainhand)weaponItems.push(C.equipped.mainhand);
+  (C.bag||[]).filter(b=>b.cat==='Arme').forEach(w=>{if(!weaponItems.find(x=>x.id===w.id))weaponItems.push(w);});
+  weaponItems.slice(0,8).forEach(w=>{
+    const p=WEAPON_PROPS[w.id];
+    if(!p)return;
+    const strM=mod(effStat('str')),dexM=mod(effStat('dex'));
+    const usesDex=p.ranged||(p.finesse&&dexM>strM);
+    const statMod=usesDex?dexM:strM;
+    const magic=w.bonus||0;
+    acts.push({tab:'attacks',label:w.n,icon:'⚔',atk:statMod+pb+magic,dmg:p.dice,dmgMod:statMod+magic,
+      detail:`${usesDex?'DEX':'FOR'}(${statMod>=0?'+':''}${statMod}) + Maîtrise(+${pb})${magic?' + Mag(+'+magic+')':''}`,type:p.type});
+  });
+  // Sauvegardes
+  STAT_KEYS.forEach(k=>{
+    const prof=C.cls?.saves?.includes(k);
+    const v=mod(effStat(k))+(prof?pb:0);
+    acts.push({tab:'saves',label:STAT_LABELS[k]+(prof?' ✦':''),icon:'🛡',atk:v,dmg:null,
+      detail:`${STAT_LABELS[k]}(${mods(mod(effStat(k)))})${prof?` + Maîtrise(+${pb})`:''}`});
+  });
+  // Compétences
+  ALL_SKILLS.forEach(sk=>{
+    const prof=C.skills.includes(sk.n)||C.background?.skills?.includes(sk.n);
+    const v=mod(effStat(sk.s))+(prof?pb:0);
+    acts.push({tab:'skills',label:sk.n+(prof?' ✦':''),icon:'🎯',atk:v,dmg:null,
+      detail:`${STAT_LABELS[sk.s].substring(0,3)}(${mods(mod(effStat(sk.s)))})${prof?` + Maîtrise(+${pb})`:''}`});
+  });
+  return acts;
+}
+let _lastRollResult=null;
+function rollAction(act){
+  const d20=Math.floor(Math.random()*20)+1;
+  const total=d20+act.atk;
+  const isCrit=d20===20,isFumble=d20===1;
+  let dmgResult='';
+  if(act.dmg){
+    const [nd,dd]=act.dmg.split('d').map(Number);
+    const rolls=Array.from({length:isCrit?nd*2:nd},()=>Math.floor(Math.random()*dd)+1);
+    const dmgTotal=rolls.reduce((a,b)=>a+b,0)+act.dmgMod;
+    dmgResult=`<div class="dr-dmg">🩸 Dégâts : <strong>${dmgTotal}</strong> <span style="color:#5A7A8A;">${act.dmg}(${rolls.join('+')})+${act.dmgMod} ${act.type}</span>${isCrit?' <span style="color:#C9A84C;">CRITIQUE !</span>':''}</div>`;
+  }
+  _lastRollResult={act,d20,total,isCrit,isFumble,dmgResult};
+  renderDiceResult();
+}
+function renderDiceResult(){
+  const el=$('dr-result');if(!el||!_lastRollResult)return;
+  const {act,d20,total,isCrit,isFumble,dmgResult}=_lastRollResult;
+  const col=isCrit?'#C9A84C':isFumble?'#8A2020':'var(--parch)';
+  el.innerHTML=`
+    <div class="dr-header">${act.icon} ${act.label}</div>
+    <div class="dr-roll-row">
+      <div class="dr-d20" style="color:${col};">${d20}${isCrit?' ✦':isFumble?' ✗':''}</div>
+      <div class="dr-plus">+</div>
+      <div class="dr-mod">${act.atk>=0?'+':''}${act.atk}</div>
+      <div class="dr-eq">=</div>
+      <div class="dr-total" style="color:${col};">${total}</div>
+    </div>
+    <div class="dr-detail">${act.detail}</div>
+    ${dmgResult}`;
+}
+function switchDiceTab(tab){
+  _diceTab=tab;
+  renderDiceList();
+  document.querySelectorAll('.dr-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.tab===tab));
+}
+function renderDiceList(){
+  const el=$('dr-list');if(!el)return;
+  const acts=getDiceActions().filter(a=>a.tab===_diceTab);
+  if(!acts.length){el.innerHTML='<div style="color:#5A4A2A;font-size:10px;font-style:italic;padding:.4rem;">Aucune action disponible</div>';return;}
+  el.innerHTML=acts.map((a,i)=>`
+    <button class="dr-action-btn" onclick="rollAction(getDiceActions().filter(x=>x.tab==='${_diceTab}')[${i}])">
+      <span class="dr-action-label">${a.label}</span>
+      <span class="dr-action-bonus" style="color:${a.atk>=0?'#4A9A5A':'#9A4A4A'};">${a.atk>=0?'+':''}${a.atk}</span>
+    </button>`).join('');
+}
+function renderDiceRoller(){
+  const el=$('dice-roller-panel');if(!el)return;
+  el.innerHTML=`
+  <div class="dr-tabs">
+    <button class="dr-tab-btn${_diceTab==='attacks'?' active':''}" data-tab="attacks" onclick="switchDiceTab('attacks')">⚔ Attaques</button>
+    <button class="dr-tab-btn${_diceTab==='skills'?' active':''}" data-tab="skills" onclick="switchDiceTab('skills')">🎯 Compétences</button>
+    <button class="dr-tab-btn${_diceTab==='saves'?' active':''}" data-tab="saves" onclick="switchDiceTab('saves')">🛡 Sauvegardes</button>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+    <div id="dr-list" class="dr-list"></div>
+    <div id="dr-result" class="dr-result"><div style="color:#4A3A20;font-size:10px;font-style:italic;text-align:center;padding:1rem 0;">Sélectionnez une action →</div></div>
+  </div>`;
+  renderDiceList();
+}
+
 function renderSummary(){
   const subLine=C.sub?` · ${C.sub.n}`:'';
   const alignLine=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
@@ -2952,13 +3378,20 @@ function renderSummary(){
         ${C.skills.map(s=>{const sk=ALL_SKILLS.find(x=>x.n===s);const v=mod(effStat(sk?.s||'str'))+calcProfBonus();return`<div class="sumr"><span>${s}</span><span>${mods(v)}</span></div>`;}).join('')||'<div style="font-size:10px;color:#8A7A5A;">Aucune</div>'}
       </div>
       <div class="sumbl"><div class="sumbl-t">MAGIE</div>
+        ${(()=>{if(!C.cls?.spellcaster)return'<div style="font-size:10px;color:#8A7A5A;font-style:italic;">Non-magicien</div>';
+          const spStat=C.cls.spellStat;const spMod=mod(effStat(spStat));const pb=calcProfBonus();
+          const dc=8+pb+spMod;const atk=pb+spMod;
+          return`<div class="sumr" style="margin-bottom:3px;"><span>DD des sorts</span><span style="color:var(--blood);">${dc}</span></div>
+          <div class="sumr" style="margin-bottom:6px;"><span>Bonus d\'attaque magique</span><span style="color:var(--blood);">+${atk}</span></div>`;})()}
         ${C.cantrips.length?`<div style="font-size:9px;color:var(--gold-d);margin-bottom:2px;">CANTRIPS</div>${C.cantrips.map(s=>`<div style="font-size:10px;">▸ ${s}</div>`).join('')}`:''}
-        ${C.spells.length?`<div style="font-size:9px;color:var(--ocean);margin-top:3px;margin-bottom:2px;">SORTS NIV.1</div>${C.spells.map(s=>`<div style="font-size:10px;">▸ ${s}</div>`).join('')}`:(!C.cantrips.length?'<div style="font-size:10px;color:#8A7A5A;font-style:italic;">Non-magicien</div>':'')}
+        ${C.spells.length?`<div style="font-size:9px;color:var(--ocean);margin-top:3px;margin-bottom:2px;">SORTS</div>${C.spells.map(s=>`<div style="font-size:10px;">▸ ${s}</div>`).join('')}`:(!C.cantrips.length&&!C.cls?.spellcaster?'':'') }
         ${slots?`<div style="font-size:9px;color:var(--gold-d);margin-top:3px;">EMPLACEMENTS DE SORTS</div>
         <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--forest);">${slots.map((n,i)=>n>0?`Niv.${i+1}: ${n}`:null).filter(Boolean).join(' · ')}</div>`:''}
       </div>
     </div>
     ${C.sub?`<div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">ARCHÉTYPE</div><div style="font-size:12px;margin-bottom:.7rem;">${C.sub.n}<br><span style="font-size:10px;color:#8A7A5A;font-style:italic;">${C.sub.fs[0]}</span></div>`:''}
+    ${(C.feats||[]).length?`<div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">DONS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.7rem;">${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid,d:''};return`<div class="feat-tag" title="${f.d}">${f.n}</div>`;}).join('')}</div>`:''}
     <div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">LANGUES</div>
     <div style="font-size:11px;margin-bottom:.7rem;">${getLanguages().join(' · ')||'—'}</div>
     ${(C.traits[0]||C.ideals||C.bonds||C.flaws)?`
@@ -2970,9 +3403,41 @@ function renderSummary(){
       ${C.flaws?`<div class="sumbl"><div class="sumbl-t">💀 DÉFAUTS</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.flaws}</div></div>`:''}
     </div>`:''}
   </div>
-  ${C.bag.length?`<div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin:.5rem 0 3px;">SAC D'AVENTURIER</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 1rem;margin-bottom:.5rem;">${C.bag.map(e=>`<div style="font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--parch2);">▸ ${e.n}${e.qty>1?' ×'+e.qty:''} <span style="color:var(--gold-d);">${e.w>0?'('+e.w*e.qty+' lb)':''}</span></div>`).join('')}</div>
-  <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);">Poids total sac : ${C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0).toFixed(1)} lb</div>`:''}
+  ${(()=>{
+    const clf=C.cls&&CLS_LVL_FEAT[C.cls.id];
+    if(!clf)return'';
+    const lvl=C.level||1;
+    const entries=Object.entries(clf).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
+    if(!entries.length)return'';
+    return`<div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📖 Capacités de classe par niveau</div>
+    <div class="cls-feat-timeline">${entries.map(([l,fs])=>`
+      <div class="cft-row">
+        <div class="cft-lvl">Niv.${l}</div>
+        <div class="cft-feats">${fs.map(f=>`<span class="cft-tag">${f}</span>`).join('')}</div>
+      </div>`).join('')}
+    </div>`;
+  })()}
+
+  <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">🎲 Lancer les dés</div>
+  <div id="dice-roller-panel"></div>
+
+  ${C.bag.length?`<div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">🎒 Sac d'aventurier</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 1rem;margin-bottom:.4rem;">${C.bag.map(e=>`<div style="font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--parch2);">▸ ${e.n}${e.qty>1?' ×'+e.qty:''} <span style="color:var(--gold-d);">${e.w>0?'('+e.w*e.qty+' lb)':''}</span></div>`).join('')}</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);">Poids total : ${C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0).toFixed(1)} lb / cap. ${(effStat('str')*15)} lb</div>`:''}
+
+  <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">💰 Monnaie</div>
+  <div class="currency-row">
+    ${[['gp','PO','#C9A84C'],['sp','PA','#AAB0B8'],['ep','PE','#8B6EC6'],['cp','PC','#8B5A3A']].map(([k,lbl,col])=>`
+    <div class="currency-cell">
+      <label class="currency-lbl" style="color:${col};">${lbl}</label>
+      <input type="number" class="currency-inp" min="0" value="${(C.currency||{})[k]||0}"
+        oninput="if(!C.currency)C.currency={gp:0,sp:0,cp:0,ep:0};C.currency['${k}']=parseInt(this.value)||0">
+    </div>`).join('')}
+  </div>
+
+  <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📝 Notes</div>
+  <textarea class="ifl" style="min-height:80px;font-size:11px;" placeholder="Notes libres, rappels, objectifs…"
+    oninput="C.notes=this.value">${C.notes||''}</textarea>
 
   <div id="equip-lp-sec"></div>
   <div class="orn">✦ · ✦ · ✦</div>
@@ -2984,6 +3449,7 @@ function renderSummary(){
   </div>`;
   if(!C.equipped) C.equipped={};
   renderEquipPanel();
+  renderDiceRoller();
 }
 
 function exportJSON(){
@@ -3067,18 +3533,31 @@ function buildPrint(){
 
   // Combat — ligne basse
   const slots=getSlots();
+  const spStat=C.cls?.spellStat;
+  const spDC=spStat?8+C.profBonus+mod(effStat(spStat)):null;
+  const spAtk=spStat?C.profBonus+mod(effStat(spStat)):null;
   $('pn-combat-bot').innerHTML=`
     <div class="ps-cbox"><span class="ps-cbox-l">Bonus maîtrise</span><div class="ps-cbox-v">+${C.profBonus}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Dé de vie</span><div class="ps-cbox-v">${C.level||1}d${C.cls?.hd||'?'}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Perc. passive</span><div class="ps-cbox-v">${calcPassivePerc()}</div></div>
-    <div class="ps-cbox"><span class="ps-cbox-l">Empl. sorts (Niv.1)</span><div class="ps-cbox-v">${slots?slots[0]:'—'}</div></div>`;
+    ${spDC?`<div class="ps-cbox"><span class="ps-cbox-l">DD sorts</span><div class="ps-cbox-v">${spDC}</div></div>
+    <div class="ps-cbox"><span class="ps-cbox-l">Att. magique</span><div class="ps-cbox-v">+${spAtk}</div></div>`
+    :`<div class="ps-cbox"><span class="ps-cbox-l">Empl. sorts (Niv.1)</span><div class="ps-cbox-v">${slots?slots[0]:'—'}</div></div>`}`;
 
-  // Attaques (armes du sac)
-  const weapons=(C.bag||[]).filter(b=>b.cat==='Arme').slice(0,6);
+  // Attaques (armes du sac + mainhand)
+  const weaponSources=[];
+  if(C.equipped?.mainhand)weaponSources.push(C.equipped.mainhand);
+  (C.bag||[]).filter(b=>b.cat==='Arme').forEach(w=>{if(!weaponSources.find(x=>x.id===w.id))weaponSources.push(w);});
+  const weapons=weaponSources.slice(0,6);
   if(!weapons.length){
     $('pn-attacks').innerHTML=`<tr><td colspan="3" style="font-style:italic;color:#888;font-size:9px;">—</td></tr>`;
   } else {
-    $('pn-attacks').innerHTML=weapons.map(w=>`<tr><td>${w.n}</td><td>${mods(mod(s.str))}</td><td>—</td></tr>`).join('');
+    $('pn-attacks').innerHTML=weapons.map(w=>{
+      const p=WEAPON_PROPS[w.id];
+      if(!p){const atk=mod(s.str)+C.profBonus;return`<tr><td>${w.n}</td><td>${mods(atk)}</td><td>1d6 —</td></tr>`;}
+      const info=getWeaponAtkBonus(w);
+      return`<tr><td>${w.n}</td><td>${mods(info.atk)}</td><td>${info.dice}+${info.dmgMod} ${info.type}</td></tr>`;
+    }).join('');
   }
 
   // Équipement
@@ -3637,27 +4116,51 @@ const EQUIP_SLOTS=[
 const _ERC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très rare':'#4A1F7A','Légendaire':'#7B4000','Artefact':'#7B1010'};
 
 let _dragItem = null;
+
+// Valide si un item peut aller dans un slot donné
+function canEquipInSlot(item, slotId){
+  if(!item) return false;
+  const SHIELD_IDS=['shield','holy-symbol-shield'];
+  // Armures physiques (hors boucliers) → Torse uniquement
+  if(item.cat==='Armure' && !SHIELD_IDS.includes(item.id)) return slotId==='chest';
+  // Boucliers (cat Armure ou Magie) → Main secondaire
+  if(SHIELD_IDS.includes(item.id)) return slotId==='offhand';
+  // Armes → Main principale ou secondaire
+  if(item.cat==='Arme') return slotId==='mainhand' || slotId==='offhand';
+  // Objets magiques et focalisateurs avec slot explicite
+  if(item.slot==='ring') return slotId==='ring1' || slotId==='ring2';
+  if(item.slot) return slotId===item.slot;
+  // Autres (Outil, Contenant, Potion, Magie sans slot) → non équipables
+  return false;
+}
+
 function bagDragStart(e, idx){
   _dragItem = C.bag[idx] ? {...C.bag[idx]} : null;
   if(_dragItem) e.dataTransfer.effectAllowed='copy';
 }
 function slotDragOver(e, slotId){
   e.preventDefault();
-  document.querySelectorAll('.equip-slot').forEach(s=>s.classList.remove('drag-over'));
-  const el=$('equip-slot-'+slotId); if(el) el.classList.add('drag-over');
+  document.querySelectorAll('.equip-slot').forEach(s=>s.classList.remove('drag-over','drag-invalid'));
+  const el=$('equip-slot-'+slotId);
+  if(el){
+    if(_dragItem && !canEquipInSlot(_dragItem, slotId)) el.classList.add('drag-invalid');
+    else el.classList.add('drag-over');
+  }
 }
 function slotDrop(e, slotId){
   e.preventDefault();
-  document.querySelectorAll('.equip-slot').forEach(s=>s.classList.remove('drag-over'));
-  if(!_dragItem) return;
+  document.querySelectorAll('.equip-slot').forEach(s=>s.classList.remove('drag-over','drag-invalid'));
+  if(!_dragItem || !canEquipInSlot(_dragItem, slotId)) return;
   if(!C.equipped) C.equipped={};
   C.equipped[slotId]={..._dragItem};
   _dragItem=null;
   renderEquipPanel();
+  updateRight();
 }
 function slotUnequip(slotId){
   if(C.equipped) delete C.equipped[slotId];
   renderEquipPanel();
+  updateRight();
 }
 
 function renderEquipPanel(){
@@ -4103,7 +4606,7 @@ function renderReStats(){
   '</div>'+
   '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--gold-d);display:flex;gap:.8rem;padding:.2rem 0;">'+
     '<span>\u2764 '+(r.maxHp||r.hp||'?')+' PV</span>'+
-    '<span>\uD83D\uDEE1 CA '+(r.ac||'?')+'</span>'+
+    '<span>\uD83D\uDEE1 CA '+calcReCA(r)+'</span>'+
   '</div>';
 }
 
@@ -4141,8 +4644,8 @@ function reSlotHtml(slot, col, row){
   var hoverAttrs=item?' onmouseenter="showSlotTooltip(event,\''+slot.id+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"':'';
   return '<div class="re-doll-slot'+(item?' equipped':'')+'"'+
     ' style="grid-column:'+col+';grid-row:'+row+';border-left-color:'+leftBorder+';border-color:#2A1A08;border-left-color:'+leftBorder+';background:'+bg+';"'+
-    ' ondragover="event.preventDefault();this.classList.add(\'drag-over\')"'+
-    ' ondragleave="this.classList.remove(\'drag-over\')"'+
+    ' ondragover="reDollDragOver(event,\''+slot.id+'\')"'+
+    ' ondragleave="this.classList.remove(\'drag-over\',\'drag-invalid\')"'+
     ' ondrop="reDollDrop(event,\''+slot.id+'\')"'+hoverAttrs+'>'+
     '<div class="re-doll-slot-icon">'+slot.icon+'</div>'+
     '<div class="re-doll-slot-info">'+
@@ -4152,6 +4655,47 @@ function reSlotHtml(slot, col, row){
     '</div>'+
     (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
   '</div>';
+}
+
+function calcReCA(r){
+  var dex=r.stats&&r.stats.dex?r.stats.dex:10;
+  var dexM=Math.floor((dex-10)/2);
+  var eq=r.equipped||{};
+  var SIDS=['shield','holy-symbol-shield'];
+  var shieldBonus=(SIDS.includes(eq.offhand&&eq.offhand.id)||SIDS.includes(eq.mainhand&&eq.mainhand.id))?2:0;
+  var magicAC=0;
+  Object.values(eq).forEach(function(item){if(item&&item.bonus&&item.bonus.ac)magicAC+=item.bonus.ac;});
+  // Armure slot Torse : lookup par id, puis par cat+nom (compat. anciens persos sans id)
+  var chestItem=eq.chest;
+  var chestId=chestItem&&chestItem.id;
+  var armorId=(chestId&&ARMOR_CA[chestId])?chestId:(r.equippedArmorId||null);
+  // Fallback : chercher dans ARMOR_CA par nom de l'item
+  if(!armorId&&chestItem){
+    var found=Object.keys(ARMOR_CA).find(function(k){
+      var it=ITEMS.find(function(x){return x.id===k;});
+      return it&&it.n===chestItem.n;
+    });
+    if(found)armorId=found;
+  }
+  if(armorId&&ARMOR_CA[armorId]){
+    var a=ARMOR_CA[armorId];
+    // dexCap:null = tout le mod; dexCap:0 = armure lourde (aucun mod DEX, pas de malus); sinon cap
+    var d=a.dexCap===null?dexM:(a.dexCap===0?0:Math.min(dexM,a.dexCap));
+    return a.base+d+shieldBonus+magicAC;
+  }
+  // Re-lier cls aux CLASSES si armorBase manquant (anciens persos sérialisés)
+  var cls=r.cls;
+  if(cls&&!cls.armorBase){var fresh=CLASSES.find(function(c){return c.id===cls.id;});if(fresh)cls=fresh;}
+  if(!cls) return 10+dexM+shieldBonus+magicAC;
+  var base=cls.armorBase;
+  if(base==='noarmor_con'){var cM=Math.floor(((r.stats&&r.stats.con?r.stats.con:10)-10)/2);return 10+dexM+cM+magicAC;}
+  if(base==='noarmor_wis'){var wM=Math.floor(((r.stats&&r.stats.wis?r.stats.wis:10)-10)/2);return 10+dexM+wM+magicAC;}
+  if(base==='none') return 10+dexM+magicAC;
+  if(base==='light') return 11+dexM+shieldBonus+magicAC;
+  if(base==='medium') return 14+Math.min(dexM,2)+shieldBonus+magicAC;
+  if(base==='medium_shield') return 14+Math.min(dexM,2)+2+magicAC;
+  if(base==='heavy') return 16+shieldBonus+magicAC;
+  return 10+dexM+shieldBonus+magicAC;
 }
 
 function renderReDoll(){
@@ -4167,8 +4711,7 @@ function renderReDoll(){
   // Stats dynamiques depuis l'équipement
   var eqVals=Object.values(r.equipped||{});
   var hasArmor=eqVals.find(function(e){return e.cat&&e.cat.toLowerCase().includes('armure');});
-  var baseCA=10+Math.floor(((r.stats&&r.stats.dex?r.stats.dex:10)-10)/2);
-  var dispCA=r.ac||baseCA;
+  var dispCA=calcReCA(r);
   var dispHP=r.maxHp||r.hp||'?';
   var dispInit=(r.stats&&r.stats.dex?Math.floor((r.stats.dex-10)/2):0);
   var dispSpd=r.race&&r.race.speed?r.race.speed:30;
@@ -4241,7 +4784,7 @@ function reBagDragStart(e,idx){
 function reCatDragStart(e,id){
   var it=ITEMS.find(function(x){return x.id===id;});
   if(!it)return;
-  _reBagDragItem={id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null};
+  _reBagDragItem={id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null,bonus:it.bonus||null};
   e.dataTransfer.effectAllowed='copy';
   var ghost=reCreateDragImage(_reBagDragItem);
   e.dataTransfer.setDragImage(ghost,45,45);
@@ -4250,10 +4793,18 @@ function reCatDragStart(e,id){
     document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.add('drop-ready');});
   },0);
 }
+function reDollDragOver(e,slotId){
+  e.preventDefault();
+  document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.remove('drag-over','drag-invalid');});
+  var el=e.currentTarget;
+  if(_reBagDragItem && !canEquipInSlot(_reBagDragItem,slotId)) el.classList.add('drag-invalid');
+  else el.classList.add('drag-over');
+}
 function reDollDrop(e,slotId){
   e.preventDefault();
-  document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.remove('drag-over');});
+  document.querySelectorAll('.re-doll-slot').forEach(function(s){s.classList.remove('drag-over','drag-invalid');});
   if(!_reBagDragItem||!_reChar) return;
+  if(!canEquipInSlot(_reBagDragItem, slotId)) return;
   if(!_reChar.equipped) _reChar.equipped={};
   _reChar.equipped[slotId]=Object.assign({},_reBagDragItem);
   _reBagDragItem=null;
@@ -4335,7 +4886,7 @@ function reAddItem(id){
   var it=ITEMS.find(function(x){return x.id===id;});if(!it)return;
   var ex=_reChar.bag.find(function(b){return b.id===id;});
   if(ex)ex.qty++;
-  else _reChar.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null});
+  else _reChar.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null,bonus:it.bonus||null});
   renderReBag();
 }
 function reAddCodexItem(idx){
