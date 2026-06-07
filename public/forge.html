@@ -2018,12 +2018,19 @@ const ITEMS=[
   {id:'flask',n:'Flasque',cat:'Contenant',d:'Contient 0,5 l. Métal ou cuir. Idéale pour les alcools et huiles.',w:1,c:'2 pa'},
   // ── OBJETS MAGIQUES (bonus:{stat}) ──
   {id:'ring-protection',n:'Anneau de protection',cat:'Magie',slot:'ring',rarity:'Inhabituel',bonus:{ac:1},d:'+1 à la CA et aux jets de sauvegarde. Magie d\'abjuration permanente.',w:0,c:'—'},
+  {id:'ring-feather-fall',n:'Anneau de chute ralentie',cat:'Magie',slot:'ring',rarity:'Rare',d:'Chute à 18 m/round max, aucun dégât de chute. Flotter quelques instants.',w:0,c:'—'},
   {id:'cloak-protection',n:'Cape de protection',cat:'Magie',slot:'back',rarity:'Inhabituel',bonus:{ac:1},d:'+1 à la CA et aux jets de sauvegarde. Légère comme une plume.',w:1,c:'—'},
+  {id:'cloak-elvenkind',n:'Cape d\'elfe',cat:'Magie',slot:'back',rarity:'Inhabituel',d:'Avantage aux tests de Discrétion. Capuche : avantage pour se cacher (luminosité dim/obscure).',w:1,c:'—'},
   {id:'bracers-defense',n:'Brassards de défense',cat:'Magie',slot:'hands',rarity:'Rare',bonus:{ac:2},d:'+2 CA si aucune armure ni bouclier portés. Récompense la confiance en soi.',w:1,c:'—'},
+  {id:'gloves-thievery',n:'Gants de vol',cat:'Magie',slot:'hands',rarity:'Inhabituel',d:'Avantage aux tests de Main légère et de Crochetage. Mains d\'une précision redoutable.',w:0,c:'—'},
   {id:'amulet-health',n:'Amulette de santé',cat:'Magie',slot:'amulet',rarity:'Rare',bonus:{con:4},d:'Constitution fixée à 19 si inférieure. Puissance vitale conférée par cet objet ancien.',w:0,c:'—'},
+  {id:'amulet-proof-detection',n:'Amulette de non-détection',cat:'Magie',slot:'amulet',rarity:'Inhabituel',d:'Protège contre la scrutation magique et les sorts de localisation. Discrétion magique absolue.',w:0,c:'—'},
   {id:'gauntlets-str',n:'Gantelets de puissance d\'ogre',cat:'Magie',slot:'hands',rarity:'Rare',bonus:{str:9},d:'Force fixée à 19 si inférieure. Mains fermes comme du fer.',w:2,c:'—'},
   {id:'belt-giant-str',n:'Ceinturon de force géante',cat:'Magie',slot:'belt',rarity:'Très rare',bonus:{str:10},d:'Force fixée à 21 (colline) ou plus selon variante. Puissance titanesque.',w:4,c:'—'},
   {id:'headband-int',n:'Bandeau d\'intelligence',cat:'Magie',slot:'head',rarity:'Rare',bonus:{int:4},d:'Intelligence fixée à 19 si inférieure. Pensées claires, mémoire parfaite.',w:0,c:'—'},
+  {id:'helm-comprehend',n:'Casque de compréhension',cat:'Magie',slot:'head',rarity:'Inhabituel',d:'1×/jour : comprendre langages (1 h). Aucune langue étrangère ne résiste à cet artefact.',w:2,c:'—'},
+  {id:'boots-speed',n:'Bottes de célérité',cat:'Magie',slot:'feet',rarity:'Rare',d:'Action bonus : vitesse double, Esquive jusqu\'au prochain tour. Rechargement au repos long.',w:1,c:'—'},
+  {id:'boots-elvenkind',n:'Bottes d\'elfe sylvestre',cat:'Magie',slot:'feet',rarity:'Inhabituel',d:'Déplacement silencieux : avantage aux tests de Discrétion (son des pas uniquement).',w:1,c:'—'},
   // ── POTIONS ──
   {id:'potion-healing',n:'Potion de soins',cat:'Potion',rarity:'Commun',d:'Restaure 2d4+2 PV. Action pour boire, action bonus pour donner à un allié.',w:0.5,c:'50 po'},
   {id:'potion-climbing',n:'Potion d\'escalade',cat:'Potion',rarity:'Commun',d:'Vitesse d\'escalade = vitesse de marche pendant 1 heure. Avantage Athlétisme.',w:0.5,c:'75 po'},
@@ -4118,19 +4125,31 @@ const _ERC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très ra
 let _dragItem = null;
 
 // Valide si un item peut aller dans un slot donné
+// Priorité : cat physique > slot explicite > inférence par nom/id (items Codex)
 function canEquipInSlot(item, slotId){
   if(!item) return false;
   const SHIELD_IDS=['shield','holy-symbol-shield'];
-  // Armures physiques (hors boucliers) → Torse uniquement
+  // Armures physiques (hors boucliers) → Torse
   if(item.cat==='Armure' && !SHIELD_IDS.includes(item.id)) return slotId==='chest';
-  // Boucliers (cat Armure ou Magie) → Main secondaire
+  // Boucliers → Main secondaire
   if(SHIELD_IDS.includes(item.id)) return slotId==='offhand';
   // Armes → Main principale ou secondaire
   if(item.cat==='Arme') return slotId==='mainhand' || slotId==='offhand';
-  // Objets magiques et focalisateurs avec slot explicite
+  // Slot explicite défini sur l'item
   if(item.slot==='ring') return slotId==='ring1' || slotId==='ring2';
   if(item.slot) return slotId===item.slot;
-  // Autres (Outil, Contenant, Potion, Magie sans slot) → non équipables
+  // Inférence par nom + id (items du Codex ou futurs items sans slot défini)
+  const key=((item.n||'')+(item.id||'')).toLowerCase()
+    .normalize('NFD').replace(/[̀-ͯ]/g,''); // sans accents
+  if(/botte|chaussure|sandal|sabot|greve|soleret|pantoufle/.test(key)) return slotId==='feet';
+  if(/casque|chapeau|tiare|couronne|capuche|heaume|calot|bonnet|coiffe|bandeau|serre.tete/.test(key)) return slotId==='head';
+  if(/gant|brassard|mitaine|gantelets|gantelé/.test(key)) return slotId==='hands';
+  if(/ceinture|ceinturon/.test(key)) return slotId==='belt';
+  if(/cape|manteau|capote/.test(key)) return slotId==='back';
+  if(/amulette|collier|pendentif|medaillon|talisman/.test(key)) return slotId==='amulet';
+  if(/anneau|bague/.test(key)) return slotId==='ring1' || slotId==='ring2';
+  if(/bouclier|targe|egide/.test(key)) return slotId==='offhand';
+  if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(key)) return slotId==='mainhand';
   return false;
 }
 
