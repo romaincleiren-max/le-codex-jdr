@@ -1257,6 +1257,31 @@ function getRaceImgUrl(id){
   const f=RACE_IMG_MAP[id];
   return f?`${SUPA_URL}/storage/v1/object/public/races/${encodeURIComponent(f)}`:null;
 }
+const CLS_IMG_MAP={
+  'barbarian': 'Classe - Barbare.png',
+  'bard':      'Classe - Barde.png',
+  'cleric':    'Classe - Clerc.png',
+  'druid':     'Classe - Druide.png',
+  'fighter':   'Classe - Guerrier.png',
+  'monk':      'Classe - Moine.png',
+  'paladin':   'Classe - Paladin.png',
+  'ranger':    'Classe - Rodeur.png',
+  'rogue':     'Classe - Roublard.png',
+  'sorcerer':  'Classe - Ensorceleur.png',
+  'warlock':   'Classe - Occultiste.png',
+  'wizard':    'Classe - Magicien.png',
+};
+function getClsImgUrl(id){
+  const f=CLS_IMG_MAP[id];
+  return f?`${SUPA_URL}/storage/v1/object/public/classes/${encodeURIComponent(f)}`:null;
+}
+function rcClsImgFallback(el){
+  const id=el.dataset.clsId;
+  const cs=CLASS_STYLE[id]||{icon:'⚔'};
+  const cls=CLASSES.find(c=>c.id===id);
+  el.onerror=null;
+  el.parentElement.innerHTML=`<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${cs.icon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${cls?.n||id}</span></div>`;
+}
 // ── Visuels par race / classe ─────────────────────────────────────────────────
 const RACE_STYLE={
   human:{icon:'👤',color:'#8B7A50'},'elf-high':{icon:'✦',color:'#2D6A4A'},
@@ -3548,7 +3573,20 @@ function updateRight(){
       }else{racePortEl.innerHTML=`<div class="rp-phl">${raceStyle?.icon||'🧝'}</div>`;}
     }else{racePortEl.innerHTML='<div class="rp-phl">✕</div>';}
   }
-  setPortrait('rp-cls-portrait','classes',C.cls?.id,clsStyle?.icon||'✕');
+  // Portrait classe via mapping fichier bucket
+  const clsPortEl=$('rp-cls-portrait');
+  if(clsPortEl){
+    if(C.cls){
+      const cUrl=getClsImgUrl(C.cls.id);
+      if(cUrl){
+        const ci=document.createElement('img');
+        ci.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
+        ci.src=cUrl;ci.alt=C.cls.n;
+        ci.onerror=function(){this.onerror=null;clsPortEl.innerHTML=`<div class="rp-phl">${clsStyle?.icon||'⚔'}</div>`;};
+        clsPortEl.innerHTML='';clsPortEl.appendChild(ci);
+      }else{clsPortEl.innerHTML=`<div class="rp-phl">${clsStyle?.icon||'⚔'}</div>`;}
+    }else{clsPortEl.innerHTML='<div class="rp-phl">✕</div>';}
+  }
   if($('rhp'))$('rhp').textContent=calcHP()||'—';
   if($('rca'))$('rca').textContent=calcCA();
   if($('rinit'))$('rinit').textContent=mods(effStat('dex'));
@@ -4178,9 +4216,13 @@ function renderRoster(){
     const lastScen = r.scenarioHistory?.length ? r.scenarioHistory[r.scenarioHistory.length-1].name : null;
     const histCount = r.scenarioHistory?.length||0;
     const bagCount = r.bag?.length||0;
+    const clsImgUrl = r.cls?.id ? getClsImgUrl(r.cls.id) : null;
+    const clsFallbackHtml = `<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${clsIcon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${clsName}</span></div>`;
     const portrait = r.photo
       ? `<img src="${r.photo}" alt="${r.name}">`
-      : `<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${clsIcon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${clsName}</span></div>`;
+      : clsImgUrl
+        ? `<img src="${clsImgUrl}" alt="${clsName}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" data-cls-id="${r.cls.id}" onerror="rcClsImgFallback(this);">`
+        : clsFallbackHtml;
     return `<div class="rc">
       <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${r.id}')" title="Supprimer">✕</button>
       <div class="rc-portrait">${portrait}</div>

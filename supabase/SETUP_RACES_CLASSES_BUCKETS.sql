@@ -81,15 +81,16 @@ END $$;
 -- races/tiefling-zariel.jpg
 
 -- ── Classes (12 fichiers) ────────────────────────────────
--- classes/barbarian.jpg
--- classes/bard.jpg
--- classes/cleric.jpg
--- classes/druid.jpg
--- classes/fighter.jpg
--- classes/monk.jpg
--- classes/paladin.jpg
--- classes/ranger.jpg
--- classes/rogue.jpg
--- classes/sorcerer.jpg
--- classes/warlock.jpg
--- classes/wizard.jpg
+-- Format : "Classe - NomFrancais.png"  (même convention que les races)
+-- classes/Classe - Barbare.png
+-- classes/Classe - Barde.png
+-- classes/Classe - Clerc.png
+-- classes/Classe - Druide.png
+-- classes/Classe - Guerrier.png
+-- classes/Classe - Moine.png
+-- classes/Classe - Paladin.png
+-- classes/Classe - Rodeur.png
+-- classes/Classe - Roublard.png
+-- classes/Classe - Ensorceleur.png
+-- classes/Classe - Occultiste.png
+-- classes/Classe - Magicien.png
