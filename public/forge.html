@@ -121,6 +121,26 @@ body{background:var(--shadow);color:var(--ink);font-family:'IM Fell English',Geo
 .dr-sub{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;}
 .assign-mode{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);margin-bottom:.4rem;}
 
+/* ── MODE SELECTOR ── */
+.dmode-btn{background:#1A1510;border:1px solid #3A2A10;color:#8A7A5A;padding:.4em .9em;font-family:'Share Tech Mono',monospace;font-size:10px;letter-spacing:.06em;cursor:pointer;transition:.15s;border-radius:3px;}
+.dmode-btn:hover{border-color:var(--gold-d);color:var(--gold);}
+.dmode-btn.active{background:var(--blood);border-color:var(--blood-l);color:#EDE0C8;}
+
+/* ── 3D6 PAR STAT ── */
+.d3-area{background:#130D06;border:1px solid var(--gold-d);padding:.9rem;margin-bottom:.9rem;}
+.d3-grid{display:flex;flex-direction:column;gap:.3rem;}
+.d3-row{display:grid;grid-template-columns:7rem 2.5rem 5.5rem 2.5rem 1fr;align-items:center;gap:.5rem;padding:.35rem .5rem;background:#1A1510;border:1px solid transparent;border-radius:3px;opacity:0;transform:translateX(-8px);transition:opacity .25s,transform .25s,border-color .15s;}
+.d3-row.settled{opacity:1;transform:none;}
+.d3-row.rerolled{border-color:#4A7A2A;background:#162010;}
+.d3-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;color:var(--gold-d);text-transform:uppercase;}
+.d3-val{font-family:'Cinzel Decorative',serif;font-size:17px;color:var(--gold);text-align:center;}
+.d3-val small{font-size:8px;color:#6A9A5A;margin-left:2px;font-family:'Share Tech Mono',monospace;}
+.d3-dice{font-family:'Share Tech Mono',monospace;font-size:9px;color:#5A4A2A;}
+.d3-mod{font-family:'Share Tech Mono',monospace;font-size:11px;font-weight:bold;text-align:center;}
+.d3-reroll{text-align:right;}
+.d3-hint{color:#5A4A2A;font-size:8px;margin-left:.6rem;}
+.d3-used{color:#4A7A2A;font-size:8px;margin-left:.6rem;}
+
 /* ── SKILLS FULL ── */
 .sk-full{display:grid;grid-template-columns:1fr 1fr;gap:.2rem;margin-bottom:.8rem;}
 .sk-r{display:flex;align-items:center;gap:.35rem;padding:.25rem .45rem;background:var(--parch);border:1px solid transparent;cursor:pointer;transition:.08s;}
@@ -1748,7 +1768,7 @@ const ITEM_RARITIES=['Tous',..._RARITY_ORDER.filter(r=>ITEMS.some(i=>i.rarity===
 let C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null,background:null,alignment:null,
   stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
   level:1,xp:0,profBonus:2,traits:[],alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
-  asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null};
+  asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,dice3d6:{},dice3d6RerollUsed:false};
 let CUR=0;
 
 // ═══════════════════════════════════════════════════
@@ -1934,7 +1954,7 @@ function newChar(){
     level:1,cls_lvl:1,xp:0,profBonus:2,traits:[],ideals:'',bonds:'',flaws:'',
     height:'',weight:'',eyes:'',hair:'',skin:'',
     alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
-    asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e'};
+    asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e',dice3d6:{},dice3d6RerollUsed:false};
   showSysSel();
 }
 function loadChar(e){
@@ -2144,12 +2164,14 @@ function renderStats(){
   const pb=calcProfBonus();
   const asiCount=asiAvailable();
   $('lp').innerHTML=`<div class="sh">Caractéristiques & Compétences</div><div class="ss">Achat de points (27) · OU Lancer les dés (4d6, garder les 3 meilleurs)</div>
-  <div style="display:flex;gap:.5rem;margin-bottom:.7rem;flex-wrap:wrap;">
-    <button class="btn btn-d" onclick="rollDice()">🎲 Lancer les dés (4d6-drop1)</button>
-    <button class="btn btn-s" onclick="resetDice()">↺ Revenir à l'achat de points</button>
+  <div style="display:flex;gap:.4rem;margin-bottom:.8rem;flex-wrap:wrap;">
+    <button class="dmode-btn ${!C.diceRolls.length&&!Object.keys(C.dice3d6||{}).length?'active':''}" onclick="setDiceMode('points')">📊 Achat de points</button>
+    <button class="dmode-btn ${C.diceRolls.length?'active':''}" onclick="setDiceMode('4d6')">🎲 4d6-drop1</button>
+    <button class="dmode-btn ${Object.keys(C.dice3d6||{}).length?'active':''}" onclick="setDiceMode('3d6')">⚄ 3d6 par stat</button>
   </div>
   <div id="dice-area-wrap"></div>
-  <div class="pts" id="pts-disp">Points restants : <span id="pl">${ptsLeft()}</span> / 27</div>
+  <div id="dice3d6-wrap"></div>
+  <div class="pts" id="pts-disp" style="display:${!C.diceRolls.length&&!Object.keys(C.dice3d6||{}).length?'block':'none'}">Points restants : <span id="pl">${ptsLeft()}</span> / 27</div>
   <div class="sg" id="sg2"></div>
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">Compétences maîtrisées</div>
@@ -2165,6 +2187,7 @@ function renderStats(){
     <button class="btn btn-p" onclick="go(3)">Suivant : Background →</button>
   </div>`;
   renderDiceArea();
+  render3d6Area();
   renderStatBoxes();
   renderSkillList();
   if(asiCount>0)renderASIGrid();
@@ -2231,7 +2254,12 @@ function rollDice(){
     }
   },55);
 }
-function resetDice(){C.diceRolls=[];C.diceAssigned={};applyRace();renderStats();}
+function resetDice(){C.diceRolls=[];C.diceAssigned={};C.dice3d6={};C.dice3d6RerollUsed=false;applyRace();renderStats();}
+function setDiceMode(mode){
+  if(mode==='points'){resetDice();return;}
+  if(mode==='4d6'){C.dice3d6={};C.dice3d6RerollUsed=false;rollDice();return;}
+  if(mode==='3d6'){C.diceRolls=[];C.diceAssigned={};roll3d6All();return;}
+}
 function assignDice(rollIdx,stat){
   if(!C.diceRolls.length)return;
   // find current assignment of this stat
@@ -2275,6 +2303,74 @@ function renderDiceArea(){
   </div>`;
 }
 function selectDiceRoll(i){pendingDice=(pendingDice===i?null:i);renderDiceArea();}
+
+// ── Mode 3d6 par stat ──────────────────────────────────────────────────────────
+const STAT_LABELS_FR={str:'Force',dex:'Dextérité',con:'Constitution',int:'Intelligence',wis:'Sagesse',cha:'Charisme'};
+function _r6(){return Math.ceil(Math.random()*6);}
+function roll3d6All(){
+  if(!C.dice3d6)C.dice3d6={};
+  C.dice3d6RerollUsed=false;
+  const fresh={};
+  STAT_KEYS.forEach(k=>{const d=[_r6(),_r6(),_r6()];fresh[k]={d,sum:d.reduce((a,b)=>a+b,0),rerolled:false};});
+  // Animation
+  const w=$('dice3d6-wrap');
+  if(!w){C.dice3d6=fresh;apply3d6ToStats();renderStats();return;}
+  if($('pts-disp'))$('pts-disp').style.display='none';
+  w.innerHTML=`<div class="d3-area"><div class="dice-h">⚄ Lancer en cours...</div><div class="d3-grid">${STAT_KEYS.map(k=>`<div class="d3-row" id="d3r-${k}"><span class="d3-label">${STAT_LABELS_FR[k]}</span><span class="d3-val" id="d3v-${k}">—</span><span class="d3-dice" id="d3d-${k}">· · ·</span><span class="d3-reroll"></span></div>`).join('')}</div></div>`;
+  const t0=Date.now(),dur=700;
+  const iv=setInterval(()=>{
+    STAT_KEYS.forEach(k=>{const el=$('d3v-'+k);if(el)el.textContent=Math.ceil(Math.random()*18);});
+    if(Date.now()-t0>dur){
+      clearInterval(iv);
+      C.dice3d6=fresh;apply3d6ToStats();
+      render3d6Area();renderStatBoxes();updateRight();
+      document.querySelectorAll('.d3-row').forEach((r,i)=>setTimeout(()=>r.classList.add('settled'),i*80));
+    }
+  },50);
+}
+function reroll3d6Stat(k){
+  if(C.dice3d6RerollUsed)return;
+  const d=[_r6(),_r6(),_r6()];
+  C.dice3d6[k]={d,sum:d.reduce((a,b)=>a+b,0),rerolled:true};
+  C.dice3d6RerollUsed=true;
+  apply3d6ToStats();
+  render3d6Area();renderStatBoxes();updateRight();
+}
+function apply3d6ToStats(){
+  if(!C.dice3d6||!Object.keys(C.dice3d6).length)return;
+  applyRace();
+  STAT_KEYS.forEach(k=>{
+    if(C.dice3d6[k]){
+      const rb=C.race?.bonus?.[k]||0;
+      C.stats[k]=C.dice3d6[k].sum+rb;
+    }
+  });
+}
+function render3d6Area(){
+  const w=$('dice3d6-wrap');if(!w)return;
+  const rolls=C.dice3d6||{};
+  if(!Object.keys(rolls).length){w.innerHTML='';return;}
+  if($('pts-disp'))$('pts-disp').style.display='none';
+  const rerollUsed=C.dice3d6RerollUsed;
+  w.innerHTML=`<div class="d3-area">
+    <div class="dice-h">⚄ 3d6 par caractéristique${rerollUsed?'<span class="d3-used">· relancer utilisé ✓</span>':'<span class="d3-hint">· un relancer autorisé</span>'}</div>
+    <div class="d3-grid">${STAT_KEYS.map(k=>{
+      const r=rolls[k];if(!r)return'';
+      const sum=r.sum;const rb=C.race?.bonus?.[k]||0;
+      const total=sum+rb;const eff=Math.floor((total-10)/2);
+      const modTxt=eff>0?`+${eff}`:eff;
+      const canReroll=!rerollUsed;
+      const wasRerolled=r.rerolled;
+      return`<div class="d3-row settled${wasRerolled?' rerolled':''}">
+        <span class="d3-label">${STAT_LABELS_FR[k]}</span>
+        <span class="d3-val">${total}${rb?`<small>+${rb}</small>`:''}</span>
+        <span class="d3-dice">[${r.d.join('+')}]</span>
+        <span class="d3-mod" style="color:${eff>=0?'#6BAF4A':'#C0392B'}">${modTxt}</span>
+        <span class="d3-reroll">${wasRerolled?'<span style="color:#5A9A4A;font-size:9px;">✓ Relancé</span>':canReroll?`<button class="sbtn" onclick="reroll3d6Stat('${k}')" title="Relancer cette stat">↺</button>`:'<span style="color:#3A2A10;font-size:9px;">—</span>'}</span>
+      </div>`;
+    }).join('')}</div>
+  </div>`;
+}
 
 function renderStatBoxes(){
   const sg=$('sg2');if(!sg)return;sg.innerHTML='';
