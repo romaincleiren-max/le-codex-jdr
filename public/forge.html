@@ -3024,7 +3024,7 @@ function addCodexToBag(safeId){
   const bagId='codex-'+safeId;
   const ex=C.bag.find(b=>b.id===bagId);
   if(ex)ex.qty++;
-  else C.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',rarity:e.rarity||null});
+  else C.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
   renderBagList();
 }
 
@@ -4125,31 +4125,49 @@ const _ERC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très ra
 let _dragItem = null;
 
 // Valide si un item peut aller dans un slot donné
-// Priorité : cat physique > slot explicite > inférence par nom/id (items Codex)
+// Priorité : cat SRD > slot explicite > item_type Codex > inférence nom/id
 function canEquipInSlot(item, slotId){
   if(!item) return false;
   const SHIELD_IDS=['shield','holy-symbol-shield'];
-  // Armures physiques (hors boucliers) → Torse
+  // Armures physiques SRD (hors boucliers) → Torse
   if(item.cat==='Armure' && !SHIELD_IDS.includes(item.id)) return slotId==='chest';
-  // Boucliers → Main secondaire
+  // Boucliers SRD → Main secondaire
   if(SHIELD_IDS.includes(item.id)) return slotId==='offhand';
-  // Armes → Main principale ou secondaire
+  // Armes SRD → Main principale ou secondaire
   if(item.cat==='Arme') return slotId==='mainhand' || slotId==='offhand';
-  // Slot explicite défini sur l'item
+  // Slot explicite défini sur l'item (SRD magic)
   if(item.slot==='ring') return slotId==='ring1' || slotId==='ring2';
   if(item.slot) return slotId===item.slot;
-  // Inférence par nom + id (items du Codex ou futurs items sans slot défini)
-  const key=((item.n||'')+(item.id||'')).toLowerCase()
-    .normalize('NFD').replace(/[̀-ͯ]/g,''); // sans accents
-  if(/botte|chaussure|sandal|sabot|greve|soleret|pantoufle/.test(key)) return slotId==='feet';
-  if(/casque|chapeau|tiare|couronne|capuche|heaume|calot|bonnet|coiffe|bandeau|serre.tete/.test(key)) return slotId==='head';
-  if(/gant|brassard|mitaine|gantelets|gantelé/.test(key)) return slotId==='hands';
-  if(/ceinture|ceinturon/.test(key)) return slotId==='belt';
-  if(/cape|manteau|capote/.test(key)) return slotId==='back';
-  if(/amulette|collier|pendentif|medaillon|talisman/.test(key)) return slotId==='amulet';
-  if(/anneau|bague/.test(key)) return slotId==='ring1' || slotId==='ring2';
-  if(/bouclier|targe|egide/.test(key)) return slotId==='offhand';
-  if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(key)) return slotId==='mainhand';
+
+  // Inférence par item_type (champ Codex) + nom + id — normalisé sans accents
+  function norm(s){ return (s||'').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,''); }
+  const type=norm(item.item_type||item.type||'');
+  const name=norm(item.n||item.name||'')+' '+norm(item.id||'');
+
+  // item_type Codex en priorité (string exacte ou partielle)
+  if(type){
+    if(/\barme\b|melee|corps.a.corps|distance/.test(type)) return slotId==='mainhand'||slotId==='offhand';
+    if(/\barmure\b|cuirasse|cotte|harnois|ecailles/.test(type)) return slotId==='chest';
+    if(/bouclier|egide|targe/.test(type)) return slotId==='offhand';
+    if(/anneau|bague/.test(type)) return slotId==='ring1'||slotId==='ring2';
+    if(/amulette|collier|pendentif|medaillon|talisman/.test(type)) return slotId==='amulet';
+    if(/cape|manteau|capote/.test(type)) return slotId==='back';
+    if(/botte|chaussure|sandal|sabot/.test(type)) return slotId==='feet';
+    if(/casque|chapeau|tiare|couronne|heaume|coiffe|bonnet|capuche/.test(type)) return slotId==='head';
+    if(/gant|brassard|mitaine|gantelets/.test(type)) return slotId==='hands';
+    if(/ceinture|ceinturon/.test(type)) return slotId==='belt';
+    if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(type)) return slotId==='mainhand';
+  }
+  // Dernier recours : inférence par le nom de l'item
+  if(/botte|chaussure|sandal|sabot|greve|soleret|pantoufle/.test(name)) return slotId==='feet';
+  if(/casque|chapeau|tiare|couronne|capuche|heaume|calot|bonnet|coiffe|serre.tete/.test(name)) return slotId==='head';
+  if(/gant|brassard|mitaine|gantelets/.test(name)) return slotId==='hands';
+  if(/ceinture|ceinturon/.test(name)) return slotId==='belt';
+  if(/cape|manteau|capote/.test(name)) return slotId==='back';
+  if(/amulette|collier|pendentif|medaillon|talisman/.test(name)) return slotId==='amulet';
+  if(/anneau|bague/.test(name)) return slotId==='ring1'||slotId==='ring2';
+  if(/bouclier|targe|egide/.test(name)) return slotId==='offhand';
+  if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(name)) return slotId==='mainhand';
   return false;
 }
 
@@ -4914,7 +4932,7 @@ function reAddCodexItem(idx){
   var bagId='codex-'+(e.id||e.name).replace(/['"\\]/g,'_');
   var ex=_reChar.bag.find(function(b){return b.id===bagId;});
   if(ex)ex.qty++;
-  else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',rarity:e.rarity||null});
+  else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
   renderReBag();
 }
 
