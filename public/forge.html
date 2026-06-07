@@ -6,6 +6,7 @@
 <title>Forge du Héros — D&D 5e v3</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
@@ -710,8 +711,7 @@ body.printing #ps-print{display:block!important;}
 .card.sel::after{color:var(--gold);text-shadow:0 0 8px rgba(201,168,76,.5);}
 .card-accent{height:3px;margin:-.85rem -.85rem .65rem;display:block;}
 .card-icon{font-size:24px;display:block;margin-bottom:.4rem;line-height:1;}
-.card-icon-img{font-size:0;}
-.card-icon-img img{width:44px;height:44px;object-fit:contain;display:block;margin-bottom:.4rem;filter:drop-shadow(0 1px 3px rgba(0,0,0,.5));}
+.card-pdf-icon{display:flex;justify-content:center;align-items:center;height:76px;margin:.5rem 0 .6rem;}
 .cn{color:var(--parch);font-size:14px;}
 .cd{color:#7A6A4A;}
 .cb{color:var(--gold-d);border-top:1px solid rgba(201,168,76,.12);padding-top:.5rem;margin-top:.45rem;}
@@ -1276,6 +1276,55 @@ const CLS_IMG_MAP={
 function getClsImgUrl(id){
   const f=CLS_IMG_MAP[id];
   return f?`${SUPA_URL}/storage/v1/object/public/classes/${encodeURIComponent(f)}`:null;
+}
+const CLS_PDF_MAP={
+  'barbarian': 'Classe - Barbare.pdf',
+  'bard':      'Classe - Barde.pdf',
+  'cleric':    'Classe - Clerc.pdf',
+  'druid':     'Classe - Druide.pdf',
+  'fighter':   'Classe - Guerrier.pdf',
+  'monk':      'Classe - Moine.pdf',
+  'paladin':   'Classe - Paladin.pdf',
+  'ranger':    'Classe - Rodeur.pdf',
+  'rogue':     'Classe - Roublard.pdf',
+  'sorcerer':  'Classe - Ensorceleur.pdf',
+  'warlock':   'Classe - Occultiste.pdf',
+  'wizard':    'Classe - Magicien.pdf',
+};
+function getClsPdfUrl(id){
+  const f=CLS_PDF_MAP[id];
+  return f?`${SUPA_URL}/storage/v1/object/public/classes/${encodeURIComponent(f)}`:null;
+}
+// Render un PDF depuis Supabase dans un container DOM via PDF.js
+async function renderClsPdf(container, pdfUrl, displayPx, fallbackIcon){
+  if(!container)return;
+  // Attendre que PDF.js soit chargé (defer)
+  let tries=30;
+  while(typeof window.pdfjsLib==='undefined'&&tries-->0)
+    await new Promise(r=>setTimeout(r,100));
+  if(typeof window.pdfjsLib==='undefined'||!pdfUrl){
+    container.innerHTML=`<span style="font-size:${Math.round(displayPx*.4)}px;">${fallbackIcon}</span>`;
+    return;
+  }
+  try{
+    const lib=window.pdfjsLib;
+    lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    const pdf=await lib.getDocument({url:pdfUrl,verbosity:0}).promise;
+    const page=await pdf.getPage(1);
+    const vp1=page.getViewport({scale:1});
+    const dpr=Math.min(window.devicePixelRatio||1,2);
+    const scale=(displayPx/Math.max(vp1.width,vp1.height))*dpr;
+    const vp=page.getViewport({scale});
+    const canvas=document.createElement('canvas');
+    canvas.width=Math.round(vp.width);
+    canvas.height=Math.round(vp.height);
+    canvas.style.cssText=`width:${displayPx}px;height:${displayPx}px;display:block;`;
+    await page.render({canvasContext:canvas.getContext('2d'),viewport:vp}).promise;
+    container.innerHTML='';
+    container.appendChild(canvas);
+  }catch(e){
+    container.innerHTML=`<span style="font-size:${Math.round(displayPx*.4)}px;">${fallbackIcon}</span>`;
+  }
 }
 function rcClsImgFallback(el){
   const id=el.dataset.clsId;
@@ -1994,13 +2043,10 @@ function renderClass(){
   CLASSES.forEach(cl=>{
     const d=document.createElement('div');d.className='card'+(C.cls?.id===cl.id?' sel':'');
     const cs=CLASS_STYLE[cl.id]||{icon:'⚔',color:'var(--gold-d)'};
-    const _ciUrl=getClsImgUrl(cl.id);
-    const _ciHtml=_ciUrl
-      ?`<span class="card-icon card-icon-img"><img src="${_ciUrl}" alt="${cl.n}" data-fallback="${cs.icon}" onerror="this.onerror=null;this.parentElement.innerHTML=this.dataset.fallback;this.parentElement.classList.remove('card-icon-img');"></span>`
-      :`<span class="card-icon">${cs.icon}</span>`;
-    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div>${_ciHtml}<div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
+    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><div class="card-pdf-icon" id="ci-${cl.id}"><span style="font-size:28px;">${cs.icon}</span></div><div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
     d.onclick=()=>{if(C.cls?.id!==cl.id){C.sub=null;C.skills=[];C.cantrips=[];C.spells=[];}C.cls=cl;renderClass();updateRight();};
     $('cg').appendChild(d);
+    renderClsPdf($('ci-'+cl.id),getClsPdfUrl(cl.id),72,cs.icon);
   });
   if(C.cls)renderSubs();
   renderMulti();
@@ -3579,18 +3625,12 @@ function updateRight(){
       }else{racePortEl.innerHTML=`<div class="rp-phl">${raceStyle?.icon||'🧝'}</div>`;}
     }else{racePortEl.innerHTML='<div class="rp-phl">✕</div>';}
   }
-  // Portrait classe via mapping fichier bucket
+  // Portrait classe via PDF depuis bucket
   const clsPortEl=$('rp-cls-portrait');
   if(clsPortEl){
     if(C.cls){
-      const cUrl=getClsImgUrl(C.cls.id);
-      if(cUrl){
-        const ci=document.createElement('img');
-        ci.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top;display:block;';
-        ci.src=cUrl;ci.alt=C.cls.n;
-        ci.onerror=function(){this.onerror=null;clsPortEl.innerHTML=`<div class="rp-phl">${clsStyle?.icon||'⚔'}</div>`;};
-        clsPortEl.innerHTML='';clsPortEl.appendChild(ci);
-      }else{clsPortEl.innerHTML=`<div class="rp-phl">${clsStyle?.icon||'⚔'}</div>`;}
+      clsPortEl.innerHTML=`<div class="rp-phl">${clsStyle?.icon||'⚔'}</div>`;
+      renderClsPdf(clsPortEl,getClsPdfUrl(C.cls.id),90,clsStyle?.icon||'⚔');
     }else{clsPortEl.innerHTML='<div class="rp-phl">✕</div>';}
   }
   if($('rhp'))$('rhp').textContent=calcHP()||'—';
