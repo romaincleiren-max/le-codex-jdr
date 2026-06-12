@@ -984,6 +984,67 @@ body{background:var(--bg);}
 .currency-lbl{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;margin-bottom:.25rem;}
 .currency-inp{background:none;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:14px;width:100%;text-align:center;outline:none;padding:0;}
 .currency-inp:focus{border-bottom-color:var(--gold-d);}
+
+/* ════ 3-COLUMN FORGE SHELL ════ */
+#layout{display:grid!important;grid-template-columns:230px 1fr 300px!important;flex:unset!important;}
+#rp{width:auto!important;border-left:none!important;border-right:1px solid var(--bd-subtle)!important;flex-shrink:unset!important;}
+/* Center immersive */
+#col-center{position:relative;overflow:hidden;background:#080C06;flex-shrink:0;}
+#center-bg{position:absolute;inset:0;background-size:cover;background-position:center top;transition:opacity .4s;}
+.grad-top{position:absolute;top:0;left:0;right:0;height:80px;background:linear-gradient(to bottom,rgba(0,0,0,.88) 0%,transparent 100%);z-index:2;pointer-events:none;}
+.grad-bot{position:absolute;bottom:0;left:0;right:0;height:130px;background:linear-gradient(to top,rgba(0,0,0,.92) 0%,transparent 100%);z-index:2;pointer-events:none;}
+/* Nav pills as overlay in center */
+#nav{position:absolute!important;top:0;left:0;right:0;z-index:3!important;background:transparent!important;border-bottom:none!important;padding:.3rem .4rem!important;gap:2px!important;justify-content:flex-start!important;flex-wrap:nowrap!important;overflow-x:auto!important;}
+#nav .pill{font-size:7px!important;padding:.22em .48em!important;border-radius:2px!important;white-space:nowrap!important;background:rgba(0,0,0,.5)!important;backdrop-filter:blur(5px);letter-spacing:.08em!important;}
+#nav .pill.active{background:rgba(201,168,76,.18)!important;border-color:rgba(201,168,76,.5)!important;}
+#nav .pill.done{background:rgba(35,65,14,.5)!important;border-color:rgba(45,80,22,.4)!important;}
+/* Image import / actions */
+#img-import-zone{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:1;}
+.img-import-btn{border:1.5px dashed rgba(201,168,76,.28);padding:.9rem 1.3rem;color:rgba(201,168,76,.38);font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;text-align:center;cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:.35rem;}
+.img-import-btn:hover{border-color:var(--gold);color:var(--gold);}
+.img-import-icon{font-size:22px;opacity:.55;}
+#img-actions{position:absolute;top:46px;right:6px;z-index:4;display:none;gap:3px;}
+.img-action-btn{font-family:'Share Tech Mono',monospace;font-size:7px;color:rgba(201,168,76,.5);border:1px solid rgba(201,168,76,.18);background:rgba(0,0,0,.6);padding:2px 6px;cursor:pointer;transition:.15s;}
+.img-action-btn:hover{color:var(--gold);border-color:var(--bd-soft);}
+/* Identity band */
+#identity-band{position:absolute;bottom:0;left:0;right:0;z-index:3;padding:.45rem .65rem .55rem;}
+.identity-name{font-family:'Cinzel',serif;font-size:16px;color:var(--gold);line-height:1;text-shadow:0 1px 8px rgba(0,0,0,.95);}
+.identity-sub{font-size:9.5px;color:#A09070;font-style:italic;text-shadow:0 1px 4px rgba(0,0,0,.9);margin-top:2px;}
+.identity-badges{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:3px;}
+.bonus-badge-c{background:#2A4A1E;color:#7AA66A;font-family:'Share Tech Mono',monospace;font-size:7px;padding:2px 5px;border:1px solid rgba(122,166,106,.22);}
+/* Right panel — step content */
+#lp{width:auto!important;max-width:none!important;padding:0!important;flex:unset!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;}
+#lp.lp-scroll-mode{overflow-y:auto!important;}
+.rp-panel-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.07em;color:var(--gold);padding:.55rem .65rem .4rem;border-bottom:1px solid var(--bd-subtle);flex-shrink:0;}
+/* Family tabs (race panel) */
+.family-tabs-wrap{overflow-x:auto;flex-shrink:0;padding:.35rem .5rem .25rem;border-bottom:1px solid var(--bd-subtle);display:flex;gap:2px;scrollbar-width:thin;scrollbar-color:var(--gold-d) transparent;}
+.family-tab{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.06em;color:#5A4E38;white-space:nowrap;padding:.16rem .42rem;border:1px solid transparent;cursor:pointer;transition:.12s;flex-shrink:0;}
+.family-tab:hover{color:var(--gold-d);border-color:var(--bd-subtle);}
+.family-tab.active{color:var(--gold);border-color:var(--bd-soft);background:rgba(201,168,76,.07);}
+/* 2-col race cards */
+.race-grid-wrap{flex:1;overflow-y:auto;padding:.4rem .45rem;}
+.race-grid-2col{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;}
+.race-card-mini{border:1px solid var(--bd-subtle);background:#100C06;cursor:pointer;transition:.15s;position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:4px;}
+.race-card-mini:hover{border-color:var(--bd-soft);}
+.race-card-mini.selected{border-color:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.18);}
+.race-portrait-mini{aspect-ratio:9/16;background:#0A0805;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;overflow:hidden;}
+.race-portrait-mini::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,5,.88) 0%,transparent 50%);pointer-events:none;}
+.race-portrait-mini img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+.race-card-foot{padding:3px 4px 4px;display:flex;flex-direction:column;gap:1px;}
+.race-card-name{font-family:'Cinzel',serif;font-size:7.5px;color:#C0B090;letter-spacing:.03em;line-height:1.25;}
+.race-card-badges{display:flex;gap:2px;flex-wrap:wrap;margin-top:1px;}
+.race-badge{font-family:'Share Tech Mono',monospace;font-size:6px;background:#2A4A1E;color:#7AA66A;padding:1px 3px;}
+.sel-badge-mini{position:absolute;top:3px;right:3px;background:var(--gold);color:#0E0C08;font-family:'Share Tech Mono',monospace;font-size:6px;padding:2px 3px;z-index:2;letter-spacing:.03em;}
+.lore-desc-panel{padding:.4rem .55rem;border-top:1px solid var(--bd-subtle);font-size:9px;font-style:italic;color:#8A795A;line-height:1.45;flex-shrink:0;min-height:42px;max-height:60px;overflow-y:auto;}
+.panel-footer{padding:.38rem .55rem;border-top:1px solid var(--bd-subtle);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(0,0,0,.2);}
+.step-indicator{font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4E38;}
+/* Other steps in 300px panel: override grids to 2-col */
+#lp .grid{grid-template-columns:repeat(2,1fr)!important;}
+#lp .race-grid{grid-template-columns:repeat(2,1fr)!important;}
+#lp .sh{font-size:14px!important;padding:.55rem .65rem .3rem!important;}
+#lp .ss{font-size:8.5px!important;padding:0 .65rem .4rem!important;}
+#lp .btn-row{padding:.4rem .55rem!important;flex-shrink:0;}
+#lp .lp-inner{flex:1;overflow-y:auto;padding:.4rem .55rem;}
 </style>
 </head>
 <body>
@@ -1095,16 +1156,6 @@ body{background:var(--bg);}
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;background:#1A1520;border-color:#4A3A70;color:#A090D0;" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">← Mes persos</button>
     </div>
   </div>
-  <div id="nav">
-    <div class="pill" id="p0" onclick="go(0)">1 · Race</div>
-    <div class="pill" id="p1" onclick="go(1)">2 · Classe & Archétype</div>
-    <div class="pill" id="p2" onclick="go(2)">3 · Caractéristiques</div>
-    <div class="pill" id="p3" onclick="go(3)">4 · Background</div>
-    <div class="pill" id="p4" onclick="go(4)">5 · Équipement & Sorts</div>
-    <div class="pill" id="p5" onclick="go(5)">6 · Identité</div>
-    <div class="pill" id="p6" onclick="go(6)">7 · Résumé & PDF</div>
-    <div class="pill" id="p8" onclick="go(8)" style="display:none;">⚔ Scénario</div>
-  </div>
   <div id="dh-nav">
     <div class="pill" id="dh0" onclick="goDH(0)">1 · Caractéristiques</div>
     <div class="pill" id="dh1" onclick="goDH(1)">2 · Monde d'Origine</div>
@@ -1126,7 +1177,6 @@ body{background:var(--bg);}
     <button class="btn btn-s" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')" style="margin-left:.5rem;font-size:9px;">← Mes persos</button>
   </div>
   <div id="layout">
-    <div id="lp"></div>
     <div id="rp">
       <div class="rp-portraits">
         <div>
@@ -1162,6 +1212,38 @@ body{background:var(--bg);}
       <div class="rsec">SORTS PRÉPARÉS/CONNUS</div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6AAAE8;" id="rspells">—</div>
     </div>
+    <div id="col-center">
+      <input id="photo-input" type="file" accept="image/*" style="display:none" onchange="handlePhotoInput(this)">
+      <div id="center-bg"></div>
+      <div class="grad-top"></div>
+      <div class="grad-bot"></div>
+      <div id="nav">
+        <div class="pill" id="p0" onclick="go(0)">1 · Race</div>
+        <div class="pill" id="p1" onclick="go(1)">2 · Classe</div>
+        <div class="pill" id="p2" onclick="go(2)">3 · Carac.</div>
+        <div class="pill" id="p3" onclick="go(3)">4 · Background</div>
+        <div class="pill" id="p4" onclick="go(4)">5 · Équipement</div>
+        <div class="pill" id="p5" onclick="go(5)">6 · Identité</div>
+        <div class="pill" id="p6" onclick="go(6)">7 · Résumé</div>
+        <div class="pill" id="p8" onclick="go(8)" style="display:none;">⚔ Scénario</div>
+      </div>
+      <div id="img-actions">
+        <button class="img-action-btn" onclick="$('photo-input').click()">Changer</button>
+        <button class="img-action-btn" onclick="removeCharPhoto()">Retirer</button>
+      </div>
+      <div id="img-import-zone">
+        <div class="img-import-btn" onclick="$('photo-input').click()">
+          <span class="img-import-icon">⊕</span>
+          Importer une image
+        </div>
+      </div>
+      <div id="identity-band">
+        <div class="identity-badges" id="identity-badges"></div>
+        <div class="identity-name" id="identity-name">—</div>
+        <div class="identity-sub" id="identity-sub">Race · Classe · Niv. 1</div>
+      </div>
+    </div>
+    <div id="lp"></div>
   </div>
 </div>
 
@@ -2198,6 +2280,7 @@ let C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null
   feats:[],currency:{gp:0,sp:0,cp:0,ep:0},notes:''};
 let CUR=0;
 let _expandedFamily=null;
+let _selectedRaceFamily=null;
 
 // ═══════════════════════════════════════════════════
 // UTILS
@@ -2429,7 +2512,6 @@ function loadChar(e){
 function go(n){
   if(n!==4 && n!==6) hideEquipPanel();
   CUR=n;
-  // Show/hide scenario bar vs normal nav
   const scnBar=$('scn-bar');
   const navBar=$('nav');
   if(n===8){ scnBar.style.display='flex'; navBar.style.display='none'; }
@@ -2437,8 +2519,11 @@ function go(n){
   if(n!==8){
     document.querySelectorAll('.pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
     [renderRace,renderClass,renderStats,renderBackground,renderEquipSpells,renderIdentity,renderSummary,renderAdventure][n]?.();
+    // Non-race steps: make #lp scrollable
+    if(n!==0){ $('lp').className='lp-scroll-mode'; }
   }
   $('lp').scrollTop=0;
+  updateCenterBand();
 }
 
 // ─── STEP 1: RACE ───────────────────────────────────
@@ -2448,63 +2533,53 @@ function raceImgFallback(el){
   el.onerror=null;
   el.parentElement.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;
 }
-function buildRaceCard(r){
-  const d=document.createElement('div');
-  d.className='card race-card'+(C.race?.id===r.id?' sel':'');
-  const rs=RACE_STYLE[r.id]||RACE_STYLE[r.family]||{icon:'🧝',color:'var(--gold-d)'};
-  const bs=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>k.toUpperCase()+' +'+v).join('  ');
-  const extra=r.bonus._ch?` +${r.bonus._ch}✦`:'';
-  const imgUrl=getRaceImgUrl(r.id);
-  const head=document.createElement('div');head.className='race-card-head';
-  head.innerHTML=`<span class="race-card-icon">${rs.icon}</span><div><div class="cn" style="font-size:11px;">${r.n}</div><div class="ct">${r.tag}</div></div>`;
-  const stats=document.createElement('div');stats.className='race-card-stats';
-  stats.textContent=bs+extra+(r.langs?.length?'  '+r.langs.join('/'):'');
-  const wrap=document.createElement('div');wrap.className='race-portrait-wrap';
-  const img=document.createElement('img');
-  img.dataset.id=r.id;img.alt=r.n;img.loading='lazy';
-  if(imgUrl){img.src=imgUrl;img.dataset.id=r.id;img.onerror=function(){raceImgFallback(this);};wrap.appendChild(img);}
-  else{wrap.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;}
-  const desc=document.createElement('div');desc.className='race-desc';desc.textContent=r.desc;
-  const acc=document.createElement('div');acc.className='card-accent';acc.style.background=rs.color||'var(--gold-d)';
-  d.appendChild(acc);d.appendChild(head);d.appendChild(stats);d.appendChild(wrap);d.appendChild(desc);
-  d.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
-  return d;
-}
 function renderRace(){
-  $('lp').innerHTML=`<div class="sh">Choisir une Race</div><div class="ss">Héritage · Traits · Bonus de Caractéristiques · Langues</div>
-  <div class="race-grid" id="rg"></div>
-  <div class="btn-row"><button class="btn btn-p" onclick="if(C.race)go(1);else alert('Choisissez une race.')">Suivant : Classe & Archétype →</button></div>`;
-  const grid=$('rg');
   // Build family map
-  const famMap={};
-  RACES.forEach(r=>{if(r.family){if(!famMap[r.family])famMap[r.family]=[];famMap[r.family].push(r);}});
-  const rendered=new Set();
-  RACES.forEach(r=>{
-    const fid=r.family;
-    // No family or single-member family → standalone card
-    if(!fid||!famMap[fid]||famMap[fid].length<2){
-      grid.appendChild(buildRaceCard(r));
-      return;
-    }
-    // Multi-member family: render header once
-    if(rendered.has(fid))return;
-    rendered.add(fid);
-    const fRaces=famMap[fid];
-    const rs=RACE_STYLE[fid]||{icon:'🧝',color:'var(--gold-d)'};
-    const label=RACE_FAMILY_LABELS[fid]||fid;
-    const isExpanded=_expandedFamily===fid;
-    const isSelected=fRaces.some(r2=>C.race?.id===r2.id);
-    const hdr=document.createElement('div');
-    hdr.className='race-fam-header'+(isSelected?' has-selected':'')+(isExpanded?' expanded':'');
-    hdr.style.setProperty('--fam-color',rs.color||'var(--gold-d)');
-    hdr.innerHTML=`<span class="race-fam-icon">${rs.icon}</span><div class="race-fam-info"><div class="race-fam-name">${label}</div><div class="race-fam-count">${fRaces.length} variantes${isSelected?' · ✓ Sélectionné':''}</div></div><span class="race-fam-arrow">${isExpanded?'▲':'▼'}</span>`;
-    hdr.onclick=()=>{_expandedFamily=isExpanded?null:fid;renderRace();};
-    grid.appendChild(hdr);
-    if(isExpanded){
-      const sub=document.createElement('div');sub.className='race-subgrid';
-      fRaces.forEach(r2=>sub.appendChild(buildRaceCard(r2)));
-      grid.appendChild(sub);
-    }
+  const famMap={};const orderedFams=[];
+  RACES.forEach(r=>{if(r.family){if(!famMap[r.family]){famMap[r.family]=[];orderedFams.push(r.family);}famMap[r.family].push(r);}});
+  const realFams=orderedFams.filter(f=>famMap[f].length>=2);
+  const standalones=RACES.filter(r=>!r.family||!famMap[r.family]||famMap[r.family].length<2);
+  // Auto-select tab
+  if(!_selectedRaceFamily){
+    if(C.race?.family&&famMap[C.race.family]?.length>=2)_selectedRaceFamily=C.race.family;
+    else _selectedRaceFamily=realFams[0]||'unique';
+  }
+  const tabRaces=_selectedRaceFamily==='unique'?standalones:(famMap[_selectedRaceFamily]||standalones);
+  $('lp').className='';
+  $('lp').innerHTML=`<div class="rp-panel-title">Choisir une Race</div>
+    <div class="family-tabs-wrap" id="ftabs"></div>
+    <div class="race-grid-wrap"><div class="race-grid-2col" id="rg"></div></div>
+    <div class="lore-desc-panel" id="race-lore">${C.race?.desc||''}</div>
+    <div class="panel-footer">
+      <button class="btn btn-s" style="font-size:8px;padding:.22em .55em;opacity:.4;" disabled>← Préc.</button>
+      <span class="step-indicator">1 / 7</span>
+      <button class="btn btn-p" style="font-size:8px;padding:.22em .55em;" onclick="if(C.race)go(1);else alert('Choisissez une race.')">Suiv. →</button>
+    </div>`;
+  // Family tabs
+  const ftabs=$('ftabs');
+  [...realFams,'unique'].forEach(fid=>{
+    const label=fid==='unique'?'Races uniques':(RACE_FAMILY_LABELS[fid]||fid);
+    const t=document.createElement('div');
+    t.className='family-tab'+(_selectedRaceFamily===fid?' active':'');
+    t.textContent=label;
+    t.onclick=()=>{_selectedRaceFamily=fid;renderRace();};
+    ftabs.appendChild(t);
+  });
+  // Race cards
+  const rg=$('rg');
+  tabRaces.forEach(r=>{
+    const rs=RACE_STYLE[r.id]||RACE_STYLE[r.family]||{icon:'🧝',color:'var(--gold-d)'};
+    const isSel=C.race?.id===r.id;
+    const imgUrl=getRaceImgUrl(r.id);
+    const badges=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>`<span class="race-badge">${k.toUpperCase()}+${v}</span>`).join('');
+    const card=document.createElement('div');
+    card.className='race-card-mini'+(isSel?' selected':'');
+    const portInner=imgUrl
+      ?`<img src="${imgUrl}" alt="${r.n}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'font-size:24px\\'>${rs.icon}</span>'">`
+      :`<span style="font-size:24px">${rs.icon}</span>`;
+    card.innerHTML=`${isSel?'<div class="sel-badge-mini">✓</div>':''}<div class="race-portrait-mini">${portInner}</div><div class="race-card-foot"><div class="race-card-name">${r.n}</div><div class="race-card-badges">${badges}</div></div>`;
+    card.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
+    rg.appendChild(card);
   });
 }
 function applyRace(){
@@ -4478,7 +4553,53 @@ function updateRight(){
   if($('pb-disp'))$('pb-disp').textContent=C.profBonus;
   if($('hp-disp'))$('hp-disp').textContent=calcHP()||'—';
   if($('asi-disp'))$('asi-disp').textContent=asiAvailable();
+  updateCenterBand();
 }
+function updateCenterBand(){
+  const nameEl=$('identity-name'),subEl=$('identity-sub'),badgesEl=$('identity-badges');
+  const bgEl=$('center-bg'),importZone=$('img-import-zone'),imgActions=$('img-actions');
+  if(nameEl)nameEl.textContent=C.name||'—';
+  if(subEl){
+    const racePart=C.race?.n||'Race';
+    const clsPart=C.cls?(' · '+C.cls.n):'';
+    subEl.textContent=racePart+clsPart+' · Niv.'+C.level;
+  }
+  if(badgesEl&&C.race?.bonus){
+    badgesEl.innerHTML=Object.entries(C.race.bonus).filter(([k,v])=>k!=='_ch'&&v>0)
+      .map(([k,v])=>`<span class="bonus-badge-c">${k.toUpperCase()} +${v}</span>`).join('');
+    if(C.race.bonus._ch)badgesEl.innerHTML+=`<span class="bonus-badge-c">+${C.race.bonus._ch} ✦</span>`;
+  }else if(badgesEl)badgesEl.innerHTML='';
+  if(bgEl){
+    if(C.photo){
+      bgEl.style.backgroundImage=`url(${C.photo})`;
+      if(importZone)importZone.style.display='none';
+      if(imgActions)imgActions.style.display='flex';
+    }else{
+      bgEl.style.backgroundImage='';
+      if(importZone)importZone.style.display='flex';
+      if(imgActions)imgActions.style.display='none';
+    }
+  }
+}
+function handlePhotoInput(input){
+  const file=input.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(e){
+    const img=new Image();
+    img.onload=function(){
+      const MAX=800;let w=img.width,h=img.height;
+      if(w>MAX){h=Math.round(h*MAX/w);w=MAX;}
+      const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      C.photo=canvas.toDataURL('image/jpeg',0.85);
+      updateCenterBand();
+    };
+    img.src=e.target.result;
+  };
+  reader.readAsDataURL(file);
+  input.value='';
+}
+function removeCharPhoto(){C.photo=null;updateCenterBand();}
 
 // ══════════════════════════════════════════════════
 // ROSTER — persistance localStorage
