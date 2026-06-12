@@ -884,6 +884,17 @@ body{background:var(--bg);}
 .race-portrait-wrap{border-radius:5px;border:1px solid var(--bd-subtle);transition:.18s ease;}
 .race-card:hover .race-portrait-wrap{border-color:var(--bd-soft);}
 .race-desc{color:#8A795A;}
+/* ── Race family accordion ── */
+.race-fam-header{grid-column:1/-1;display:flex;align-items:center;gap:.5rem;padding:.4rem .6rem;background:rgba(0,0,0,.3);border:1px solid var(--bd-subtle);border-left:3px solid var(--fam-color,var(--gold-d));border-radius:6px;cursor:pointer;transition:border-color .15s;}
+.race-fam-header:hover{border-color:var(--bd-soft);background:rgba(255,255,255,.03);}
+.race-fam-header.has-selected{border-color:var(--gold);}
+.race-fam-header.expanded{background:rgba(201,168,76,.07);}
+.race-fam-icon{font-size:18px;flex-shrink:0;line-height:1;}
+.race-fam-info{flex:1;min-width:0;}
+.race-fam-name{font-family:'Cinzel',serif;font-size:11px;color:var(--gold);letter-spacing:.1em;}
+.race-fam-count{font-size:9px;color:#6A5A3A;font-family:'Share Tech Mono',monospace;margin-top:1px;}
+.race-fam-arrow{color:#6A5A3A;font-size:10px;flex-shrink:0;}
+.race-subgrid{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;padding:.3rem 0 .2rem .6rem;border-left:2px solid rgba(201,168,76,.18);margin-bottom:.1rem;}
 
 /* ── Roster carousel ── */
 .rc:hover{box-shadow:0 4px 8px rgba(0,0,0,.45),0 14px 36px rgba(0,0,0,.7),0 30px 64px rgba(0,0,0,.55),0 0 30px rgba(201,168,76,.14),inset 0 1px 0 rgba(201,168,76,.22),inset 0 0 0 1px rgba(201,168,76,.12);}
@@ -1402,13 +1413,59 @@ function rcClsImgFallback(el){
 }
 // ── Visuels par race / classe ─────────────────────────────────────────────────
 const RACE_STYLE={
-  human:{icon:'👤',color:'#8B7A50'},'elf-high':{icon:'✦',color:'#2D6A4A'},
-  'elf-wood':{icon:'🌲',color:'#3D7A2A'},'elf-drow':{icon:'🌑',color:'#4A1A6A'},
+  // Famille (headers d'accordéon + fallback pour races sans entrée propre)
+  human:{icon:'👤',color:'#8B7A50'},elf:{icon:'✦',color:'#2D6A4A'},
+  dwarf:{icon:'⛏',color:'#8B5A14'},halfling:{icon:'🌾',color:'#4A8B20'},
+  gnome:{icon:'⚙',color:'#1A5A8B'},'half-elf':{icon:'🌟',color:'#7A4A8B'},
+  'half-orc':{icon:'💪',color:'#5A7A20'},tiefling:{icon:'🔥',color:'#8B1A1A'},
+  aasimar:{icon:'☀',color:'#8B7A10'},genasi:{icon:'🌀',color:'#3A8B6A'},
+  gith:{icon:'⚡',color:'#6A4A8B'},dragonborn:{icon:'🐉',color:'#8B4A14'},
+  orc:{icon:'💀',color:'#4A6A20'},goblin:{icon:'🗡',color:'#4A7A20'},
+  shifter:{icon:'🐾',color:'#7A5A20'},
+  // Surcharges individuelles
+  'elf-high':{icon:'✦',color:'#2D6A4A'},'elf-wood':{icon:'🌲',color:'#3D7A2A'},
+  'elf-drow':{icon:'🌑',color:'#4A1A6A'},'elf-sea':{icon:'🌊',color:'#1A5A8B'},
+  'elf-pallid':{icon:'🌙',color:'#5A4A7A'},'elf-shadar-kai':{icon:'💀',color:'#3A2A4A'},
+  'elf-eladrin':{icon:'🍂',color:'#7A4A2A'},
   'dwarf-hill':{icon:'⛏',color:'#8B5A14'},'dwarf-mountain':{icon:'🪨',color:'#6A5A4A'},
-  halfling:{icon:'🌾',color:'#4A8B20'},gnome:{icon:'⚙',color:'#1A5A8B'},
-  'half-elf':{icon:'🌟',color:'#7A4A8B'},'half-orc':{icon:'💪',color:'#5A7A20'},
-  tiefling:{icon:'🔥',color:'#8B1A1A'},dragonborn:{icon:'🐉',color:'#8B4A14'},
+  'dwarf-duergar':{icon:'🔗',color:'#4A4A4A'},
+  'gnome-deep':{icon:'💎',color:'#2A4A6A'},
+  'half-orc':{icon:'💪',color:'#5A7A20'},
+  'tiefling-zariel':{icon:'⚔',color:'#8B2A14'},'tiefling-mephistopheles':{icon:'🔥',color:'#6A1A1A'},
+  'tiefling-baalzebul':{icon:'🪰',color:'#3A4A1A'},'tiefling-dispater':{icon:'🕵',color:'#4A3A6A'},
+  'tiefling-fierna':{icon:'💋',color:'#8B2A4A'},'tiefling-glasya':{icon:'👁',color:'#4A2A6A'},
+  'tiefling-levistus':{icon:'❄',color:'#2A4A6A'},'tiefling-mammon':{icon:'💰',color:'#7A6A1A'},
+  'aasimar-protector':{icon:'🕊',color:'#8B7A10'},'aasimar-scourge':{icon:'☀',color:'#8B6A10'},
+  'aasimar-fallen':{icon:'💔',color:'#5A2A4A'},
+  'genasi-fire':{icon:'🔥',color:'#8B4A14'},'genasi-water':{icon:'🌊',color:'#1A5A8B'},
+  'genasi-earth':{icon:'🪨',color:'#5A4A2A'},'genasi-air':{icon:'💨',color:'#2A6A7A'},
+  'gith-githyanki':{icon:'⚔',color:'#6A2A4A'},'gith-githzerai':{icon:'🧘',color:'#2A4A6A'},
+  'dragonborn-draconblood':{icon:'🐉',color:'#6A3A14'},'dragonborn-ravenite':{icon:'🐉',color:'#4A3A14'},
+  'shifter-beasthide':{icon:'🐻',color:'#6A5A20'},'shifter-longtooth':{icon:'🐺',color:'#5A4A20'},
+  'shifter-swiftstride':{icon:'🐆',color:'#7A5A14'},'shifter-wildhunt':{icon:'🦊',color:'#8B5A20'},
   aarakocra:{icon:'🦅',color:'#2A6A8B'},
+  goliath:{icon:'🏔',color:'#5A6A7A'},tabaxi:{icon:'🐱',color:'#7A5A2A'},
+  kenku:{icon:'🐦',color:'#2A2A4A'},firbolg:{icon:'🌿',color:'#2D6A4A'},
+  lizardfolk:{icon:'🦎',color:'#3A6A2A'},triton:{icon:'🔱',color:'#1A4A8B'},
+  'yuan-ti':{icon:'🐍',color:'#3A6A1A'},bugbear:{icon:'🐻',color:'#4A3A2A'},
+  goblin:{icon:'🗡',color:'#4A7A20'},hobgoblin:{icon:'⚔',color:'#6A3A14'},
+  kobold:{icon:'🦎',color:'#8B4A14'},centaur:{icon:'🐎',color:'#6A4A2A'},
+  loxodon:{icon:'🐘',color:'#5A5A6A'},minotaur:{icon:'🐂',color:'#6A3A14'},
+  'simic-hybrid':{icon:'🧬',color:'#2A6A5A'},vedalken:{icon:'🔬',color:'#2A4A6A'},
+  verdan:{icon:'🌱',color:'#3A6A3A'},changeling:{icon:'🎭',color:'#5A4A8B'},
+  kalashtar:{icon:'✨',color:'#6A4A8B'},warforged:{icon:'⚙',color:'#4A5A6A'},
+  leonin:{icon:'🦁',color:'#8B6A14'},satyr:{icon:'🎵',color:'#5A7A2A'},
+  locathah:{icon:'🐟',color:'#2A6A7A'},grung:{icon:'🐸',color:'#3A8B3A'},
+  tortle:{icon:'🐢',color:'#4A7A3A'},dhampir:{icon:'🧛',color:'#4A1A4A'},
+  hexblood:{icon:'🧿',color:'#3A4A2A'},reborn:{icon:'💀',color:'#4A4A5A'},
+  fairy:{icon:'🧚',color:'#6A2A6A'},harengon:{icon:'🐰',color:'#7A5A6A'},
+  owlin:{icon:'🦉',color:'#4A4A3A'},
+};
+const RACE_FAMILY_LABELS={
+  human:'Humains',elf:'Elfes',dwarf:'Nains',halfling:'Halfelins',gnome:'Gnomes',
+  'half-elf':'Demi-Elfes','half-orc':'Demi-Orques',tiefling:'Tieffelins',
+  aasimar:'Aasimars',genasi:'Génasis',gith:'Giths',dragonborn:'Drakéides',
+  orc:'Orques',goblin:'Gobelins',shifter:'Changeformes',
 };
 const CLASS_STYLE={
   barbarian:{icon:'🪓',color:'#8B2A14'},bard:{icon:'🎶',color:'#7A4A8B'},
@@ -1422,46 +1479,137 @@ const CLASS_STYLE={
 // DATA — RACES
 // ═══════════════════════════════════════════════════
 const RACES=[
-  {id:'human',n:'Humain',tag:'POLYVALENT',bonus:{str:1,dex:1,con:1,int:1,wis:1,cha:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Polyvalent : +1 à toutes les caractéristiques','Compétence ou Don supplémentaire'],desc:'Adaptables et ambitieux, ils dominent la plupart des contrées.'},
-  {id:'elf-high',n:'Elfe de haut rang',tag:'ELF · FÉE',bonus:{dex:2,int:1},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Transe (méditation 4h)','Armes elfiques','Sort de magicien mineur bonus'],desc:'Gracieux et anciens, porteurs d\'une magie innée.'},
-  {id:'elf-wood',n:'Elfe des bois',tag:'ELF · SYLVAIN',bonus:{dex:2,wis:1},speed:35,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Masque de la nature'],desc:'Plus robustes, vivant en harmonie avec la nature sauvage.'},
-  {id:'elf-drow',n:'Drow',tag:'ELF · OMBRES',bonus:{dex:2,cha:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision supérieure 36m','Sorts innés (Lumières dansantes, Lueur, Ténèbres)','Sensibilité au soleil'],desc:'Issus des profondeurs, portant la marque de leur héritage.'},
-  {id:'dwarf-hill',n:'Nain des collines',tag:'NAIN · COLLINES',bonus:{con:2,wis:1},speed:25,langs:['Commun','Nain'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux poisons','Armes naines','PV bonus par niveau'],desc:'Robustes et déterminés, gardiens des traditions ancestrales.'},
-  {id:'dwarf-mountain',n:'Nain des montagnes',tag:'NAIN · MONTAGNES',bonus:{str:2,con:2},speed:25,langs:['Commun','Nain'],armor:'armures légères et intermédiaires',traits:['Vision dans le noir 18m','Résistance aux poisons','Armures légères/intermédiaires','Armes naines'],desc:'Guerriers nés, taillés dans la roche des profondeurs.'},
-  {id:'halfling-lf',n:'Halfelin pied-léger',tag:'HALFELIN',bonus:{dex:2,cha:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Discrétion naturelle'],desc:'Petits mais intrépides, porteurs d\'une chance légendaire.'},
-  {id:'halfling-stout',n:'Halfelin robuste',tag:'HALFELIN',bonus:{dex:2,con:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Résistance aux poisons'],desc:'Plus rustiques, descendants de lignées robustes.'},
-  {id:'dragonborn',n:'Drakéide',tag:'DRACONIQUE',bonus:{str:2,cha:1},speed:30,langs:['Commun','Draconique'],armor:'—',traits:['Souffle draconique','Résistance draconique'],desc:'Descendants de dragons, portant leur héritage dans leur sang.'},
-  {id:'gnome-forest',n:'Gnome des forêts',tag:'GNOME · SYLVAIN',bonus:{int:2,dex:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Communication animale'],desc:'Curieux et joyeux, communiant avec la petite faune.'},
-  {id:'gnome-rock',n:'Gnome des roches',tag:'GNOME · INGÉNIEUR',bonus:{int:2,con:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Mémoire artificielle'],desc:'Inventeurs passionnés, toujours en train de bricoler.'},
-  {id:'half-elf',n:'Demi-Elfe',tag:'HYBRIDE · FÉE',bonus:{cha:2,_ch:2},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Polyvalence (2 compétences)'],desc:'Héritiers de deux mondes, d\'un charme naturel.'},
+  // ── HUMAINS ──────────────────────────────────────
+  {id:'human',family:'human',n:'Humain (standard)',tag:'POLYVALENT',bonus:{str:1,dex:1,con:1,int:1,wis:1,cha:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Polyvalent : +1 à toutes les caractéristiques'],desc:'Adaptables et ambitieux, ils dominent la plupart des contrées.'},
+  {id:'human-variant',family:'human',n:'Humain (variante)',tag:'POLYVALENT · DON',bonus:{_ch:2},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['+1 dans 2 caractéristiques','1 compétence supplémentaire','1 don au niveau 1'],desc:'Variante PHB — flexibilité maximale avec un don dès le niveau 1.'},
+  // ── ELFES ────────────────────────────────────────
+  {id:'elf-high',family:'elf',n:'Elfe de haut rang',tag:'ELF · FÉE',bonus:{dex:2,int:1},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Transe (4h)','Armes elfiques','Sort de magicien mineur'],desc:'Gracieux et anciens, porteurs d\'une magie innée.'},
+  {id:'elf-wood',family:'elf',n:'Elfe des bois',tag:'ELF · SYLVAIN',bonus:{dex:2,wis:1},speed:35,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Masque de la nature'],desc:'Plus robustes, vivant en harmonie avec la nature sauvage.'},
+  {id:'elf-drow',family:'elf',n:'Drow',tag:'ELF · OMBRES',bonus:{dex:2,cha:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision supérieure 36m','Sorts innés (Lumières dansantes, Lueur, Ténèbres)','Sensibilité au soleil'],desc:'Issus des profondeurs, portant la marque de leur héritage sombre.'},
+  {id:'elf-sea',family:'elf',n:'Elfe de la mer',tag:'ELF · AQUATIQUE',bonus:{dex:2,con:1},speed:30,langs:['Commun','Elfique','Aquan'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Nage 9m','Respiration amphibie'],desc:'Gardiens des profondeurs océaniques, alliés des tritons.'},
+  {id:'elf-pallid',family:'elf',n:'Elfe pâle',tag:'ELF · EXANDRIA',bonus:{dex:2,wis:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Invisibilité 1×/repos long','Trouver l\'objet 1×/repos long'],desc:'Issus des régions lunaires d\'Exandria, mystérieux et détachés du monde.'},
+  {id:'elf-shadar-kai',family:'elf',n:'Shadar-Kaï',tag:'ELF · PLAN DES OMBRES',bonus:{dex:2,con:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Marche de ténèbres (Misty Step + résistance, 1×/repos court)','Résistance nécrotique'],desc:'Elfes liés au Plan des Ombres, portant l\'empreinte de la mort dans leur chair grisée.'},
+  {id:'elf-eladrin',family:'elf',n:'Éladrin',tag:'ELF · ROYAUMES FÉERIQUES',bonus:{dex:2,int:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Pas féerique (Misty Step + charme/peur, 1×/repos court)','Tempérament des saisons'],desc:'Elfes des Royaumes Féeriques dont l\'humeur et l\'apparence changent avec les saisons.'},
+  // ── NAINS ────────────────────────────────────────
+  {id:'dwarf-hill',family:'dwarf',n:'Nain des collines',tag:'NAIN · COLLINES',bonus:{con:2,wis:1},speed:25,langs:['Commun','Nain'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux poisons','Armes naines','PV bonus par niveau'],desc:'Robustes et déterminés, gardiens des traditions ancestrales.'},
+  {id:'dwarf-mountain',family:'dwarf',n:'Nain des montagnes',tag:'NAIN · MONTAGNES',bonus:{str:2,con:2},speed:25,langs:['Commun','Nain'],armor:'légères et intermédiaires',traits:['Vision dans le noir 18m','Résistance aux poisons','Armures légères/intermédiaires','Armes naines'],desc:'Guerriers nés, taillés dans la roche des profondeurs.'},
+  {id:'dwarf-duergar',family:'dwarf',n:'Duergar',tag:'NAIN · GRIS',bonus:{str:1,con:2},speed:25,langs:['Commun','Nain','Sous-commun'],armor:'—',traits:['Vision supérieure 36m','Résistance poisons/charmes/illusions','Élargissement (taille Grande, 1×/repos long)','Invisibilité (1×/repos long)','Sensibilité à la lumière'],desc:'Nains des profondeurs esclavagistes, forgés par des siècles de servitude aux Illithids.'},
+  // ── HALFELINS ────────────────────────────────────
+  {id:'halfling-lf',family:'halfling',n:'Halfelin pied-léger',tag:'HALFELIN',bonus:{dex:2,cha:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Discrétion naturelle'],desc:'Petits mais intrépides, porteurs d\'une chance légendaire.'},
+  {id:'halfling-stout',family:'halfling',n:'Halfelin robuste',tag:'HALFELIN',bonus:{dex:2,con:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Résistance aux poisons'],desc:'Plus rustiques, descendants de lignées robustes et résistantes.'},
+  {id:'halfling-ghostwise',family:'halfling',n:'Halfelin spectral',tag:'HALFELIN · FANTÔME',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Télépathie silencieuse (9m)'],desc:'Reclus des forêts profondes, capables de communiquer par la pensée.'},
+  {id:'halfling-lotusden',family:'halfling',n:'Halfelin de Lotusden',tag:'HALFELIN · EXANDRIA',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Racines naturelles (1×/repos long)','Parler aux animaux (1×/repos long)'],desc:'Nés dans les forêts anciennes d\'Exandria, profondément liés à la nature de Lotusden.'},
+  // ── GNOMES ───────────────────────────────────────
+  {id:'gnome-forest',family:'gnome',n:'Gnome des forêts',tag:'GNOME · SYLVAIN',bonus:{int:2,dex:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Communication animale'],desc:'Curieux et joyeux, communiant avec la petite faune.'},
+  {id:'gnome-rock',family:'gnome',n:'Gnome des roches',tag:'GNOME · INGÉNIEUR',bonus:{int:2,con:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Mémoire artificielle'],desc:'Inventeurs passionnés, toujours en train de bricoler quelque chose.'},
+  {id:'gnome-deep',family:'gnome',n:'Gnome des profondeurs',tag:'GNOME · SVIRFNEBLIN',bonus:{int:2,dex:1},speed:25,langs:['Commun','Gnome','Sous-commun'],armor:'—',traits:['Vision supérieure 36m','Ruse gnome','Camouflage gnome (avantage Discrétion en cavernes)','Connaissance de la pierre'],desc:'Svirfneblins des Royaumes Souterrains, maîtres du camouflage dans les profondeurs.'},
+  // ── DEMI-ELFES ───────────────────────────────────
+  {id:'half-elf',family:'half-elf',n:'Demi-Elfe',tag:'HYBRIDE · FÉE',bonus:{cha:2,_ch:2},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Polyvalence (2 compétences)'],desc:'Héritiers de deux mondes, d\'un charme naturel inégalé.'},
+  {id:'half-elf-aquatic',family:'half-elf',n:'Demi-Elfe aquatique',tag:'HYBRIDE · AQUATIQUE',bonus:{cha:2,_ch:2},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Nage 9m','Polyvalence (2 compétences)'],desc:'Sang d\'elfe de mer (variante SCAG) — à l\'aise dans les eaux côtières.'},
+  {id:'half-elf-drow',family:'half-elf',n:'Demi-Elfe (sang Drow)',tag:'HYBRIDE · OMBRES',bonus:{cha:2,_ch:2},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision supérieure 36m','Résistance aux charmes','Sorts innés Drow (Lumières dansantes, Lueur)','Polyvalence (2 compétences)'],desc:'Ascendance drowique (variante SCAG) — porteur des sorts innés des profondeurs.'},
+  {id:'half-elf-high',family:'half-elf',n:'Demi-Elfe (sang haut-elfe)',tag:'HYBRIDE · ARCANE',bonus:{cha:2,_ch:2},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Sort mineur de magicien (INT)','Polyvalence (2 compétences)'],desc:'Ascendance haut-elfique (variante SCAG) — accès à un sort mineur arcanique.'},
+  {id:'half-elf-wood',family:'half-elf',n:'Demi-Elfe (sang elfe des bois)',tag:'HYBRIDE · SYLVAIN',bonus:{cha:2,_ch:2},speed:35,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Masque de la nature','Polyvalence (2 compétences)'],desc:'Ascendance sylvaine (variante SCAG) — vitesse 35m et communion avec la nature.'},
+  // ── DEMI-ORQUES ──────────────────────────────────
   {id:'half-orc',n:'Demi-Orque',tag:'HYBRIDE · OGRELIN',bonus:{str:2,con:1},speed:30,langs:['Commun','Orque'],armor:'—',traits:['Vision dans le noir 18m','Intimidation maîtrisée','Résistance implacable','Attaques sauvages'],desc:'Fiers et puissants, dépassant les préjugés par leurs actes.'},
-  // ── TIEFFELINS (Mordenkainen's Tome of Foes) ──
-  {id:'tiefling',n:'Tieffelin — Asmodée',tag:'INFERNAL',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie (sort mineur)','Niv.3 : Mains brûlantes (1×/repos long)','Niv.5 : Ténèbres (1×/repos long)'],desc:'La lignée la plus répandue — descendants du pacte originel d\'Asmodée. Maîtres en manipulation.'},
-  {id:'tiefling-zariel',n:'Tieffelin — Zariel',tag:'INFERNAL · ZARIEL',bonus:{str:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie (sort mineur)','Niv.3 : Représailles divines (1×/repos long)','Niv.5 : Marque de Zariel / Branding Smite (1×/repos long)'],desc:'Descendants de Zariel, archidiablesse de l\'Avernus. Guerriers-nés aux ailes brûlées.'},
-  {id:'tiefling-mephistopheles',n:'Tieffelin — Méphistophélès',tag:'INFERNAL · MÉPHISTOPHÉLÈS',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie (sort mineur)','Niv.3 : Flamme ardente (1×/repos long)','Niv.5 : Flamme du diable (1×/repos long)'],desc:'Lignée de Méphistophélès. Maîtres des flammes infernales, ils brûlent d\'un feu qui ne s\'éteint pas.'},
-  {id:'tiefling-baalzebul',n:'Tieffelin — Baalzébul',tag:'INFERNAL · BAALZÉBUL',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie (sort mineur)','Niv.3 : Rayon empoisonné (1×/repos long)','Niv.5 : Couronne du fou (1×/repos long)'],desc:'Seigneur des mouches et du mensonge. Ses descendants répandent la corruption et la discorde.'},
-  {id:'tiefling-dispater',n:'Tieffelin — Dispater',tag:'INFERNAL · DISPATER',bonus:{dex:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie (sort mineur)','Niv.3 : Déguisement (1×/repos long)','Niv.5 : Détection des pensées (1×/repos long)'],desc:'Maîtres de l\'espionnage et de l\'infiltration — héritiers du seigneur de la deuxième couche infernale.'},
-  {id:'tiefling-fierna',n:'Tieffelin — Fierna',tag:'INFERNAL · FIERNA',bonus:{wis:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Ami des amis (sort mineur)','Niv.3 : Charme-personne (1×/repos long)','Niv.5 : Charme-monstre (1×/repos long)'],desc:'Séducteurs-nés, lignée de Fierna — diablesse de la quatrième couche. Maîtres de la manipulation émotionnelle.'},
-  {id:'tiefling-glasya',n:'Tieffelin — Glasya',tag:'INFERNAL · GLASYA',bonus:{dex:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Illusion mineure (sort mineur)','Niv.3 : Pas du vent (1×/repos long)','Niv.5 : Invisibilité (1×/repos long)'],desc:'Fille d\'Asmodée. Ses descendants excellent dans la tromperie et l\'évasion — voleurs et illusionnistes naturels.'},
-  {id:'tiefling-levistus',n:'Tieffelin — Lévistus',tag:'INFERNAL · LÉVISTUS',bonus:{con:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Rayon de givre (sort mineur)','Niv.3 : Armure du mage (1×/repos long)','Niv.5 : Bouclier (1×/repos long)'],desc:'Emprisonné dans la glace de Stygie, Lévistus donne à ses descendants l\'endurance et la maîtrise du froid.'},
-  {id:'tiefling-mammon',n:'Tieffelin — Mammon',tag:'INFERNAL · MAMMON',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Détection de la magie (sort mineur)','Niv.3 : Identification (1×/repos long)','Niv.5 : Chercher l\'objet (1×/repos long)'],desc:'Seigneur de l\'avarice. Ses descendants ont le don de trouver richesses et objets précieux.'},
-  // ── AASIMAR (Volo's Guide) ──
-  {id:'aasimar-protector',n:'Aasimar — Protecteur',tag:'CÉLESTE',bonus:{wis:1,cha:2},speed:30,langs:['Commun','Céleste'],armor:'—',traits:['Vision dans le noir 18m','Résistance nécrotique et radiant','Guérison par les mains (Niv×/repos long) : restaurer PV','Niv.3 : Formes radieuses : ailes lumineuses (vol 9m, 1 minute, 1×/repos long)'],desc:'Porteurs de la lumière divine, guidés par un ange gardien. Nés pour protéger les mortels.'},
-  {id:'aasimar-scourge',n:'Aasimar — Fléau',tag:'CÉLESTE · FLÉAU',bonus:{con:1,cha:2},speed:30,langs:['Commun','Céleste'],armor:'—',traits:['Vision dans le noir 18m','Résistance nécrotique et radiant','Guérison par les mains (Niv×/repos long)','Niv.3 : Forme de fléau : auréole de feu, +niv/2 dégâts radiants (dégâts à soi-même aussi)'],desc:'Aasimar brûlant d\'énergie divine — leur corps peine à contenir la puissance céleste.'},
-  {id:'aasimar-fallen',n:'Aasimar — Déchu',tag:'CÉLESTE · DÉCHU',bonus:{str:1,cha:2},speed:30,langs:['Commun','Céleste'],armor:'—',traits:['Vision dans le noir 18m','Résistance nécrotique et radiant','Guérison par les mains (Niv×/repos long)','Niv.3 : Forme nécromancie : aura de mort, +niv/2 dégâts nécrotiques (cibles autour de soi)'],desc:'Aasimar dont l\'âme divine a été corrompue — soit par la malédiction, soit par le choix.'},
-  // ── GENASI (Mordenkainen's) ──
-  {id:'genasi-fire',n:'Genasi du Feu',tag:'PLANAIRE · FEU',bonus:{int:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Résistance feu','Flamme : sort mineur Produire une flamme (CON)','Niv.3 : Mains brûlantes (1×/repos long, CON)','Pas besoin de respirer'],desc:'Descendants des djinns de feu et des êtres de la forge. Ardents et impulsifs.'},
-  {id:'genasi-water',n:'Genasi de l\'Eau',tag:'PLANAIRE · EAU',bonus:{wis:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Vitesse de nage 9m','Respiration amphibie','Appel aux vagues (sort mineur Forme de l\'eau)','Niv.3 : Création ou destruction d\'eau (1×/repos long)'],desc:'Fluides et adaptables, ils portent en eux l\'essence des océans et des marées.'},
-  {id:'genasi-earth',n:'Genasi de la Terre',tag:'PLANAIRE · TERRE',bonus:{str:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Vitesse de déplacement 9m (dans la pierre/terre non travaillée)','Pas de saut','Niv.3 : Passe-muraille (1×/repos long)','Avantage sur jets FOR'],desc:'Robustes et inébranlables — ils marchent à travers la pierre comme si elle n\'existait pas.'},
-  {id:'genasi-air',n:'Genasi de l\'Air',tag:'PLANAIRE · AIR',bonus:{dex:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Respiration permanente (même sous vide)','Niv.3 : Lévitation (1×/repos long, CON)','Vitesse marche 9m (lévitation gratuite mais non vol)'],desc:'Légers comme le vent, ils se déplacent sans bruit et semblent défier la gravité.'},
-  // ── GOLIATH (Volo's Guide / Mordenkainen's) ──
-  {id:'goliath',n:'Goliath',tag:'GÉANT',bonus:{str:2,con:1},speed:30,langs:['Commun','Géant'],armor:'—',traits:['Constitution athlétique : comptez 1 taille au-dessus pour les capacités de charge','Endurance de pierre : Réaction — réduire dégâts de 1d12+CON (1×/repos court)','Maîtrise Athlétisme','Adapté à l\'altitude'],desc:'Demi-géants des montagnes — nobles guerriers au code d\'honneur strict.'},
-  // ── TABAXI (Volo's Guide) ──
-  {id:'tabaxi',n:'Tabaxi',tag:'FÉE · FÉLIN',bonus:{dex:2,cha:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Griffes : attaque sans arme 1d4 + DEX / avantage Athlétisme et Acrobaties sur grimper','Vitesse féline (1×/repos court) : vitesse ×2 pendant 1 round'],desc:'Humanoïdes félins curieux et nomades, natifs des jungles tropicales.'},
-  // ── KENKU (Volo's Guide) ──
-  {id:'kenku',n:'Kenku',tag:'OISEAU · MIMIC',bonus:{dex:2,wis:1},speed:30,langs:['Commun (compris mais ne parle qu\'en imitant)'],armor:'—',traits:['Imitation parfaite : reproduire sons, voix et textes entendus','Souvenir du Kenku : expertise double sur 2 compétences parmi DEX et SAG','Maîtrise : 2 outils/instruments (expertise double sur imitation artistique)'],desc:'Humanoïdes à plumes maudits de la perte de la parole — ils ne communiquent qu\'en imitant.'},
-  // ── AARAKOCRA (Elemental Evil) ──
-  {id:'aarakocra',n:'Aarakocra',tag:'OISEAU · VOLANT',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Aarakocra','Auran'],armor:'Incompatible avec armures standard (ailes)',traits:['Vol 15m (inaccessible en armure lourde ou intermédiaire)','Serres : attaque sans arme 1d4 dégâts tranchants + mod DEX','Enfant du ciel : avantage sur jets de SAG (Perception) pour repérer au loin'],desc:'Humanoïdes aviaires des montagnes isolées — les Aarakocra sont des chasseurs solitaires dotés d\'un vol naturel, gardiens jaloux de leurs territoires et messagers des divinités de l\'air.'},
+  // ── TIEFFELINS ───────────────────────────────────
+  {id:'tiefling',family:'tiefling',n:'Tieffelin — Asmodée',tag:'INFERNAL',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Mains brûlantes (1×/repos long)','Niv.5 : Ténèbres (1×/repos long)'],desc:'La lignée la plus répandue — descendants du pacte d\'Asmodée. Maîtres en manipulation.'},
+  {id:'tiefling-zariel',family:'tiefling',n:'Tieffelin — Zariel',tag:'INFERNAL · ZARIEL',bonus:{str:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Représailles divines (1×/repos long)','Niv.5 : Marque de Zariel (1×/repos long)'],desc:'Descendants de Zariel, archidiablesse de l\'Avernus. Guerriers-nés aux ailes brûlées.'},
+  {id:'tiefling-mephistopheles',family:'tiefling',n:'Tieffelin — Méphistophélès',tag:'INFERNAL · MÉPHISTOPHÉLÈS',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Flamme ardente (1×/repos long)','Niv.5 : Flamme du diable (1×/repos long)'],desc:'Lignée de Méphistophélès. Maîtres des flammes infernales, ils brûlent sans se consumer.'},
+  {id:'tiefling-baalzebul',family:'tiefling',n:'Tieffelin — Baalzébul',tag:'INFERNAL · BAALZÉBUL',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Rayon empoisonné (1×/repos long)','Niv.5 : Couronne du fou (1×/repos long)'],desc:'Seigneur des mouches et du mensonge. Ses descendants répandent la corruption et la discorde.'},
+  {id:'tiefling-dispater',family:'tiefling',n:'Tieffelin — Dispater',tag:'INFERNAL · DISPATER',bonus:{dex:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Déguisement (1×/repos long)','Niv.5 : Détection des pensées (1×/repos long)'],desc:'Maîtres de l\'espionnage et de l\'infiltration — héritiers du seigneur de la 2e couche infernale.'},
+  {id:'tiefling-fierna',family:'tiefling',n:'Tieffelin — Fierna',tag:'INFERNAL · FIERNA',bonus:{wis:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Ami des amis','Niv.3 : Charme-personne (1×/repos long)','Niv.5 : Charme-monstre (1×/repos long)'],desc:'Séducteurs-nés, lignée de Fierna. Maîtres de la manipulation émotionnelle.'},
+  {id:'tiefling-glasya',family:'tiefling',n:'Tieffelin — Glasya',tag:'INFERNAL · GLASYA',bonus:{dex:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Illusion mineure','Niv.3 : Pas du vent (1×/repos long)','Niv.5 : Invisibilité (1×/repos long)'],desc:'Fille d\'Asmodée. Ses descendants excellent dans la tromperie et l\'évasion.'},
+  {id:'tiefling-levistus',family:'tiefling',n:'Tieffelin — Lévistus',tag:'INFERNAL · LÉVISTUS',bonus:{con:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Rayon de givre','Niv.3 : Armure du mage (1×/repos long)','Niv.5 : Bouclier (1×/repos long)'],desc:'Lévistus emprisonné dans la glace donne à ses descendants la maîtrise du froid.'},
+  {id:'tiefling-mammon',family:'tiefling',n:'Tieffelin — Mammon',tag:'INFERNAL · MAMMON',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Détection de la magie','Niv.3 : Identification (1×/repos long)','Niv.5 : Chercher l\'objet (1×/repos long)'],desc:'Seigneur de l\'avarice. Ses descendants ont le don de trouver richesses et objets précieux.'},
+  // ── AASIMARS ─────────────────────────────────────
+  {id:'aasimar-protector',family:'aasimar',n:'Aasimar — Protecteur',tag:'CÉLESTE',bonus:{wis:1,cha:2},speed:30,langs:['Commun','Céleste'],armor:'—',traits:['Vision dans le noir 18m','Résistance nécrotique et radiant','Guérison par les mains (niv×/repos long)','Niv.3 : Ailes lumineuses (vol 9m, 1×/repos long)'],desc:'Porteurs de la lumière divine, guidés par un ange gardien. Nés pour protéger les mortels.'},
+  {id:'aasimar-scourge',family:'aasimar',n:'Aasimar — Fléau',tag:'CÉLESTE · FLÉAU',bonus:{con:1,cha:2},speed:30,langs:['Commun','Céleste'],armor:'—',traits:['Vision dans le noir 18m','Résistance nécrotique et radiant','Guérison par les mains','Niv.3 : Auréole de feu (+niv/2 dégâts radiants, 1×/repos long)'],desc:'Aasimar brûlant d\'énergie divine — leur corps peine à contenir la puissance céleste.'},
+  {id:'aasimar-fallen',family:'aasimar',n:'Aasimar — Déchu',tag:'CÉLESTE · DÉCHU',bonus:{str:1,cha:2},speed:30,langs:['Commun','Céleste'],armor:'—',traits:['Vision dans le noir 18m','Résistance nécrotique et radiant','Guérison par les mains','Niv.3 : Aura de mort nécrotique (1×/repos long)'],desc:'Aasimar dont l\'âme divine a été corrompue — par la malédiction ou par le choix.'},
+  // ── GÉNASIS ──────────────────────────────────────
+  {id:'genasi-fire',family:'genasi',n:'Génasi du Feu',tag:'PLANAIRE · FEU',bonus:{int:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Résistance feu','Produire une flamme (sort mineur, CON)','Niv.3 : Mains brûlantes (1×/repos long)','Pas besoin de respirer'],desc:'Descendants des djinns de feu. Ardents, impulsifs et forgeant le destin.'},
+  {id:'genasi-water',family:'genasi',n:'Génasi de l\'Eau',tag:'PLANAIRE · EAU',bonus:{wis:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Nage 9m','Respiration amphibie','Forme de l\'eau (sort mineur)','Niv.3 : Création d\'eau (1×/repos long)'],desc:'Fluides et adaptables, ils portent en eux l\'essence des océans et des marées.'},
+  {id:'genasi-earth',family:'genasi',n:'Génasi de la Terre',tag:'PLANAIRE · TERRE',bonus:{str:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Déplacement dans la pierre (9m)','Niv.3 : Passe-muraille (1×/repos long)','Avantage sur jets FOR'],desc:'Robustes et inébranlables — ils marchent à travers la pierre comme si elle n\'existait pas.'},
+  {id:'genasi-air',family:'genasi',n:'Génasi de l\'Air',tag:'PLANAIRE · AIR',bonus:{dex:1,con:2},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Respiration permanente (même sous vide)','Niv.3 : Lévitation (1×/repos long, CON)'],desc:'Légers comme le vent, ils se déplacent sans bruit et semblent défier la gravité.'},
+  // ── GITHS ────────────────────────────────────────
+  {id:'gith-githyanki',family:'gith',n:'Githyanki',tag:'GITH · GUERRIER',bonus:{str:1,int:2},speed:30,langs:['Commun','Gith'],armor:'légères et intermédiaires',traits:['Armures légères/intermédiaires + épées','Psionique : Main du mage (niv.1), Saut (niv.3), Misty Step (niv.5)','Résistance psionique (charmes, peur)'],desc:'Guerriers astraux féroces, ennemis jurés des Illithids qu\'ils ont jadis vaincus.'},
+  {id:'gith-githzerai',family:'gith',n:'Githzeraï',tag:'GITH · MOINE',bonus:{wis:1,int:2},speed:30,langs:['Commun','Gith'],armor:'—',traits:['Défense psionique : CA 10+DEX+SAG sans armure','Bouclier psionique (réaction, 1×/repos long)','Psionique : Main du mage (niv.1), Misty Step (niv.3), Voir l\'invisible (niv.5)'],desc:'Ascètes des plans éthérés, maîtres du Ki psionique, adversaires des Githyanki.'},
+  // ── DRAKÉIDES ────────────────────────────────────
+  {id:'dragonborn',family:'dragonborn',n:'Drakéide (standard)',tag:'DRACONIQUE',bonus:{str:2,cha:1},speed:30,langs:['Commun','Draconique'],armor:'—',traits:['Souffle draconique (1×/repos court)','Résistance draconique (selon lignée)'],desc:'Descendants de dragons, portant leur héritage écailleux dans leur sang.'},
+  {id:'dragonborn-draconblood',family:'dragonborn',n:'Drakéide Draconblood',tag:'DRACONIQUE · EXANDRIA',bonus:{int:2,cha:1},speed:30,langs:['Commun','Draconique'],armor:'—',traits:['Souffle du dragon (1×/repos court, INT)','Résistance draconique','Vision dans le noir 18m','Langue supplémentaire'],desc:'Variante EGW : nobles Draconbloods d\'Exandria, plus intellectuels que guerriers.'},
+  {id:'dragonborn-ravenite',family:'dragonborn',n:'Drakéide Ravenite',tag:'DRACONIQUE · EXANDRIA',bonus:{str:2,con:1},speed:30,langs:['Commun','Draconique'],armor:'—',traits:['Souffle du dragon (1×/repos court)','Résistance draconique','Vengeance : +1d4 dégâts si allié tué au round précédent'],desc:'Variante EGW : Ravenites robustes, anciens esclaves cherchant leur liberté.'},
+  // ── ORQUES ───────────────────────────────────────
+  {id:'orc',family:'orc',n:'Orque',tag:'SAUVAGE · BRUTAL',bonus:{str:2,con:1},speed:30,langs:['Commun','Orque'],armor:'—',traits:['Vision dans le noir 18m','Agressivité : Déplacement bonus vers ennemi','Puissance menaçante : maîtrise Intimidation'],desc:'Guerriers brutaux des tribus sauvages, redoutables en combat rapproché.'},
+  {id:'orc-eberron',family:'orc',n:'Orque d\'Eberron',tag:'SAUVAGE · GARDIEN',bonus:{str:2,con:1},speed:30,langs:['Commun','Orque'],armor:'—',traits:['Vision dans le noir 18m','Agressivité','Puissance menaçante','Magie ancestrale : Détection de la magie 1×/repos long'],desc:'Orques d\'Eberron — gardiens des frontières entre les royaumes, porteurs d\'une tradition magique ancienne.'},
+  // ── GOBELINS ─────────────────────────────────────
+  {id:'goblin',family:'goblin',n:'Gobelin',tag:'PETIT · RAPIDE',bonus:{dex:2,con:1},speed:30,langs:['Commun','Gobelin'],armor:'—',traits:['Petite créature','Vision dans le noir 18m','Nimble Escape : Désengagement ou Se cacher en bonus action','Fureur : +2d6 sur créature à 0 PV (bonus action)'],desc:'Petits mais agiles, les gobelins survivent grâce à leur ruse et leur vitesse redoutable.'},
+  {id:'goblin-ravnica',family:'goblin',n:'Gobelin de Ravnica',tag:'PETIT · INGÉNIEUX',bonus:{dex:2,con:1},speed:30,langs:['Commun','Gobelin'],armor:'—',traits:['Petite créature','Vision dans le noir 18m','Nimble Escape','Familiarité des engins : maîtrise Outils de forgeron ou Outils de bricoleur'],desc:'Gobelins de Ravnica — inventeurs imprévisibles des guildes, maîtres du démontage et du rafistolage.'},
+  // ── CHANGEFORMES ─────────────────────────────────
+  {id:'shifter-beasthide',family:'shifter',n:'Changeforme — Peaudesbête',tag:'LYCANTHROPE · DÉFENSE',bonus:{con:2,str:1},speed:30,langs:['Commun'],armor:'—',traits:['Vision dans le noir 18m','Changeforme (bonus action, 1 min, 1×/repos court) : PV temp + armure naturelle +1','Maîtrise Athlétisme'],desc:'Shifter d\'Eberron lié à l\'endurance animale — la transformation renforce la peau et les muscles.'},
+  {id:'shifter-longtooth',family:'shifter',n:'Changeforme — Longcroc',tag:'LYCANTHROPE · MORSURE',bonus:{str:2,dex:1},speed:30,langs:['Commun'],armor:'—',traits:['Vision dans le noir 18m','Changeforme : crocs (1d6+STR en bonus action chaque tour)','Maîtrise Intimidation'],desc:'Shifter lié aux prédateurs à crocs — la transformation révèle une mâchoire meurtrière.'},
+  {id:'shifter-swiftstride',family:'shifter',n:'Changeforme — Foulée-Rapide',tag:'LYCANTHROPE · VITESSE',bonus:{dex:2,cha:1},speed:35,langs:['Commun'],armor:'—',traits:['Vision dans le noir 18m','Changeforme : vitesse +3m + réaction si attaque manquée','Maîtrise Acrobaties'],desc:'Shifter lié à la fulgurance animale — la transformation décuple agilité et réflexes.'},
+  {id:'shifter-wildhunt',family:'shifter',n:'Changeforme — Chassesauvage',tag:'LYCANTHROPE · CHASSE',bonus:{wis:2,dex:1},speed:30,langs:['Commun'],armor:'—',traits:['Vision dans le noir 18m','Changeforme : avantage SAG + aucune surprise','Maîtrise Survie'],desc:'Shifter lié à l\'instinct de prédateur — la transformation aiguise les sens au-delà du naturel.'},
+  // ── GOLIATH ──────────────────────────────────────
+  {id:'goliath',n:'Goliath',tag:'GÉANT',bonus:{str:2,con:1},speed:30,langs:['Commun','Géant'],armor:'—',traits:['Constitution athlétique (charge comme taille Grande)','Endurance de pierre : 1d12+CON (réaction, 1×/repos court)','Maîtrise Athlétisme','Adapté à l\'altitude'],desc:'Demi-géants des montagnes — nobles guerriers au code d\'honneur strict.'},
+  // ── TABAXI ───────────────────────────────────────
+  {id:'tabaxi',n:'Tabaxi',tag:'FÉE · FÉLIN',bonus:{dex:2,cha:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Griffes (1d4+DEX, avantage escalade)','Vitesse féline (1×/repos court) : vitesse ×2 pendant 1 round'],desc:'Humanoïdes félins curieux et nomades, natifs des jungles tropicales.'},
+  // ── KENKU ─────────────────────────────────────────
+  {id:'kenku',n:'Kenku',tag:'OISEAU · MIMIC',bonus:{dex:2,wis:1},speed:30,langs:['Commun (imitation uniquement)'],armor:'—',traits:['Imitation parfaite','Souvenir du Kenku : expertise double sur 2 compétences','Maîtrise 2 outils/instruments'],desc:'Humanoïdes à plumes maudits de la perte de la parole — ils ne communiquent qu\'en imitant.'},
+  // ── AARAKOCRA ─────────────────────────────────────
+  {id:'aarakocra',n:'Aarakocra',tag:'OISEAU · VOLANT',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Aarakocra','Auran'],armor:'Incompatible avec armures standard',traits:['Vol 15m (inaccessible en armure lourde/intermédiaire)','Serres (1d4 tranchants + DEX)','Avantage Perception (vision)'],desc:'Humanoïdes aviaires des montagnes isolées — gardiens des cieux et messagers des divinités de l\'air.'},
+  // ── FIRBOLG ──────────────────────────────────────
+  {id:'firbolg',n:'Firbolg',tag:'GÉANT · SYLVAIN',bonus:{wis:2,str:1},speed:30,langs:['Commun','Géant','Elfique'],armor:'—',traits:['Magie des Firbolgs : invisible 1 round (bonus action, 2×/repos court)','Discours caché : parler aux bêtes/plantes (1×/repos court)','Puissance des Firbolgs : avantage FOR'],desc:'Géants sylvains solitaires, protecteurs des forêts, rarement vus des autres races.'},
+  // ── HOMME-LÉZARD ──────────────────────────────────
+  {id:'lizardfolk',n:'Homme-lézard',tag:'REPTILE · SAUVAGE',bonus:{con:2,wis:1},speed:30,langs:['Commun','Draconique'],armor:'—',traits:['Armure naturelle : CA 13+DEX','Morsure (1d6+FOR, attaque bonus)','Nage 9m','Retenir souffle 15 min','Carnivore de combat : PV temp depuis ennemi tué'],desc:'Humanoïdes reptiliens pragmatiques, voyant le monde comme un cycle prédateur/proie.'},
+  // ── TRITON ───────────────────────────────────────
+  {id:'triton',n:'Triton',tag:'AQUATIQUE · NOBLE',bonus:{str:1,con:1,cha:1},speed:30,langs:['Commun','Primordial'],armor:'—',traits:['Amphibie : nage 9m, respiration amphibie','Contrôle des courants (1×/repos long)','Parler aux bêtes aquatiques','Résistance froid + sorts innés'],desc:'Humanoïdes aquatiques nobles, gardiens des frontières entre royaumes marins et terrestres.'},
+  // ── YUAN-TI ───────────────────────────────────────
+  {id:'yuan-ti',n:'Yuan-Ti Pureblooded',tag:'SERPENT · IMMUN',bonus:{int:1,cha:2},speed:30,langs:['Commun','Abyssal','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Immunité poison et empoisonnement','Résistance magique (avantage contre sorts)','Sorts innés (Suggestion, Détection des poisons)'],desc:'Les plus humanoïdes des Yuan-Ti, parfaitement dissimulés parmi les races civilisées.'},
+  // ── BUGBEAR ───────────────────────────────────────
+  {id:'bugbear',n:'Bugbear',tag:'GOBELIN · BRUTAL',bonus:{str:2,dex:1},speed:30,langs:['Commun','Gobelin'],armor:'—',traits:['Allonge 3m (comme créature Grande)','Surprise : +2d6 dégâts si attaque surprise','Vision dans le noir 18m','Maîtrise Discrétion'],desc:'Gobelinoïdes brutaux et imprévisibles, maîtres de l\'embuscade nocturne.'},
+  // ── HOBGOBELIN ────────────────────────────────────
+  {id:'hobgoblin',n:'Hobgobelin',tag:'GOBELIN · MILITAIRE',bonus:{con:2,int:1},speed:30,langs:['Commun','Gobelin'],armor:'légères et intermédiaires',traits:['Vision dans le noir 18m','Armures légères/intermédiaires + bouclier','Bravoure martiale : +1d6 à 2 jets ratés (2×/repos court)'],desc:'Guerriers disciplinés organisés en armées — la plus militarisée des races gobelines.'},
+  // ── KOBOLD ────────────────────────────────────────
+  {id:'kobold',n:'Kobold',tag:'REPTILE · PACK',bonus:{dex:2,int:1},speed:30,langs:['Commun','Draconique'],armor:'—',traits:['Vision dans le noir 18m','Sensibilité à la lumière solaire','Tactique de meute : avantage si allié adjacent à la cible','Fuite couarde : Désengagement en bonus action'],desc:'Petits humanoïdes reptiliens vénérant les dragons, redoutables en groupe.'},
+  // ── CENTAURE ──────────────────────────────────────
+  {id:'centaur',n:'Centaure',tag:'HYBRIDE · STEPPE',bonus:{str:2,wis:1},speed:40,langs:['Commun','Sylvain'],armor:'—',traits:['Taille Grande','Sabots (1d6+STR, bonus action)','Charge : +1d6 dégâts si 9m de déplacement avant impact','Maîtrise Nature et Survie'],desc:'Mi-humains mi-chevaux, guerriers nomades des steppes, fiers et libres.'},
+  // ── LOXODON ───────────────────────────────────────
+  {id:'loxodon',n:'Loxodon',tag:'ÉLÉPHANTIN · SAV',bonus:{con:2,wis:1},speed:30,langs:['Commun','Loxodon'],armor:'—',traits:['Armure naturelle : CA 12+CON','Trompe (prise, force 2× taille)','Mémoire d\'éléphant (avantage connaissances)','Sérénité : avantage contre charme'],desc:'Humanoïdes pachydermes de Ravnica, calmes et sages, gardiens de la tradition orale.'},
+  // ── MINOTAURE ─────────────────────────────────────
+  {id:'minotaur',n:'Minotaure',tag:'TAUREAU · LABYRINTHIQUE',bonus:{str:2,con:1},speed:30,langs:['Commun','Minotaure'],armor:'—',traits:['Sens du labyrinthe (jamais perdu)','Cornes (1d6+STR, bonus action)','Charge : +2d6 et knockback si 3m de déplacement','Maîtrise Intimidation ou Athlétisme'],desc:'Humanoïdes bovins fiers, cherchant l\'honneur dans le combat singulier.'},
+  // ── HYBRIDE SIMIC ─────────────────────────────────
+  {id:'simic-hybrid',n:'Hybride Simic',tag:'HYBRIDE · ÉVOLUTIF',bonus:{con:2,_ch:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Amélioration animale au niv.1 (branchies, griffes, muqueuse, tentacule...)','Amélioration supplémentaire au niv.5'],desc:'Créés par la guilde Simic de Ravnica, hybrides humains/animaux en perpétuelle évolution.'},
+  // ── VEDALKEN ──────────────────────────────────────
+  {id:'vedalken',n:'Vedalken',tag:'LOGIQUE · ARCANE',bonus:{int:2,wis:1},speed:30,langs:['Commun','Vedalken','2 au choix'],armor:'—',traits:['Imperturbable : avantage jets SAG hors Perception','Concentration vedalken : avantage concentration de sort','Vedalken impeccable : +1d4 sur un jet de compétence ou d\'outil'],desc:'Humanoïdes bleu-gris de Ravnica, perfectionnistes rationnels en quête de connaissance absolue.'},
+  // ── VERDAN ────────────────────────────────────────
+  {id:'verdan',n:'Verdan',tag:'GOBELIN · EMPATHIQUE',bonus:{con:1,cha:2},speed:30,langs:['Commun','Gobelin'],armor:'—',traits:['Vision dans le noir 18m','Télépathie noire (émotions, 9m)','Avantage Perspicacité et Persuasion','Immunité peur, avantage charme'],desc:'Goblins mutés par magie noire, capables d\'empathie profonde — Acquisitions Incorporated.'},
+  // ── CHANGELING ────────────────────────────────────
+  {id:'changeling',n:'Changeling',tag:'MÉTAMORPHE',bonus:{cha:2,_ch:1},speed:30,langs:['Commun','2 au choix'],armor:'—',traits:['Métamorphose (bonus action) : apparence physique libre','Maîtrise Tromperie et Persuasion','Identités multiples'],desc:'Métamorphes d\'Eberron, capables de prendre n\'importe quelle apparence humanoïde.'},
+  // ── KALASHTAR ─────────────────────────────────────
+  {id:'kalashtar',n:'Kalashtar',tag:'PSIONIQUE · QUORI',bonus:{wis:1,cha:2},speed:30,langs:['Commun','Quori','1 au choix'],armor:'—',traits:['Télépathie duale (9m)','Résistance psychique + avantage SAG','Immunité prise de contrôle mentale','Double personnalité'],desc:'Humains liés à des esprits quori de Dal Quor, portant en eux la dualité de deux âmes.'},
+  // ── WARFORGED ─────────────────────────────────────
+  {id:'warforged',n:'Warforged',tag:'CONSTRUIT · IMMORTEL',bonus:{con:2,_ch:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Intégration d\'armure : CA = 16+DEX (ou armure équipée +1)','Construit : immunité maladie/poison/sommeil/faim','Repos vigile : méditation 6h = repos long'],desc:'Automates de guerre d\'Eberron, cherchant leur identité au-delà du conflit qui les a créés.'},
+  // ── LÉONIN ────────────────────────────────────────
+  {id:'leonin',n:'Léonin',tag:'FÉLIN · THEROS',bonus:{con:1,str:2},speed:35,langs:['Commun','Léonin'],armor:'—',traits:['Vision dans le noir 18m','Griffes (1d4+STR/DEX)','Rugissement de défi (peur 9m, 1×/repos court)','Maîtrise Athlétisme et Intimidation'],desc:'Humanoïdes félins fiers de Theros, gardiens de la paix dans les terres qu\'ils patrouillent.'},
+  // ── SATYRE ────────────────────────────────────────
+  {id:'satyr',n:'Satyre',tag:'FÉE · DIONYSIEN',bonus:{cha:2,dex:1},speed:35,langs:['Commun','Sylvain'],armor:'—',traits:['Coup de corne (2d4+STR, après 3m de déplacement)','Magie féérique (résistance aux sorts)','Maîtrise Persuasion et Représentation'],desc:'Créatures féeriques de Theros, moitié humains moitié boucs, épris de musique et de plaisirs.'},
+  // ── LOCATHAH ──────────────────────────────────────
+  {id:'locathah',n:'Locathah',tag:'AQUATIQUE · RÉSILIENT',bonus:{str:1,dex:2},speed:30,langs:['Commun','Aquan'],armor:'—',traits:['Nage 30m','Respiration aquatique','Immunité paralysie + résistance épuisement','Armure naturelle CA 13+DEX'],desc:'Humanoïdes pisciformes des profondeurs côtières, jadis réduits en esclavage, maintenant libres.'},
+  // ── GRUNG ─────────────────────────────────────────
+  {id:'grung',n:'Grung',tag:'AMPHIBIE · VÉNÉNEUX',bonus:{dex:2,con:1},speed:25,langs:['Grung'],armor:'—',traits:['Amphibie (nage 9m, doit s\'immerger 1h/jour)','Toxine cutanée (contact → Empoisonnement)','Venin d\'arme','Escalade 9m'],desc:'Grenouilles humanoïdes toxiques, organisées en sociétés de couleur hiérarchisées.'},
+  // ── TORTLE ────────────────────────────────────────
+  {id:'tortle',n:'Tortle',tag:'TORTUE · RETRAITE',bonus:{str:2,wis:1},speed:30,langs:['Commun','Aquan'],armor:'—',traits:['Armure naturelle : CA 17 (sans armure)','Carapace défensive (bonus action) : CA 19, avantage KO, vitesse 0','Griffes (1d4+STR)','Nage 9m'],desc:'Humanoïdes tortues nomades et philosophes, portant leur forteresse naturelle sur le dos.'},
+  // ── DHAMPIR ───────────────────────────────────────
+  {id:'dhampir',n:'Dhampir',tag:'MORT-VIVANT · HYBRIDE',bonus:{_ch:3},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Ascendance vampirique : Morsure (nécrotique, bonus action, soigne l\'attaquant)','Escalade araignée','Vision dans le noir 18m','Résistance nécrotique'],desc:'Né d\'un humain et d\'un vampire, le Dhampir hérite des deux mondes — Règles de van Richten.'},
+  // ── HEXBLOOD ──────────────────────────────────────
+  {id:'hexblood',n:'Hexblood',tag:'MALÉDICTION · OCCULTE',bonus:{_ch:3},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Marque de la Sorcière Nuit : Maléfice et Sorts de sorcière','Partage des sens avec un messager familier','Résistance psychique','Vision dans le noir 18m'],desc:'Transformé par un marché avec une Sorcière des nuits — Règles de van Richten.'},
+  // ── REBORN ────────────────────────────────────────
+  {id:'reborn',n:'Reborn',tag:'MORT-VIVANT · REVENU',bonus:{_ch:3},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Revenu d\'entre les morts : résistance nécrotique, immunité empoisonnement','Mémoire spectrale (avantage Histoire, 1×/repos court)','Besoins organiques réduits'],desc:'Ressuscité avec des fragments de mémoire, cherchant à comprendre qui ils étaient — Règles de van Richten.'},
+  // ── FÉE (FAIRY) ───────────────────────────────────
+  {id:'fairy',n:'Fée',tag:'FÉE · MINUSCULE',bonus:{_ch:3},speed:30,langs:['Commun','Sylvain'],armor:'—',traits:['Petite créature','Vol (vitesse de marche)','Sorts fées : Druidisme, Sort mineur de fée, Faerie Fire 1×/repos long','Magie des Royaumes Féeriques'],desc:'Minuscules créatures féeriques dotées d\'ailes — Une Fête pour les Personnages.'},
+  // ── HARENGON ──────────────────────────────────────
+  {id:'harengon',n:'Harengon',tag:'LAPIN · AGILE',bonus:{_ch:3},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Percée de lapin : bond de Vitesse de course en bonus action','Chance de Lapin : réaction pour relancer un d20 (1×/repos court)','Maîtrise Perception ou Initiative'],desc:'Humanoïdes lapins agiles — Une Fête pour les Personnages.'},
+  // ── OWLIN ─────────────────────────────────────────
+  {id:'owlin',n:'Owlin',tag:'HIBOU · FURTIF',bonus:{_ch:3},speed:30,langs:['Commun','Auran'],armor:'—',traits:['Vol (vitesse de marche, en armure légère ou moins)','Vision dans le noir 36m','Vol silencieux (avantage Discrétion en vol)'],desc:'Humanoïdes hiboux des forêts — Livre de Sorts de Strixhaven.'},
 ];
 
 // ═══════════════════════════════════════════════════
@@ -2049,6 +2197,7 @@ let C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null
   asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,dice3d6:{},dice3d6RerollUsed:false,
   feats:[],currency:{gp:0,sp:0,cp:0,ep:0},notes:''};
 let CUR=0;
+let _expandedFamily=null;
 
 // ═══════════════════════════════════════════════════
 // UTILS
@@ -2299,36 +2448,63 @@ function raceImgFallback(el){
   el.onerror=null;
   el.parentElement.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;
 }
+function buildRaceCard(r){
+  const d=document.createElement('div');
+  d.className='card race-card'+(C.race?.id===r.id?' sel':'');
+  const rs=RACE_STYLE[r.id]||RACE_STYLE[r.family]||{icon:'🧝',color:'var(--gold-d)'};
+  const bs=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>k.toUpperCase()+' +'+v).join('  ');
+  const extra=r.bonus._ch?` +${r.bonus._ch}✦`:'';
+  const imgUrl=getRaceImgUrl(r.id);
+  const head=document.createElement('div');head.className='race-card-head';
+  head.innerHTML=`<span class="race-card-icon">${rs.icon}</span><div><div class="cn" style="font-size:11px;">${r.n}</div><div class="ct">${r.tag}</div></div>`;
+  const stats=document.createElement('div');stats.className='race-card-stats';
+  stats.textContent=bs+extra+(r.langs?.length?'  '+r.langs.join('/'):'');
+  const wrap=document.createElement('div');wrap.className='race-portrait-wrap';
+  const img=document.createElement('img');
+  img.dataset.id=r.id;img.alt=r.n;img.loading='lazy';
+  if(imgUrl){img.src=imgUrl;img.dataset.id=r.id;img.onerror=function(){raceImgFallback(this);};wrap.appendChild(img);}
+  else{wrap.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;}
+  const desc=document.createElement('div');desc.className='race-desc';desc.textContent=r.desc;
+  const acc=document.createElement('div');acc.className='card-accent';acc.style.background=rs.color||'var(--gold-d)';
+  d.appendChild(acc);d.appendChild(head);d.appendChild(stats);d.appendChild(wrap);d.appendChild(desc);
+  d.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
+  return d;
+}
 function renderRace(){
   $('lp').innerHTML=`<div class="sh">Choisir une Race</div><div class="ss">Héritage · Traits · Bonus de Caractéristiques · Langues</div>
   <div class="race-grid" id="rg"></div>
   <div class="btn-row"><button class="btn btn-p" onclick="if(C.race)go(1);else alert('Choisissez une race.')">Suivant : Classe & Archétype →</button></div>`;
+  const grid=$('rg');
+  // Build family map
+  const famMap={};
+  RACES.forEach(r=>{if(r.family){if(!famMap[r.family])famMap[r.family]=[];famMap[r.family].push(r);}});
+  const rendered=new Set();
   RACES.forEach(r=>{
-    const d=document.createElement('div');
-    d.className='card race-card'+(C.race?.id===r.id?' sel':'');
-    const rs=RACE_STYLE[r.id]||{icon:'🧝',color:'var(--gold-d)'};
-    const bs=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>k.toUpperCase()+' +'+v).join('  ');
-    const extra=r.bonus._ch?` +${r.bonus._ch}✦`:'';
-    const imgUrl=getRaceImgUrl(r.id);
-    // Header : icon + nom + tag
-    const head=document.createElement('div');head.className='race-card-head';
-    head.innerHTML=`<span class="race-card-icon">${rs.icon}</span><div><div class="cn" style="font-size:11px;">${r.n}</div><div class="ct">${r.tag}</div></div>`;
-    // Stats
-    const stats=document.createElement('div');stats.className='race-card-stats';
-    stats.textContent=bs+extra+(r.langs?.length?'  '+r.langs.join('/'):'');
-    // Portrait
-    const wrap=document.createElement('div');wrap.className='race-portrait-wrap';
-    const img=document.createElement('img');
-    img.dataset.id=r.id;img.alt=r.n;img.loading='lazy';
-    if(imgUrl){img.src=imgUrl;img.dataset.id=r.id;img.onerror=function(){raceImgFallback(this);};wrap.appendChild(img);}
-    else{wrap.innerHTML=`<div class="rp-phl">${rs.icon}</div>`;}
-    // Description
-    const desc=document.createElement('div');desc.className='race-desc';desc.textContent=r.desc;
-    // Accent
-    const acc=document.createElement('div');acc.className='card-accent';acc.style.background=rs.color;
-    d.appendChild(acc);d.appendChild(head);d.appendChild(stats);d.appendChild(wrap);d.appendChild(desc);
-    d.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
-    $('rg').appendChild(d);
+    const fid=r.family;
+    // No family or single-member family → standalone card
+    if(!fid||!famMap[fid]||famMap[fid].length<2){
+      grid.appendChild(buildRaceCard(r));
+      return;
+    }
+    // Multi-member family: render header once
+    if(rendered.has(fid))return;
+    rendered.add(fid);
+    const fRaces=famMap[fid];
+    const rs=RACE_STYLE[fid]||{icon:'🧝',color:'var(--gold-d)'};
+    const label=RACE_FAMILY_LABELS[fid]||fid;
+    const isExpanded=_expandedFamily===fid;
+    const isSelected=fRaces.some(r2=>C.race?.id===r2.id);
+    const hdr=document.createElement('div');
+    hdr.className='race-fam-header'+(isSelected?' has-selected':'')+(isExpanded?' expanded':'');
+    hdr.style.setProperty('--fam-color',rs.color||'var(--gold-d)');
+    hdr.innerHTML=`<span class="race-fam-icon">${rs.icon}</span><div class="race-fam-info"><div class="race-fam-name">${label}</div><div class="race-fam-count">${fRaces.length} variantes${isSelected?' · ✓ Sélectionné':''}</div></div><span class="race-fam-arrow">${isExpanded?'▲':'▼'}</span>`;
+    hdr.onclick=()=>{_expandedFamily=isExpanded?null:fid;renderRace();};
+    grid.appendChild(hdr);
+    if(isExpanded){
+      const sub=document.createElement('div');sub.className='race-subgrid';
+      fRaces.forEach(r2=>sub.appendChild(buildRaceCard(r2)));
+      grid.appendChild(sub);
+    }
   });
 }
 function applyRace(){
