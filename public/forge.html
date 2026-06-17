@@ -859,10 +859,14 @@ body{background:var(--bg);}
 /* ── Sidebar ── */
 #rp{background:rgba(11,8,5,.94);border-left:1px solid var(--bd-subtle);}
 .rstat{background:rgba(255,255,255,.035);border:1px solid var(--bd-subtle);border-radius:4px;}
+.rsl{font-size:8.5px!important;color:var(--gold-d)!important;}
 .rsv{font-size:18px;color:var(--parch);}
+.rmod{font-size:10px!important;}
 .rcs{background:rgba(255,255,255,.025);border:1px solid var(--bd-subtle);border-radius:4px;}
-.rcsv{font-size:13px;color:var(--parch2);}
-.rsec{color:var(--gold-d);border-bottom-color:var(--bd-subtle);}
+.rcsl{font-size:8px!important;letter-spacing:.06em!important;}
+.rcsv{font-size:14px;color:var(--parch2);}
+.rsec{font-size:9px!important;letter-spacing:.14em!important;color:var(--gold-d);border-bottom-color:var(--bd-subtle);}
+.r-line{font-size:10px!important;}
 .rp-portrait{border:1px solid var(--bd-subtle);border-radius:6px;transition:.18s ease;}
 .rp-portrait:hover{border-color:var(--bd-soft);}
 
@@ -1018,26 +1022,35 @@ body{background:var(--bg);}
 .rp-panel-title{font-family:'Cinzel',serif;font-size:12px;letter-spacing:.07em;color:var(--gold);padding:.55rem .65rem .4rem;border-bottom:1px solid var(--bd-subtle);flex-shrink:0;}
 /* Family tabs (race panel) */
 .family-tabs-wrap{overflow-x:auto;flex-shrink:0;padding:.35rem .5rem .25rem;border-bottom:1px solid var(--bd-subtle);display:flex;gap:2px;scrollbar-width:thin;scrollbar-color:var(--gold-d) transparent;}
-.family-tab{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.06em;color:#5A4E38;white-space:nowrap;padding:.16rem .42rem;border:1px solid transparent;cursor:pointer;transition:.12s;flex-shrink:0;}
+.family-tab{font-family:'Cinzel',serif;font-size:8.5px;letter-spacing:.06em;color:#7A6E58;white-space:nowrap;padding:.22rem .55rem;border:1px solid transparent;cursor:pointer;transition:.12s;flex-shrink:0;border-radius:2px;}
 .family-tab:hover{color:var(--gold-d);border-color:var(--bd-subtle);}
-.family-tab.active{color:var(--gold);border-color:var(--bd-soft);background:rgba(201,168,76,.07);}
+.family-tab.active{color:var(--gold);border-color:var(--bd-soft);background:rgba(201,168,76,.1);}
 /* 2-col race cards */
 .race-grid-wrap{flex:1;overflow-y:auto;padding:.4rem .45rem;}
-.race-grid-2col{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;}
-.race-card-mini{border:1px solid var(--bd-subtle);background:#100C06;cursor:pointer;transition:.15s;position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:4px;}
-.race-card-mini:hover{border-color:var(--bd-soft);}
-.race-card-mini.selected{border-color:var(--gold);box-shadow:0 0 8px rgba(201,168,76,.18);}
-.race-portrait-mini{aspect-ratio:9/16;background:#0A0805;display:flex;align-items:center;justify-content:center;font-size:24px;position:relative;overflow:hidden;}
+.race-grid-2col{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;}
+.race-card-mini{border:1px solid var(--bd-subtle);background:#100C06;cursor:pointer;transition:.15s;position:relative;display:flex;flex-direction:column;overflow:hidden;border-radius:5px;}
+.race-card-mini:hover{border-color:var(--bd-soft);background:#140E08;}
+.race-card-mini.selected{border-color:var(--gold);box-shadow:0 0 10px rgba(201,168,76,.22);}
+.race-portrait-mini{aspect-ratio:9/16;background:#0A0805;display:flex;align-items:center;justify-content:center;font-size:26px;position:relative;overflow:hidden;}
 .race-portrait-mini::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(10,8,5,.88) 0%,transparent 50%);pointer-events:none;}
 .race-portrait-mini img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
-.race-card-foot{padding:3px 4px 4px;display:flex;flex-direction:column;gap:1px;}
-.race-card-name{font-family:'Cinzel',serif;font-size:7.5px;color:#C0B090;letter-spacing:.03em;line-height:1.25;}
-.race-card-badges{display:flex;gap:2px;flex-wrap:wrap;margin-top:1px;}
-.race-badge{font-family:'Share Tech Mono',monospace;font-size:6px;background:#2A4A1E;color:#7AA66A;padding:1px 3px;}
-.sel-badge-mini{position:absolute;top:3px;right:3px;background:var(--gold);color:#0E0C08;font-family:'Share Tech Mono',monospace;font-size:6px;padding:2px 3px;z-index:2;letter-spacing:.03em;}
-.lore-desc-panel{padding:.4rem .55rem;border-top:1px solid var(--bd-subtle);font-size:9px;font-style:italic;color:#8A795A;line-height:1.45;flex-shrink:0;min-height:42px;max-height:60px;overflow-y:auto;}
-.panel-footer{padding:.38rem .55rem;border-top:1px solid var(--bd-subtle);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(0,0,0,.2);}
-.step-indicator{font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4E38;}
+.race-card-foot{padding:4px 5px 5px;display:flex;flex-direction:column;gap:2px;}
+.race-card-name{font-family:'Cinzel',serif;font-size:9px;color:#D0C090;letter-spacing:.03em;line-height:1.3;}
+.race-card-badges{display:flex;gap:2px;flex-wrap:wrap;margin-top:2px;}
+.race-badge{font-family:'Share Tech Mono',monospace;font-size:7.5px;background:#2A4A1E;color:#8ABF7A;padding:2px 4px;border-radius:2px;}
+.race-badge-free{background:#2A3A5A;color:#7AAAE8;}
+.sel-badge-mini{position:absolute;top:4px;right:4px;background:var(--gold);color:#0E0C08;font-family:'Share Tech Mono',monospace;font-size:8px;padding:2px 5px;z-index:2;letter-spacing:.04em;border-radius:2px;}
+/* Lore + traits panel */
+.lore-desc-panel{padding:.45rem .6rem;border-top:1px solid var(--bd-subtle);flex-shrink:0;max-height:140px;overflow-y:auto;}
+.lore-empty{font-size:9.5px;font-style:italic;color:#4A3A28;}
+.lore-traits{display:flex;flex-wrap:wrap;gap:3px;margin-bottom:.35rem;}
+.trait-chip{font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#A09070;background:#1A1510;border:1px solid #3A2A10;padding:2px 5px;border-radius:2px;white-space:nowrap;}
+.lore-text{font-size:8.5px;font-style:italic;color:#7A6A4A;line-height:1.45;margin-top:.1rem;}
+.panel-footer{padding:.45rem .6rem;border-top:1px solid var(--bd-subtle);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;background:rgba(0,0,0,.25);gap:.4rem;}
+.panel-footer .btn{font-size:9px!important;padding:.3em .9em!important;letter-spacing:.08em!important;}
+.step-indicator{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A48;}
+.footer-warn{font-family:'Cinzel',serif;font-size:8px;color:#C05050;letter-spacing:.04em;opacity:0;transition:opacity .2s;text-align:center;flex:1;}
+.footer-warn.show{opacity:1;}
 /* Other steps in 300px panel: override grids to 2-col */
 #lp .grid{grid-template-columns:repeat(2,1fr)!important;}
 #lp .race-grid{grid-template-columns:repeat(2,1fr)!important;}
@@ -1565,25 +1578,25 @@ const RACES=[
   {id:'human',family:'human',n:'Humain (standard)',tag:'POLYVALENT',bonus:{str:1,dex:1,con:1,int:1,wis:1,cha:1},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['Polyvalent : +1 à toutes les caractéristiques'],desc:'Adaptables et ambitieux, ils dominent la plupart des contrées.'},
   {id:'human-variant',family:'human',n:'Humain (variante)',tag:'POLYVALENT · DON',bonus:{_ch:2},speed:30,langs:['Commun','1 au choix'],armor:'—',traits:['+1 dans 2 caractéristiques','1 compétence supplémentaire','1 don au niveau 1'],desc:'Variante PHB — flexibilité maximale avec un don dès le niveau 1.'},
   // ── ELFES ────────────────────────────────────────
-  {id:'elf-high',family:'elf',n:'Elfe de haut rang',tag:'ELF · FÉE',bonus:{dex:2,int:1},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Transe (4h)','Armes elfiques','Sort de magicien mineur'],desc:'Gracieux et anciens, porteurs d\'une magie innée.'},
-  {id:'elf-wood',family:'elf',n:'Elfe des bois',tag:'ELF · SYLVAIN',bonus:{dex:2,wis:1},speed:35,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Masque de la nature'],desc:'Plus robustes, vivant en harmonie avec la nature sauvage.'},
-  {id:'elf-drow',family:'elf',n:'Drow',tag:'ELF · OMBRES',bonus:{dex:2,cha:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision supérieure 36m','Sorts innés (Lumières dansantes, Lueur, Ténèbres)','Sensibilité au soleil'],desc:'Issus des profondeurs, portant la marque de leur héritage sombre.'},
-  {id:'elf-sea',family:'elf',n:'Elfe de la mer',tag:'ELF · AQUATIQUE',bonus:{dex:2,con:1},speed:30,langs:['Commun','Elfique','Aquan'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Nage 9m','Respiration amphibie'],desc:'Gardiens des profondeurs océaniques, alliés des tritons.'},
-  {id:'elf-pallid',family:'elf',n:'Elfe pâle',tag:'ELF · EXANDRIA',bonus:{dex:2,wis:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Invisibilité 1×/repos long','Trouver l\'objet 1×/repos long'],desc:'Issus des régions lunaires d\'Exandria, mystérieux et détachés du monde.'},
-  {id:'elf-shadar-kai',family:'elf',n:'Shadar-Kaï',tag:'ELF · PLAN DES OMBRES',bonus:{dex:2,con:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Marche de ténèbres (Misty Step + résistance, 1×/repos court)','Résistance nécrotique'],desc:'Elfes liés au Plan des Ombres, portant l\'empreinte de la mort dans leur chair grisée.'},
-  {id:'elf-eladrin',family:'elf',n:'Éladrin',tag:'ELF · ROYAUMES FÉERIQUES',bonus:{dex:2,int:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Pas féerique (Misty Step + charme/peur, 1×/repos court)','Tempérament des saisons'],desc:'Elfes des Royaumes Féeriques dont l\'humeur et l\'apparence changent avec les saisons.'},
+  {id:'elf-high',family:'elf',n:'Elfe de haut rang',tag:'ELF · FÉE',bonus:{dex:2,int:1},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Sens aiguisés (Perception)','Transe (4h)','Armes elfiques','Sort de magicien mineur'],desc:'Gracieux et anciens, porteurs d\'une magie innée.'},
+  {id:'elf-wood',family:'elf',n:'Elfe des bois',tag:'ELF · SYLVAIN',bonus:{dex:2,wis:1},speed:35,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Sens aiguisés (Perception)','Masque de la nature'],desc:'Plus robustes, vivant en harmonie avec la nature sauvage.'},
+  {id:'elf-drow',family:'elf',n:'Drow',tag:'ELF · OMBRES',bonus:{dex:2,cha:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision supérieure 36m','Résistance aux charmes','Sens aiguisés (Perception)','Sorts innés (Lumières dansantes, Lueur, Ténèbres)','Sensibilité au soleil'],desc:'Issus des profondeurs, portant la marque de leur héritage sombre.'},
+  {id:'elf-sea',family:'elf',n:'Elfe de la mer',tag:'ELF · AQUATIQUE',bonus:{dex:2,con:1},speed:30,langs:['Commun','Elfique','Aquan'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Sens aiguisés (Perception)','Nage 9m','Respiration amphibie'],desc:'Gardiens des profondeurs océaniques, alliés des tritons.'},
+  {id:'elf-pallid',family:'elf',n:'Elfe pâle',tag:'ELF · EXANDRIA',bonus:{dex:2,wis:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Sens aiguisés (Perception)','Invisibilité 1×/repos long','Trouver l\'objet 1×/repos long'],desc:'Issus des régions lunaires d\'Exandria, mystérieux et détachés du monde.'},
+  {id:'elf-shadar-kai',family:'elf',n:'Shadar-Kaï',tag:'ELF · PLAN DES OMBRES',bonus:{dex:2,con:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Sens aiguisés (Perception)','Marche de ténèbres (Misty Step + résistance, 1×/repos court)','Résistance nécrotique'],desc:'Elfes liés au Plan des Ombres, portant l\'empreinte de la mort dans leur chair grisée.'},
+  {id:'elf-eladrin',family:'elf',n:'Éladrin',tag:'ELF · ROYAUMES FÉERIQUES',bonus:{dex:2,int:1},speed:30,langs:['Commun','Elfique'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Sens aiguisés (Perception)','Pas féerique (Misty Step + charme/peur, 1×/repos court)','Tempérament des saisons'],desc:'Elfes des Royaumes Féeriques dont l\'humeur et l\'apparence changent avec les saisons.'},
   // ── NAINS ────────────────────────────────────────
-  {id:'dwarf-hill',family:'dwarf',n:'Nain des collines',tag:'NAIN · COLLINES',bonus:{con:2,wis:1},speed:25,langs:['Commun','Nain'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux poisons','Armes naines','PV bonus par niveau'],desc:'Robustes et déterminés, gardiens des traditions ancestrales.'},
-  {id:'dwarf-mountain',family:'dwarf',n:'Nain des montagnes',tag:'NAIN · MONTAGNES',bonus:{str:2,con:2},speed:25,langs:['Commun','Nain'],armor:'légères et intermédiaires',traits:['Vision dans le noir 18m','Résistance aux poisons','Armures légères/intermédiaires','Armes naines'],desc:'Guerriers nés, taillés dans la roche des profondeurs.'},
+  {id:'dwarf-hill',family:'dwarf',n:'Nain des collines',tag:'NAIN · COLLINES',bonus:{con:2,wis:1},speed:25,langs:['Commun','Nain'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux poisons','Armes naines','Connaissance de la pierre','Maîtrise d\'outils nains','PV bonus par niveau'],desc:'Robustes et déterminés, gardiens des traditions ancestrales.'},
+  {id:'dwarf-mountain',family:'dwarf',n:'Nain des montagnes',tag:'NAIN · MONTAGNES',bonus:{str:2,con:2},speed:25,langs:['Commun','Nain'],armor:'légères et intermédiaires',traits:['Vision dans le noir 18m','Résistance aux poisons','Armes naines','Armures légères/intermédiaires','Connaissance de la pierre','Maîtrise d\'outils nains'],desc:'Guerriers nés, taillés dans la roche des profondeurs.'},
   {id:'dwarf-duergar',family:'dwarf',n:'Duergar',tag:'NAIN · GRIS',bonus:{str:1,con:2},speed:25,langs:['Commun','Nain','Sous-commun'],armor:'—',traits:['Vision supérieure 36m','Résistance poisons/charmes/illusions','Élargissement (taille Grande, 1×/repos long)','Invisibilité (1×/repos long)','Sensibilité à la lumière'],desc:'Nains des profondeurs esclavagistes, forgés par des siècles de servitude aux Illithids.'},
   // ── HALFELINS ────────────────────────────────────
-  {id:'halfling-lf',family:'halfling',n:'Halfelin pied-léger',tag:'HALFELIN',bonus:{dex:2,cha:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Discrétion naturelle'],desc:'Petits mais intrépides, porteurs d\'une chance légendaire.'},
-  {id:'halfling-stout',family:'halfling',n:'Halfelin robuste',tag:'HALFELIN',bonus:{dex:2,con:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Résistance aux poisons'],desc:'Plus rustiques, descendants de lignées robustes et résistantes.'},
-  {id:'halfling-ghostwise',family:'halfling',n:'Halfelin spectral',tag:'HALFELIN · FANTÔME',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Télépathie silencieuse (9m)'],desc:'Reclus des forêts profondes, capables de communiquer par la pensée.'},
-  {id:'halfling-lotusden',family:'halfling',n:'Halfelin de Lotusden',tag:'HALFELIN · EXANDRIA',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Racines naturelles (1×/repos long)','Parler aux animaux (1×/repos long)'],desc:'Nés dans les forêts anciennes d\'Exandria, profondément liés à la nature de Lotusden.'},
+  {id:'halfling-lf',family:'halfling',n:'Halfelin pied-léger',tag:'HALFELIN',bonus:{dex:2,cha:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Agilité halfeline','Discrétion naturelle'],desc:'Petits mais intrépides, porteurs d\'une chance légendaire.'},
+  {id:'halfling-stout',family:'halfling',n:'Halfelin robuste',tag:'HALFELIN',bonus:{dex:2,con:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Agilité halfeline','Résistance aux poisons'],desc:'Plus rustiques, descendants de lignées robustes et résistantes.'},
+  {id:'halfling-ghostwise',family:'halfling',n:'Halfelin spectral',tag:'HALFELIN · FANTÔME',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Agilité halfeline','Télépathie silencieuse (9m)'],desc:'Reclus des forêts profondes, capables de communiquer par la pensée.'},
+  {id:'halfling-lotusden',family:'halfling',n:'Halfelin de Lotusden',tag:'HALFELIN · EXANDRIA',bonus:{dex:2,wis:1},speed:25,langs:['Commun','Halfelin'],armor:'—',traits:['Chance','Bravoure','Agilité halfeline','Racines naturelles (1×/repos long)','Parler aux animaux (1×/repos long)'],desc:'Nés dans les forêts anciennes d\'Exandria, profondément liés à la nature de Lotusden.'},
   // ── GNOMES ───────────────────────────────────────
-  {id:'gnome-forest',family:'gnome',n:'Gnome des forêts',tag:'GNOME · SYLVAIN',bonus:{int:2,dex:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Communication animale'],desc:'Curieux et joyeux, communiant avec la petite faune.'},
-  {id:'gnome-rock',family:'gnome',n:'Gnome des roches',tag:'GNOME · INGÉNIEUR',bonus:{int:2,con:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Mémoire artificielle'],desc:'Inventeurs passionnés, toujours en train de bricoler quelque chose.'},
+  {id:'gnome-forest',family:'gnome',n:'Gnome des forêts',tag:'GNOME · SYLVAIN',bonus:{int:2,dex:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Illusionniste naturel (Illusion mineure)','Communication animale'],desc:'Curieux et joyeux, communiant avec la petite faune.'},
+  {id:'gnome-rock',family:'gnome',n:'Gnome des roches',tag:'GNOME · INGÉNIEUR',bonus:{int:2,con:1},speed:25,langs:['Commun','Gnome'],armor:'—',traits:['Vision dans le noir 18m','Ruse gnome','Bricoleur (mécanismes d\'horlogerie)','Mémoire artificielle'],desc:'Inventeurs passionnés, toujours en train de bricoler quelque chose.'},
   {id:'gnome-deep',family:'gnome',n:'Gnome des profondeurs',tag:'GNOME · SVIRFNEBLIN',bonus:{int:2,dex:1},speed:25,langs:['Commun','Gnome','Sous-commun'],armor:'—',traits:['Vision supérieure 36m','Ruse gnome','Camouflage gnome (avantage Discrétion en cavernes)','Connaissance de la pierre'],desc:'Svirfneblins des Royaumes Souterrains, maîtres du camouflage dans les profondeurs.'},
   // ── DEMI-ELFES ───────────────────────────────────
   {id:'half-elf',family:'half-elf',n:'Demi-Elfe',tag:'HYBRIDE · FÉE',bonus:{cha:2,_ch:2},speed:30,langs:['Commun','Elfique','1 au choix'],armor:'—',traits:['Vision dans le noir 18m','Résistance aux charmes','Polyvalence (2 compétences)'],desc:'Héritiers de deux mondes, d\'un charme naturel inégalé.'},
@@ -1594,7 +1607,7 @@ const RACES=[
   // ── DEMI-ORQUES ──────────────────────────────────
   {id:'half-orc',n:'Demi-Orque',tag:'HYBRIDE · OGRELIN',bonus:{str:2,con:1},speed:30,langs:['Commun','Orque'],armor:'—',traits:['Vision dans le noir 18m','Intimidation maîtrisée','Résistance implacable','Attaques sauvages'],desc:'Fiers et puissants, dépassant les préjugés par leurs actes.'},
   // ── TIEFFELINS ───────────────────────────────────
-  {id:'tiefling',family:'tiefling',n:'Tieffelin — Asmodée',tag:'INFERNAL',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Mains brûlantes (1×/repos long)','Niv.5 : Ténèbres (1×/repos long)'],desc:'La lignée la plus répandue — descendants du pacte d\'Asmodée. Maîtres en manipulation.'},
+  {id:'tiefling',family:'tiefling',n:'Tieffelin — Asmodée',tag:'INFERNAL',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Représailles infernales (1×/repos long)','Niv.5 : Ténèbres (1×/repos long)'],desc:'La lignée la plus répandue — descendants du pacte d\'Asmodée. Maîtres en manipulation.'},
   {id:'tiefling-zariel',family:'tiefling',n:'Tieffelin — Zariel',tag:'INFERNAL · ZARIEL',bonus:{str:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Représailles divines (1×/repos long)','Niv.5 : Marque de Zariel (1×/repos long)'],desc:'Descendants de Zariel, archidiablesse de l\'Avernus. Guerriers-nés aux ailes brûlées.'},
   {id:'tiefling-mephistopheles',family:'tiefling',n:'Tieffelin — Méphistophélès',tag:'INFERNAL · MÉPHISTOPHÉLÈS',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Flamme ardente (1×/repos long)','Niv.5 : Flamme du diable (1×/repos long)'],desc:'Lignée de Méphistophélès. Maîtres des flammes infernales, ils brûlent sans se consumer.'},
   {id:'tiefling-baalzebul',family:'tiefling',n:'Tieffelin — Baalzébul',tag:'INFERNAL · BAALZÉBUL',bonus:{int:1,cha:2},speed:30,langs:['Commun','Infernal'],armor:'—',traits:['Vision dans le noir 18m','Résistance feu','Niv.1 : Thaumaturgie','Niv.3 : Rayon empoisonné (1×/repos long)','Niv.5 : Couronne du fou (1×/repos long)'],desc:'Seigneur des mouches et du mensonge. Ses descendants répandent la corruption et la discorde.'},
@@ -1721,6 +1734,12 @@ const SUBS={
     {id:'totem-bear',n:'Guerrier Totem — Ours',fs:['Niv.3 — Esprit de l\'ours : résistance à TOUS les types de dégâts en Rage (sauf psychiques)','Niv.6 — Aspect de l\'ours : porter 2× le poids normal ; avantage FOR pour soulever/pousser','Niv.10 — Communion du totem : communiquer avec ours à longue distance','Niv.14 — Âme de l\'ours : alliés en Rage dans 9m reçoivent la résistance de l\'ours']},
     {id:'totem-eagle',n:'Guerrier Totem — Aigle',fs:['Niv.3 — Esprit de l\'aigle : Désengagement + Dash en bonus en Rage ; vision précise','Niv.6 — Aspect de l\'aigle : courir 3h sans fatigue ; regard précis sur 1,5 km','Niv.10 — Communion : communiquer avec aigles','Niv.14 — Âme de l\'aigle : vitesse de vol = vitesse de marche pendant la Rage']},
     {id:'totem-wolf',n:'Guerrier Totem — Loup',fs:['Niv.3 — Esprit du loup : alliés ont avantage contre ennemis adjacents à vous en Rage','Niv.6 — Aspect du loup : traque sans laisser de traces ; déplacement groupe accéléré','Niv.10 — Communion : communiquer avec loups','Niv.14 — Âme du loup : bonus action faire tomber une créature Grande ou moins frappée']},
+    {id:'ancestral-guardian',n:'Guerrier Ancestral',fs:['Niv.3 — Protecteurs ancestraux : premier ennemi attaqué en Rage → désavantage s\'il cible tes alliés ; résistance ½ dégâts pour tes alliés','Niv.6 — Bouclier des esprits : Réaction — réduire dégâts reçus par un allié adjacent (d8+mod CON)','Niv.10 — Consultation des esprits : Augure ou Clairvoyance sans emplacement (1×/repos court)','Niv.14 — Interception ancestrale : l\'esprit absorbe une attaque — cible résistante aux dégâts (Réaction, 1×/repos court)']},
+    {id:'storm-herald',n:'Héraut de Tempête',fs:['Niv.3 — Aura de tempête (choisir Désert, Mer ou Toundra) : zone 3m auto-active en Rage — dégâts ou effets selon terrain','Niv.6 — Âme de tempête : résistance élémentaire selon type (feu/foudre/froid) + effet passif hors rage','Niv.10 — Rugissement de la tempête : bonus action en Rage — effet majeur élémentaire (zone ou cible)','Niv.14 — Furie incontrôlable : aura s\'étend à 9m, dégâts de l\'aura doublés pendant la Rage']},
+    {id:'zealot',n:'Zélote',fs:['Niv.3 — Frappe divine : +1d6 radiant ou nécrotique à la 1ère attaque de chaque tour en Rage','Niv.3 — Guerrier du Dieu : si tu meurs en Rage, tu peux être ressuscité sans matériau coûteux','Niv.6 — Fanatique : avantage à tous jets de mort ; concentration = résistance à TOUS dégâts pendant la Rage','Niv.10 — Âme zélée : immunité charme et effroi','Niv.14 — Présence exaltée : tous ennemis dans 9m effrayés au début de leur tour (SAG vs FOR)']},
+    {id:'beast',n:'Voie de la Bête',fs:['Niv.3 — Forme de la bête : en Rage, choisir Griffes (1d6+FOR, bonus attack), Morsure (1d8+FOR, récup. PV) ou Queue (1d8+FOR, +1 CA en réaction)','Niv.6 — Membres bestiaux : griffes → escalade pleine vitesse ; queue → +1 CA permanent','Niv.10 — Crocs contaminés : cible mordue = désavantage sur 1 jet choisi jusqu\'en fin de tour suivant','Niv.14 — Appel de la bête : convoquer des bêtes locales (1d4, FP ≤ ½) comme bonus action en Rage']},
+    {id:'wild-magic-barb',n:'Magie Sauvage',fs:['Niv.3 — Surge de magie sauvage : 1 fois par Rage au toucher, déclencher 1 effet aléatoire (table 8 : soins, téléport, invisibilité, aura…)','Niv.6 — Magie débridée : tirer 2 effets et choisir ; recharger 1 Ki si applicable','Niv.10 — Décharge de magie : avantage sur les jets de concentration en Rage','Niv.14 — Âme chaotique : résistance aléatoire (acide/froid/feu/foudre/tonnerre/poison) renouvelée chaque repos long']},
+    {id:'giant',n:'Voie des Géants',fs:['Niv.3 — Aspect du géant : choisir un type (Colline, Pierre, Givre, Feu, Nuage, Tempête) → langage géant + type de dégâts bonus en Rage','Niv.3 — Lancer les corps : lancer une créature/objet de taille Moyen ou moins (bonus action en Rage, 9m, 1d6+FOR)','Niv.6 — Corps du géant : taille Très Grande en Rage (allonge 3m, avantage FOR, espace naturel agrandi)','Niv.10 — Âme du géant : résistance élémentaire selon type de géant ; lancer des créatures Grandes','Niv.14 — Puissance colossale : taille Immense en Rage (si espace suffisant) + effet de tremblement au sol']},
   ],
   bard:[
     {id:'lore',n:'Collège du Savoir',fs:['Niv.3 — Maîtrises : 3 compétences supplémentaires (toutes listes disponibles)','Niv.3 — Mots cinglants : Réaction — retirer 1d6 du jet d\'attaque/dégâts/sauvegarde d\'une créature','Niv.6 — Secrets magiques : apprendre 2 sorts de N\'IMPORTE QUELLE classe','Niv.14 — Paroles incomparables : relancer 1 dé de compétence raté (1×/repos court)']},
@@ -1755,6 +1774,7 @@ const SUBS={
     {id:'spores',n:'Cercle des Spores',fs:['Niv.2 — Halo de spores : 1d4 nécrotiques bonus sur attaque (réaction)','Niv.2 — Symbiose fungique : animation cadavre améliorée (bonus action, pas de concentration)','Niv.6 — Prolifération des spores : zone de spores 9m — affecte toutes créatures dans la zone','Niv.10 — Présence fongique : immunité maladie, guérison par les champignons']},
     {id:'stars',n:'Cercle des Étoiles',fs:['Niv.2 — Carte stellaire : accès à Guidance + sorts cosmiques supplémentaires + lumière bonus','Niv.2 — Forme stellaire : 3 formes constellation (Dragon, Archer, Calice — bonus variables)','Niv.6 — Illumination cosmique : soins bonus quand tu lances un sort de guérison sous forme étoile','Niv.10 — Téléportation de comète : action bonus pour téléporter (9m) et projeter énergie radieuse']},
     {id:'wildfire',n:'Cercle du Feu Sauvage',fs:['Niv.2 — Esprit du feu sauvage : convoquer esprit de feu (FP 1/2) qui apporte des capacités','Niv.2 — Sorts bonus : Branding Smite, Mains brûlantes, Beacon of Hope, Flame Strike','Niv.6 — Amis du feu : l\'esprit soigne et téléporte les alliés adjacents','Niv.10 — Brûlure guérisseuse : dégâts de feu soignent alliés dans le cercle de feu']},
+    {id:'shepherd',n:'Cercle du Troupeau',fs:['Niv.2 — Discours du berger : parler avec bêtes et plantes à volonté','Niv.2 — Totems spirituels : invoquer esprit (Faucon, Licorne ou Ours) en bonus action — zone d\'aura d\'effet (3m) sur alliés ou convocations','Niv.6 — Totems puissants : créatures invoquées dans la zone du totem gagnent PV max + avantage selon type','Niv.10 — Protection de la nature : immunité peur + résistance selon le totem actif','Niv.14 — Invocateur fidèle : une convocation supplémentaire gratuite à chaque lancer de sort de convocation d\'animal']},
   ],
   fighter:[
     {id:'champion',n:'Champion',fs:['Niv.3 — Critique amélioré : coup critique sur 19–20 (18–20 dès niv.15)','Niv.7 — Athlétisme remarquable : maîtrise physique + expertise si déjà maîtrisée','Niv.10 — 2e style de combat : choisir un second style parmi la liste','Niv.15 — Critique supérieur : coup critique sur 18–20','Niv.18 — Survivant : récupérer niv÷2 + mod CON PV en début de tour si PV < niv÷2 max']},
@@ -1785,6 +1805,7 @@ const SUBS={
     {id:'devotion',n:'Serment de Dévotion',fs:['Niv.3 — Sorts : Protection du bien/mal, Sanctuaire, Aide, Zone de vérité, Lumière du soleil','Niv.3 — Canal : Présence sacrée (avantage SAG alliés) ou Arme sacrée (+CHA mod dégâts)','Niv.7 — Aura de dévotion : immunité charme (toi + alliés dans 3m, puis 9m dès niv.18)','Niv.20 — Forme sacrée : ailes, résistances, immunités et aura renforcée']},
     {id:'ancients',n:'Serment des Anciens',fs:['Niv.3 — Sorts : Lueur des fées, Communication avec animaux, Croissance végétale, Peau d\'écorce','Niv.3 — Canal : Châtiment de nature (avantage SAG) ou Guérison de nature (1d6×niv PV)','Niv.7 — Aura de gardien : résistance dégâts de sorts (9m à niv.18)','Niv.20 — Seigneur de l\'Antique : aura lumière, bonus et formes végétales']},
     {id:'vengeance',n:'Serment de Vengeance',fs:['Niv.3 — Sorts : Bane, Marque du chasseur, Tenir la personne, Pas brumeux, Protection énergie','Niv.3 — Canal : Serment de vengeance (avantage vs cible) ou Bouche de l\'abîme (Effrayer zone)','Niv.7 — Implacable : double vitesse vers cible marquée','Niv.20 — Ange de vengeance : ailes, halo de feu, effets de terreur']},
+    {id:'redemption',n:'Serment de Rédemption',fs:['Niv.3 — Sorts : Sanctuaire, Communication avec les animaux, Calm Emotions, Hold Person, Counterspell, Hypnotic Pattern','Niv.3 — Canal : Confort de la vérité (soins à distance, SAG mod+niv PV) ou Rebuffade de la violence (l\'agresseur prend ½ dégâts de son attaque)','Niv.7 — Aura de Grâce (9m) : si allié dans l\'aura subit des dégâts, tu en prends la moitié (jusqu\'à 0 PV)','Niv.15 — Protecteur protégé : résistance à tous les dégâts sauf psychiques tant que tu n\'as pas attaqué ce round','Niv.20 — Émissaire de la Rédemption : résistance aux dégâts d\'arme ; attaquant qui te frappe prend ½ dégâts radiants en retour']},
   ],
   ranger:[
     {id:'gloom-stalker',n:'Traqueur des Ombres',fs:['Niv.3 — Vision des ombres : voir dans l\'obscurité magique 18m','Niv.3 — Rôdeur de la pénombre : invisible aux créatures avec vision dans le noir pendant 1 round','Niv.3 — Frappe d\'ombres : +1d8 lors du premier tour de combat','Niv.7 — Imagination rapide : action supplémentaire au premier tour de combat','Niv.11 — Attaque fantasme : au raté, réattaquer immédiatement (1×/tour)','Niv.15 — Résistance à la peur : immunité à l\'effroi']},
@@ -1804,6 +1825,7 @@ const SUBS={
     {id:'thief',n:'Voleur',fs:['Niv.3 — Mains agiles : Escamotage, crochetage, Outils de voleur en BONUS ACTION','Niv.3 — Deuxième histoire : escalader vitesse normale + sauter loin','Niv.9 — Maître de la discrétion : toujours maîtrisé Discrétion','Niv.13 — Usage d\'objet supérieur : utiliser objets magiques normalement inaccessibles','Niv.17 — Réflexes du voleur : 2 tours complets lors du premier round de combat']},
     {id:'assassin',n:'Assassin',fs:['Niv.3 — Maîtrises : kit de déguisement + outils empoisonneur','Niv.3 — Assassinat : avantage si ennemi n\'a pas encore agi + coup critique si surprise','Niv.9 — Imposteur : copier identité parfaite (comportement, ton, manières)','Niv.13 — Infiltration : créer fausse identité documentée en 7 jours','Niv.17 — Mort en un éclair : dépasser les PV max d\'une cible en un tour']},
     {id:'arcane-trickster',n:'Escroc Arcanique',fs:['Niv.3 — Sorts d\'enchantement/illusion (INT) : 3 cantrips + sorts niv.1','Niv.3 — Main du mage enchanté : bonus Escamotage via Main de mage','Niv.9 — Sort sournois : utiliser Attaque sournoise avec un sort de contact','Niv.13 — Voleur de magie : tenter de voler un sort en cours de lancement','Niv.17 — Sort volé : utiliser emplacement de sort sur des sorts volés']},
+    {id:'phantom',n:'Esprit Fantôme',fs:['Niv.3 — Bribes des morts : à chaque repos long, choisir 2 compétences ou outils au hasard parmi une liste élargie — maîtrise temporaire jusqu\'au prochain repos','Niv.3 — Danse fantôme : après une Attaque sournoise, téléporter 9m (bonus action) + dégâts nécrotiques bonus à la prochaine attaque','Niv.9 — Mémoires fantômes : expertise temporaire en Arcanes ou Histoire (contact avec les morts)','Niv.13 — Âme effilochée : immunité effroi, résistance nécrotique, voir les créatures invisibles dans 18m','Niv.17 — Souvenir final : toucher un mort récent (1 min) pour lire une de ses 5 dernières mémoires']},
   ],
   sorcerer:[
     {id:'draconic',n:'Lignée Draconique',fs:['Niv.1 — Ancêtre draconique : choisir type de dragon (souffle + résistance)','Niv.1 — Résilience draconique : +1 PV/niveau, CA 13+DEX sans armure','Niv.6 — Affinité élémentaire : +CHA mod aux dégâts du type draconique','Niv.14 — Ailes draconiques : vol = vitesse marche (bonus action)','Niv.18 — Présence draconique : Effrayer ou Fasciner dans 18m (CHA vs SAG, concentration)']},
@@ -2546,14 +2568,17 @@ function renderRace(){
   }
   const tabRaces=_selectedRaceFamily==='unique'?standalones:(famMap[_selectedRaceFamily]||standalones);
   $('lp').className='';
-  $('lp').innerHTML=`<div class="rp-panel-title">Choisir une Race</div>
+  const lorePanelHtml=C.race
+    ?`<div class="lore-traits">${C.race.traits.map(t=>`<span class="trait-chip">◆ ${t}</span>`).join('')}</div><div class="lore-text">${C.race.desc}</div>`
+    :`<span class="lore-empty">Cliquez sur une race pour voir ses traits et bonus</span>`;
+  $('lp').innerHTML=`<div class="rp-panel-title">1 / 7 — Race</div>
     <div class="family-tabs-wrap" id="ftabs"></div>
     <div class="race-grid-wrap"><div class="race-grid-2col" id="rg"></div></div>
-    <div class="lore-desc-panel" id="race-lore">${C.race?.desc||''}</div>
+    <div class="lore-desc-panel" id="race-lore">${lorePanelHtml}</div>
     <div class="panel-footer">
-      <button class="btn btn-s" style="font-size:8px;padding:.22em .55em;opacity:.4;" disabled>← Préc.</button>
-      <span class="step-indicator">1 / 7</span>
-      <button class="btn btn-p" style="font-size:8px;padding:.22em .55em;" onclick="if(C.race)go(1);else alert('Choisissez une race.')">Suiv. →</button>
+      <button class="btn btn-s" style="opacity:.35;cursor:default;" disabled>← Préc.</button>
+      <span class="footer-warn" id="race-warn">⚠ Choisissez une race</span>
+      <button class="btn btn-p" onclick="if(C.race){go(1);}else{const w=$('race-warn');w.classList.add('show');setTimeout(()=>w.classList.remove('show'),1800);}">Suivant →</button>
     </div>`;
   // Family tabs
   const ftabs=$('ftabs');
@@ -2571,13 +2596,16 @@ function renderRace(){
     const rs=RACE_STYLE[r.id]||RACE_STYLE[r.family]||{icon:'🧝',color:'var(--gold-d)'};
     const isSel=C.race?.id===r.id;
     const imgUrl=getRaceImgUrl(r.id);
-    const badges=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>`<span class="race-badge">${k.toUpperCase()}+${v}</span>`).join('');
+    const statBadges=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>`<span class="race-badge">${k.toUpperCase()}+${v}</span>`).join('');
+    const freeBadge=r.bonus._ch?`<span class="race-badge race-badge-free">+${r.bonus._ch} au choix</span>`:'';
+    const spdBadge=r.speed&&r.speed!==30?`<span class="race-badge" style="background:#2A1A0A;color:#9A7040;">⚡${r.speed}m</span>`:'';
+    const badges=statBadges+freeBadge+spdBadge;
     const card=document.createElement('div');
     card.className='race-card-mini'+(isSel?' selected':'');
     const portInner=imgUrl
-      ?`<img src="${imgUrl}" alt="${r.n}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'font-size:24px\\'>${rs.icon}</span>'">`
-      :`<span style="font-size:24px">${rs.icon}</span>`;
-    card.innerHTML=`${isSel?'<div class="sel-badge-mini">✓</div>':''}<div class="race-portrait-mini">${portInner}</div><div class="race-card-foot"><div class="race-card-name">${r.n}</div><div class="race-card-badges">${badges}</div></div>`;
+      ?`<img src="${imgUrl}" alt="${r.n}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'font-size:26px\\'>${rs.icon}</span>'">`
+      :`<span style="font-size:26px">${rs.icon}</span>`;
+    card.innerHTML=`${isSel?'<div class="sel-badge-mini">✓ Sélectionné</div>':''}<div class="race-portrait-mini">${portInner}</div><div class="race-card-foot"><div class="race-card-name">${r.n}</div><div class="race-card-badges">${badges}</div></div>`;
     card.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
     rg.appendChild(card);
   });
