@@ -991,7 +991,7 @@ body{background:var(--bg);}
 .currency-inp:focus{border-bottom-color:var(--gold-d);}
 
 /* ════ 3-COLUMN FORGE SHELL — RESPONSIVE ════ */
-#gs{height:100vh!important;overflow:hidden!important;}
+#gs{overflow:hidden!important;}
 #layout{display:grid!important;grid-template-columns:clamp(190px,17vw,270px) 1fr clamp(250px,22vw,340px)!important;flex:1!important;overflow:hidden!important;min-height:0!important;}
 #rp{width:auto!important;border-left:none!important;border-right:1px solid var(--bd-subtle)!important;flex-shrink:unset!important;overflow-y:auto!important;padding:clamp(.5rem,.7vw,1.1rem)!important;}
 /* Center immersive */
@@ -2499,8 +2499,16 @@ function getLanguages(){
 // ═══════════════════════════════════════════════════
 // UI
 // ═══════════════════════════════════════════════════
+function setForgeScale(){
+  const s=Math.min(2,Math.max(0.7,window.innerWidth/1280));
+  const g=$('gs');if(!g)return;
+  g.style.zoom=s.toFixed(3);
+  g.style.height=(100/s).toFixed(3)+'vh';
+  g.style.width=(100/s).toFixed(3)+'vw';
+}
+window.addEventListener('resize',setForgeScale);
 function showTitle(){$('ts').style.display='flex';$('gs').style.display='none';updateLoginStatus();}
-function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';}
+function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';setForgeScale();}
 function newChar(){
   C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',race:null,cls:null,sub:null,multiclasses:[],background:null,alignment:null,
     stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
