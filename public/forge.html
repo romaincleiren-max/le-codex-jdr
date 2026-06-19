@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
@@ -2310,6 +2310,7 @@ let _selectedRaceFamily=null;
 // UTILS
 // ═══════════════════════════════════════════════════
 const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 const mod=v=>Math.floor((v-10)/2);
 const mods=v=>{const m=mod(v);return(m>=0?'+':'')+m;};
 const PBC={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
@@ -5296,34 +5297,37 @@ function renderRoster(){
   }
   const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮'};
   g.innerHTML = roster.map(r=>{
-    const clsName = r.cls?.n||'—';
-    const clsKey = clsName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+    const clsName = esc(r.cls?.n||'—');
+    const clsKey = (r.cls?.n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
     const clsIcon = Object.entries(CLASS_ICONS).find(([k])=>clsKey.includes(k))?.[1]||'◈';
-    const raceName = r.race?.n||'—';
-    const lastScen = r.scenarioHistory?.length ? r.scenarioHistory[r.scenarioHistory.length-1].name : null;
+    const raceName = esc(r.race?.n||'—');
+    const lastScen = r.scenarioHistory?.length ? esc(r.scenarioHistory[r.scenarioHistory.length-1].name) : null;
     const histCount = r.scenarioHistory?.length||0;
     const bagCount = r.bag?.length||0;
     const clsImgUrl = r.cls?.id ? getClsImgUrl(r.cls.id) : null;
     const clsFallbackHtml = `<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${clsIcon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${clsName}</span></div>`;
-    const portrait = r.photo
-      ? `<img src="${r.photo}" alt="${r.name}">`
+    const safeName = esc(r.name);
+    const safePhoto = r.photo ? esc(r.photo) : null;
+    const safeId = esc(r.id);
+    const portrait = safePhoto
+      ? `<img src="${safePhoto}" alt="${safeName}">`
       : clsImgUrl
-        ? `<img src="${clsImgUrl}" alt="${clsName}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" data-cls-id="${r.cls.id}" onerror="rcClsImgFallback(this);">`
+        ? `<img src="${esc(clsImgUrl)}" alt="${clsName}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" data-cls-id="${esc(r.cls.id)}" onerror="rcClsImgFallback(this);">`
         : clsFallbackHtml;
     return `<div class="rc">
-      <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${r.id}')" title="Supprimer">✕</button>
+      <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('\')" title="Supprimer">✕</button>
       <div class="rc-portrait">${portrait}</div>
       <div class="rc-body">
-        <div class="rc-name">${r.name}</div>
+        <div class="rc-name">${safeName}</div>
         <div class="rc-sub">${clsName} · ${raceName} · Niv ${r.level||1}</div>
         <div class="rc-meta"><span>🎒 ${bagCount}</span><span>📜 ${histCount}</span></div>
         <div class="rc-scenarios">${lastScen||(!histCount?'Aucun scénario':'')}</div>
         <div class="rc-btns">
-          <button class="rc-btn primary" onclick="openRosterEquip('${r.id}')">⚔ Fiche</button>
-          <button class="rc-btn" onclick="openCharFromRoster('${r.id}')">Éditer</button>
-          <button class="rc-btn" onclick="openShareModal('${r.id}')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager sur le site">📤</button>
+          <button class="rc-btn primary" onclick="openRosterEquip('\')">⚔ Fiche</button>
+          <button class="rc-btn" onclick="openCharFromRoster('\')">Éditer</button>
+          <button class="rc-btn" onclick="openShareModal('\')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager sur le site">📤</button>
         </div>
-        ${r.supabaseId?`<button class="rc-share-admin${r.sharedWithAdmin?' shared':''}" onclick="shareCharWithAdmin('${r.id}')" title="${r.sharedWithAdmin?'Partagé avec l\'Admin — cliquer pour annuler':'Partager avec l\'Admin'}">
+        ${r.supabaseId?`<button class="rc-share-admin${r.sharedWithAdmin?' shared':''}" onclick="shareCharWithAdmin('\')" title="${r.sharedWithAdmin?'Partagé avec l\'Admin — cliquer pour annuler':'Partager avec l\'Admin'}">
           ${r.sharedWithAdmin?'👑 Partagé ✓':'👑 Partager avec l\'Admin'}</button>`:'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#3A2A1A;margin-top:.25rem;">💾 Sauvegardez d\'abord pour partager</div>'}
       </div>
     </div>`;
@@ -6101,12 +6105,13 @@ async function loadAdminPanel(){
     if(!data.length){$('admin-char-grid').innerHTML='<div class="admin-empty">Aucun personnage partagé pour l\'instant.</div>';return;}
     $('admin-char-grid').innerHTML=data.map(function(row){
       var sd=row.sheet_data||{};
-      var name=row.char_name||sd.name||'—';
-      var cls=(row.class_name||sd.cls?.n||'—');
-      var race=(row.race_name||sd.race?.n||'—');
-      var lvl=row.level||sd.level||1;
-      var player=sd.player||'';
-      return '<div class="admin-card" onclick="adminOpenChar(\''+row.id+'\')" title="Ouvrir la fiche">'
+      var name=esc(row.char_name||sd.name||'—');
+      var cls=esc(row.class_name||sd.cls?.n||'—');
+      var race=esc(row.race_name||sd.race?.n||'—');
+      var lvl=esc(row.level||sd.level||1);
+      var player=esc(sd.player||'');
+      var sid=esc(row.id);
+      return '<div class="admin-card" onclick="adminOpenChar(\''+sid+'\')" title="Ouvrir la fiche">'
         +'<div class="admin-card-name">'+name+'</div>'
         +'<div class="admin-card-sub">'+cls+' · '+race+' · Niv.'+lvl+'</div>'
         +(player?'<div class="admin-card-player">Joueur : '+player+'</div>':'')
@@ -6117,6 +6122,7 @@ async function loadAdminPanel(){
 }
 
 async function adminOpenChar(supabaseId){
+  if(!_isAdmin){console.warn('adminOpenChar: accès refusé');return;}
   const sc=getSupaClient();
   try{
     const {data,error}=await sc.from('characters').select('sheet_data').eq('id',supabaseId).single();
@@ -6602,7 +6608,7 @@ async function submitShareCharacter() {
 
   const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮'};
   const clsName = r.cls?.n||'';
-  const clsKey = clsName.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const clsKey = (r.cls?.n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const emoji = Object.entries(CLASS_ICONS).find(([k])=>clsKey.includes(k))?.[1]||'⚔';
 
   const payload = {
