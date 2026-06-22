@@ -1020,7 +1020,7 @@ body{background:var(--bg);}
 .bonus-badge-c{background:#2A4A1E;color:#7AA66A;font-family:'Share Tech Mono',monospace;font-size:clamp(6px,.6vw,9px);padding:2px 5px;border:1px solid rgba(122,166,106,.22);}
 /* Right panel — step content */
 #lp{width:auto!important;max-width:none!important;padding:0!important;flex:unset!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;}
-#lp.lp-scroll-mode{overflow-y:auto!important;}
+#lp.lp-scroll-mode{overflow-y:auto!important;display:block!important;}
 .rp-panel-title{font-family:'Cinzel',serif;font-size:clamp(10px,.95vw,15px);letter-spacing:.07em;color:var(--gold);padding:clamp(.4rem,.5vw,.7rem) clamp(.5rem,.6vw,.9rem);border-bottom:1px solid var(--bd-subtle);flex-shrink:0;}
 /* Family tabs (race panel) */
 .family-tabs-wrap{overflow-x:auto;flex-shrink:0;padding:.3rem .45rem .2rem;border-bottom:1px solid var(--bd-subtle);display:flex;gap:2px;scrollbar-width:thin;scrollbar-color:var(--gold-d) transparent;}
@@ -1153,8 +1153,9 @@ body{background:var(--bg);}
 .inv-item{box-shadow:0 1px 6px rgba(0,0,0,.3);}
 
 /* ── Roster cards (rc) ── */
-.rc{border-radius:8px!important;overflow:hidden!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important;transition:.2s ease!important;}
-.rc:hover{box-shadow:0 8px 28px rgba(0,0,0,.7)!important;transform:translateY(-2px)!important;}
+.rc{border-radius:8px!important;box-shadow:0 4px 16px rgba(0,0,0,.55)!important;transition:.2s ease!important;}
+.rc:hover{box-shadow:0 8px 28px rgba(0,0,0,.7)!important;}
+.rc-portrait{border-radius:7px 7px 0 0!important;overflow:hidden!important;}
 .rc-name{letter-spacing:.04em;}
 
 /* ── Center column — gradients atmosphériques ── */
