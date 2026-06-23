@@ -624,7 +624,7 @@ body.printing #ps-print{display:block!important;}
 .re-stat-pill-v{font-family:'Cinzel Decorative',serif;font-size:clamp(14px,2.2vh,26px);color:var(--parch);display:block;}
 .re-stat-pill-l{font-family:'Cinzel',serif;font-size:clamp(7px,1vh,11px);letter-spacing:.1em;color:var(--gold-d);display:block;text-transform:uppercase;margin-top:2px;}
 .re-doll-slot-icon{width:clamp(24px,3vh,38px);height:clamp(24px,3vh,38px);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,2.2vh,26px);line-height:1;overflow:hidden;border-radius:3px;}
-.re-doll-slot-icon img{width:100%;height:100%;object-fit:contain;}
+.re-doll-slot-icon img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;image-rendering:crisp-edges;}
 .re-doll-slot-info{flex:1;min-width:0;}
 .re-doll-slot-lbl{font-family:'Cinzel',serif;font-size:clamp(6px,.75vh,9px);letter-spacing:.1em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.3;}
 .re-doll-slot-nm{font-family:'IM Fell English',serif;font-size:clamp(9px,1.2vh,13px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
@@ -2087,6 +2087,218 @@ const SPELLS9={
 };
 // Table de référence par niveau
 const SPELLS_BY_LEVEL=[null,SPELLS1,SPELLS2,SPELLS3,SPELLS4,SPELLS5,SPELLS6,SPELLS7,SPELLS8,SPELLS9];
+
+// Descriptions courtes des sorts (tooltip)
+const SPELL_DESC={
+  // ── Sorts mineurs ──
+  'Trait de feu':'Attaque à distance · 1d10 feu · portée 36 m',
+  'Rayon de givre':'Attaque à distance · 1d8 froid · vitesse -3 m 1 tour',
+  'Décharge électrique':'Attaque à distance · 1d8 foudre · désavantage armure métal',
+  'Lumière':'Objet brillant lumière vive 6 m / faible 6 m · 1 heure',
+  'Prestidigitation':'Effets magiques mineurs à volonté (nettoyer, allumer, etc.)',
+  'Illusion mineure':'Son ou image fixe dans 9 m · 1 minute',
+  'Aspersion acide':'1–2 cibles adjacentes · 1d6 acide · JdS Dex annule',
+  'Bouffée de poison':'Cible à 3 m · 1d12 poison · JdS Con annule',
+  'Main de mage':'Main spectrale · manipule objets à 9 m',
+  'Contact glacial':'Contact · 1d8 nécrotique · pas de récup. PV 1 tour',
+  'Poigne électrique':'Contact · 1d8 foudre · désavantage JS si armure métal',
+  'Thaumaturgie':'Effets mineurs : tonnerre, feu, son dans 9 m',
+  'Flamme sacrée':'JdS Dex ou 1d8 radiant · pas d\'abri · portée 18 m',
+  'Guidance':'Toucher · +1d4 à un test de carac. · 1 min',
+  'Résistance':'Toucher · +1d4 à un jet de sauvegarde · 1 min',
+  'Réparation':'Répare une petite coupure ou fissure dans un objet',
+  'Gémissement':'Réaction · cible s\'effraie · JdS Sagesse',
+  'Assistance':'Allié · +1d4 au prochain jet d\'attaque ou test',
+  'Druidisme':'Communique avec la nature · effets mineurs',
+  'Feu follet':'Flamme dansante dans la main · chauffe ou éclaire',
+  // ── Niveau 1 ──
+  'Armure du mage':'CA = 13 + mod Dex · 8 heures · pas d\'armure requise',
+  'Projectile magique':'3 fléchettes de force auto · 1d4+1 force chacune',
+  'Bouclier':'Réaction · +5 CA · 1 tour · absorbe Projectile magique',
+  'Charme-personne':'JdS Sag ou cible amie · 1 heure · portée 9 m',
+  'Sommeil':'5d8 PV de créatures endormies (plus faibles d\'abord)',
+  'Mains brûlantes':'Cône 4,5 m · 3d6 feu · JdS Dex demi',
+  'Feuille morte':'Chute ralentie 18 m/round · pas de dégâts de chute',
+  'Nappe de brouillard':'Sphère 6 m de rayon · bloque la vue · 10 min (concentration)',
+  'Compréhension des langues':'Lit et comprend toutes langues · 1 heure (rituel)',
+  'Détection de la magie':'Sens magie à 9 m · 10 min (rituel, concentration)',
+  'Déguisement':'Change votre apparence physique · 1 heure',
+  'Couleurs dansantes':'Cône · aveugle créatures (JdS Con) · total 10d6 PV',
+  'Image silencieuse':'Illusion visuelle 4,5 m cube · 10 min (concentration)',
+  'Saut':'Triple la distance de saut d\'une créature · 1 min',
+  'Grande foulée':'Double la vitesse de déplacement · 1 heure',
+  'Alarme':'Alerte si intrusion dans zone · rituel possible',
+  'Absorption des éléments':'Réaction · absorbe dégâts élémentaires · +1d6/niv au c-à-c',
+  'Soin des blessures':'Toucher · 1d8 + mod Sacré PV',
+  'Bénédiction':'3 cibles · +1d4 attaques et JdS · 1 min (concentration)',
+  'Bane':'3 cibles (JdS Cha) · -1d4 attaques et JdS · 1 min',
+  'Sanctuaire':'Attaques contre vous nécessitent JdS Sag · bonus action',
+  'Bouclier de la foi':'Aura brillante · +2 CA · 10 min (concentration)',
+  'Injonction':'Un mot (JdS Sag) : approche, fuit, tombe, part, stop',
+  'Guérison':'Stabilise et rend 1 PV à une créature à 0 PV',
+  'Armure spirituelle':'+2 CA · 1 heure · pas de concentration, pas d\'armure',
+  'Protection contre le mal et le bien':'Protège contre créatures anormales · 10 min (concentration)',
+  'Mot de guérison':'Action bonus · 18 m · 1d4 + mod Sacré PV',
+  'Aide':'2 alliés · +5 PV max et PV actuels · 8 heures',
+  'Enchevêtrement':'Zone 6 m · plantes entravantes · JdS For · 1 min (conc.)',
+  'Marque du chasseur':'Bonus · +1d6 dégâts sur proie · suivi 1 heure (conc.)',
+  'Baies nourricières':'10 baies · 1 PV chacune · nourrit 1 jour',
+  'Communication avec les animaux':'Parle aux bêtes · 10 min (rituel)',
+  'Héroïsme':'Allié immunisé à Peur · +mod Cha PV temps chaque tour · 1 min',
+  'Frayeur':'Cône 9 m · JdS Sag ou Peur · 1 min (concentration)',
+  'Hexe':'Bonus · +1d6 nécrotique sur cible · désavantage 1 carac · 1h',
+  'Regain d\'aplomb':'Réaction · annule un effet d\'échec · une fois/repos',
+  // ── Niveau 2 ──
+  'Invisibilité':'Cible invisible · 1 heure (concentration) · annulé si attaque',
+  'Toile d\'araignée':'Zone 6 m cube · toiles entravantes · JdS Dex · 1 min',
+  'Flèche acide de Melf':'Attaque à distance · 4d4 acide imm. + 2d4 acide fin tour',
+  'Cécité/Surdité':'JdS Con ou aveuglé/assourdi · jusqu\'à annulé (1 min)',
+  'Verrou d\'Arcane':'Verrouille une porte ou conteneur magiquement',
+  'Projectile enflammé':'Attaque à distance · 3d6 feu · embrase cible',
+  'Force du taureau':'+4 For · avantage tests Force · 1 heure',
+  'Flou':'Attaquants désavantagés contre vous · 1 min (concentration)',
+  'Pas nébuleux':'Téléportation bonus action dans un espace libre à 9 m',
+  'Ténèbres':'Sphère 4,5 m obscurité magique · 10 min (concentration)',
+  'Détection des pensées':'Lit les pensées superficielles à 9 m · 1 min (conc.)',
+  'Fracassement':'Tonnerre 3 m rayon · 3d8 tonnerre · JdS Con demi',
+  'Silence':'Zone 6 m · aucun son ni sort verbal · 10 min (conc.)',
+  'Immobilisation de personne':'JdS Sag ou paralysé · 1 min (conc.) · renouvelable',
+  'Prière de soins':'Jusqu\'à 6 cibles à 9 m · 2d8 + mod Sacré PV · 10 min',
+  'Arme spirituelle':'Arme de force bonus action · 1d8 + mod Sacré · 1 min',
+  'Restauration partielle':'Supprime une affliction (aveuglé, empoisonné, etc.)',
+  'Protection contre le poison':'Neutralise venin · résistance poison · 1 heure',
+  'Augure':'Rituel · présage sur une action prévue · destin/malheur',
+  'Trouver des pièges':'Sens la présence de pièges dans 36 m',
+  'Amélioration de caractéristique':'+2 à une caractéristique (max 20) · 1 heure (conc.)',
+  'Peau d\'écorce':'+5 CA (min 16) · 8 heures · concentration',
+  'Croissance d\'épines':'Zone 6 m · épines · 2d4 perforant · terrain difficile',
+  'Localisation d\'animaux':'Sens bête ou plante dans 1,5 km · 30 min (conc.)',
+  'Lien avec un animal':'Familiarisez-vous avec une bête ordinaire · 24h',
+  'Passage sans trace':'+10 Discrétion groupe · pas de traces · 1 heure (conc.)',
+  'Fractionnement':'Partagez dégâts reçus avec une autre cible · réaction',
+  'Déblocage':'Ouvre verrous et barricades magiques ou ordinaires',
+  'Suggestion':'JdS Sag · cible suit une suggestion raisonnable · 8h',
+  'Image majeure':'Illusion multisensorielle 5 m cube · 10 min (conc.)',
+  'Couronne de folie':'JdS Sag ou charmé, ordres aléatoires · 1 min (conc.)',
+  // ── Niveau 3 ──
+  'Boule de feu':'Sphère 6 m · 8d6 feu · JdS Dex demi · portée 45 m',
+  'Éclair':'Ligne 30 m · 8d6 foudre · JdS Dex demi',
+  'Contresort':'Réaction · interrompt sort niv.3 ou moins auto · sup. JdS',
+  'Dissipation de la magie':'Annule sort ou effet magique actif (auto si niv.3)',
+  'Vol':'Cible vole à 18 m/round · 10 min (concentration)',
+  'Hâte':'Double vitesse, +1 CA, attaque bonus · 1 min (concentration)',
+  'Lenteur':'6 cibles (JdS Sag) · demi vitesse, -2 CA, 1 action · 1 min',
+  'Clignotement':'50% chance de téléportation plan éthéré chaque tour · 1 min',
+  'Vague de tonnerre':'Cube 4,5 m · 2d8 tonnerre · repoussé 3 m · JdS Con',
+  'Terreur':'Cône 9 m · JdS Sag ou Peur · 1 min (concentration)',
+  'Langue':'Cible parle et comprend toutes langues · 1 heure',
+  'Cercle magique':'Cylindre 3 m · maintient créatures d\'un type à l\'extérieur',
+  'Non-détection':'Protège contre divination · 8 heures',
+  'Animation des morts':'Anime 3 squelettes ou zombies · 24 heures',
+  'Aura de vitalité':'Sphère 9 m · soigne 2d6 PV bonus action/tour · 1 min',
+  'Clairvoyance':'Œil/oreille invisible dans un lieu connu · 10 min',
+  'Délivrance des malédictions':'Supprime toutes malédictions sur une cible',
+  'Lueur d\'espoir':'Avantage JdS Sag et mort · maximise soins · 3 min (conc.)',
+  'Protection contre l\'énergie':'Résistance à un type d\'énergie · 1 heure (conc.)',
+  'Revigoration de masse':'6 cibles · supprime une condition chacune',
+  'Appel de la foudre':'Nuage tempétueux · foudre 3d10 chaque tour · 10 min',
+  'Croissance végétale':'Zone envahie de végétation dense (terrain difficile)',
+  'Communication avec les plantes':'Parle aux végétaux · informations locales · 10 min',
+  'Façonnage de la terre':'Modèle la terre et la pierre dans 36 m',
+  'Hypnose':'Zone 9 m · créatures charmées et incapacitées · JdS Sag',
+  'Motif hypnotique':'Zone 9 m · 3d6 créatures (JdS Sag) incapacitées · 1 min',
+  'Faim d\'Hadar':'Zone 6 m rayon · obscurité, dégâts froids et acide · 1 min',
+  // ── Niveau 4 ──
+  'Confusion':'Sphère 3 m · actions aléatoires · JdS Sag · 1 min (conc.)',
+  'Terrain hallucinatoire':'Zone 45 m carré · illusion du terrain · 24 heures',
+  'Mur de feu':'Rideau de feu 9 m · 5d8 feu par traverse · 1 min (conc.)',
+  'Peau de pierre':'CA 17 (armure naturelle) · concentration · pas combinable',
+  'Flétrissement':'Toucher · 8d8 nécrotique · JdS Con demi · végétaux auto',
+  'Bannissement':'JdS Cha ou banni sur son plan d\'origine · concentration',
+  'Porte dimensionnelle':'Téléportation dans un lieu connu à 500 km · 1 action',
+  'Sphère de tempête':'Boule d\'éclairs mobiles · 2d6 foudre rayon d\'action bonus',
+  'Liberté de mouvement':'Immunité entrave, plongée, magie de déplacement · 1 heure',
+  'Invisibilité suprême':'Invisible même en attaquant · 1 min (concentration)',
+  'Gardien de la foi':'Gardien spectral 3 m rayon · 20 radiant sur intrus · 8h',
+  'Protection contre la mort':'Immunité à la mort magique · 8 heures',
+  'Mort et désintégration':'Prévient mort imminente une fois · 1 minute',
+  'Mort simulée':'Catalepsie indétectable · 1 heure',
+  'Domination de bête':'Contrôle mental d\'une bête · JdS Sag · 1 min (conc.)',
+  'Sécheresse':'Zone 9 m rayon · eau annulée · plantes mortes',
+  'Façonnage de la pierre':'Modèle pierre naturelle ou taillée à volonté',
+  'Façonnage de l\'eau':'Déplace ou modèle une eau dans 9 m',
+  'Charme monstre':'JdS Sag ou charmé · fonctionne sur toute créature · 1 heure',
+  'Cauchemar (Blight)':'Toucher · 8d8 nécrotique · JdS Con demi',
+  // ── Niveau 5 ──
+  'Cône de froid':'Cône 18 m · 8d8 froid · JdS Con demi',
+  'Domination d\'humanoïde':'Contrôle mental · JdS Sag · 1 min (concentration)',
+  'Télékinésie':'Déplace objet ou créature à 9 m · 10 min (conc.)',
+  'Mur de force':'Panneau invisible indestructible jusqu\'à dissipé',
+  'Modification de mémoire':'Modifie 10 min de mémoire d\'une créature',
+  'Passe-muraille':'Passe à travers murs et plafonds · 1 heure',
+  'Immobilisation de monstre':'JdS Sag ou paralysé (toute créature) · 1 min (conc.)',
+  'Délivrance de malédiction de masse':'Restauration partielle sur 6 créatures',
+  'Création':'Crée objet de matière quasi-réelle jusqu\'à 5 pi³',
+  'Renvoi des impies':'Mort-vivants et fiélons · JdS Sag ou bannis/détruits',
+  'Rappel à la vie':'Ramène mort de moins de 10 jours · -1 jeton épuisement',
+  'Guérison de masse':'6 cibles dans 9 m · 3d8 + mod Sacré PV',
+  'Contagion':'Toucher · maladie dévastatrice (empoisonné 3 rounds d\'abord)',
+  'Tremblement de terre':'Zone 30 m · terrain instable · concentration · 1 min',
+  'Réveil de la nature':'Animaux et plantes attaquent dans grande zone',
+  'Fléau d\'insectes':'Nuée · 4d10 perforant par tour · JdS Con demi · 10 min',
+  'Mur d\'épines':'Rideau d\'épines 18 m · 7d8 perforant · JdS Dex demi',
+  'Communion avec la nature':'Rituel · 3 informations sur le terrain environnant',
+  'Contact du plan Astral':'Toucher · JdS Int ou banni sur plan astral',
+  'Modifications de forme':'Transformez volontairement en bête CR ≤ niv/4',
+  'Cercle des morts':'Jusqu\'à 12 mort-vivants sous commandement · 24 heures',
+  // ── Niveau 6 ──
+  'Désintégration':'Attaque sort · 10d6+40 force · JdS Dex demi · anéantit à 0 PV',
+  'Chaîne d\'éclairs':'Foudre à 4 cibles · 10d8 foudre · JdS Dex demi',
+  'Globe d\'invulnérabilité':'Sphère · immunise sorts niv.5 et moins · 1 min (conc.)',
+  'Suggestion de masse':'12 cibles · JdS Sag ou suivent suggestion · 24 h',
+  'Marque du chasseur suprême':'Comme Marque du chasseur mais sorts niv.6',
+  'Injonction de masse':'Jusqu\'à 6 cibles · JdS Sag ou injonction 1 min',
+  'Vision de la vérité':'Vois l\'invisible et les illusions · 10 min',
+  'Guérison':'Toucher · rend 70 PV · supprime maladies et conditions',
+  'Blessure':'Toucher · 70 PV de dégâts nécrotiques · JdS Con demi',
+  'Ange gardien':'Ange protège 30 m · absorbe dégâts pour vous · 1 heure',
+  'Sanctification':'Zone sacrée protégée contre créatures choisies · perm.',
+  'Coque de transport':'Coquillage → véhicule maritime magique',
+  'Barrière de lames':'Rideau de lames 18 m · 6d10 tranchant · JdS Dex demi',
+  'Festin des héros':'Banquet · immunités, soins, avantage JdS Sag · 24h',
+  'Formes vivantes':'Transformez animaux en humanoïdes temporairement',
+  'Inspiration épique':'Dé d\'inspiration bardique recharge toutes 1 min',
+  'Cercle de mort':'Sphère 18 m · 8d6 nécrotique · JdS Con demi · tue 0 PV',
+  // ── Niveau 7 ──
+  'Téléportation':'Transport jusqu\'à 8 créatures vers un lieu connu',
+  'Doigt de mort':'Toucher · 7d8+30 nécrotique · JdS Con demi · zombie si tué',
+  'Inversion de la gravité':'Zone 30 m rayon · gravité inversée · 1 min (conc.)',
+  'Résurrection':'Ramène mort de moins de 100 ans · corps reconstitué',
+  'Forme éthérée':'Plan éthéré · invisible · traversez matière · 8 heures',
+  'Mot divin':'JdS Cha · aveuglé/sourd/étourdi/mort selon PV · portée 9 m',
+  'Régénération':'Toucher · 4d8+15 PV · regagne 1 PV/tour · 1 heure',
+  'Tempête de feu':'Zone 9×9 m · 7d10 feu · JdS Dex demi',
+  'Forme animale suprême':'Transformation en créature légendaire (CR ≤ 20)',
+  'Cercle planaire':'Accès ou invocation d\'un plan alternatif',
+  // ── Niveau 8 ──
+  'Domination de monstre':'Contrôle mental toute créature · JdS Sag · 1 heure',
+  'Puissant invincibilité':'Immunité tous dégâts sauf force · 1 minute',
+  'Résurrection suprême':'Ramène mort quelle que soit l\'ancienneté',
+  'Sanctification de masse':'Zone entière sanctifiée de façon permanente',
+  'Tempête de grêle':'Cylindre 18 m · 2d8 contondant +4d6 froid · terrain difficile',
+  'Animaux suprêmes':'8 créatures de CR ≤ 3 ou 1 de CR ≤ 18 sous commandement',
+  'Confusion de masse':'Zone 18 m rayon · actions aléatoires · 1 min (conc.)',
+  'Demi-plan':'Porte vers poche dimensionnelle personnelle permanente',
+  // ── Niveau 9 ──
+  'Vœu':'Le sort le plus puissant · 1 vœu possible avec des risques',
+  'Porte':'Portail vers plan/lieu spécifié · permanence possible',
+  'Invocation de monstre IX':'Invoque créature alliée CR ≤ 16 · 1 heure (conc.)',
+  'Nuée de météores':'4 météores · 2d6 feu + 2d6 contondant chacun · action bon.',
+  'Résurrection véritable':'Ramène mort quelle que soit la cause ou l\'ancienneté',
+  'Façonnage de la réalité':'Altère la réalité dans 1,5 km rayon (druide épique)',
+  'Foresight':'Sens danger · avantage tous jets · impossible d\'être surpris · 8h',
+  'Projection astrale':'Voyage sur le plan astral · corps physique endormi',
+};
 
 // ═══════════════════════════════════════════════════
 // FEATS (Dons D&D 5e SRD)
@@ -5009,7 +5221,8 @@ function renderReSpells(){
       var active=cants.includes(s);
       var disabled=!active&&cntFull;
       html+='<div class="re-sp-card'+(active?' active':'')+(disabled?' grayed':'')+'"'
-        +' onclick="reToggleSpell(\'c\',\''+s.replace(/'/g,"\\'")+'\')">'
+        +' onclick="reToggleSpell(\'c\',\''+s.replace(/'/g,"\\'")+'\')"'
+        +' onmouseenter="showSpellTooltip(event,\''+s.replace(/'/g,"\\'")+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'
         +(active?'✓ ':'')+'<span>'+s+'</span>'
         +(active?'<span style="color:#8A3A3A;font-size:10px;margin-left:2px;">✕</span>':'')+'</div>';
     });
@@ -5030,7 +5243,8 @@ function renderReSpells(){
         var disabled=!active&&spFull;
         var cls=info.isPrepared?(active?'active prepared-cls':''):(active?'active':'');
         html+='<div class="re-sp-card '+cls+(disabled?' grayed':'')+'"'
-          +' onclick="reToggleSpell(\'s\',\''+s.replace(/'/g,"\\'")+'\')">'
+          +' onclick="reToggleSpell(\'s\',\''+s.replace(/'/g,"\\'")+'\')"'
+          +' onmouseenter="showSpellTooltip(event,\''+s.replace(/'/g,"\\'")+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'
           +(active?(info.isPrepared?'✓ ':'✓ '):'')+'<span>'+s+'</span>'
           +(active?'<span style="color:#8A3A3A;font-size:10px;margin-left:2px;">✕</span>':'')+'</div>';
       });
@@ -5142,8 +5356,23 @@ function showItemTooltip(ev, item){
   var tt=$('re-slot-tooltip'); if(!tt||!item)return;
   var rc=item.rarity&&_RE_RC?_RE_RC[item.rarity]:null;
   var rarHtml=item.rarity?'<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+(rc||'#C9A84C')+';">'+item.rarity+'</div>':'';
+  var typeHtml=(item.cat||item.item_type||item.type)?'<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;">'+(item.cat||item.item_type||item.type)+'</div>':'';
+  var metaHtml='';
+  if(item.w&&item.w>0||item.c){
+    metaHtml='<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#5A4A2A;margin-top:3px;">';
+    if(item.w&&item.w>0)metaHtml+=item.w+' lb  ';
+    if(item.c)metaHtml+=item.c;
+    metaHtml+='</div>';
+  }
   var harmHtml=item.attunement?'<div class="rst-attune">⧁ Harmonisation requise</div>':'';
-  tt.innerHTML='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+rarHtml+harmHtml;
+  tt.innerHTML='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+typeHtml+rarHtml+metaHtml+harmHtml;
+  posSlotTooltip(ev);
+  tt.classList.add('visible');
+}
+function showSpellTooltip(ev, name){
+  var tt=$('re-slot-tooltip'); if(!tt)return;
+  var desc=SPELL_DESC[name]||'';
+  tt.innerHTML='<div class="rst-name">'+name+'</div>'+(desc?'<div style="font-size:10px;color:#8A7A5A;margin-top:4px;line-height:1.4;">'+desc+'</div>':'');
   posSlotTooltip(ev);
   tt.classList.add('visible');
 }
