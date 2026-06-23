@@ -1189,6 +1189,80 @@ body{background:var(--bg);}
 /* ── Focus ring ── */
 button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);outline-offset:2px;}
 
+/* ══════════════════ BESTIAIRE ══════════════════ */
+#bestiary-overlay{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9100;display:none;flex-direction:column;background:#0D0805;}
+#bestiary-overlay.open{display:flex;}
+#bestiary-hdr{background:linear-gradient(100deg,#14100A,#0C0906);border-bottom:1px solid #2A1A08;padding:.5rem 1.2rem;display:flex;align-items:center;justify-content:space-between;flex-shrink:0;}
+#bestiary-hdr-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.22em;color:var(--gold-d);text-transform:uppercase;}
+#bestiary-hdr-name{font-family:'Cinzel Decorative',serif;font-size:14px;color:var(--gold);margin-left:.7rem;}
+#bestiary-body{flex:1;display:flex;overflow:hidden;}
+/* Left column — list */
+#bestiary-list-col{flex:0 0 25%;width:25%;display:flex;flex-direction:column;border-right:1px solid #1E1208;background:#0F0A06;overflow:hidden;}
+#bestiary-search-wrap{padding:.4rem .5rem;border-bottom:1px solid #1E1208;flex-shrink:0;}
+#bestiary-search{width:100%;box-sizing:border-box;background:#130D06;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .5rem;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--parch);outline:none;}
+#bestiary-search::placeholder{color:#4A3A1A;}
+#bestiary-add-btn{margin:.4rem .5rem;display:block;width:calc(100% - 1rem);box-sizing:border-box;background:#1A1208;border:1px solid #3A2A12;border-radius:4px;padding:.3rem;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:var(--gold-d);cursor:pointer;text-align:center;transition:.12s;}
+#bestiary-add-btn:hover{background:#221A0A;border-color:var(--gold-d);}
+#bestiary-list-scroll{flex:1;overflow-y:auto;padding:.3rem 0;}
+#bestiary-list-scroll::-webkit-scrollbar{width:3px;}
+#bestiary-list-scroll::-webkit-scrollbar-thumb{background:#2A1A08;}
+.bst-family-hdr{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.14em;color:var(--gold-d);text-transform:uppercase;padding:.35rem .6rem .15rem;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #1E1208;user-select:none;}
+.bst-family-hdr:hover{background:#130D06;}
+.bst-family-arrow{transition:transform .15s;font-size:9px;color:#6A5A3A;}
+.bst-family-hdr.open .bst-family-arrow{transform:rotate(90deg);}
+.bst-monster-list{overflow:hidden;}
+.bst-monster-item{padding:.28rem .8rem .28rem 1.2rem;font-family:'IM Fell English',serif;font-size:11px;color:#A89060;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:.1s;border-left:2px solid transparent;}
+.bst-monster-item:hover{background:#130D06;color:var(--parch);}
+.bst-monster-item.active{background:#1A1208;border-left-color:var(--gold-d);color:var(--gold);}
+.bst-cr-badge{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;flex-shrink:0;margin-left:.3rem;}
+/* Right column — sheet */
+#bestiary-sheet-col{flex:1;overflow-y:auto;padding:1.4rem 2rem;background:#0D0805;}
+#bestiary-sheet-col::-webkit-scrollbar{width:5px;}
+#bestiary-sheet-col::-webkit-scrollbar-thumb{background:#2A1A08;}
+#bestiary-sheet{max-width:820px;margin:0 auto;}
+.bst-empty{font-family:'IM Fell English',serif;font-size:14px;color:#4A3A1A;font-style:italic;text-align:center;margin-top:3rem;}
+/* Sheet components */
+.bst-sheet-name{font-family:'Cinzel Decorative',serif;font-size:26px;color:var(--gold);margin-bottom:.2rem;}
+.bst-sheet-sub{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.1em;color:var(--gold-d);text-transform:uppercase;margin-bottom:.8rem;}
+.bst-vitals{display:flex;gap:.6rem;margin-bottom:.8rem;}
+.bst-vital-box{flex:1;background:#130D06;border:1px solid #2A1A08;border-radius:5px;padding:.5rem .6rem;text-align:center;}
+.bst-vital-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:var(--gold-d);text-transform:uppercase;display:block;margin-bottom:2px;}
+.bst-vital-val{font-family:'Cinzel Decorative',serif;font-size:15px;color:var(--parch);}
+.bst-stats-row{display:grid;grid-template-columns:repeat(6,1fr);gap:.4rem;margin-bottom:.8rem;}
+.bst-stat-box{background:#130D06;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .2rem;text-align:center;}
+.bst-stat-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.08em;color:var(--gold-d);display:block;}
+.bst-stat-val{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--blood);line-height:1.1;}
+.bst-stat-mod{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8A9080;}
+.bst-section{margin-bottom:.7rem;border-top:1px solid #1E1208;padding-top:.5rem;}
+.bst-section-lbl{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.14em;color:var(--gold-d);text-transform:uppercase;margin-bottom:.3rem;}
+.bst-prop-line{font-family:'Share Tech Mono',monospace;font-size:10px;color:#8A7A5A;margin-bottom:.2rem;line-height:1.5;}
+.bst-prop-line b{color:var(--parch);}
+.bst-trait{margin-bottom:.5rem;}
+.bst-trait-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parch);font-style:italic;}
+.bst-trait-desc{font-family:'IM Fell English',serif;font-size:12px;color:#9A8A6A;line-height:1.5;margin-top:.1rem;}
+.bst-divider{border:none;border-top:1px solid #2A1A08;margin:.6rem 0;}
+.bst-action-section-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.16em;color:var(--blood);text-transform:uppercase;margin:.6rem 0 .35rem;border-bottom:1px solid #2A1A08;padding-bottom:.2rem;}
+/* Modal add/edit */
+#bst-modal{position:fixed;top:0;left:0;width:100vw;height:100vh;z-index:9200;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;}
+#bst-modal.open{display:flex;}
+#bst-modal-inner{background:#130D06;border:1px solid #3A2810;border-radius:8px;padding:1.4rem 1.6rem;width:680px;max-height:85vh;overflow-y:auto;position:relative;}
+#bst-modal-inner::-webkit-scrollbar{width:4px;}
+#bst-modal-inner::-webkit-scrollbar-thumb{background:#2A1A08;}
+.bst-form-row{display:flex;gap:.6rem;margin-bottom:.6rem;flex-wrap:wrap;}
+.bst-form-group{display:flex;flex-direction:column;flex:1;min-width:80px;}
+.bst-form-group label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:var(--gold-d);text-transform:uppercase;margin-bottom:2px;}
+.bst-form-group input,.bst-form-group select,.bst-form-group textarea{background:#0F0A06;border:1px solid #2A1A08;border-radius:3px;padding:.25rem .4rem;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--parch);outline:none;width:100%;box-sizing:border-box;}
+.bst-form-group textarea{resize:vertical;min-height:60px;font-family:'IM Fell English',serif;font-size:11px;}
+.bst-modal-title{font-family:'Cinzel Decorative',serif;font-size:16px;color:var(--gold);margin-bottom:.8rem;}
+.bst-modal-close{position:absolute;top:.6rem;right:.8rem;background:none;border:none;color:#6A5A3A;font-size:16px;cursor:pointer;}
+.bst-modal-close:hover{color:var(--parch);}
+/* Sheet action buttons */
+.bst-sheet-actions{display:flex;gap:.5rem;margin-bottom:1rem;}
+.bst-sheet-btn{background:#1A1208;border:1px solid #2A1A08;border-radius:4px;padding:.28rem .7rem;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:var(--gold-d);cursor:pointer;transition:.1s;}
+.bst-sheet-btn:hover{background:#221A0A;border-color:var(--gold-d);color:var(--gold);}
+.bst-sheet-btn.danger{border-color:#5A2A2A;color:#9A4A4A;}
+.bst-sheet-btn.danger:hover{background:#1A0A0A;border-color:#9A3A3A;color:#C06060;}
+
 </style>
 </head>
 <body>
@@ -1206,6 +1280,9 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
       ↑ Charger (.json) ou glissez ici
       <input type="file" id="fi" accept=".json" style="display:none" onchange="loadChar(event)">
     </div>
+  </div>
+  <div style="margin-top:.8rem;">
+    <button class="btn btn-s" style="padding:.4em 1.4em;font-size:10px;letter-spacing:.12em;" onclick="openBestiary()">🐉 Bestiaire</button>
   </div>
   <div id="roster-sec">
     <div class="roster-hdr">✦ Mes Personnages</div>
@@ -1248,6 +1325,30 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
       <div id="bmo-hist"></div>
     </div>
   </div>
+</div>
+
+<!-- BESTIAIRE OVERLAY -->
+<div id="bestiary-overlay">
+  <div id="bestiary-hdr">
+    <div><span id="bestiary-hdr-title">🐉 Bestiaire</span></div>
+    <button class="re-close" onclick="closeBestiary()">✕ Fermer</button>
+  </div>
+  <div id="bestiary-body">
+    <div id="bestiary-list-col">
+      <div id="bestiary-search-wrap">
+        <input id="bestiary-search" placeholder="Rechercher un monstre..." oninput="bstSearch(this.value)">
+      </div>
+      <button id="bestiary-add-btn" onclick="openAddMonster()">+ Ajouter un monstre personnalisé</button>
+      <div id="bestiary-list-scroll"></div>
+    </div>
+    <div id="bestiary-sheet-col">
+      <div id="bestiary-sheet"><div class="bst-empty">Sélectionnez un monstre dans la liste</div></div>
+    </div>
+  </div>
+</div>
+<!-- Modal ajout/édition monstre -->
+<div id="bst-modal">
+  <div id="bst-modal-inner"></div>
 </div>
 
 <!-- ROSTER EQUIPMENT OVERLAY — RPG Paper Doll -->
@@ -2854,6 +2955,11 @@ function setForgeScale(){
     re.style.zoom=s.toFixed(3);
     re.style.height=(100/s).toFixed(3)+'vh';
     re.style.width=(100/s).toFixed(3)+'vw';
+  }
+  const bs=$('bestiary-overlay');if(bs){
+    bs.style.zoom=s.toFixed(3);
+    bs.style.height=(100/s).toFixed(3)+'vh';
+    bs.style.width=(100/s).toFixed(3)+'vw';
   }
 }
 window.addEventListener('resize',setForgeScale);
@@ -7117,6 +7223,348 @@ async function submitShareCharacter() {
 document.getElementById('share-overlay').addEventListener('click', e => {
   if (e.target === document.getElementById('share-overlay')) closeShareModal();
 });
+
+/* ══════════════════ BESTIAIRE JS ══════════════════ */
+var BESTIARY_FAMILIES=['Aberrations','Bêtes','Célestes','Construits','Dragons','Élémentaires','Fées','Fiélons','Géants','Humanoïdes','Monstruosités','Morts-vivants','Plantes','Vases'];
+
+var BST_SRD=[
+// ── BÊTES ──
+{id:'rat',n:'Rat',fam:'Bêtes',cr:'0',sz:'TP',type:'Bête',al:'Neutre',ac:10,acN:'',hp:1,hpD:'1d4−1',spd:'6 m',str:2,dex:11,con:9,int:2,wis:10,cha:4,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Perception des vibrations 6 m, Perception passive 10',lng:'—',spe:[{n:'Odorat aiguisé',d:"Avantage aux tests de Perception basés sur l'odorat."}],act:[{n:'Morsure',d:'Attaque d\'arme au corps à corps : +0, allonge 1,5 m. Touché : 1 dégât perforant.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'loup',n:'Loup',fam:'Bêtes',cr:'1/4',sz:'M',type:'Bête',al:'Neutre',ac:13,acN:'',hp:11,hpD:'2d8+2',spd:'12 m',str:12,dex:15,con:12,int:3,wis:12,cha:6,sav:{},ski:{Discrétion:'+4',Perception:'+3'},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 13',lng:'—',spe:[{n:'Odorat et ouïe aiguisés',d:"Avantage aux tests de Perception basés sur l'ouïe ou l'odorat."},{n:'Tactique de meute',d:'Avantage aux jets d\'attaque si un allié non neutralisé est adjacent à la cible.'}],act:[{n:'Morsure',d:'Attaque d\'arme au corps à corps : +4, allonge 1,5 m. Touché : 7 (2d4+2) dégâts perforants. Si la cible est une créature, elle doit réussir un jet de sauvegarde de Force DD 11 ou être jetée à terre.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'panthère',n:'Panthère',fam:'Bêtes',cr:'1/4',sz:'M',type:'Bête',al:'Neutre',ac:12,acN:'',hp:13,hpD:'3d8',spd:'15 m, escalade 12 m',str:14,dex:15,con:10,int:3,wis:14,cha:7,sav:{},ski:{Discrétion:'+6',Perception:'+4'},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 14',lng:'—',spe:[{n:'Ouïe et odorat aiguisés',d:"Avantage aux tests de Perception basés sur l'ouïe ou l'odorat."},{n:'Bond',d:'Si la panthère se déplace d\'au moins 6 m en ligne droite vers une cible puis la touche avec une griffe, la cible doit réussir un JS de Force DD 12 ou être renversée. Elle peut alors faire une morsure par action bonus.'}],act:[{n:'Morsure',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 5 (1d6+2) dégâts perforants.'},{n:'Griffe',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 4 (1d4+2) dégâts tranchants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'ours_brun',n:'Ours brun',fam:'Bêtes',cr:'1',sz:'G',type:'Bête',al:'Neutre',ac:11,acN:'(armure naturelle)',hp:34,hpD:'4d10+12',spd:'12 m, escalade 9 m',str:19,dex:10,con:16,int:2,wis:13,cha:7,sav:{},ski:{Perception:'+3'},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 13',lng:'—',spe:[{n:'Odorat aiguisé',d:"Avantage aux tests de Perception basés sur l'odorat."}],act:[{n:'Attaques multiples',d:'L\'ours effectue deux attaques : une de griffes et une de morsure.'},{n:'Griffe',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 8 (2d4+4) dégâts tranchants.'},{n:'Morsure',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 11 (2d6+4) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'araignee_geante',n:'Araignée géante',fam:'Bêtes',cr:'1',sz:'G',type:'Bête',al:'Neutre',ac:14,acN:'(armure naturelle)',hp:26,hpD:'4d10+4',spd:'9 m, escalade 9 m',str:14,dex:16,con:12,int:2,wis:11,cha:4,sav:{},ski:{Discrétion:'+7'},imm:[],res:[],vul:[],cim:[],sen:'Vision aveugle 3 m, Vision dans le noir 18 m, Perception passive 10',lng:'—',spe:[{n:'Déplacement en toile',d:'La créature ignore les difficultés de déplacement liées aux toiles d\'araignée.'},{n:'Pattes d\'araignée',d:'Peut escalader les surfaces difficiles sans test.'},{n:'Sens de la toile',d:'Connaît l\'emplacement exact de toute créature touchant sa toile dans un rayon de 18 m.'}],act:[{n:'Morsure',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 7 (1d8+3) dégâts perforants, et la cible doit réussir un JS de Constitution DD 11 ou subir 9 (2d8) dégâts de poison, moitié sur réussite.'},{n:'Toile (Recharge 5–6)',d:'Jet d\'une toile (portée 9/18 m). La cible doit réussir un JS de Dextérité DD 12 ou être entravée.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'lion',n:'Lion',fam:'Bêtes',cr:'1',sz:'G',type:'Bête',al:'Neutre',ac:12,acN:'',hp:26,hpD:'4d10+4',spd:'12 m',str:17,dex:15,con:13,int:3,wis:12,cha:8,sav:{},ski:{Discrétion:'+6',Perception:'+3'},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 13',lng:'—',spe:[{n:'Odorat aiguisé',d:"Avantage aux tests de Perception basés sur l'odorat."},{n:'Bond',d:'Si le lion se déplace d\'au moins 6 m vers une cible et la touche avec une griffade, la cible doit réussir un JS de Force DD 13 ou être renversée, puis peut faire une morsure par action bonus.'},{n:'Bravoure du troupeau',d:'Le lion a l\'avantage aux jets de sauvegarde contre la peur si au moins un allié est dans un rayon de 9 m.'}],act:[{n:'Morsure',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 7 (1d8+3) dégâts perforants.'},{n:'Griffade',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 6 (1d6+3) dégâts tranchants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'requin_geant',n:'Requin géant',fam:'Bêtes',cr:'5',sz:'Gig',type:'Bête',al:'Neutre',ac:13,acN:'(armure naturelle)',hp:126,hpD:'11d20+11',spd:'0 m, nage 15 m',str:23,dex:11,con:21,int:1,wis:10,cha:5,sav:{},ski:{Perception:'+3'},imm:[],res:[],vul:[],cim:[],sen:'Vision aveugle 18 m, Perception passive 13',lng:'—',spe:[{n:'Odorat du sang',d:'Peut sentir le sang dans un rayon de 900 m. Avantage aux jets de Perception pour détecter une créature saignante.'},{n:'Attaque en eau profonde',d:'Avantage aux jets d\'attaque contre une créature qui n\'a plus tous ses points de vie.'}],act:[{n:'Morsure',d:'Attaque au corps à corps : +9, allonge 1,5 m. Touché : 22 (3d10+6) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── HUMANOÏDES ──
+{id:'kobold',n:'Kobold',fam:'Humanoïdes',cr:'1/8',sz:'TP',type:'Humanoïde (kobold)',al:'Loyal mauvais',ac:12,acN:'(armure de cuir)',hp:5,hpD:'2d6−2',spd:'9 m',str:7,dex:15,con:9,int:8,wis:7,cha:8,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 8',lng:'Commun, Draconique',spe:[{n:'Lumière solaire — Sensibilité',d:'Désavantage aux jets d\'attaque et tests de Perception basés sur la vue en plein soleil.'},{n:'Tactique de meute',d:'Avantage aux jets d\'attaque si un allié non neutralisé est adjacent à la cible.'}],act:[{n:'Dague',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 4 (1d4+2) dégâts perforants.'},{n:'Fronde',d:'Attaque à distance : +4, portée 9/36 m. Touché : 4 (1d4+2) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'gobelin',n:'Gobelin',fam:'Humanoïdes',cr:'1/4',sz:'P',type:'Humanoïde (gobelin)',al:'Neutre mauvais',ac:15,acN:'(armure de cuir, bouclier)',hp:7,hpD:'2d6',spd:'9 m',str:8,dex:14,con:10,int:10,wis:8,cha:8,sav:{},ski:{Discrétion:'+6'},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 9',lng:'Commun, Gobelin',spe:[{n:'Fuite agile',d:'Peut effectuer l\'action Se Désengager ou Se Cacher en action bonus à chaque tour.'}],act:[{n:'Cimeterre',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 5 (1d6+2) dégâts tranchants.'},{n:'Arc court',d:'Attaque à distance : +4, portée 24/96 m. Touché : 5 (1d6+2) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'orque',n:'Orque',fam:'Humanoïdes',cr:'1/2',sz:'M',type:'Humanoïde (orque)',al:'Chaotique mauvais',ac:13,acN:'(armure de peaux)',hp:15,hpD:'2d8+6',spd:'9 m',str:16,dex:12,con:16,int:7,wis:11,cha:10,sav:{},ski:{Intimidation:'+2'},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Commun, Orque',spe:[{n:'Agressivité',d:'En action bonus, l\'orque peut se déplacer jusqu\'à sa vitesse vers une créature hostile visible.'}],act:[{n:'Hache à deux mains',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 9 (1d12+3) dégâts tranchants.'},{n:'Javeline',d:'Attaque au corps à corps ou à distance : +5, allonge 1,5 m ou portée 9/36 m. Touché : 6 (1d6+3) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'hobgobelin',n:'Hobgobelin',fam:'Humanoïdes',cr:'1/2',sz:'M',type:'Humanoïde (gobelin)',al:'Loyal mauvais',ac:18,acN:'(armure de plates)',hp:11,hpD:'2d8+2',spd:'9 m',str:13,dex:12,con:12,int:10,wis:10,cha:9,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Commun, Gobelin',spe:[{n:'Formation martiale',d:'La créature inflige un dé supplémentaire de dégâts à la première touche de chaque tour si un allié non neutralisé est adjacent à la cible (une fois par tour).'}],act:[{n:'Épée longue',d:'Attaque au corps à corps : +3, allonge 1,5 m. Touché : 5 (1d8+1) dégâts tranchants, ou 6 (1d10+1) à deux mains.'},{n:'Arc long',d:'Attaque à distance : +3, portée 45/180 m. Touché : 5 (1d8+1) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'gnoll',n:'Gnoll',fam:'Humanoïdes',cr:'1/2',sz:'M',type:'Humanoïde (gnoll)',al:'Chaotique mauvais',ac:15,acN:'(armure de peaux, bouclier)',hp:22,hpD:'5d8',spd:'9 m',str:14,dex:9,con:11,int:6,wis:10,cha:7,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Gnoll',spe:[{n:'Frénésie rampante',d:'Quand un gnoll réduit une créature à 0 PV, il peut se déplacer jusqu\'à la moitié de sa vitesse et effectuer une attaque de morsure par action bonus.'}],act:[{n:'Morsure',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 4 (1d4+2) dégâts perforants.'},{n:'Lance',d:'Attaque au corps à corps ou à distance : +4, allonge 1,5 m ou portée 6/18 m. Touché : 5 (1d6+2) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'berserker',n:'Berserker',fam:'Humanoïdes',cr:'2',sz:'M',type:'Humanoïde (toute race)',al:'Tout',ac:13,acN:'(armure de peaux)',hp:67,hpD:'9d8+27',spd:'9 m',str:16,dex:12,con:17,int:9,wis:11,cha:9,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 10',lng:'Toute langue (généralement une seule)',spe:[{n:'Téméraire',d:'Au début de son tour, le berserker peut obtenir l\'avantage à toutes ses attaques ce tour. Ses attaques bénéficient jusqu\'à la fin de son prochain tour de l\'avantage des créatures contre lui.'}],act:[{n:'Hache à deux mains',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 9 (1d12+3) dégâts tranchants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── MORTS-VIVANTS ──
+{id:'squelette',n:'Squelette',fam:'Morts-vivants',cr:'1/4',sz:'M',type:'Mort-vivant',al:'Loyal mauvais',ac:13,acN:'(restes d\'armure)',hp:13,hpD:'2d8+4',spd:'9 m',str:10,dex:14,con:15,int:6,wis:8,cha:5,sav:{},ski:{},imm:['poison'],res:[],vul:['contondant'],cim:['empoisonné','épuisement'],sen:'Vision dans le noir 18 m, Perception passive 9',lng:'Comprend les langues qu\'il parlait de son vivant',spe:[],act:[{n:'Cimeterre',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 5 (1d6+2) dégâts tranchants.'},{n:'Arc court',d:'Attaque à distance : +4, portée 24/96 m. Touché : 5 (1d6+2) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'zombie',n:'Zombie',fam:'Morts-vivants',cr:'1/4',sz:'M',type:'Mort-vivant',al:'Neutre mauvais',ac:8,acN:'',hp:22,hpD:'3d8+9',spd:'6 m',str:13,dex:6,con:16,int:3,wis:6,cha:5,sav:{Sag:'+0'},ski:{},imm:['poison'],res:[],vul:[],cim:['empoisonné'],sen:'Vision dans le noir 18 m, Perception passive 8',lng:'Comprend les langues qu\'il parlait de son vivant',spe:[{n:'Ténacité du mort-vivant',d:'Si la créature subit des dégâts qui la réduiraient à 0 PV, elle réussit un JS de Constitution DD 5+dégâts. En cas de réussite, elle tombe à 1 PV. Ne fonctionne pas avec les dégâts radiants.'}],act:[{n:'Coup',d:'Attaque au corps à corps : +3, allonge 1,5 m. Touché : 4 (1d6+1) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'goule',n:'Goule',fam:'Morts-vivants',cr:'1',sz:'M',type:'Mort-vivant',al:'Chaotique mauvais',ac:12,acN:'',hp:22,hpD:'5d8',spd:'9 m',str:13,dex:15,con:10,int:7,wis:10,cha:6,sav:{},ski:{},imm:['poison'],res:[],vul:[],cim:['charmé','empoisonné','épuisement'],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Commun',spe:[],act:[{n:'Morsure',d:'Attaque au corps à corps : +2, allonge 1,5 m. Touché : 9 (2d6+2) dégâts perforants.'},{n:'Griffes',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 7 (2d4+2) dégâts tranchants. La cible (autre qu\'un elfe ou mort-vivant) doit réussir un JS de Constitution DD 10 ou être paralysée pendant 1 minute. Elle peut retenter le JS à chaque fin de tour.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'spectre',n:'Spectre',fam:'Morts-vivants',cr:'1',sz:'M',type:'Mort-vivant',al:'Chaotique mauvais',ac:12,acN:'',hp:22,hpD:'5d8',spd:'0 m, vol 15 m (vol stationnaire)',str:1,dex:14,con:11,int:10,wis:10,cha:11,sav:{},ski:{},imm:['poison','nécrotique'],res:['acide','feu','foudre','tonnerre','contondant non magique','perforant non magique','tranchant non magique'],vul:[],cim:['charmé','épuisement','agrippé','paralysé','pétrifié','empoisonné','à terre','entravé'],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Commun',spe:[{n:'Déplacement incorporel',d:'La créature peut traverser créatures et objets comme terrain difficile. Elle subit 5 (1d10) dégâts de force si elle termine son tour dans un objet.'},{n:'Sensibilité à la lumière du soleil',d:'Désavantage aux jets d\'attaque et tests de Perception basés sur la vue en plein soleil.'}],act:[{n:'Drain de vie',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 10 (3d6) dégâts nécrotiques. La cible doit réussir un JS de Constitution DD 10 : en cas d\'échec, son maximum de PV est réduit de la quantité de dégâts. Si ce maximum tombe à 0, elle meurt.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'momie',n:'Momie',fam:'Morts-vivants',cr:'3',sz:'M',type:'Mort-vivant',al:'Loyal mauvais',ac:11,acN:'(armure naturelle)',hp:58,hpD:'9d8+18',spd:'6 m',str:16,dex:8,con:15,int:6,wis:10,cha:12,sav:{},ski:{},imm:['poison','nécrotique'],res:['contondant non magique','perforant non magique','tranchant non magique'],vul:['feu'],cim:['charmé','épuisement','empuanti','paralysé','empoisonné'],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Langues qu\'elle parlait de son vivant',spe:[],act:[{n:'Attaques multiples',d:'La momie peut utiliser Regard putréfié, puis effectuer une attaque de poing.'},{n:'Poing de momie',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 10 (2d6+3) dégâts contondants + 10 (3d6) dégâts nécrotiques. La cible est maudite : malédiction de la momie. Le max PV est réduit de 10 à chaque fin de tour de la cible jusqu\'à la mort ou un sort Délivrance des malédictions.'},{n:'Regard putréfié',d:'La momie cible une créature visible dans un rayon de 18 m. Si la créature peut voir la momie, elle doit réussir un JS de Sagesse DD 11 ou être paralysée jusqu\'à la fin du prochain tour de la momie.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'vampire',n:'Vampire',fam:'Morts-vivants',cr:'13',sz:'M',type:'Mort-vivant (métamorphe)',al:'Loyal mauvais',ac:16,acN:'(armure naturelle)',hp:144,hpD:'17d8+68',spd:'9 m',str:18,dex:18,con:18,int:17,wis:15,cha:18,sav:{Dex:'+9',Sag:'+7',Cha:'+9'},ski:{Discrétion:'+9',Perception:'+7',Persuasion:'+9'},imm:['poison'],res:['nécrotique','contondant non magique','perforant non magique','tranchant non magique'],vul:[],cim:['charmé','empoisonné'],sen:'Vision dans le noir 36 m, Perception passive 17',lng:'Langues connues de son vivant',spe:[{n:'Charme légendaire',d:'Chaque nuit le vampire peut cibler un humanoïde à 9 m : JS Sag DD 17 ou charmé 24h.'},{n:'Régénération',d:'Récupère 20 PV au début de son tour sauf si exposé à la lumière du soleil ou dans l\'eau courante (ou après dégâts radiants).'},{n:'Repousser les non-morts',d:'Peut lancer Repousser les morts-vivants (DD 17) à volonté.'}],act:[{n:'Attaques multiples',d:'Le vampire fait deux attaques, dont une seule de Morsure.'},{n:'Griffes (forme vampire)',d:'Attaque au corps à corps : +9, allonge 1,5 m. Touché : 8 (1d8+4) dégâts tranchants + agrippé (évasion DD 18).'},{n:'Morsure (forme vampire ou chauve-souris)',d:'Attaque au corps à corps : +9, allonge 1,5 m contre une créature agrippée, neutralisée ou consentante. Touché : 7 (1d6+4) dégâts perforants + 10 (3d6) dégâts nécrotiques. Le max PV de la cible est réduit d\'autant, le vampire récupère autant de PV.'}],rea:[],leg:[{n:'Déplacement',d:'Le vampire se déplace jusqu\'à sa vitesse sans provoquer d\'attaques d\'opportunité.'},{n:'Griffes (3 par round max)',d:'Le vampire effectue une attaque de griffes.'},{n:'Fascination (Coûte 2)',d:'Une créature à 9 m doit réussir un JS de Sagesse DD 17 ou être charmée jusqu\'à la fin du round.'}],lgD:"Le vampire peut effectuer 3 actions légendaires par round.",src:'srd'},
+{id:'liche',n:'Liche',fam:'Morts-vivants',cr:'21',sz:'M',type:'Mort-vivant',al:'Tout mauvais',ac:17,acN:'(armure naturelle)',hp:135,hpD:'18d8+54',spd:'9 m',str:11,dex:16,con:16,int:20,wis:14,cha:16,sav:{Con:'+10',Int:'+12',Sag:'+9'},ski:{Arcane:'+18','Histoire':'+12',Perspicacité:'+9',Perception:'+9'},imm:['poison','nécrotique','froid','foudre','physique non magique'],res:[],vul:[],cim:['charmé','épuisement','paralysé','empoisonné'],sen:'Détection de la magie, Truesight 36 m, Perception passive 19',lng:'Commun + toutes langues apprises de son vivant',spe:[{n:'Résistance légendaire (3/jour)',d:'Si la liche rate un JS, elle peut choisir de réussir à la place.'},{n:'Lair (dans son antre)',d:'La liche régénère 20 PV au début de son tour dans son antre (si >= 1 PV).'}],act:[{n:'Toucher paralysant',d:'Attaque au corps à corps : +12, allonge 1,5 m. Touché : 10 (3d6) dégâts de froid. La cible doit réussir un JS de Constitution DD 18 ou être paralysée pendant 1 minute. Elle peut retenter le JS à chaque fin de tour.'},{n:'Lancement de sorts',d:'La liche est un lanceur de sorts de niveau 18 (DD 20, +12 aux jets d\'attaque). Elle connaît tous les sorts de magicien jusqu\'au niveau 9.'}],rea:[{n:'Contre-sort',d:'Si la liche voit un lanceur de sorts à 18 m lancer un sort, elle peut tenter d\'interrompre le sort (comme Contre-sort de niveau 5).'}],leg:[{n:'Coup de la liche (Coûte 1)',d:'Toucher paralysant.'},{n:'Entrave des liches (Coûte 2)',d:'La liche peut utiliser Paralysie des morts (sort de niveau 6) sur une créature à 18 m.'},{n:'Fléau désespéré (Coûte 3)',d:'Chaque créature à 9 m doit réussir un JS de Constitution DD 18 ou subir 21 (6d6) dégâts nécrotiques et être épuisée jusqu\'à son prochain tour.'}],lgD:"La liche peut effectuer 3 actions légendaires par round.",src:'srd'},
+// ── GÉANTS ──
+{id:'ogre',n:'Ogre',fam:'Géants',cr:'2',sz:'G',type:'Géant',al:'Chaotique mauvais',ac:11,acN:'(armure de peaux)',hp:59,hpD:'7d10+21',spd:'12 m',str:19,dex:8,con:16,int:5,wis:7,cha:7,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 8',lng:'Commun, Géant',spe:[],act:[{n:'Massue',d:'Attaque au corps à corps : +6, allonge 1,5 m. Touché : 13 (2d8+4) dégâts contondants.'},{n:'Javeline',d:'Attaque au corps à corps ou à distance : +6, allonge 1,5 m ou portée 9/36 m. Touché : 11 (2d6+4) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'troll',n:'Troll',fam:'Géants',cr:'5',sz:'G',type:'Géant',al:'Chaotique mauvais',ac:15,acN:'(armure naturelle)',hp:84,hpD:'8d10+40',spd:'9 m',str:18,dex:13,con:20,int:7,wis:9,cha:7,sav:{},ski:{Perception:'+2'},imm:[],res:[],vul:['acide','feu'],cim:[],sen:'Vision dans le noir 18 m, Perception passive 12',lng:'Géant',spe:[{n:'Odorat aiguisé',d:"Avantage aux tests de Perception basés sur l'odorat."},{n:'Régénération',d:'Le troll regagne 10 PV au début de son tour. Si le troll subit des dégâts d\'acide ou de feu, cette régénération ne fonctionne pas jusqu\'au début de son prochain tour. Il meurt uniquement si, à son tour, il est à 0 PV et n\'a pas régénéré.'}],act:[{n:'Attaques multiples',d:'Le troll effectue trois attaques : une de morsure et deux de griffes.'},{n:'Morsure',d:'Attaque au corps à corps : +7, allonge 1,5 m. Touché : 7 (1d6+4) dégâts perforants.'},{n:'Griffe',d:'Attaque au corps à corps : +7, allonge 1,5 m. Touché : 11 (2d6+4) dégâts tranchants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'geant_colline',n:'Géant de colline',fam:'Géants',cr:'5',sz:'Gig',type:'Géant',al:'Chaotique mauvais',ac:13,acN:'(armure naturelle)',hp:105,hpD:'10d12+40',spd:'12 m',str:21,dex:8,con:19,int:5,wis:9,cha:6,sav:{},ski:{Perception:'+2'},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 12',lng:'Géant',spe:[],act:[{n:'Attaques multiples',d:'Le géant effectue deux attaques de gourdin.'},{n:'Gourdin',d:'Attaque au corps à corps : +8, allonge 3 m. Touché : 18 (3d8+5) dégâts contondants.'},{n:'Rocher',d:'Attaque à distance : +8, portée 18/72 m. Touché : 21 (3d10+5) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'geant_givre',n:'Géant du givre',fam:'Géants',cr:'8',sz:'Gig',type:'Géant',al:'Neutre mauvais',ac:15,acN:'(armure de peaux, bouclier)',hp:138,hpD:'12d12+60',spd:'12 m',str:23,dex:9,con:21,int:9,wis:10,cha:12,sav:{Con:'+8',Sag:'+3',Cha:'+4'},ski:{Athlétisme:'+9',Perception:'+3'},imm:['froid'],res:[],vul:[],cim:[],sen:'Perception passive 13',lng:'Commun, Géant',spe:[],act:[{n:'Attaques multiples',d:'Le géant effectue deux attaques de hache.'},{n:'Hache à deux mains',d:'Attaque au corps à corps : +9, allonge 3 m. Touché : 25 (3d12+6) dégâts tranchants.'},{n:'Rocher',d:'Attaque à distance : +9, portée 18/72 m. Touché : 28 (4d10+6) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'geant_feu',n:'Géant du feu',fam:'Géants',cr:'9',sz:'Gig',type:'Géant',al:'Loyal mauvais',ac:18,acN:'(armure de plates)',hp:162,hpD:'13d12+78',spd:'9 m',str:25,dex:9,con:23,int:10,wis:14,cha:13,sav:{Dex:'+3',Con:'+10',Cha:'+5'},ski:{Athlétisme:'+11',Perception:'+6'},imm:['feu'],res:[],vul:[],cim:[],sen:'Perception passive 16',lng:'Commun, Géant',spe:[],act:[{n:'Attaques multiples',d:'Le géant effectue deux attaques d\'épée.'},{n:'Épée à deux mains',d:'Attaque au corps à corps : +11, allonge 3 m. Touché : 28 (6d6+7) dégâts tranchants.'},{n:'Rocher',d:'Attaque à distance : +11, portée 18/72 m. Touché : 29 (4d10+7) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── DRAGONS ──
+{id:'dragon_blanc_jeune',n:'Dragon blanc jeune',fam:'Dragons',cr:'6',sz:'G',type:'Dragon',al:'Chaotique mauvais',ac:17,acN:'(armure naturelle)',hp:133,hpD:'14d10+56',spd:'12 m, creusement 9 m, vol 24 m, nage 9 m',str:18,dex:10,con:18,int:6,wis:11,cha:12,sav:{Dex:'+3',Con:'+7',Sag:'+3',Cha:'+4'},ski:{Discrétion:'+3',Perception:'+6'},imm:['froid'],res:[],vul:[],cim:[],sen:'Sens aveugle 9 m, Vision dans le noir 18 m, Perception passive 16',lng:'Draconique',spe:[{n:'Résistance aux glaces',d:'Le dragon peut se déplacer normalement sur terrain de glace ou de neige.'}],act:[{n:'Attaques multiples',d:'Le dragon fait trois attaques : une de morsure et deux de griffes.'},{n:'Morsure',d:'Attaque au corps à corps : +7, allonge 3 m. Touché : 15 (2d10+4) dégâts perforants + 4 (1d8) dégâts de froid.'},{n:'Griffe',d:'Attaque au corps à corps : +7, allonge 1,5 m. Touché : 11 (2d6+4) dégâts tranchants.'},{n:'Souffle de froid (Recharge 5–6)',d:'Le dragon exhale un cône de froid de 9 m. Chaque créature dans la zone effectue un JS de Constitution DD 15 : 45 (10d8) dégâts de froid en cas d\'échec, moitié en cas de réussite.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'dragon_vert_adulte',n:'Dragon vert adulte',fam:'Dragons',cr:'15',sz:'TG',type:'Dragon',al:'Loyal mauvais',ac:19,acN:'(armure naturelle)',hp:207,hpD:'18d12+90',spd:'12 m, nage 12 m, vol 24 m',str:23,dex:12,con:21,int:18,wis:15,cha:17,sav:{Dex:'+6',Con:'+10',Sag:'+7',Cha:'+8'},ski:{Discrétion:'+6',Déception:'+8',Perspicacité:'+7',Perception:'+12',Persuasion:'+8'},imm:['poison'],res:[],vul:[],cim:['empoisonné'],sen:'Sens aveugle 18 m, Vision dans le noir 36 m, Perception passive 22',lng:'Commun, Draconique',spe:[{n:'Sens amphibien',d:'Le dragon peut respirer dans l\'eau et l\'air.'},{n:'Résistance légendaire (3/jour)',d:'Si le dragon rate un JS, il peut choisir de réussir à la place.'}],act:[{n:'Attaques multiples',d:'Le dragon peut utiliser sa Présence terrifiante, puis fait trois attaques : une de morsure et deux de griffes.'},{n:'Morsure',d:'Attaque au corps à corps : +11, allonge 3 m. Touché : 17 (2d10+6) dégâts perforants + 7 (2d6) dégâts de poison.'},{n:'Griffe',d:'Attaque au corps à corps : +11, allonge 1,5 m. Touché : 13 (2d6+6) dégâts tranchants.'},{n:'Queue',d:'Attaque au corps à corps : +11, allonge 4,5 m. Touché : 15 (2d8+6) dégâts contondants.'},{n:'Présence terrifiante',d:'Chaque créature à 36 m qui connaît le dragon doit réussir un JS de Sagesse DD 16 ou être effrayée pendant 1 minute.'},{n:'Souffle de poison (Recharge 5–6)',d:'Le dragon exhale un nuage de gaz empoisonné en cône de 18 m. Chaque créature effectue un JS de Constitution DD 18 : 56 (16d6) dégâts de poison en cas d\'échec, moitié en réussite.'}],rea:[],leg:[{n:'Attaque de queue (Coûte 1)',d:'Attaque de queue.'},{n:'Attaque d\'aile (Coûte 2)',d:'Chaque créature à 3 m doit réussir un JS de Dextérité DD 19 ou subir 13 (2d6+6) dégâts contondants et être renversée. Le dragon vole ensuite jusqu\'à la moitié de sa vitesse.'},{n:'Détection (Coûte 1)',d:'Le dragon effectue un test de Perception.'}],lgD:"Le dragon peut effectuer 3 actions légendaires par round.",src:'srd'},
+{id:'dragon_rouge_adulte',n:'Dragon rouge adulte',fam:'Dragons',cr:'17',sz:'TG',type:'Dragon',al:'Chaotique mauvais',ac:19,acN:'(armure naturelle)',hp:256,hpD:'19d12+114',spd:'12 m, escalade 12 m, vol 24 m',str:27,dex:10,con:25,int:16,wis:13,cha:21,sav:{Dex:'+6',Con:'+13',Sag:'+7',Cha:'+11'},ski:{Discrétion:'+6',Perception:'+13'},imm:['feu'],res:[],vul:[],cim:[],sen:'Sens aveugle 18 m, Vision dans le noir 36 m, Perception passive 23',lng:'Commun, Draconique',spe:[{n:'Résistance légendaire (3/jour)',d:'Si le dragon rate un JS, il peut choisir de réussir à la place.'}],act:[{n:'Attaques multiples',d:'Présence terrifiante puis trois attaques : une de morsure, deux de griffes.'},{n:'Morsure',d:'Attaque au corps à corps : +14, allonge 3 m. Touché : 19 (2d10+8) dégâts perforants + 7 (2d6) dégâts de feu.'},{n:'Griffe',d:'Attaque au corps à corps : +14, allonge 1,5 m. Touché : 15 (2d6+8) dégâts tranchants.'},{n:'Queue',d:'Attaque au corps à corps : +14, allonge 4,5 m. Touché : 17 (2d8+8) dégâts contondants.'},{n:'Présence terrifiante',d:'JS Sagesse DD 19 dans 36 m ou effrayé 1 minute.'},{n:'Souffle de feu (Recharge 5–6)',d:'Cône de 18 m : JS Constitution DD 21, 63 (18d6) dégâts de feu, moitié en réussite.'}],rea:[],leg:[{n:'Détection',d:'Jet de Perception.'},{n:'Attaque de queue',d:'Attaque de queue.'},{n:'Attaque d\'aile (Coûte 2)',d:'Chaque créature à 3 m effectue un JS Dex DD 22 ou subit 15 (2d6+8) dégâts + renversée. Le dragon vole à mi-vitesse.'}],lgD:"Le dragon peut effectuer 3 actions légendaires par round.",src:'srd'},
+// ── MONSTRUOSITÉS ──
+{id:'minotaure',n:'Minotaure',fam:'Monstruosités',cr:'3',sz:'G',type:'Monstruosité',al:'Chaotique mauvais',ac:14,acN:'(armure naturelle)',hp:114,hpD:'12d10+48',spd:'12 m',str:18,dex:11,con:16,int:6,wis:16,cha:9,sav:{},ski:{Perception:'+7'},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 17',lng:'Abyssal',spe:[{n:'Charge',d:'Si le minotaure se déplace d\'au moins 3 m en ligne droite vers une cible et la touche avec ses cornes, la cible subit 9 (2d8) dégâts perforants supplémentaires et doit réussir un JS de Force DD 14 ou être repoussée de 3 m et renversée.'},{n:'Sens du labyrinthe',d:'Le minotaure ne peut jamais être égaré sous terre.'}],act:[{n:'Hache à deux mains',d:'Attaque au corps à corps : +6, allonge 1,5 m. Touché : 17 (2d12+4) dégâts tranchants.'},{n:'Cornes',d:'Attaque au corps à corps : +6, allonge 1,5 m. Touché : 13 (2d8+4) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'manticore',n:'Manticore',fam:'Monstruosités',cr:'3',sz:'G',type:'Monstruosité',al:'Loyal mauvais',ac:14,acN:'(armure naturelle)',hp:68,hpD:'8d10+24',spd:'9 m, vol 18 m',str:17,dex:16,con:17,int:7,wis:12,cha:8,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 11',lng:'Commun',spe:[],act:[{n:'Attaques multiples',d:'La manticore effectue trois attaques : une de morsure et deux de griffes, ou trois de queue d\'épines.'},{n:'Morsure',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 6 (1d6+3) dégâts perforants.'},{n:'Griffe',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 6 (1d6+3) dégâts tranchants.'},{n:'Épines de queue',d:'Attaque à distance : +5, portée 30/60 m. Touché : 7 (1d8+3) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'griffon',n:'Griffon',fam:'Monstruosités',cr:'2',sz:'G',type:'Monstruosité',al:'Neutre',ac:12,acN:'',hp:59,hpD:'7d10+21',spd:'9 m, vol 24 m',str:18,dex:15,con:16,int:2,wis:13,cha:8,sav:{},ski:{Perception:'+5'},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 15',lng:'—',spe:[{n:'Ouïe et vue aiguisées',d:'Avantage aux tests de Perception basés sur l\'ouïe ou la vue.'}],act:[{n:'Attaques multiples',d:'Le griffon effectue deux attaques : une de bec et une de serres.'},{n:'Bec',d:'Attaque au corps à corps : +6, allonge 1,5 m. Touché : 8 (1d8+4) dégâts perforants.'},{n:'Serres',d:'Attaque au corps à corps : +6, allonge 1,5 m. Touché : 11 (2d6+4) dégâts tranchants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'basilic',n:'Basilic',fam:'Monstruosités',cr:'3',sz:'M',type:'Monstruosité',al:'Neutre',ac:15,acN:'(armure naturelle)',hp:52,hpD:'8d8+16',spd:'6 m',str:16,dex:8,con:15,int:2,wis:8,cha:7,sav:{},ski:{},imm:[],res:[],vul:[],cim:['pétrifié'],sen:'Vision dans le noir 18 m, Perception passive 9',lng:'—',spe:[{n:'Regard pétrifiant',d:'Chaque créature qui commence son tour à 9 m du basilic doit réussir un JS de Constitution DD 12 ou avoir le désavantage pendant le round. Si la créature échoue deux fois de suite, elle est pétrifiée pour 24h.'}],act:[{n:'Morsure',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 10 (2d6+3) dégâts perforants + 7 (2d6) dégâts de poison.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'meduse',n:'Méduse',fam:'Monstruosités',cr:'6',sz:'M',type:'Monstruosité',al:'Loyal mauvais',ac:15,acN:'(armure naturelle)',hp:127,hpD:'17d8+51',spd:'9 m',str:10,dex:15,con:16,int:12,wis:13,cha:15,sav:{},ski:{Discrétion:'+5',Perspicacité:'+4',Perception:'+4',Tromperie:'+5'},imm:[],res:[],vul:[],cim:['pétrifié'],sen:'Vision dans le noir 18 m, Perception passive 14',lng:'Commun',spe:[{n:'Regard pétrifiant',d:'Si une créature qui peut voir la méduse commence son tour à 9 m ou moins d\'elle et que la méduse n\'est pas incapacitée : JS de Constitution DD 14. Raté : entravé. Déjà entravé : pétrifié 24h.'}],act:[{n:'Attaques multiples',d:'La méduse effectue trois attaques : deux de serpents et une d\'arc court.'},{n:'Morsure de serpents',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 4 (1d4+2) perforant + 14 (4d6) poison.'},{n:'Arc court',d:'Attaque à distance : +5, portée 24/96 m. Touché : 5 (1d6+2) perforant + 7 (2d6) poison.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'hydre',n:'Hydre',fam:'Monstruosités',cr:'8',sz:'Gig',type:'Monstruosité',al:'Neutre',ac:15,acN:'(armure naturelle)',hp:172,hpD:'15d20+15',spd:'9 m, nage 9 m',str:20,dex:12,con:20,int:2,wis:10,cha:7,sav:{},ski:{Perception:'+6'},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 18 m, Perception passive 16',lng:'—',spe:[{n:'Têtes multiples',d:'L\'hydre commence avec 5 têtes. Tant qu\'elle en a plus d\'une, elle obtient l\'avantage aux tests de Sagesse (Perception) et ne peut pas être charmée, effrayée, assommée ou endormie.'},{n:'Réactivité',d:'L\'hydre peut effectuer autant de réactions que de têtes (une max par tour).'},{n:'Régénération des têtes',d:'Si une tête est sectionnée, deux repoussent à la fin du tour suivant sauf si la plaie a été brûlée par un sort de flamme ou du feu.'}],act:[{n:'Attaques multiples',d:'L\'hydre fait autant d\'attaques de morsure qu\'elle possède de têtes.'},{n:'Morsure',d:'Attaque au corps à corps : +8, allonge 3 m. Touché : 10 (1d10+5) dégâts perforants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── FIÉLONS ──
+{id:'diablotin',n:'Diablotin',fam:'Fiélons',cr:'1',sz:'TP',type:'Fiélon (diable)',al:'Loyal mauvais',ac:13,acN:'(armure naturelle)',hp:10,hpD:'3d4+3',spd:'6 m, vol 12 m',str:6,dex:17,con:13,int:11,wis:12,cha:14,sav:{},ski:{Discrétion:'+5',Tromperie:'+4',Perspicacité:'+3',Persuasion:'+4'},imm:['feu','poison'],res:['froid','physique non magique'],vul:[],cim:['empoisonné'],sen:'Vision dans le noir 36 m, Perception passive 11',lng:'Infernal, Commun',spe:[{n:'Résistance du diable',d:'Avantage aux JS contre les sorts et les effets magiques.'},{n:'Forme variable',d:'Le diablotin peut se transformer en bête de taille TP ou M (action bonus).'}],act:[{n:'Dard (forme d\'araignée ou de scorpion)',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 5 (1d4+3) perforant + 3 (1d6) poison (JS Con DD 11).'},],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'succube_incube',n:'Succube / Incube',fam:'Fiélons',cr:'4',sz:'M',type:'Fiélon',al:'Neutre mauvais',ac:13,acN:'(armure naturelle)',hp:66,hpD:'12d8+12',spd:'9 m, vol 18 m',str:8,dex:17,con:13,int:15,wis:12,cha:20,sav:{},ski:{Discrétion:'+5','Perspicacité':'+3','Perception':'+3',Tromperie:'+9',Persuasion:'+9'},imm:['poison','feu'],res:['froid','foudre','nécrotique','physique non magique'],vul:[],cim:['empoisonné'],sen:'Vision dans le noir 18 m, Perception passive 13',lng:'Abyssal, Commun, Infernal, Télépathie 18 m',spe:[{n:'Forme changeante',d:'Peut prendre la forme d\'un humanoïde M ou P, ou retrouver sa véritable forme (action bonus).'},{n:'Sens magique',d:'Détecte la magie dans un rayon de 18 m en action.'}],act:[{n:'Griffes (forme véritable)',d:'Attaque au corps à corps : +5, allonge 1,5 m. Touché : 6 (1d6+3) dégâts tranchants + 14 (4d6) nécrotiques.'},{n:'Charme',d:'Une créature humanoïde à 9 m doit réussir un JS de Sagesse DD 15 ou être charmée pendant 1 jour. La créature perçoit le démon comme un ami désiré et l\'accompagnera.'},{n:'Baiser draconique',d:'La créature charmée doit réussir un JS de Constitution DD 15 ou subir 32 (5d10+5) nécrotiques (max PV réduit d\'autant).'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'balor',n:'Balor',fam:'Fiélons',cr:'19',sz:'G',type:'Fiélon (démon)',al:'Chaotique mauvais',ac:19,acN:'(armure naturelle)',hp:262,hpD:'21d10+147',spd:'12 m, vol 24 m',str:26,dex:15,con:22,int:20,wis:16,cha:22,sav:{For:'+14',Con:'+12',Sag:'+9',Cha:'+12'},ski:{},imm:['foudre','poison','feu'],res:['froid','physique non magique'],vul:[],cim:['empoisonné'],sen:'Truesight 36 m, Perception passive 13',lng:'Abyssal, Télépathie 36 m',spe:[{n:'Mort dans le feu',d:'Quand le Balor meurt, il explose. Chaque créature à 9 m effectue un JS de Dextérité DD 20 : 70 (20d6) dégâts de feu, moitié en réussite.'},{n:'Aura de feu',d:'Chaque créature qui commence son tour à 1,5 m subit 10 (3d6) dégâts de feu.'},{n:'Résistance magique',d:'Avantage aux JS contre les sorts.'}],act:[{n:'Attaques multiples',d:'Le Balor fait deux attaques : une de fléau de foudre et une de fouet enflammé.'},{n:'Fléau de foudre',d:'Attaque au corps à corps : +14, allonge 3 m. Touché : 21 (2d12+8) tranchant + 13 (3d8) foudre.'},{n:'Fouet enflammé',d:'Attaque au corps à corps : +14, allonge 9 m. Touché : 10 (2d6+8) tranchant + 7 (2d6) feu, et la cible doit réussir un JS Force DD 20 ou être tirée à 4,5 m du Balor.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── ABERRATIONS ──
+{id:'flagelleur_mental',n:'Flagelleur mental',fam:'Aberrations',cr:'7',sz:'M',type:'Aberration',al:'Loyal mauvais',ac:15,acN:'(armure naturelle)',hp:71,hpD:'13d8+13',spd:'9 m',str:11,dex:12,con:12,int:19,wis:17,cha:17,sav:{Int:'+7',Sag:'+6',Cha:'+6'},ski:{Arcane:'+7',Tromperie:'+6',Perspicacité:'+6',Perception:'+6',Persuasion:'+6',Discrétion:'+4'},imm:[],res:[],vul:[],cim:[],sen:'Détection des pensées, Vision dans le noir 36 m, Perception passive 16',lng:'Profond, Télépathie 36 m',spe:[{n:'Consommation de cerveau (1/jour)',d:'Si le flagelleur tue une créature en lui retirant son cerveau, il absorbe son énergie vitale : 10 (3d6) PV temporaires.'},{n:'Sensibilité à la lumière du soleil',d:'Désavantage aux jets d\'attaque et tests de Perception basés sur la vue en plein soleil.'}],act:[{n:'Tentacules',d:'Attaque au corps à corps : +7, allonge 1,5 m. Touché : 15 (2d10+4) psychiques. La cible est agrippée (évasion DD 15). Agrippée : paralysée.'},{n:'Explosion mentale (Recharge 5–6)',d:'Les créatures dans un cône de 18 m effectuent un JS d\'Intelligence DD 15. Raté : 22 (4d8+4) dégâts psychiques + étourdies jusqu\'à la fin du prochain tour. Réussi : moitié des dégâts, pas d\'étourdissement.'},{n:'Extraction du cerveau',d:'Une créature agrippée et paralysée par le flagelleur doit réussir un JS d\'Intelligence DD 15 ou subir 55 (10d10) dégâts psychiques. Si cela la réduit à 0 PV, le flagelleur lui arrache le cerveau et la tue.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'aboleth',n:'Aboleth',fam:'Aberrations',cr:'10',sz:'Gig',type:'Aberration',al:'Loyal mauvais',ac:17,acN:'(armure naturelle)',hp:135,hpD:'18d12+18',spd:'3 m, nage 18 m',str:21,dex:9,con:15,int:18,wis:15,cha:18,sav:{Con:'+6',Int:'+8',Sag:'+6'},ski:{Histoire:'+12',Perception:'+10'},imm:[],res:[],vul:[],cim:[],sen:'Vision dans le noir 36 m, Perception passive 20',lng:'Profond, Télépathie 36 m',spe:[{n:'Amphibien',d:'Peut respirer air et eau.'},{n:'Mémoire des mucosités',d:'Une créature touchée par un tentacule doit réussir un JS de Constitution DD 14 ou sa peau commence à se muer en membrane translucide en 1d4 heures. La créature doit être immergée dans l\'eau toutes les heures ou subir 6 (1d12) nécrotiques. Un sort de Délivrance des malédictions annule cela.'}],act:[{n:'Attaques multiples',d:'L\'aboleth effectue trois attaques de tentacule.'},{n:'Tentacule',d:'Attaque au corps à corps : +9, allonge 3 m. Touché : 12 (2d6+5) dégâts contondants. Si la cible est une créature, elle doit réussir un JS de Constitution DD 14 ou être maudite par les mucosités.'},{n:'Queue',d:'Attaque au corps à corps : +9, allonge 3 m. Touché : 15 (3d6+5) dégâts contondants.'},{n:'Détection des pensées (envoûtement)',d:'L\'aboleth choisit un humanoïde à 18 m : JS Sagesse DD 14 ou charmé pendant 30 jours ou jusqu\'à la mort de l\'aboleth.'}],rea:[{n:'Sens de la houle',d:'Lorsqu\'une créature à 18 m se déplace, l\'aboleth peut en percevoir la position exacte jusqu\'à la fin du tour.'}],leg:[{n:'Détection (Coûte 1)',d:'Jet de Perception.'},{n:'Coup de queue (Coûte 2)',d:'Attaque de queue.'},{n:'Résonance psychique (Coûte 2)',d:'Chaque créature charmée par l\'aboleth subit 10 (3d6) dégâts psychiques.'}],lgD:"L'aboleth peut effectuer 3 actions légendaires par round.",src:'srd'},
+// ── CONSTRUITS ──
+{id:'golem_chair',n:'Golem de chair',fam:'Construits',cr:'5',sz:'G',type:'Construit',al:'Neutre',ac:9,acN:'',hp:93,hpD:'11d10+33',spd:'9 m',str:19,dex:9,con:18,int:6,wis:10,cha:5,sav:{},ski:{},imm:['poison','psychique','foudre','physique non magique'],res:[],vul:['acide','feu'],cim:['charmé','épuisement','effrayé','paralysé','empoisonné'],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Comprend les langues de son créateur mais ne parle pas',spe:[{n:'Immunité contre les armes ordinaires',d:'Résistance contondant/perforant/tranchant non-magiques (sauf argent). Immunité foudre.'},{n:'Absorbe la foudre',d:'Si le golem devrait subir des dégâts de foudre, il récupère autant de PV (au lieu de subir des dégâts).'},{n:'Frénésie',d:'Lorsque le golem commence son tour avec ≤40 PV, il entre en frénésie aléatoire (DD 15 en début de tour ou attaque la cible la plus proche).'}],act:[{n:'Attaques multiples',d:'Le golem effectue deux attaques de coup.'},{n:'Coup',d:'Attaque au corps à corps : +7, allonge 1,5 m. Touché : 13 (2d8+4) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'golem_pierre',n:'Golem de pierre',fam:'Construits',cr:'10',sz:'G',type:'Construit',al:'Neutre',ac:17,acN:'(armure naturelle)',hp:178,hpD:'17d10+85',spd:'9 m',str:22,dex:9,con:20,int:3,wis:11,cha:1,sav:{},ski:{},imm:['poison','psychique','physique non magique'],res:[],vul:[],cim:['charmé','épuisement','effrayé','paralysé','empoisonné'],sen:'Vision dans le noir 36 m, Perception passive 10',lng:'Comprend les langues de son créateur mais ne parle pas',spe:[{n:'Immunité contre les armes ordinaires',d:'Immunité aux dégâts contondants/perforants/tranchants non magiques (sauf adamantine).'},{n:'Immobilisation (Recharge 6)',d:'Le golem tente d\'immobiliser les créatures à 3 m. Chaque créature dans la zone effectue un JS de Dextérité DD 17 ou est entravée pendant 1 minute.'}],act:[{n:'Attaques multiples',d:'Le golem effectue deux attaques de coup.'},{n:'Coup',d:'Attaque au corps à corps : +10, allonge 1,5 m. Touché : 19 (3d8+6) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── VASES ──
+{id:'cube_gelatineux',n:'Cube gélatineux',fam:'Vases',cr:'2',sz:'G',type:'Vase',al:'Neutre',ac:6,acN:'',hp:84,hpD:'8d10+40',spd:'4,5 m',str:14,dex:3,con:20,int:1,wis:6,cha:1,sav:{},ski:{},imm:['acide','froid','foudre'],res:[],vul:[],cim:['aveuglé','charmé','assourdi','épuisement','effrayé','à terre'],sen:'Vision aveugle 18 m (aveuglé au-delà), Perception passive 8',lng:'—',spe:[{n:'Transparent',d:'Même dans des conditions lumineuses optimales, un cube gélatineux est difficile à repérer (DD 15 pour remarquer qu\'il ne s\'agit pas d\'une zone vide). Il peut se trouver adjacent à une créature sans déclencher de réaction.'},{n:'Engloutissement',d:'Si un cube gélatineux entre dans l\'espace d\'une créature M ou plus petite, elle doit réussir un JS de Dextérité DD 12 ou être englouti.'}],act:[{n:'Pseudo-podes',d:'Attaque au corps à corps : +4, allonge 1,5 m. Touché : 10 (3d6) dégâts d\'acide.'},{n:'Englouti',d:'La créature englobie subit 18 (6d6) dégâts d\'acide au début de chaque tour du cube, peut agir mais a le désavantage aux attaques autres que contre le cube.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'vase_grise',n:'Vase grise',fam:'Vases',cr:'1/2',sz:'M',type:'Vase',al:'Neutre',ac:8,acN:'',hp:22,hpD:'5d8',spd:'4,5 m, escalade 4,5 m',str:12,dex:6,con:16,int:1,wis:6,cha:2,sav:{},ski:{Discrétion:'+2'},imm:['acide','froid','feu'],res:[],vul:[],cim:['aveuglé','charmé','assourdi','épuisement','effrayé','à terre'],sen:'Vision aveugle 18 m, Perception passive 8',lng:'—',spe:[{n:'Corrosion des métaux',d:'Toute arme de métal non magique frappant la vase rouille. Après deux touches, l\'arme est détruite.'},{n:'Forme de pierre',d:'La vase ressemble à une pierre mouillée lorsqu\'elle est immobile.'}],act:[{n:'Pseudo-podes',d:'Attaque au corps à corps : +3, allonge 1,5 m. Touché : 4 (1d6+1) dégâts contondants + 7 (2d6) dégâts d\'acide. Si la cible porte une armure ou un bouclier métallique non magique, ceux-ci subissent un malus de -1 à la CA (peuvent être détruits si CA tombe à 10 pour armures ou 0 malus).'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── GÉANTS (suite) ──
+{id:'geant_tempetes',n:'Géant des tempêtes',fam:'Géants',cr:'13',sz:'Colo',type:'Géant',al:'Chaotique bon',ac:16,acN:'(armure de peaux)',hp:230,hpD:'20d12+100',spd:'15 m, nage 15 m',str:29,dex:14,con:20,int:16,wis:18,cha:18,sav:{For:'+14',Con:'+10',Sag:'+9',Cha:'+9'},ski:{Arcane:'+8',Athlétisme:'+14','Histoire':'+8',Perception:'+9'},imm:['foudre','tonnerre'],res:[],vul:[],cim:[],sen:'Perception passive 19',lng:'Commun, Géant',spe:[{n:'Ambidextre',d:'Le géant peut attaquer deux fois lors de son action d\'Attaque.'},{n:'Amphibien',d:'Peut respirer air et eau.'}],act:[{n:'Attaques multiples',d:'Le géant effectue deux attaques de massue d\'éclair.'},{n:'Massue d\'éclair',d:'Attaque au corps à corps : +14, allonge 3 m. Touché : 30 (3d12+9) contondants + 13 (3d8) foudre.'},{n:'Rocher',d:'Attaque à distance : +14, portée 18/72 m. Touché : 35 (4d12+9) contondants.'},{n:'Éclair (Recharge 5–6)',d:'Un éclair frappant un point à 450 m. Chaque créature dans un rayon de 3 m effectue un JS de Dextérité DD 17 : 54 (12d8) foudre, moitié en réussite.'}],rea:[],leg:[{n:'Détection (Coûte 1)',d:'Jet de Perception.'},{n:'Jet de rocher (Coûte 2)',d:'Attaque de rocher.'},{n:'Maëstrom (Coûte 3)',d:'Chaque créature à 18 m dans l\'air doit réussir un JS de Dextérité DD 20 ou tomber.'}],lgD:"Le géant peut effectuer 3 actions légendaires par round.",src:'srd'},
+// ── CÉLESTES ──
+{id:'deva',n:'Déva',fam:'Célestes',cr:'10',sz:'M',type:'Céleste',al:'Loyal bon',ac:17,acN:'(armure naturelle)',hp:136,hpD:'16d8+64',spd:'9 m, vol 27 m',str:18,dex:18,con:18,int:17,wis:20,cha:20,sav:{Sag:'+9',Cha:'+9'},ski:{Perspicacité:'+9',Perception:'+9'},imm:['radiant','poison'],res:['radiant','contondant non magique','perforant non magique','tranchant non magique'],vul:[],cim:['charmé','épuisement','effrayé','empoisonné'],sen:'Truesight 36 m, Perception passive 19',lng:'Céleste, Commun, Télépathie 36 m',spe:[{n:'Résistance à la magie',d:'Avantage aux JS contre les sorts.'},{n:'Aura angélique',d:'Chaque créature de bon alignement débutant son tour à 9 m est immunisée contre la peur.'}],act:[{n:'Attaques multiples',d:'Le déva fait deux attaques de masse d\'armes.'},{n:'Masse d\'armes',d:'Attaque au corps à corps : +8, allonge 1,5 m. Touché : 7 (1d6+4) contondants + 18 (4d8) radiants.'},{n:'Guérison (3/jour)',d:'Le déva rend 20 PV à lui-même ou à une créature qu\'il touche.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── PLANTES ──
+{id:'arbre_eveille',n:'Arbre éveillé',fam:'Plantes',cr:'2',sz:'Gig',type:'Plante',al:'Non aligné',ac:13,acN:'(armure naturelle)',hp:59,hpD:'7d12+7',spd:'6 m',str:19,dex:6,con:15,int:10,wis:10,cha:7,sav:{},ski:{},imm:[],res:['contondant','perforant'],vul:['feu'],cim:[],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Une langue connue de son créateur',spe:[{n:'Faux-semblant',d:'Tant qu\'il est immobile, l\'arbre ressemble à un arbre ordinaire. Tout test d\'Intelligence DC 18 pour remarquer la différence.'}],act:[{n:'Coup',d:'Attaque au corps à corps : +6, allonge 3 m. Touché : 14 (3d6+4) dégâts contondants.'}],rea:[],leg:[],lgD:'',src:'srd'},
+// ── ÉLÉMENTAIRES ──
+{id:'elem_feu',n:'Élémentaire de feu',fam:'Élémentaires',cr:'5',sz:'G',type:'Élémentaire',al:'Neutre',ac:13,acN:'',hp:102,hpD:'12d10+36',spd:'15 m',str:10,dex:17,con:16,int:6,wis:10,cha:7,sav:{},ski:{},imm:['feu','poison','épuisement'],res:['nécrotique','physique non magique'],vul:['froid'],cim:['agrippé','épuisement','paralysé','pétrifié','empoisonné','à terre','entravé'],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Ignan',spe:[{n:'Forme de feu',d:'L\'élémentaire peut traverser l\'espace d\'une autre créature. La première fois qu\'il entre dans l\'espace d\'une créature à son tour, celle-ci subit 5 (1d10) dégâts de feu.'},{n:'Illumination',d:'Émet une lumière vive dans un rayon de 9 m et faible jusqu\'à 18 m.'},{n:'Bain de feu',d:'Si l\'élémentaire est touché par une arme de métal, l\'attaquant subit 4 (1d8) dégâts de feu.'}],act:[{n:'Attaques multiples',d:'L\'élémentaire effectue deux attaques de Toucher.'},{n:'Toucher',d:'Attaque au corps à corps : +6, allonge 1,5 m. Touché : 10 (2d6+3) dégâts de feu. Si la cible est une créature ou un objet inflammable, elle s\'enflamme. La créature subit 5 (1d10) dégâts de feu au début de chaque tour jusqu\'à extinction.'}],rea:[],leg:[],lgD:'',src:'srd'},
+{id:'elem_eau',n:'Élémentaire d\'eau',fam:'Élémentaires',cr:'5',sz:'G',type:'Élémentaire',al:'Neutre',ac:14,acN:'(armure naturelle)',hp:114,hpD:'12d10+48',spd:'9 m, nage 27 m',str:18,dex:14,con:18,int:5,wis:10,cha:8,sav:{},ski:{},imm:['poison','acide'],res:['résistance acide','physique non magique'],vul:[],cim:['épuisement','paralysé','pétrifié','empoisonné'],sen:'Vision dans le noir 18 m, Perception passive 10',lng:'Aquan',spe:[{n:'Forme gelée',d:'Si l\'élémentaire subit des dégâts de froid, sa vitesse est divisée par deux jusqu\'à la fin de son prochain tour.'},{n:'Amphibien',d:'Peut respirer air et eau.'}],act:[{n:'Attaques multiples',d:'L\'élémentaire effectue deux attaques de Fouet aquatique.'},{n:'Fouet aquatique',d:'Attaque au corps à corps : +7, allonge 3 m. Touché : 13 (2d8+4) dégâts contondants.'},{n:'Noyade (Recharge 5–6)',d:'Un humanoïde M ou plus petit à 3 m doit réussir un JS de Force DD 15 ou être englouti. Il est aveuglé et entravé, ne peut respirer, doit retenir sa respiration ou se noyer.'}],rea:[],leg:[],lgD:'',src:'srd'},
+];
+
+var _bstFamily=null;
+var _bstMonster=null;
+var _bstSearch='';
+
+function getBstCustom(){try{return JSON.parse(localStorage.getItem('bst_custom')||'[]');}catch(e){return[];}}
+function saveBstCustom(list){localStorage.setItem('bst_custom',JSON.stringify(list));}
+function getAllMonsters(){return BST_SRD.concat(getBstCustom());}
+
+function openBestiary(){
+  var o=$('bestiary-overlay');if(!o)return;
+  o.classList.add('open');
+  _bstFamily=null;_bstMonster=null;_bstSearch='';
+  renderBstList();
+  $('bestiary-sheet').innerHTML='<div class="bst-empty">Sélectionnez un monstre dans la liste</div>';
+  if($('bestiary-search'))$('bestiary-search').value='';
+  setForgeScale();
+}
+function closeBestiary(){var o=$('bestiary-overlay');if(o)o.classList.remove('open');}
+
+function renderBstList(){
+  var all=getAllMonsters();
+  var q=_bstSearch.toLowerCase().trim();
+  var fams=BESTIARY_FAMILIES.concat(['Personnalisé']);
+  var html='';
+  fams.forEach(function(fam){
+    var items=all.filter(function(m){
+      if(m.fam!==fam)return false;
+      if(q&&m.n.toLowerCase().indexOf(q)<0)return false;
+      return true;
+    });
+    if(q&&items.length===0)return;
+    var open=(!q&&_bstFamily===fam)||(q&&items.length>0);
+    html+='<div class="bst-family-hdr'+(open?' open':'')+'" onclick="bstToggleFamily(\''+fam+'\')">';
+    html+='<span>'+fam+'</span><span style="display:flex;align-items:center;gap:.3rem;"><span style="font-size:8px;color:#4A3A1A;">'+items.length+'</span><span class="bst-family-arrow">▶</span></span></div>';
+    html+='<div class="bst-monster-list" style="display:'+(open?'block':'none')+';" data-fam="'+fam+'">';
+    items.sort(function(a,b){var ca=crSort(a.cr),cb=crSort(b.cr);return ca-cb||a.n.localeCompare(b.n);});
+    items.forEach(function(m){
+      html+='<div class="bst-monster-item'+(_bstMonster&&_bstMonster.id===m.id?' active':'')+'" onclick="bstSelectMonster(\''+m.id+'\',\''+m.src+'\')">'+
+        '<span>'+m.n+'</span><span class="bst-cr-badge">IC '+m.cr+'</span></div>';
+    });
+    html+='</div>';
+  });
+  $('bestiary-list-scroll').innerHTML=html;
+}
+
+function crSort(cr){
+  if(cr==='0')return 0;if(cr==='1/8')return 0.125;if(cr==='1/4')return 0.25;if(cr==='1/2')return 0.5;
+  return parseFloat(cr)||0;
+}
+
+function bstToggleFamily(fam){
+  _bstFamily=(_bstFamily===fam)?null:fam;
+  renderBstList();
+}
+
+function bstSelectMonster(id,src){
+  var all=getAllMonsters();
+  var m=all.find(function(x){return x.id===id;});
+  if(!m)return;
+  _bstMonster=m;
+  renderBstList();
+  renderBstSheet(m);
+}
+
+function bstSearch(q){
+  _bstSearch=q;
+  renderBstList();
+}
+
+function statMod(v){var m=Math.floor((v-10)/2);return(m>=0?'+':'')+m;}
+
+function renderBstSheet(m){
+  var el=$('bestiary-sheet');if(!el)return;
+  var custom=(m.src==='custom');
+  var html='';
+  // Action buttons
+  if(custom){
+    html+='<div class="bst-sheet-actions">'+
+      '<button class="bst-sheet-btn" onclick="bstEditMonster(\''+m.id+'\')">✎ Modifier</button>'+
+      '<button class="bst-sheet-btn danger" onclick="bstDeleteMonster(\''+m.id+'\')">✕ Supprimer</button>'+
+    '</div>';
+  }
+  // Header
+  html+='<div class="bst-sheet-name">'+m.n+'</div>';
+  var szMap={TP:'Très petite',P:'Petite',M:'Moyenne',G:'Grande',TG:'Très grande',Gig:'Gigantesque',Colo:'Colossale'};
+  html+='<div class="bst-sheet-sub">'+(szMap[m.sz]||m.sz)+' '+m.type+' · '+m.al+'</div>';
+  // Vitals
+  html+='<div class="bst-vitals">'+
+    '<div class="bst-vital-box"><span class="bst-vital-lbl">Classe d\'armure</span><span class="bst-vital-val">'+m.ac+(m.acN?' <span style="font-size:9px;color:#6A5A3A;">'+m.acN+'</span>':'')+'</span></div>'+
+    '<div class="bst-vital-box"><span class="bst-vital-lbl">Points de vie</span><span class="bst-vital-val">'+m.hp+' <span style="font-size:10px;color:#6A5A3A;">('+m.hpD+')</span></span></div>'+
+    '<div class="bst-vital-box"><span class="bst-vital-lbl">Vitesse</span><span class="bst-vital-val" style="font-size:11px;">'+m.spd+'</span></div>'+
+    '<div class="bst-vital-box"><span class="bst-vital-lbl">Indice de danger</span><span class="bst-vital-val">'+m.cr+'</span></div>'+
+  '</div>';
+  // Stats
+  var skeys=['str','dex','con','int','wis','cha'];
+  var slbl=['FOR','DEX','CON','INT','SAG','CHA'];
+  html+='<div class="bst-stats-row">';
+  skeys.forEach(function(k,i){
+    var v=m[k]||10;
+    html+='<div class="bst-stat-box"><span class="bst-stat-lbl">'+slbl[i]+'</span><span class="bst-stat-val">'+v+'</span><span class="bst-stat-mod">'+statMod(v)+'</span></div>';
+  });
+  html+='</div>';
+  // Saves & Skills
+  var savKeys=Object.keys(m.sav||{});
+  var skiKeys=Object.keys(m.ski||{});
+  if(savKeys.length||skiKeys.length){
+    html+='<div class="bst-section">';
+    if(savKeys.length)html+='<div class="bst-prop-line"><b>Jets de sauvegarde</b> '+savKeys.map(function(k){return k+' '+m.sav[k];}).join(', ')+'</div>';
+    if(skiKeys.length)html+='<div class="bst-prop-line"><b>Compétences</b> '+skiKeys.map(function(k){return k+' '+m.ski[k];}).join(', ')+'</div>';
+    html+='</div>';
+  }
+  // Immunities / Resistances / Vulnerabilities
+  var hasIRV=(m.imm&&m.imm.length)||(m.res&&m.res.length)||(m.vul&&m.vul.length)||(m.cim&&m.cim.length);
+  if(hasIRV){
+    html+='<div class="bst-section">';
+    if(m.imm&&m.imm.length)html+='<div class="bst-prop-line"><b>Immunités aux dégâts</b> '+m.imm.join(', ')+'</div>';
+    if(m.res&&m.res.length)html+='<div class="bst-prop-line"><b>Résistances aux dégâts</b> '+m.res.join(', ')+'</div>';
+    if(m.vul&&m.vul.length)html+='<div class="bst-prop-line"><b>Vulnérabilités aux dégâts</b> '+m.vul.join(', ')+'</div>';
+    if(m.cim&&m.cim.length)html+='<div class="bst-prop-line"><b>Immunités aux états</b> '+m.cim.join(', ')+'</div>';
+    html+='</div>';
+  }
+  // Senses + Languages
+  html+='<div class="bst-section">'+
+    '<div class="bst-prop-line"><b>Sens</b> '+m.sen+'</div>'+
+    '<div class="bst-prop-line"><b>Langues</b> '+m.lng+'</div>'+
+  '</div>';
+  // Special traits
+  if(m.spe&&m.spe.length){
+    html+='<div class="bst-section">';
+    m.spe.forEach(function(t){
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+t.n+'.</span> <span class="bst-trait-desc">'+t.d+'</span></div>';
+    });
+    html+='</div>';
+  }
+  // Actions
+  if(m.act&&m.act.length){
+    html+='<div class="bst-action-section-title">Actions</div>';
+    m.act.forEach(function(a){
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+a.n+'.</span> <span class="bst-trait-desc">'+a.d+'</span></div>';
+    });
+  }
+  // Reactions
+  if(m.rea&&m.rea.length){
+    html+='<div class="bst-action-section-title">Réactions</div>';
+    m.rea.forEach(function(a){
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+a.n+'.</span> <span class="bst-trait-desc">'+a.d+'</span></div>';
+    });
+  }
+  // Legendary
+  if(m.leg&&m.leg.length){
+    html+='<div class="bst-action-section-title">Actions légendaires</div>';
+    if(m.lgD)html+='<div class="bst-trait-desc" style="margin-bottom:.4rem;">'+m.lgD+'</div>';
+    m.leg.forEach(function(a){
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+a.n+'.</span> <span class="bst-trait-desc">'+a.d+'</span></div>';
+    });
+  }
+  el.innerHTML=html;
+}
+
+/* ── Add / Edit modal ── */
+function openAddMonster(id){
+  var modal=$('bst-modal');if(!modal)return;
+  var custom=getBstCustom();
+  var existing=id?custom.find(function(m){return m.id===id;}):null;
+  var e=existing||{id:'',n:'',fam:'Humanoïdes',cr:'1',sz:'M',type:'',al:'Neutre',ac:10,acN:'',hp:10,hpD:'2d8',spd:'9 m',str:10,dex:10,con:10,int:10,wis:10,cha:10,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 10',lng:'—',spe:[],act:[],rea:[],leg:[],lgD:'',src:'custom'};
+  var famOpts=BESTIARY_FAMILIES.concat(['Personnalisé']).map(function(f){return '<option value="'+f+'"'+(e.fam===f?' selected':'')+'>'+f+'</option>';}).join('');
+  modal.querySelector('#bst-modal-inner').innerHTML=
+    '<button class="bst-modal-close" onclick="closeBstModal()">✕</button>'+
+    '<div class="bst-modal-title">'+(existing?'Modifier':'Ajouter un monstre')+'</div>'+
+    '<input type="hidden" id="bst-edit-id" value="'+(existing?e.id:'')+'">'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group" style="flex:3"><label>Nom</label><input id="be-n" value="'+e.n+'"></div>'+
+      '<div class="bst-form-group"><label>Famille</label><select id="be-fam">'+famOpts+'</select></div>'+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group"><label>IC (Danger)</label><input id="be-cr" value="'+e.cr+'"></div>'+
+      '<div class="bst-form-group"><label>Taille</label><select id="be-sz"><option value="TP">TP</option><option value="P">P</option><option value="M"'+(e.sz==='M'?' selected':'')+'>M</option><option value="G"'+(e.sz==='G'?' selected':'')+'>G</option><option value="TG">TG</option><option value="Gig">Gig</option></select></div>'+
+      '<div class="bst-form-group" style="flex:2"><label>Type</label><input id="be-type" value="'+e.type+'"></div>'+
+      '<div class="bst-form-group" style="flex:2"><label>Alignement</label><input id="be-al" value="'+e.al+'"></div>'+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group"><label>CA</label><input id="be-ac" type="number" value="'+e.ac+'"></div>'+
+      '<div class="bst-form-group" style="flex:2"><label>Note CA</label><input id="be-acn" value="'+e.acN+'"></div>'+
+      '<div class="bst-form-group"><label>PV</label><input id="be-hp" type="number" value="'+e.hp+'"></div>'+
+      '<div class="bst-form-group"><label>Dés PV</label><input id="be-hpd" value="'+e.hpD+'"></div>'+
+      '<div class="bst-form-group"><label>Vitesse</label><input id="be-spd" value="'+e.spd+'"></div>'+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      ['str','dex','con','int','wis','cha'].map(function(k,i){return '<div class="bst-form-group"><label>'+['FOR','DEX','CON','INT','SAG','CHA'][i]+'</label><input id="be-'+k+'" type="number" value="'+e[k]+'"></div>';}).join('')+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group" style="flex:1"><label>Sens</label><input id="be-sen" value="'+e.sen+'"></div>'+
+      '<div class="bst-form-group" style="flex:1"><label>Langues</label><input id="be-lng" value="'+e.lng+'"></div>'+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group" style="flex:1"><label>Immunités dégâts (séparées par virgule)</label><input id="be-imm" value="'+e.imm.join(', ')+'"></div>'+
+      '<div class="bst-form-group" style="flex:1"><label>Résistances dégâts</label><input id="be-res" value="'+e.res.join(', ')+'"></div>'+
+      '<div class="bst-form-group" style="flex:1"><label>Vulnérabilités</label><input id="be-vul" value="'+e.vul.join(', ')+'"></div>'+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group"><label>Traits spéciaux (nom | description, un par ligne)</label><textarea id="be-spe">'+e.spe.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group"><label>Actions (nom | description, un par ligne)</label><textarea id="be-act">'+e.act.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+    '</div>'+
+    '<div class="bst-form-row">'+
+      '<div class="bst-form-group"><label>Réactions (nom | description, un par ligne)</label><textarea id="be-rea">'+e.rea.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+    '</div>'+
+    '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.8rem;">'+
+      '<button class="bst-sheet-btn" onclick="closeBstModal()">Annuler</button>'+
+      '<button class="bst-sheet-btn" style="border-color:var(--gold-d);color:var(--gold);" onclick="saveBstMonster()">✓ Sauvegarder</button>'+
+    '</div>';
+  modal.classList.add('open');
+}
+function closeBstModal(){var m=$('bst-modal');if(m)m.classList.remove('open');}
+function parseTrait(txt){
+  return (txt||'').split('\n').map(function(l){l=l.trim();if(!l)return null;var p=l.indexOf('|');if(p<0)return{n:l,d:''};return{n:l.slice(0,p).trim(),d:l.slice(p+1).trim()};}).filter(Boolean);
+}
+function splitList(s){return(s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
+function saveBstMonster(){
+  var existing=$('bst-edit-id')&&$('bst-edit-id').value;
+  var id=existing||('custom_'+Date.now());
+  var m={
+    id:id,src:'custom',
+    n:$('be-n').value.trim(),
+    fam:$('be-fam').value,
+    cr:$('be-cr').value.trim(),
+    sz:$('be-sz').value,
+    type:$('be-type').value.trim(),
+    al:$('be-al').value.trim(),
+    ac:parseInt($('be-ac').value)||10,
+    acN:$('be-acn').value.trim(),
+    hp:parseInt($('be-hp').value)||0,
+    hpD:$('be-hpd').value.trim(),
+    spd:$('be-spd').value.trim(),
+    str:parseInt($('be-str').value)||10,
+    dex:parseInt($('be-dex').value)||10,
+    con:parseInt($('be-con').value)||10,
+    int:parseInt($('be-int').value)||10,
+    wis:parseInt($('be-wis').value)||10,
+    cha:parseInt($('be-cha').value)||10,
+    sav:{},ski:{},
+    imm:splitList($('be-imm').value),
+    res:splitList($('be-res').value),
+    vul:splitList($('be-vul').value),
+    cim:[],
+    sen:$('be-sen').value.trim(),
+    lng:$('be-lng').value.trim(),
+    spe:parseTrait($('be-spe').value),
+    act:parseTrait($('be-act').value),
+    rea:parseTrait($('be-rea').value),
+    leg:[],lgD:'',
+  };
+  var list=getBstCustom();
+  if(existing){var idx=list.findIndex(function(x){return x.id===existing;});if(idx>=0)list[idx]=m;else list.push(m);}
+  else list.push(m);
+  saveBstCustom(list);
+  closeBstModal();
+  _bstMonster=m;
+  _bstFamily=m.fam;
+  renderBstList();
+  renderBstSheet(m);
+}
+function bstEditMonster(id){openAddMonster(id);}
+function bstDeleteMonster(id){
+  if(!confirm('Supprimer ce monstre ?'))return;
+  var list=getBstCustom().filter(function(m){return m.id!==id;});
+  saveBstCustom(list);
+  _bstMonster=null;
+  renderBstList();
+  $('bestiary-sheet').innerHTML='<div class="bst-empty">Sélectionnez un monstre dans la liste</div>';
+}
+
 </script>
 </body>
 </html>
