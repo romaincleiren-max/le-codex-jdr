@@ -7,10 +7,7 @@ import { supabase } from '../lib/supabase';
 // ── Lecture ──────────────────────────────────────────────────────────────────
 
 export const getAllCharacters = async () => {
-  const { data, error } = await supabase
-    .from('characters')
-    .select('*')
-    .order('created_at', { ascending: false });
+  const { data, error } = await supabase.rpc('get_all_characters_admin');
   if (error) throw error;
   return data;
 };

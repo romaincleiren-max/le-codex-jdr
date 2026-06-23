@@ -6795,10 +6795,8 @@ async function loadAdminPanel(){
   ap.style.display='block';
   const sc=getSupaClient();
   try{
-    const {data,error}=await sc.from('characters')
-      .select('id,char_name,race_name,class_name,level,sheet_data,user_id,player_name')
-      .neq('status','archived');
-    if(error||!data){$('admin-char-grid').innerHTML='<div class="admin-empty">Erreur de chargement.</div>';return;}
+    const {data,error}=await sc.rpc('get_all_characters_admin');
+    if(error||!data){$('admin-char-grid').innerHTML='<div class="admin-empty">Erreur : '+(error?.message||'chargement impossible')+'</div>';return;}
     if(!data.length){$('admin-char-grid').innerHTML='<div class="admin-empty">Aucun personnage partagé pour l\'instant.</div>';return;}
     $('admin-char-grid').innerHTML=data.map(function(row){
       var sd=row.sheet_data||{};
