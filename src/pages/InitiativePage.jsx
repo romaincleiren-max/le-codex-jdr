@@ -513,21 +513,77 @@ function AddCustomModal({ onAdd, onClose }) {
   );
 }
 
+// ── Fetch Open5e minimal (pour InitiativePage sans passer par la Forge) ──────
+
+function mapOpen5eMinimal(raw) {
+  const typeMap = {
+    beast:'Bêtes', dragon:'Dragons', undead:'Morts-vivants',
+    humanoid:'Humanoïdes', monstrosity:'Monstruosités', fiend:'Fiélons',
+    celestial:'Célestes', aberration:'Aberrations', construct:'Constructs',
+    elemental:'Élémentaires', fey:'Fées', giant:'Géants',
+    ooze:'Vases', plant:'Plantes', swarm:'Nuées',
+  };
+  const typeKey = (raw.type || '').toLowerCase().replace(/\(.*\)/, '').trim();
+  return {
+    id: 'api_' + raw.slug,
+    n: raw.name,
+    fam: typeMap[typeKey] || 'Monstruosités',
+    cr: raw.challenge_rating != null ? String(raw.challenge_rating) : '?',
+    hp: raw.hit_points || 1,
+    ac: raw.armor_class || 10,
+    dex: raw.dexterity || 10,
+    src: 'api',
+  };
+}
+
+async function fetchAndCacheOpen5e(onProgress) {
+  let url = 'https://api.open5e.com/v1/monsters/?limit=500&format=json';
+  const all = [];
+  while (url) {
+    const resp = await fetch(url);
+    const data = await resp.json();
+    all.push(...(data.results || []).map(mapOpen5eMinimal));
+    if (onProgress) onProgress(all.length, data.count || 0);
+    url = data.next || null;
+  }
+  localStorage.setItem('bst_open5e_v2', JSON.stringify({ ts: Date.now(), data: all }));
+  return all;
+}
+
 // ── Modal recherche monstres ─────────────────────────────────────────────────
 
 function MonsterSearchModal({ onAdd, onClose, currentCombatants }) {
   const [query, setQuery] = useState('');
   const [monsters, setMonsters] = useState([]);
   const [justAdded, setJustAdded] = useState(new Set());
+  const [loading, setLoading] = useState(false);
+  const [progress, setProgress] = useState('');
 
   useEffect(() => {
-    setMonsters(readBestiaryMonsters());
+    const local = readBestiaryMonsters();
+    if (local.length > 0) setMonsters(local);
   }, []);
 
   const q = query.trim().toLowerCase();
   const filtered = q
     ? monsters.filter(m => (m.n || '').toLowerCase().includes(q))
     : monsters.slice(0, 80);
+
+  const loadFromApi = async () => {
+    setLoading(true);
+    setProgress('Connexion à Open5e…');
+    try {
+      const all = await fetchAndCacheOpen5e((loaded, total) => {
+        setProgress(`${loaded} / ${total} monstres…`);
+      });
+      setMonsters(all);
+      setProgress('');
+    } catch (err) {
+      setProgress('Erreur de connexion.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const addMonster = (m) => {
     onAdd(monsterToCombatant(m, currentCombatants));
@@ -548,48 +604,74 @@ function MonsterSearchModal({ onAdd, onClose, currentCombatants }) {
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200">✕</button>
         </div>
 
-        {/* Search */}
-        <div className="p-4 border-b border-slate-800 flex-shrink-0">
-          <input
-            autoFocus
-            type="text"
-            value={query}
-            onChange={e => setQuery(e.target.value)}
-            placeholder="Chercher un monstre…"
-            className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-red-700"
-          />
-          <div className="text-xs text-slate-600 mt-1.5">
-            {monsters.length === 0
-              ? 'Aucun bestiaire chargé — ouvrez la Forge pour importer les monstres.'
-              : `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}${!q ? ' (tapez pour filtrer)' : ''}`}
+        {/* État vide ou chargé */}
+        {monsters.length === 0 ? (
+          <div className="flex-1 flex flex-col items-center justify-center p-8 gap-5">
+            {loading ? (
+              <>
+                <div className="text-4xl animate-pulse">🐉</div>
+                <div className="text-slate-300 font-bold">{progress || 'Chargement…'}</div>
+                <div className="text-xs text-slate-500">Connexion à l'API Open5e (~800 monstres)</div>
+              </>
+            ) : (
+              <>
+                <div className="text-4xl">📖</div>
+                <div className="text-slate-300 font-bold text-center">Bestiaire non chargé</div>
+                <div className="text-slate-500 text-sm text-center">
+                  Ouvrez la Forge → Bestiaire pour charger depuis le cache,<br/>
+                  ou importez directement ici.
+                </div>
+                <button onClick={loadFromApi}
+                  className="px-5 py-2.5 bg-red-800 hover:bg-red-700 border border-red-600 text-red-100 font-bold rounded-xl text-sm">
+                  ⬇ Importer depuis Open5e
+                </button>
+              </>
+            )}
           </div>
-        </div>
+        ) : (
+          <>
+            {/* Search */}
+            <div className="p-4 border-b border-slate-800 flex-shrink-0">
+              <input
+                autoFocus
+                type="text"
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Chercher un monstre…"
+                className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-red-700"
+              />
+              <div className="text-xs text-slate-600 mt-1.5">
+                {`${filtered.length} résultat${filtered.length !== 1 ? 's' : ''}${!q ? ' (tapez pour filtrer)' : ''}`}
+              </div>
+            </div>
 
-        {/* List */}
-        <div className="overflow-y-auto flex-1 p-2">
-          {filtered.map(m => {
-            const done = justAdded.has(m.id);
-            return (
-              <button key={m.id} onClick={() => addMonster(m)}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-left transition-all hover:bg-red-900/20"
-                style={{ background: done ? 'rgba(100,20,20,0.25)' : undefined }}>
-                <span className="text-xl flex-shrink-0">{done ? '✓' : '🐉'}</span>
-                <div className="flex-1 min-w-0">
-                  <div className="font-bold text-slate-200 text-sm truncate"
-                    style={{ fontFamily: 'Cinzel, serif' }}>{m.n}</div>
-                  <div className="text-xs text-slate-500 truncate">{m.fam || m.type || '—'}</div>
-                </div>
-                <div className="flex-shrink-0 text-right text-xs space-y-0.5">
-                  <div className="text-amber-400 font-bold">IC {m.cr || '?'}</div>
-                  <div className="text-slate-500">❤ {m.hp} · 🛡 {m.ac}</div>
-                </div>
-              </button>
-            );
-          })}
-          {filtered.length === 0 && q && (
-            <div className="text-center text-slate-500 py-10">Aucun monstre trouvé</div>
-          )}
-        </div>
+            {/* List */}
+            <div className="overflow-y-auto flex-1 p-2">
+              {filtered.map(m => {
+                const done = justAdded.has(m.id);
+                return (
+                  <button key={m.id} onClick={() => addMonster(m)}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-left transition-all hover:bg-red-900/20"
+                    style={{ background: done ? 'rgba(100,20,20,0.25)' : undefined }}>
+                    <span className="text-xl flex-shrink-0">{done ? '✓' : '🐉'}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="font-bold text-slate-200 text-sm truncate"
+                        style={{ fontFamily: 'Cinzel, serif' }}>{m.n}</div>
+                      <div className="text-xs text-slate-500 truncate">{m.fam || m.type || '—'}</div>
+                    </div>
+                    <div className="flex-shrink-0 text-right text-xs space-y-0.5">
+                      <div className="text-amber-400 font-bold">IC {m.cr || '?'}</div>
+                      <div className="text-slate-500">❤ {m.hp} · 🛡 {m.ac}</div>
+                    </div>
+                  </button>
+                );
+              })}
+              {filtered.length === 0 && q && (
+                <div className="text-center text-slate-500 py-10">Aucun monstre trouvé</div>
+              )}
+            </div>
+          </>
+        )}
 
         {/* Footer */}
         <div className="p-4 border-t border-slate-800 flex-shrink-0">
