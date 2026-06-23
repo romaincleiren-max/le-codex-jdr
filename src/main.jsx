@@ -16,7 +16,7 @@ import { PlayerRoute } from './components/PlayerRoute';
 import PlayerDashboard from './pages/PlayerDashboard';
 import CharacterSheetPage from './pages/CharacterSheetPage';
 import LevelUpWizardPage from './pages/LevelUpWizardPage';
-import CharacterForgePage from './pages/CharacterForgePage';
+// CharacterForgePage supprimé — la Forge du Héros (forge.html) est utilisée à la place
 import { inject } from '@vercel/analytics';
 import { LanguageProvider, useLanguage } from './i18n';
 import { useSupabaseData } from './hooks/useSupabaseData';
@@ -4230,6 +4230,11 @@ export default function App() {
   );
 }
 
+function ForgeRouteWrapper() {
+  const navigate = useNavigate();
+  return <ForgePage onNavigate={(page) => navigate(page === 'initiative' ? '/#initiative' : '/')} />;
+}
+
 function AppRouter() {
   return (
     <Routes>
@@ -4239,7 +4244,7 @@ function AppRouter() {
 
       {/* Routes joueurs */}
       <Route path="/player" element={<PlayerRoute><PlayerDashboard /></PlayerRoute>} />
-      <Route path="/forge" element={<PlayerRoute><CharacterForgePage onBack={() => window.history.back()} /></PlayerRoute>} />
+      <Route path="/forge" element={<PlayerRoute><ForgeRouteWrapper /></PlayerRoute>} />
       <Route path="/character/:id" element={<PlayerRoute><CharacterSheetPage /></PlayerRoute>} />
       <Route path="/character/:id/levelup" element={<PlayerRoute><LevelUpWizardPage /></PlayerRoute>} />
 
