@@ -30,6 +30,49 @@ function nameToColor(str = '') {
   return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
 }
 
+// ── Lecture bestiaire forge (localStorage) ───────────────────────────────────
+
+function readBestiaryMonsters() {
+  const all = [];
+  try {
+    const cached = JSON.parse(localStorage.getItem('bst_open5e_v2') || 'null');
+    if (cached?.data) all.push(...cached.data);
+  } catch {}
+  try {
+    const custom = JSON.parse(localStorage.getItem('bst_custom') || '[]');
+    if (Array.isArray(custom)) all.push(...custom);
+  } catch {}
+  return all;
+}
+
+function monsterToCombatant(m, existingCombatants = []) {
+  const dexMod = statMod(m.dex || 10);
+  const baseName = m.n || 'Monstre';
+  const sameCount = existingCombatants.filter(c =>
+    c.name === baseName || c.name.startsWith(baseName + ' ')
+  ).length;
+  return {
+    id: 'monster_' + m.id + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 5),
+    type: 'monster',
+    monsterRef: m.id,
+    name: sameCount > 0 ? `${baseName} ${sameCount + 1}` : baseName,
+    portraitUrl: null,
+    portraitEmoji: '🐉',
+    currentHp: m.hp || 10,
+    maxHp: m.hp || 10,
+    ac: m.ac || 10,
+    dexMod,
+    initiative: d20() + dexMod,
+    conditions: [],
+    notes: '',
+    className: m.fam || '',
+    level: null,
+    raceName: `IC ${m.cr || '?'}`,
+    playerName: 'MJ',
+    sheetData: m,
+  };
+}
+
 // ── Lecture roster forge ─────────────────────────────────────────────────────
 
 function readForgeRoster() {
@@ -470,6 +513,96 @@ function AddCustomModal({ onAdd, onClose }) {
   );
 }
 
+// ── Modal recherche monstres ─────────────────────────────────────────────────
+
+function MonsterSearchModal({ onAdd, onClose, currentCombatants }) {
+  const [query, setQuery] = useState('');
+  const [monsters, setMonsters] = useState([]);
+  const [justAdded, setJustAdded] = useState(new Set());
+
+  useEffect(() => {
+    setMonsters(readBestiaryMonsters());
+  }, []);
+
+  const q = query.trim().toLowerCase();
+  const filtered = q
+    ? monsters.filter(m => (m.n || '').toLowerCase().includes(q))
+    : monsters.slice(0, 80);
+
+  const addMonster = (m) => {
+    onAdd(monsterToCombatant(m, currentCombatants));
+    setJustAdded(prev => new Set([...prev, m.id]));
+    setTimeout(() => setJustAdded(prev => { const s = new Set(prev); s.delete(m.id); return s; }), 900);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/85 z-50 flex items-center justify-center p-4">
+      <div className="bg-slate-900 border-2 border-red-900/60 rounded-2xl w-full max-w-lg shadow-2xl flex flex-col"
+        style={{ maxHeight: '85vh' }}>
+
+        {/* Header */}
+        <div className="flex justify-between items-center p-5 border-b border-slate-700 flex-shrink-0">
+          <h3 className="text-xl font-bold text-red-300" style={{ fontFamily: 'Cinzel, serif' }}>
+            🐉 Ajouter un monstre
+          </h3>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-200">✕</button>
+        </div>
+
+        {/* Search */}
+        <div className="p-4 border-b border-slate-800 flex-shrink-0">
+          <input
+            autoFocus
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Chercher un monstre…"
+            className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-2.5 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-red-700"
+          />
+          <div className="text-xs text-slate-600 mt-1.5">
+            {monsters.length === 0
+              ? 'Aucun bestiaire chargé — ouvrez la Forge pour importer les monstres.'
+              : `${filtered.length} résultat${filtered.length > 1 ? 's' : ''}${!q ? ' (tapez pour filtrer)' : ''}`}
+          </div>
+        </div>
+
+        {/* List */}
+        <div className="overflow-y-auto flex-1 p-2">
+          {filtered.map(m => {
+            const done = justAdded.has(m.id);
+            return (
+              <button key={m.id} onClick={() => addMonster(m)}
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl mb-1 text-left transition-all hover:bg-red-900/20"
+                style={{ background: done ? 'rgba(100,20,20,0.25)' : undefined }}>
+                <span className="text-xl flex-shrink-0">{done ? '✓' : '🐉'}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="font-bold text-slate-200 text-sm truncate"
+                    style={{ fontFamily: 'Cinzel, serif' }}>{m.n}</div>
+                  <div className="text-xs text-slate-500 truncate">{m.fam || m.type || '—'}</div>
+                </div>
+                <div className="flex-shrink-0 text-right text-xs space-y-0.5">
+                  <div className="text-amber-400 font-bold">IC {m.cr || '?'}</div>
+                  <div className="text-slate-500">❤ {m.hp} · 🛡 {m.ac}</div>
+                </div>
+              </button>
+            );
+          })}
+          {filtered.length === 0 && q && (
+            <div className="text-center text-slate-500 py-10">Aucun monstre trouvé</div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="p-4 border-t border-slate-800 flex-shrink-0">
+          <button onClick={onClose}
+            className="w-full py-2.5 rounded-xl border border-slate-600 text-slate-400 hover:text-slate-200 text-sm">
+            Fermer
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Composant principal ──────────────────────────────────────────────────────
 
 export default function InitiativePage({ isAdmin = false, onGoForge }) {
@@ -478,6 +611,7 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
   const [activeIdx, setActiveIdx] = useState(0);
   const [showSelectModal, setShowSelectModal] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showMonsterModal, setShowMonsterModal] = useState(false);
 
   const allCombatants = [...combatants].sort((a, b) => (b.initiative ?? -99) - (a.initiative ?? -99));
   const aliveCount = allCombatants.filter(c => c.currentHp > 0 || c.maxHp === 0).length;
@@ -570,6 +704,10 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
               className="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 hover:border-amber-600 text-sm text-slate-300 hover:text-amber-300 transition-all">
               🎲 Initiative
             </button>
+            <button onClick={() => setShowMonsterModal(true)}
+              className="px-3 py-2 rounded-xl bg-red-900 hover:bg-red-800 border border-red-700 text-sm text-red-100 font-bold transition-all">
+              🐉 Monstres
+            </button>
             {isAdmin && (
               <button onClick={() => setShowAddModal(true)}
                 className="px-3 py-2 rounded-xl bg-amber-800 hover:bg-amber-700 border border-amber-600 text-sm text-amber-100 font-bold transition-all">
@@ -639,6 +777,13 @@ export default function InitiativePage({ isAdmin = false, onGoForge }) {
         <AddCustomModal
           onAdd={handleAdd}
           onClose={() => setShowAddModal(false)}
+        />
+      )}
+      {showMonsterModal && (
+        <MonsterSearchModal
+          onAdd={handleAdd}
+          onClose={() => setShowMonsterModal(false)}
+          currentCombatants={combatants}
         />
       )}
     </div>
