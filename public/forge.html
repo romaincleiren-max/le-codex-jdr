@@ -5390,7 +5390,9 @@ function reRest(type){
     _reChar.currentHp=_reChar.maxHp||_reChar.hp||0;
     _reChar.usedSlots={};
   }else{
-    // Repos court : sorcier récupère tous ses emplacements
+    // Repos court : 50% PV + sorcier récupère tous ses emplacements
+    var max=_reChar.maxHp||_reChar.hp||0;
+    _reChar.currentHp=Math.min(max,(_reChar.currentHp||0)+Math.floor(max/2));
     if(info&&_reChar.cls&&_reChar.cls.id==='warlock') _reChar.usedSlots={};
   }
   reSaveChar();
