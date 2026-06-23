@@ -7302,7 +7302,7 @@ var _bstFamily=null;
 var _bstMonster=null;
 var _bstSearch='';
 var _bstApiMonsters=null;
-var BST_API_KEY='bst_open5e_v1';
+var BST_API_KEY='bst_open5e_v2';
 var BST_API_TTL=7*24*3600*1000;
 
 function getBstCustom(){try{return JSON.parse(localStorage.getItem('bst_custom')||'[]');}catch(e){return[];}}
@@ -7345,6 +7345,402 @@ var BST_TYPE_MAP={
 };
 var BST_SIZE_MAP={'Tiny':'TP','Small':'P','Medium':'M','Large':'G','Huge':'TG','Gargantuan':'Gig'};
 
+/* ── Traductions FR ── */
+var BST_FR_NAMES={
+  'Aboleth':'Aboleth','Adult Black Dragon':'Dragon noir adulte','Adult Blue Dragon':'Dragon bleu adulte',
+  'Adult Brass Dragon':'Dragon d\'airain adulte','Adult Bronze Dragon':'Dragon de bronze adulte',
+  'Adult Copper Dragon':'Dragon de cuivre adulte','Adult Gold Dragon':'Dragon d\'or adulte',
+  'Adult Green Dragon':'Dragon vert adulte','Adult Red Dragon':'Dragon rouge adulte',
+  'Adult Silver Dragon':'Dragon d\'argent adulte','Adult White Dragon':'Dragon blanc adulte',
+  'Air Elemental':'Élémentaire d\'air','Allosaurus':'Allosaure',
+  'Ancient Black Dragon':'Dragon noir ancien','Ancient Blue Dragon':'Dragon bleu ancien',
+  'Ancient Brass Dragon':'Dragon d\'airain ancien','Ancient Bronze Dragon':'Dragon de bronze ancien',
+  'Ancient Copper Dragon':'Dragon de cuivre ancien','Ancient Gold Dragon':'Dragon d\'or ancien',
+  'Ancient Green Dragon':'Dragon vert ancien','Ancient Red Dragon':'Dragon rouge ancien',
+  'Ancient Silver Dragon':'Dragon d\'argent ancien','Ancient White Dragon':'Dragon blanc ancien',
+  'Androsphinx':'Androsphinx','Animated Armor':'Armure animée','Ankheg':'Ankheg',
+  'Ape':'Grand singe','Azer':'Azer','Baboon':'Babouin','Badger':'Blaireau','Balor':'Balor',
+  'Bandit':'Bandit','Bandit Captain':'Chef de bandits','Banshee':'Banshee',
+  'Barbed Devil':'Diable barbelé','Basilisk':'Basilic','Bat':'Chauve-souris',
+  'Bearded Devil':'Diable barbu','Behir':'Behir',
+  'Beholder':'Beholder (Œil du Tyran)','Black Bear':'Ours noir','Black Dragon Wyrmling':'Dragonnet noir',
+  'Black Pudding':'Flaque noire','Blink Dog':'Chien clignotant','Blood Hawk':'Faucon sanguin',
+  'Bone Devil':'Diable osseux','Brown Bear':'Ours brun','Bugbear':'Bugbear','Bugbear Chief':'Chef bugbear',
+  'Bulette':'Bulette','Camel':'Chameau','Cat':'Chat','Cave Bear':'Ours des cavernes',
+  'Centaur':'Centaure','Chain Devil':'Diable des chaînes','Chimera':'Chimère','Chuul':'Chuul',
+  'Clay Golem':'Golem d\'argile','Cloud Giant':'Géant des nuages','Cloaker':'Cloakeur',
+  'Cockatrice':'Cockatrice','Commoner':'Paysan','Constrictor Snake':'Serpent constricteur',
+  'Copper Dragon Wyrmling':'Dragonnet de cuivre','Couatl':'Couatl','Crab':'Crabe',
+  'Crawling Claw':'Griffe rampante','Crocodile':'Crocodile','Cult Fanatic':'Fanatique de culte',
+  'Cultist':'Cultiste','Darkmantle':'Darkmantle','Death Dog':'Chien de la mort',
+  'Death Knight':'Chevalier de la mort','Deep Gnome (Svirfneblin)':'Gnome des profondeurs',
+  'Deer':'Cerf','Deva':'Déva','Dire Wolf':'Loup géant','Displacer Beast':'Déplaceur',
+  'Djinni':'Djinn','Doppelganger':'Doppelganger','Draft Horse':'Cheval de trait',
+  'Dragon Turtle':'Tortue-dragon','Dretch':'Dretch','Drider':'Drider',
+  'Drow':'Drow','Drow Elite Warrior':'Guerrier d\'élite drow','Drow Mage':'Mage drow',
+  'Drow Priestess of Lolth':'Prêtresse de Lolth','Druid':'Druide','Dryad':'Dryade',
+  'Duergar':'Duergar','Eagle':'Aigle','Earth Elemental':'Élémentaire de terre',
+  'Efreeti':'Éfrit','Elephant':'Éléphant','Elk':'Élan','Empyrean':'Empyréen',
+  'Erinyes':'Érinyes','Ettercap':'Ettercap','Ettin':'Ettine',
+  'Fire Elemental':'Élémentaire de feu','Fire Giant':'Géant du feu',
+  'Flesh Golem':'Golem de chair','Flying Snake':'Serpent volant','Frog':'Grenouille',
+  'Frost Giant':'Géant du givre','Gargoyle':'Gargouille','Gelatinous Cube':'Cube gélatineux',
+  'Ghost':'Fantôme','Ghoul':'Goule','Giant Ape':'Grand singe','Giant Badger':'Grand blaireau',
+  'Giant Bat':'Grande chauve-souris','Giant Boar':'Grand sanglier',
+  'Giant Centipede':'Mille-pattes géant','Giant Constrictor Snake':'Grand serpent constricteur',
+  'Giant Crab':'Grand crabe','Giant Crocodile':'Grand crocodile','Giant Eagle':'Grand aigle',
+  'Giant Elk':'Grand élan','Giant Fire Beetle':'Coléoptère de feu géant',
+  'Giant Frog':'Grande grenouille','Giant Goat':'Grande chèvre','Giant Hyena':'Grande hyène',
+  'Giant Lizard':'Grand lézard','Giant Octopus':'Grand poulpe','Giant Owl':'Grand hibou',
+  'Giant Poisonous Snake':'Grand serpent venimeux','Giant Rat':'Grand rat',
+  'Giant Scorpion':'Grand scorpion','Giant Sea Horse':'Grand hippocampe',
+  'Giant Shark':'Requin géant','Giant Spider':'Araignée géante','Giant Toad':'Grand crapaud',
+  'Giant Vulture':'Grand vautour','Giant Wasp':'Grande guêpe','Giant Weasel':'Grande belette',
+  'Giant Wolf Spider':'Araignée-loup géante','Gibbering Mouther':'Bouche gargouilleuse',
+  'Glabrezu':'Glabrezu','Gnoll':'Gnoll','Gnoll Fang of Yeenoghu':'Gnoll crochet de Yeenoghu',
+  'Gnoll Pack Lord':'Seigneur de meute gnoll','Goat':'Chèvre','Goblin':'Gobelin',
+  'Gold Dragon Wyrmling':'Dragonnet d\'or','Gorgon':'Gorgone','Grell':'Grell',
+  'Grick':'Grick','Grick Alpha':'Grick alpha','Griffon':'Griffon','Grimlock':'Grimlock',
+  'Guard':'Garde','Guardian Naga':'Naga gardien','Gynosphinx':'Gynosphinx',
+  'Harpy':'Harpie','Hawk':'Faucon','Hell Hound':'Chien de l\'enfer',
+  'Helmed Horror':'Horreur heaumée','Hezrou':'Hezrou','Hill Giant':'Géant de colline',
+  'Hippogriff':'Hippogriffe','Hobgoblin':'Hobgobelin','Hobgoblin Captain':'Capitaine hobgobelin',
+  'Hobgoblin Warlord':'Seigneur de guerre hobgobelin','Homunculus':'Homoncule',
+  'Hook Horror':'Horreur à crochets','Horned Devil':'Diable cornu',
+  'Hunter Shark':'Requin chasseur','Hydra':'Hydre','Hyena':'Hyène',
+  'Ice Devil':'Diable de glace','Ice Mephit':'Méphite de glace','Imp':'Diablotin',
+  'Incubus':'Incube','Iron Golem':'Golem de fer','Jackal':'Chacal','Jackalwere':'Chacal-garou',
+  'Killer Whale':'Orque (cétacé)','Knight':'Chevalier','Kobold':'Kobold','Kraken':'Kraken',
+  'Lamia':'Lamia','Lemure':'Lémure','Lich':'Liche','Lion':'Lion','Lizard':'Lézard',
+  'Lizardfolk':'Homme-lézard','Lizard King/Queen':'Roi/Reine homme-lézard',
+  'Mage':'Mage','Magmin':'Magmin','Mammoth':'Mammouth','Manticore':'Manticore',
+  'Marilith':'Marilith','Mastiff':'Mâtin','Medusa':'Méduse','Merfolk':'Homme-poisson',
+  'Merrow':'Merrow','Mind Flayer':'Flagelleur mental','Mimic':'Mimic',
+  'Minotaur':'Minotaure','Mummy':'Momie','Mummy Lord':'Seigneur momie',
+  'Myconid Adult':'Myconide adulte','Myconid Sovereign':'Myconide souverain',
+  'Myconid Sprout':'Myconide pousse','Nalfeshnee':'Nalfeshnee',
+  'Night Hag':'Sorcière nocturne','Nightmare':'Cauchemar','Noble':'Noble',
+  'Nothic':'Nothique','Nycaloth':'Nycaloth','Ochre Jelly':'Vase ochre',
+  'Ogre':'Ogre','Ogre Zombie':'Zombie ogre','Oni':'Oni','Orc':'Orque',
+  'Orc Eye of Gruumsh':'Orque œil de Gruumsh','Orc War Chief':'Chef de guerre orque',
+  'Orog':'Orog','Otyugh':'Otyugh','Owl':'Hibou','Owlbear':'Hibours','Panther':'Panthère',
+  'Pegasus':'Pégase','Peryton':'Péryton','Piercer':'Perceur',
+  'Pit Fiend':'Seigneur des fosses','Planetar':'Planétaire','Plesiosaurus':'Plésiosaure',
+  'Poisonous Snake':'Serpent venimeux','Polar Bear':'Ours polaire','Pony':'Poney',
+  'Priest':'Prêtre','Pseudodragon':'Pseudodragon','Purple Worm':'Ver pourpre',
+  'Quasit':'Quasit','Quipper':'Piranha','Rakshasa':'Rakshasa','Rat':'Rat','Raven':'Corbeau',
+  'Red Dragon Wyrmling':'Dragonnet rouge','Remorhaz':'Rémorhaz','Revenant':'Revenant',
+  'Riding Horse':'Cheval de selle','Roc':'Roc','Roper':'Roper',
+  'Rug of Smothering':'Tapis étouffant','Rust Monster':'Monstre rouilleur',
+  'Saber-Toothed Tiger':'Tigre à dents de sabre','Sahuagin':'Sahuagin',
+  'Salamander':'Salamandre','Satyr':'Satyre','Scorpion':'Scorpion','Scout':'Éclaireur',
+  'Sea Hag':'Sorcière des mers','Sea Horse':'Hippocampe','Shadow':'Ombre',
+  'Shadow Demon':'Démon d\'ombre','Shambling Mound':'Amas ambulant',
+  'Shield Guardian':'Gardien de bouclier','Shrieker':'Crieur',
+  'Silver Dragon Wyrmling':'Dragonnet d\'argent','Skeleton':'Squelette',
+  'Solar':'Solaire','Specter':'Spectre','Sphinx':'Sphinx','Spider':'Araignée',
+  'Sprite':'Farfadet','Spy':'Espion','Spirit Naga':'Naga esprit',
+  'Steam Mephit':'Méphite de vapeur','Stone Giant':'Géant de pierre',
+  'Stone Golem':'Golem de pierre','Storm Giant':'Géant des tempêtes',
+  'Succubus':'Succube','Swarm of Bats':'Nuée de chauves-souris',
+  'Swarm of Beetles':'Nuée de coléoptères','Swarm of Centipedes':'Nuée de mille-pattes',
+  'Swarm of Insects':'Nuée d\'insectes','Swarm of Poisonous Snakes':'Nuée de serpents venimeux',
+  'Swarm of Quippers':'Nuée de piranhas','Swarm of Rats':'Nuée de rats',
+  'Swarm of Ravens':'Nuée de corbeaux','Swarm of Spiders':'Nuée d\'araignées',
+  'Swarm of Wasps':'Nuée de guêpes','Tarrasque':'Tarrasque','Thug':'Brute',
+  'Tiger':'Tigre','Treant':'Sylvanien','Tribal Warrior':'Guerrier tribal',
+  'Triceratops':'Tricératops','Troll':'Troll','Tyrannosaurus Rex':'Tyrannosaure rex',
+  'Ultroloth':'Ultroloth','Umber Hulk':'Hulk des ombres','Unicorn':'Licorne',
+  'Vampire':'Vampire','Vampire Spawn':'Rejeton vampire','Veteran':'Vétéran',
+  'Violet Fungus':'Fongus violet','Vrock':'Vrock','Vulture':'Vautour',
+  'Warhorse':'Cheval de guerre','Warhorse Skeleton':'Squelette de cheval de guerre',
+  'Water Elemental':'Élémentaire d\'eau','Weasel':'Belette',
+  'Werebear':'Lycanthrope ours','Wereboar':'Lycanthrope sanglier',
+  'Wererat':'Lycanthrope rat','Weretiger':'Lycanthrope tigre','Werewolf':'Lycanthrope loup',
+  'White Dragon Wyrmling':'Dragonnet blanc','Wight':'Spectre vivant',
+  'Will-o\'-Wisp':'Feu follet','Winged Kobold':'Kobold ailé','Winter Wolf':'Loup des neiges',
+  'Wolf':'Loup','Worg':'Worg','Wyvern':'Wyverne','Xorn':'Xorn','Yeti':'Yéti',
+  'Young Black Dragon':'Dragon noir jeune','Young Blue Dragon':'Dragon bleu jeune',
+  'Young Brass Dragon':'Dragon d\'airain jeune','Young Bronze Dragon':'Dragon de bronze jeune',
+  'Young Copper Dragon':'Dragon de cuivre jeune','Young Gold Dragon':'Dragon d\'or jeune',
+  'Young Green Dragon':'Dragon vert jeune','Young Red Dragon':'Dragon rouge jeune',
+  'Young Silver Dragon':'Dragon d\'argent jeune','Young White Dragon':'Dragon blanc jeune',
+  'Yuan-ti Abomination':'Yuan-ti abomination','Yuan-ti Malison':'Yuan-ti maliçon',
+  'Yuan-ti Pureblood':'Yuan-ti sang-pur','Zombie':'Zombie',
+  'Brass Dragon Wyrmling':'Dragonnet d\'airain','Bronze Dragon Wyrmling':'Dragonnet de bronze',
+};
+
+var BST_FR_ALIGN={
+  'lawful good':'loyal bon','neutral good':'neutre bon','chaotic good':'chaotique bon',
+  'lawful neutral':'loyal neutre','true neutral':'neutre','neutral':'neutre',
+  'chaotic neutral':'chaotique neutre','lawful evil':'loyal mauvais',
+  'neutral evil':'neutre mauvais','chaotic evil':'chaotique mauvais',
+  'unaligned':'sans alignement','any alignment':'tout alignement',
+  'any non-good alignment':'tout alignement non-bon',
+  'any non-lawful alignment':'tout alignement non-loyal',
+  'any chaotic alignment':'tout alignement chaotique',
+  'any lawful alignment':'tout alignement loyal',
+  'any evil alignment':'tout alignement mauvais',
+  'any good alignment':'tout alignement bon',
+};
+var BST_FR_DMG={
+  'acid':'acide','bludgeoning':'contondant','cold':'froid','fire':'feu','force':'force',
+  'lightning':'foudre','necrotic':'nécrotique','piercing':'perforant','poison':'poison',
+  'psychic':'psychique','radiant':'radiant','slashing':'tranchant','thunder':'tonnerre',
+  'nonmagical bludgeoning':'contondant non magique','nonmagical piercing':'perforant non magique',
+  'nonmagical slashing':'tranchant non magique',
+  'bludgeoning, piercing, and slashing from nonmagical attacks':'contondant, perforant et tranchant non magiques',
+  'bludgeoning, piercing, and slashing from nonmagical weapons':'contondant, perforant et tranchant non magiques',
+  'bludgeoning, piercing, and slashing that is nonmagical':'contondant, perforant et tranchant non magiques',
+};
+var BST_FR_COND={
+  'blinded':'aveuglé','charmed':'charmé','deafened':'assourdi','exhaustion':'épuisement',
+  'frightened':'effrayé','grappled':'agrippé','incapacitated':'neutralisé',
+  'invisible':'invisible','paralyzed':'paralysé','petrified':'pétrifié',
+  'poisoned':'empoisonné','prone':'à terre','restrained':'entravé',
+  'stunned':'étourdi','unconscious':'inconscient',
+};
+var BST_FR_LANG={
+  'Common':'Commun','Elvish':'Elfique','Dwarvish':'Nain','Halfling':'Halfelin',
+  'Orc':'Orque','Orcish':'Orque','Gnomish':'Gnome','Goblin':'Gobelin',
+  'Draconic':'Draconique','Giant':'Géant','Deep Speech':'Langage des profondeurs',
+  'Undercommon':'Commun des profondeurs','Celestial':'Céleste','Infernal':'Infernal',
+  'Abyssal':'Abyssal','Sylvan':'Sylvestre','Primordial':'Primordial',
+  'Aquan':'Aquan','Auran':'Auran','Ignan':'Ignan','Terran':'Terran',
+  'Thieves\' Cant':'Argot des voleurs','Druidic':'Druidique',
+  'all languages':'toutes les langues','any language':'toute langue',
+};
+var BST_FR_SKILLS={
+  'acrobatics':'Acrobaties','animal handling':'Dressage','arcana':'Arcanes',
+  'athletics':'Athlétisme','deception':'Tromperie','history':'Histoire',
+  'insight':'Perspicacité','intimidation':'Intimidation','investigation':'Investigation',
+  'medicine':'Médecine','nature':'Nature','perception':'Perception','performance':'Représentation',
+  'persuasion':'Persuasion','religion':'Religion','sleight of hand':'Escamotage',
+  'stealth':'Discrétion','survival':'Survie',
+};
+var BST_FR_SENSE={
+  'darkvision':'Vision dans le noir','blindsight':'Vision aveugle',
+  'truesight':'Vision totale','tremorsense':'Perception des vibrations',
+  'passive Perception':'Perception passive',
+};
+var BST_FR_ACT={
+  'Multiattack':'Attaques multiples','Bite':'Morsure','Claw':'Griffe','Claws':'Griffes',
+  'Tail':'Queue','Tail Swipe':'Coup de queue','Gore':'Coup de corne','Slam':'Coup',
+  'Fist':'Poing','Wing Attack':'Attaque d\'aile','Frightful Presence':'Présence terrifiante',
+  'Fire Breath':'Souffle de feu','Cold Breath':'Souffle de froid',
+  'Lightning Breath':'Souffle de foudre','Poison Breath':'Souffle de poison',
+  'Acid Breath':'Souffle d\'acide','Thunder Breath':'Souffle de tonnerre',
+  'Necrotic Breath':'Souffle nécrotique','Breath Weapon':'Souffle',
+  'Tentacle':'Tentacule','Tentacles':'Tentacules','Rock':'Rocher','Javelin':'Javeline',
+  'Shortsword':'Épée courte','Longsword':'Épée longue','Greatsword':'Épée à deux mains',
+  'Greataxe':'Hache à deux mains','Battleaxe':'Hache d\'armes','Spear':'Lance',
+  'Trident':'Trident','Dagger':'Dague','Handaxe':'Hachette','Quarterstaff':'Bâton de combat',
+  'Sling':'Fronde','Shortbow':'Arc court','Longbow':'Arc long',
+  'Stinger':'Dard','Pincer':'Pince','Pincers':'Pinces','Web':'Toile',
+  'Constrict':'Constriction','Swallow':'Avalement','Engulf':'Engloutissement',
+  'Life Drain':'Drain de vie','Energy Drain':'Drain d\'énergie',
+  'Paralyzing Touch':'Toucher paralysant','Corrupting Touch':'Toucher corrupteur',
+  'Rotting Fist':'Poing putréfiant','Possession':'Possession',
+  'Horrifying Visage':'Visage terrifiant','Etherealness':'Éthéréité',
+  'Mind Blast':'Explosion mentale','Extract Brain':'Extraction du cerveau',
+  'Detect':'Détection','Acid Spit':'Crachat acide','Charge':'Charge','Pounce':'Bond',
+  'Trample':'Piétiner','Pack Tactics':'Tactique de meute','Keen Smell':'Odorat aiguisé',
+  'Keen Sight':'Vue aiguisée','Keen Senses':'Sens aiguisés',
+  'Keen Hearing and Smell':'Ouïe et odorat aiguisés',
+  'Keen Hearing and Sight':'Ouïe et vue aiguisées',
+  'Magic Resistance':'Résistance à la magie','Spider Climb':'Pattes d\'araignée',
+  'Web Sense':'Sens de la toile','Web Walker':'Marcheur dans les toiles',
+  'Amphibious':'Amphibien','Shapechanger':'Métamorphe','Regeneration':'Régénération',
+  'Blood Frenzy':'Frénésie sanguine','Sunlight Sensitivity':'Sensibilité à la lumière du soleil',
+  'Legendary Resistance':'Résistance légendaire','False Appearance':'Faux-semblant',
+  'Light':'Lumière','Illumination':'Illumination','Death Burst':'Explosion à la mort',
+  'Spellcasting':'Lancement de sorts','Innate Spellcasting':'Sorts innés',
+  'Reckless':'Téméraire','Undead Fortitude':'Ténacité du mort-vivant',
+  'Aggressive':'Agressivité','Martial Advantage':'Avantage martial',
+  'Nimble Escape':'Fuite agile','Sunlight Hypersensitivity':'Hypersensibilité solaire',
+  'Standing Leap':'Saut debout','Hold Breath':'Retenir son souffle',
+  'Stone Camouflage':'Camouflage de pierre','Rampage':'Frénésie rampante',
+  'Charge (Trample)':'Charge piétinante','Antimagic Susceptibility':'Sensibilité antimagie',
+  'Aversion to Fire':'Aversion au feu','Lightbringer':'Porteur de lumière',
+  'Healing Touch':'Toucher curatif',
+};
+
+function bstTranslateDmgList(s){
+  if(!s)return[];
+  // Try full-phrase match first, then word-by-word
+  var low=s.toLowerCase().trim();
+  if(BST_FR_DMG[low])return[BST_FR_DMG[low]];
+  return s.split(/[;,]/).map(function(p){
+    var t=p.trim().toLowerCase();
+    return BST_FR_DMG[t]||p.trim();
+  }).filter(Boolean);
+}
+function bstTranslateCondList(s){
+  if(!s)return[];
+  return s.split(/[;,]/).map(function(p){
+    var t=p.trim().toLowerCase();
+    return BST_FR_COND[t]||p.trim();
+  }).filter(Boolean);
+}
+function bstTranslateSenses(s){
+  if(!s)return'—';
+  var r=s;
+  r=r.replace(/(\d+)\s*ft\./gi,function(_,n){return Math.round(n*0.3*2)/2+' m';});
+  Object.keys(BST_FR_SENSE).forEach(function(k){
+    r=r.replace(new RegExp(k,'gi'),BST_FR_SENSE[k]);
+  });
+  return r;
+}
+function bstTranslateLangs(s){
+  if(!s||s==='—')return s||'—';
+  var r=s;
+  r=r.replace(/telepathy\s+(\d+)\s*ft\./gi,function(_,n){return'Télépathie '+Math.round(n*0.3)+' m';});
+  r=r.replace(/understands[^,;.]+but[^,;.]+speak/gi,'comprend mais ne parle pas');
+  r=r.replace(/the languages it knew in life/gi,'les langues qu\'il connaissait de son vivant');
+  r=r.replace(/all languages/gi,'toutes les langues');
+  r=r.replace(/any language/gi,'toute langue');
+  Object.keys(BST_FR_LANG).forEach(function(k){
+    r=r.replace(new RegExp('\\b'+k+'\\b','g'),BST_FR_LANG[k]);
+  });
+  return r;
+}
+function bstTranslateText(s){
+  if(!s)return s;
+  var r=s;
+  // Feet to meters
+  r=r.replace(/(\d+)\s*ft\./gi,function(_,n){var m=Math.round(n*0.3*2)/2;return m+' m';});
+  r=r.replace(/(\d+)-foot/gi,function(_,n){return Math.round(n*0.3*2)/2+' m';});
+  r=r.replace(/(\d+)\s*feet/gi,function(_,n){return Math.round(n*0.3*2)/2+' m';});
+  // Attack types
+  r=r.replace(/Melee or Ranged Weapon Attack:/g,'Attaque d\'arme au corps à corps ou à distance :');
+  r=r.replace(/Melee Weapon Attack:/g,'Attaque d\'arme au corps à corps :');
+  r=r.replace(/Ranged Weapon Attack:/g,'Attaque d\'arme à distance :');
+  r=r.replace(/Melee Spell Attack:/g,'Attaque de sort au corps à corps :');
+  r=r.replace(/Ranged Spell Attack:/g,'Attaque de sort à distance :');
+  r=r.replace(/\+(\d+) to hit/g,'+$1 pour toucher');
+  r=r.replace(/reach (\S+) m,/g,'allonge $1 m,');
+  r=r.replace(/range (\S+)\/(\S+) m,/g,'portée $1/$2 m,');
+  r=r.replace(/\bone target\b/gi,'une cible');
+  r=r.replace(/\bone creature\b/gi,'une créature');
+  r=r.replace(/\bone humanoid\b/gi,'un humanoïde');
+  r=r.replace(/\bone beast or humanoid\b/gi,'une bête ou un humanoïde');
+  r=r.replace(/\bHit:\b/g,'Touché :');
+  r=r.replace(/\bMiss:\b/g,'Raté :');
+  // Damage types
+  r=r.replace(/\bpiercing damage\b/gi,'dégâts perforants');
+  r=r.replace(/\bslashing damage\b/gi,'dégâts tranchants');
+  r=r.replace(/\bbludgeoning damage\b/gi,'dégâts contondants');
+  r=r.replace(/\bfire damage\b/gi,'dégâts de feu');
+  r=r.replace(/\bcold damage\b/gi,'dégâts de froid');
+  r=r.replace(/\blightning damage\b/gi,'dégâts de foudre');
+  r=r.replace(/\bpoison damage\b/gi,'dégâts de poison');
+  r=r.replace(/\bacid damage\b/gi,'dégâts d\'acide');
+  r=r.replace(/\bnecrotic damage\b/gi,'dégâts nécrotiques');
+  r=r.replace(/\bradiant damage\b/gi,'dégâts radiants');
+  r=r.replace(/\bpsychic damage\b/gi,'dégâts psychiques');
+  r=r.replace(/\bthunder damage\b/gi,'dégâts de tonnerre');
+  r=r.replace(/\bforce damage\b/gi,'dégâts de force');
+  // Abilities
+  r=r.replace(/\bStrength saving throw\b/gi,'jet de sauvegarde de Force');
+  r=r.replace(/\bDexterity saving throw\b/gi,'jet de sauvegarde de Dextérité');
+  r=r.replace(/\bConstitution saving throw\b/gi,'jet de sauvegarde de Constitution');
+  r=r.replace(/\bIntelligence saving throw\b/gi,'jet de sauvegarde d\'Intelligence');
+  r=r.replace(/\bWisdom saving throw\b/gi,'jet de sauvegarde de Sagesse');
+  r=r.replace(/\bCharisma saving throw\b/gi,'jet de sauvegarde de Charisme');
+  r=r.replace(/\bsaving throw\b/gi,'jet de sauvegarde');
+  r=r.replace(/\bDC (\d+)\b/g,'DD $1');
+  r=r.replace(/\bStrength check\b/gi,'test de Force');
+  r=r.replace(/\bDexterity check\b/gi,'test de Dextérité');
+  r=r.replace(/\bConstitution check\b/gi,'test de Constitution');
+  r=r.replace(/\bIntelligence check\b/gi,'test d\'Intelligence');
+  r=r.replace(/\bWisdom check\b/gi,'test de Sagesse');
+  r=r.replace(/\bCharisma check\b/gi,'test de Charisme');
+  r=r.replace(/\bStrength\b/g,'Force');
+  r=r.replace(/\bDexterity\b/g,'Dextérité');
+  r=r.replace(/\bConstitution\b/g,'Constitution');
+  r=r.replace(/\bIntelligence\b/g,'Intelligence');
+  r=r.replace(/\bWisdom\b/g,'Sagesse');
+  r=r.replace(/\bCharisma\b/g,'Charisme');
+  // Conditions in text
+  r=r.replace(/\bis frightened\b/gi,'est effrayé');
+  r=r.replace(/\bis poisoned\b/gi,'est empoisonné');
+  r=r.replace(/\bis paralyzed\b/gi,'est paralysé');
+  r=r.replace(/\bis stunned\b/gi,'est étourdi');
+  r=r.replace(/\bis blinded\b/gi,'est aveuglé');
+  r=r.replace(/\bis grappled\b/gi,'est agrippé');
+  r=r.replace(/\bis restrained\b/gi,'est entravé');
+  r=r.replace(/\bis prone\b/gi,'est à terre');
+  r=r.replace(/\bis charmed\b/gi,'est charmé');
+  r=r.replace(/\bis incapacitated\b/gi,'est neutralisé');
+  r=r.replace(/\bis petrified\b/gi,'est pétrifié');
+  r=r.replace(/\bis deafened\b/gi,'est assourdi');
+  r=r.replace(/\bfrightened\b/gi,'effrayé');
+  r=r.replace(/\bpoisoned\b/gi,'empoisonné');
+  r=r.replace(/\bparalyzed\b/gi,'paralysé');
+  r=r.replace(/\bstunned\b/gi,'étourdi');
+  r=r.replace(/\bblinded\b/gi,'aveuglé');
+  r=r.replace(/\bgrappled\b/gi,'agrippé');
+  r=r.replace(/\brestrained\b/gi,'entravé');
+  r=r.replace(/\bprone\b/gi,'à terre');
+  r=r.replace(/\bcharmed\b/gi,'charmé');
+  r=r.replace(/\bpetrified\b/gi,'pétrifié');
+  r=r.replace(/\bincapacitated\b/gi,'neutralisé');
+  r=r.replace(/\bdeafened\b/gi,'assourdi');
+  r=r.replace(/\bunconscious\b/gi,'inconscient');
+  // Common phrases
+  r=r.replace(/\bon a failed save\b/gi,'en cas d\'échec');
+  r=r.replace(/\bon a successful save\b/gi,'en cas de réussite');
+  r=r.replace(/\bon a failed saving throw\b/gi,'en cas d\'échec au jet de sauvegarde');
+  r=r.replace(/\bon a successful saving throw\b/gi,'en cas de réussite au jet de sauvegarde');
+  r=r.replace(/\buntil the end of its next turn\b/gi,'jusqu\'à la fin de son prochain tour');
+  r=r.replace(/\bat the start of each of its turns\b/gi,'au début de chacun de ses tours');
+  r=r.replace(/\bat the end of each of its turns\b/gi,'à la fin de chacun de ses tours');
+  r=r.replace(/\bat the start of its turn\b/gi,'au début de son tour');
+  r=r.replace(/\bat the end of its turn\b/gi,'à la fin de son tour');
+  r=r.replace(/\bfor 1 minute\b/gi,'pendant 1 minute');
+  r=r.replace(/\bfor 1 hour\b/gi,'pendant 1 heure');
+  r=r.replace(/\bfor 24 hours\b/gi,'pendant 24 heures');
+  r=r.replace(/\buntil it succeeds\b/gi,'jusqu\'à ce qu\'il réussisse');
+  r=r.replace(/\beach creature\b/gi,'chaque créature');
+  r=r.replace(/\bthe target\b/gi,'la cible');
+  r=r.replace(/\bthe creature\b/gi,'la créature');
+  r=r.replace(/\bon a hit\b/gi,'en cas de touché');
+  r=r.replace(/\bhalf as much damage\b/gi,'la moitié des dégâts');
+  r=r.replace(/\bbonus action\b/gi,'action bonus');
+  r=r.replace(/\breaction\b/gi,'réaction');
+  r=r.replace(/\bhit points\b/gi,'points de vie');
+  r=r.replace(/\bhit point maximum\b/gi,'maximum de points de vie');
+  r=r.replace(/\btemporary hit points\b/gi,'points de vie temporaires');
+  r=r.replace(/\bspell slot\b/gi,'emplacement de sort');
+  r=r.replace(/\bspell slots\b/gi,'emplacements de sorts');
+  r=r.replace(/\baction\b/gi,'action');
+  r=r.replace(/\badvantage\b/gi,'l\'avantage');
+  r=r.replace(/\bdisadvantage\b/gi,'le désavantage');
+  r=r.replace(/\bopportunity attack\b/gi,'attaque d\'opportunité');
+  r=r.replace(/\bwithin (\S+) m\b/g,'dans un rayon de $1');
+  r=r.replace(/\bup to (\S+) m away\b/g,'jusqu\'à $1');
+  r=r.replace(/\bregains (\S+) hit points?\b/gi,'récupère $1 points de vie');
+  r=r.replace(/\btakes? (\S+) (\S+ dégâts)\b/g,'subit $1 $2');
+  return r;
+}
+function bstTranslateActionName(name){
+  if(!name)return name;
+  if(BST_FR_ACT[name])return BST_FR_ACT[name];
+  // Pattern: "X (Recharge Y-Z)" → "X (Recharge Y-Z)"
+  var m=name.match(/^(.*?)\s*\((Recharge\s+[\d–-]+)\)$/i);
+  if(m){
+    var base=BST_FR_ACT[m[1].trim()]||m[1].trim();
+    return base+' (Recharge '+m[2].replace('Recharge','').trim()+')';
+  }
+  // Pattern: "X (X/Day)" → "X (X/jour)"
+  var m2=name.match(/^(.*?)\s*\((\d+\/Day)\)$/i);
+  if(m2){
+    var base2=BST_FR_ACT[m2[1].trim()]||m2[1].trim();
+    return base2+' ('+m2[2].replace(/day/i,'jour')+')';
+  }
+  return name;
+}
+
 function mapOpen5e(m){
   var typeLow=(m.type||'').toLowerCase().replace(/\(.*\)/,'').trim();
   var fam=BST_TYPE_MAP[typeLow]||'Monstruosités';
@@ -7353,14 +7749,22 @@ function mapOpen5e(m){
   var sav={};
   savKeys.forEach(function(k,i){if(m[k]!=null){sav[savLbls[i]]=(m[k]>=0?'+':'')+m[k];}});
   var ski={};
-  if(m.skills)Object.keys(m.skills).forEach(function(k){ski[k.charAt(0).toUpperCase()+k.slice(1)]=(m.skills[k]>=0?'+':'')+m.skills[k];});
-  function splitStr(s){return(s||'').split(/[;,]/).map(function(x){return x.trim();}).filter(Boolean);}
-  function mapArr(arr){return(arr||[]).map(function(a){return{n:a.name,d:a.desc};});}
+  if(m.skills)Object.keys(m.skills).forEach(function(k){
+    var frK=BST_FR_SKILLS[k.toLowerCase()]||(k.charAt(0).toUpperCase()+k.slice(1));
+    ski[frK]=(m.skills[k]>=0?'+':'')+m.skills[k];
+  });
+  function mapArr(arr){
+    return(arr||[]).map(function(a){
+      return{n:bstTranslateActionName(a.name),d:bstTranslateText(a.desc)};
+    });
+  }
+  var frName=BST_FR_NAMES[m.name]||m.name;
   return{
-    id:'api_'+m.slug,n:m.name,fam:fam,
+    id:'api_'+m.slug,n:frName,fam:fam,
     cr:bstParseCr(m.challenge_rating),
     sz:BST_SIZE_MAP[m.size]||'M',
-    type:m.type||'',al:m.alignment||'—',
+    type:m.type||'',
+    al:BST_FR_ALIGN[(m.alignment||'').toLowerCase()]||m.alignment||'—',
     ac:m.armor_class||10,
     acN:m.armor_desc?'('+m.armor_desc+')':'',
     hp:m.hit_points||0,hpD:m.hit_dice||'',
@@ -7368,16 +7772,17 @@ function mapOpen5e(m){
     str:m.strength||10,dex:m.dexterity||10,con:m.constitution||10,
     int:m.intelligence||10,wis:m.wisdom||10,cha:m.charisma||10,
     sav:sav,ski:ski,
-    imm:splitStr(m.damage_immunities),
-    res:splitStr(m.damage_resistances),
-    vul:splitStr(m.damage_vulnerabilities),
-    cim:splitStr(m.condition_immunities),
-    sen:m.senses||'—',lng:m.languages||'—',
+    imm:bstTranslateDmgList(m.damage_immunities),
+    res:bstTranslateDmgList(m.damage_resistances),
+    vul:bstTranslateDmgList(m.damage_vulnerabilities),
+    cim:bstTranslateCondList(m.condition_immunities),
+    sen:bstTranslateSenses(m.senses),
+    lng:bstTranslateLangs(m.languages),
     spe:mapArr(m.special_abilities),
     act:mapArr(m.actions),
     rea:mapArr(m.reactions),
     leg:mapArr(m.legendary_actions),
-    lgD:m.legendary_desc||'',
+    lgD:bstTranslateText(m.legendary_desc),
     src:'api',
   };
 }
