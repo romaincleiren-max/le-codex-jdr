@@ -586,9 +586,10 @@ body.printing #ps-print{display:block!important;}
 .re-sp-notice{font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;}
 #re-body{display:flex;flex:1;overflow:hidden;}
 /* Bag column */
-#re-bag-col{flex:0 0 20%;width:20%;min-width:0;background:#130D06;border-right:1px solid #2A1A08;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+#re-bag-col{flex:0 0 20%;width:20%;min-width:0;background:#130D06;border-right:1px solid #2A1A08;display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto;overflow-x:hidden;}
+#re-bag-col::-webkit-scrollbar{width:3px;}#re-bag-col::-webkit-scrollbar-thumb{background:#3A2810;}
 .re-col-t{font-family:'Cinzel',serif;font-size:clamp(8px,1vh,11px);letter-spacing:.18em;color:var(--gold-d);text-transform:uppercase;padding:clamp(.4rem,.8vh,.7rem) clamp(.6rem,1vw,.9rem);border-bottom:1px solid #1E1208;flex-shrink:0;background:#0F0A06;}
-#re-bag-list2{flex:0 0 auto;max-height:clamp(140px,26vh,260px);overflow-y:auto;padding:.3rem .5rem;}
+#re-bag-list2{flex:0 0 auto;overflow-y:visible;padding:.3rem .5rem;}
 #re-bag-list2::-webkit-scrollbar{width:3px;}#re-bag-list2::-webkit-scrollbar-thumb{background:#3A2810;}
 #re-hp-input::-webkit-inner-spin-button,#re-hp-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 #re-hp-input{-moz-appearance:textfield;}
@@ -611,7 +612,7 @@ body.printing #ps-print{display:block!important;}
 /* Doll column */
 #re-doll-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden;padding:clamp(.2rem,.6vh,.6rem) clamp(.4rem,.8vw,.8rem);}
 #re-doll-inner{width:100%;max-width:100%;}
-.doll-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(6,clamp(44px,5.5vh,72px));gap:clamp(4px,0.6vh,10px);margin-top:.4rem;}
+.doll-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(6,clamp(57px,7.2vh,94px));gap:clamp(4px,0.6vh,10px);margin-top:.4rem;}
 .re-doll-slot{display:flex;align-items:center;gap:clamp(4px,0.5vw,8px);padding:clamp(.2rem,.4vh,.5rem) clamp(.3rem,.5vw,.6rem);border:1px solid #3A2810;background:#130D06;border-radius:4px;cursor:default;transition:.12s;overflow:hidden;min-height:0;border-left-width:3px;}
 .re-doll-slot:hover{border-color:var(--gold-d) !important;background:rgba(201,168,76,.07) !important;}
 .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.5)!important;background:rgba(201,168,76,.06)!important;animation:re-pulse .9s ease-in-out infinite alternate;}
