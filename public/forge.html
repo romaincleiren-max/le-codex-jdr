@@ -610,8 +610,8 @@ body.printing #ps-print{display:block!important;}
 .re-bag-del:hover{color:var(--blood-l);}
 .re-rarity{font-family:'Share Tech Mono',monospace;font-size:clamp(7px,.9vh,9px);border-radius:2px;padding:1px 4px;margin-left:4px;vertical-align:middle;}
 /* Doll column */
-#re-doll-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden;padding:clamp(.1rem,.2vh,.2rem) clamp(.4rem,.8vw,.8rem);}
-#re-doll-inner{width:100%;max-width:100%;}
+#re-doll-col{flex:1;display:flex;flex-direction:column;align-items:stretch;overflow:hidden;padding:0;}
+#re-doll-inner{flex:1;display:flex;flex-direction:column;min-height:0;}
 .doll-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(6,clamp(40px,5vh,66px));gap:clamp(3px,0.4vh,7px);margin-top:.15rem;}
 .re-doll-slot{display:flex;align-items:center;gap:clamp(4px,0.5vw,8px);padding:clamp(.2rem,.4vh,.5rem) clamp(.3rem,.5vw,.6rem);border:1px solid #3A2810;background:#130D06;border-radius:4px;cursor:default;transition:.12s;overflow:hidden;min-height:0;border-left-width:3px;}
 .re-doll-slot:hover{border-color:var(--gold-d) !important;background:rgba(201,168,76,.07) !important;}
@@ -5529,25 +5529,26 @@ function renderReDoll(){
   var r=_reChar; if(!r)return;
   if(!r.equipped) r.equipped={};
   var el=$('re-doll-inner'); if(!el)return;
-  var portHtml=r.photo
-    ?'<img src="'+r.photo+'" style="width:100%;height:100%;object-fit:cover;object-position:center top;">'
-    :'<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:\'Cinzel Decorative\',serif;font-size:60px;color:var(--gold);">'+((r.name||'?')[0].toUpperCase())+'</div>';
+  var portBg=r.photo
+    ?'<img src="'+r.photo+'" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center top;z-index:0;">'
+    :'<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:\'Cinzel Decorative\',serif;font-size:60px;color:var(--gold);z-index:0;">'+((r.name||'?')[0].toUpperCase())+'</div>';
   var leftSlots=RE_SLOTS_LEFT.map(function(s,i){return reSlotHtml(s,1,i+2);}).join('');
   var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
   var headSlot=reSlotHtml(RE_HEAD,2,1);
   el.innerHTML=
-    '<div style="text-align:center;padding:clamp(.05rem,.15vh,.15rem) 0 0;font-family:\'Cinzel Decorative\',serif;font-size:clamp(12px,1.6vh,20px);color:var(--gold);">'+r.name+'</div>'+
-    '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.12em;color:var(--gold-d);margin-bottom:clamp(.05rem,.15vh,.15rem);">'+(r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+'</div>'+
-    '<div class="doll-grid">'+
-      headSlot+
-      leftSlots+
-      '<div style="grid-column:2;grid-row:2/7;overflow:hidden;background:#130D06;">'+
-        portHtml+
+    '<div style="position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;">'+
+      portBg+
+      '<div style="position:relative;z-index:1;flex-shrink:0;text-align:center;padding:clamp(.05rem,.15vh,.15rem) 0 0;font-family:\'Cinzel Decorative\',serif;font-size:clamp(12px,1.6vh,20px);color:var(--gold);text-shadow:0 1px 6px #000;">'+r.name+'</div>'+
+      '<div style="position:relative;z-index:1;flex-shrink:0;text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.12em;color:var(--gold-d);margin-bottom:clamp(.05rem,.15vh,.15rem);text-shadow:0 1px 4px #000;">'+(r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+'</div>'+
+      '<div style="position:relative;z-index:1;flex:1;display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(6,clamp(40px,5vh,66px));gap:clamp(3px,0.4vh,7px);">'+
+        headSlot+
+        leftSlots+
+        '<div style="grid-column:2;grid-row:1/7;"></div>'+
+        rightSlots+
       '</div>'+
-      rightSlots+
-    '</div>'+
-    '<div style="text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#3A2A1A;margin-top:.15rem;letter-spacing:.04em;">'+
-      '☷ Glissez du sac ou du catalogue ▶ emplacement · ✕ déséquiper'+
+      '<div style="position:relative;z-index:1;flex-shrink:0;text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#6A5A3A;margin:.1rem 0;letter-spacing:.04em;text-shadow:0 1px 4px #000;">'+
+        '☷ Glissez du sac ou du catalogue ▶ emplacement · ✕ déséquiper'+
+      '</div>'+
     '</div>';
 }
 
