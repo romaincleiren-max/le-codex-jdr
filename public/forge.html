@@ -1279,7 +1279,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
       <div class="badge" id="badge">CRÉATION</div>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="saveToRoster();this.textContent='✓ Sauvegardé';setTimeout(()=>this.textContent='💾 Sauvegarder',1500)">💾 Sauvegarder</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="showTitle()">↩ Accueil</button>
-      <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;background:#1A1520;border-color:#4A3A70;color:#A090D0;" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">← Mes persos</button>
+      <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;background:#1A1520;border-color:#4A3A70;color:#A090D0;" onclick="saveToRoster();showTitle()">← Mes persos</button>
     </div>
   </div>
   <div id="dh-nav">
@@ -1300,7 +1300,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <span class="scn-title" id="scn-title-bar">La Maîtresse des Doigts</span>
     <span class="scn-phase" id="scn-phase-bar"></span>
     <span class="scn-xp" id="scn-xp-bar">0 XP</span>
-    <button class="btn btn-s" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')" style="margin-left:.5rem;font-size:9px;">← Mes persos</button>
+    <button class="btn btn-s" onclick="saveToRoster();showTitle()" style="margin-left:.5rem;font-size:9px;">← Mes persos</button>
   </div>
   <div id="layout">
     <div id="rp">
@@ -1545,23 +1545,10 @@ function getRaceImgUrl(id){
   const f=RACE_IMG_MAP[id];
   return f?`${SUPA_URL}/storage/v1/object/public/races/${encodeURIComponent(f)}`:null;
 }
-const CLS_IMG_MAP={
-  'barbarian': 'Classe - Barbare.png',
-  'bard':      'Classe - Barde.png',
-  'cleric':    'Classe - Clerc.png',
-  'druid':     'Classe - Druide.png',
-  'fighter':   'Classe - Guerrier.png',
-  'monk':      'Classe - Moine.png',
-  'paladin':   'Classe - Paladin.png',
-  'ranger':    'Classe - Rodeur.png',
-  'rogue':     'Classe - Roublard.png',
-  'sorcerer':  'Classe - Ensorceleur.png',
-  'warlock':   'Classe - Occultiste.png',
-  'wizard':    'Classe - Magicien.png',
-};
 function getClsImgUrl(id){
-  const f=CLS_IMG_MAP[id];
-  return f?`${SUPA_URL}/storage/v1/object/public/classes/${encodeURIComponent(f)}`:null;
+  if(!id)return null;
+  const name=id.charAt(0).toUpperCase()+id.slice(1);
+  return `${SUPA_URL}/storage/v1/object/public/classes/${encodeURIComponent(name+'.jpg')}`;
 }
 const CLS_PDF_MAP={
   'barbarian': 'Classe - Barbare.pdf',
@@ -1618,6 +1605,12 @@ function rcClsImgFallback(el){
   const cls=CLASSES.find(c=>c.id===id);
   el.onerror=null;
   el.parentElement.innerHTML=`<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${cs.icon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${cls?.n||id}</span></div>`;
+}
+function clsImgFallback(el,id,mode){
+  el.onerror=null;
+  const cs=CLASS_STYLE[id]||{icon:'⚔'};
+  if(mode==='card'){const s=document.createElement('span');s.style.fontSize='28px';s.textContent=cs.icon;el.replaceWith(s);}
+  else{el.parentElement.innerHTML='<div class="rp-phl">'+cs.icon+'</div>';}
 }
 // ── Visuels par race / classe ─────────────────────────────────────────────────
 const RACE_STYLE={
@@ -2762,10 +2755,9 @@ function renderClass(){
   CLASSES.forEach(cl=>{
     const d=document.createElement('div');d.className='card'+(C.cls?.id===cl.id?' sel':'');
     const cs=CLASS_STYLE[cl.id]||{icon:'⚔',color:'var(--gold-d)'};
-    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><div class="card-pdf-icon" id="ci-${cl.id}"><span style="font-size:28px;">${cs.icon}</span></div><div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
+    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><div class="card-pdf-icon" id="ci-${cl.id}"><img src="${getClsImgUrl(cl.id)}" alt="${cl.n}" style="max-height:68px;width:auto;max-width:100%;object-fit:contain;" onerror="clsImgFallback(this,'${cl.id}','card')"></div><div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
     d.onclick=()=>{if(C.cls?.id!==cl.id){C.sub=null;C.skills=[];C.cantrips=[];C.spells=[];}C.cls=cl;renderClass();updateRight();};
     $('cg').appendChild(d);
-    renderClsPdf($('ci-'+cl.id),getClsPdfUrl(cl.id),72,cs.icon);
   });
   if(C.cls)renderSubs();
   renderMulti();
@@ -4688,8 +4680,7 @@ function updateRight(){
   const clsPortEl=$('rp-cls-portrait');
   if(clsPortEl){
     if(C.cls){
-      clsPortEl.innerHTML=`<div class="rp-phl">${clsStyle?.icon||'⚔'}</div>`;
-      renderClsPdf(clsPortEl,getClsPdfUrl(C.cls.id),90,clsStyle?.icon||'⚔');
+      clsPortEl.innerHTML=`<img src="${getClsImgUrl(C.cls.id)}" alt="${C.cls.n}" onerror="clsImgFallback(this,'${C.cls.id}','port')">`;
     }else{clsPortEl.innerHTML='<div class="rp-phl">✕</div>';}
   }
   if($('rhp'))$('rhp').textContent=calcHP()||'—';
