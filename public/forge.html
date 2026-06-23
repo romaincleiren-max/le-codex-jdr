@@ -546,6 +546,18 @@ body.printing #ps-print{display:block!important;}
 .lvl-btn{background:#1A1510;color:var(--gold-d);border:1px solid #3A2A10;font-family:'Cinzel Decorative',serif;font-size:15px;padding:.55em 0;cursor:pointer;transition:.12s;border-radius:3px;font-weight:bold;min-height:48px;width:100%;line-height:1;}
 .lvl-btn:hover{border-color:var(--gold);color:var(--gold);background:#221A0E;}
 .lvl-btn.active{border-color:var(--blood);background:var(--blood);color:var(--parch);}
+/* ── Spell slot pips (Baldur's Gate style) ── */
+#re-slots-bar{display:flex;justify-content:center;gap:.7rem;flex-wrap:wrap;padding:.6rem .4rem .2rem;margin-top:.5rem;}
+.re-slot-lvl{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.re-slot-lvl-n{font-family:'Cinzel',serif;font-size:9px;color:#7A6A3A;letter-spacing:.08em;}
+.re-slot-pips{display:flex;gap:2px;flex-wrap:wrap;justify-content:center;}
+.re-slot-pip{width:16px;height:16px;border:1px solid #3A2A10;border-radius:2px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.12s;background:#0F0A06;}
+.re-slot-pip:hover{border-color:var(--gold-d);}
+.re-slot-pip .pip-inner{width:9px;height:9px;border-radius:1px;transition:.15s;}
+.re-slot-pip.avail .pip-inner{background:#00CCFF;box-shadow:0 0 5px #00CCFF88;}
+.re-slot-pip.used .pip-inner{background:#2A2A2A;}
+.re-slot-lvl.exhausted .re-slot-pip{border-color:#5A1A1A;background:#160707;}
+.re-slot-lvl.exhausted .re-slot-lvl-n{color:#7A3030;}
 /* ── Roster Equipment Overlay — RPG Paper Doll ── */
 #re-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:9001;display:none;flex-direction:column;background:#0D0805;}
 #re-overlay.open{display:flex;}
@@ -4923,6 +4935,7 @@ function closeReOverlay(){
       roster[idx].equipped=_reChar.equipped||{};
       roster[idx].cantrips=_reChar.cantrips||[];
       roster[idx].spells=_reChar.spells||[];
+      roster[idx].usedSlots=_reChar.usedSlots||{};
       setRoster(roster);
     }
   }
@@ -5225,17 +5238,50 @@ function renderReDoll(){
     '<div class="doll-grid">'+
       headSlot+
       leftSlots+
-      '<div style="grid-column:2;grid-row:2/7;display:flex;align-items:center;justify-content:center;">'+
-        '<div style="width:min(260px,20vw);height:min(340px,40vh);border-radius:8px;overflow:hidden;border:3px solid var(--gold-d);background:#130D06;box-shadow:0 0 40px rgba(201,168,76,.25),0 8px 32px rgba(0,0,0,.7);">'+
-          portHtml+
-        '</div>'+
+      '<div style="grid-column:2;grid-row:2/7;overflow:hidden;background:#130D06;">'+
+        portHtml+
       '</div>'+
       rightSlots+
     '</div>'+
     '<div style="text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#3A2A1A;margin-top:.5rem;letter-spacing:.04em;">'+
       '\u2637 Glissez du sac ou du catalogue \u25b6 emplacement &nbsp;\u00b7&nbsp; \u2715 d\u00e9s\u00e9quiper'+
     '</div>'+
-    statsBar;
+    statsBar+
+    renderReSlots();
+}
+
+var _ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX'];
+function renderReSlots(){
+  var r=_reChar; if(!r)return'';
+  var info=getReSpellInfo(); if(!info||!info.slots)return'';
+  if(!r.usedSlots)r.usedSlots={};
+  var html='<div id="re-slots-bar">';var hasAny=false;
+  for(var i=0;i<9;i++){
+    var total=info.slots[i]||0; if(!total)continue;
+    hasAny=true;
+    var used=Math.min(r.usedSlots[i+1]||0,total);
+    var exhausted=(used>=total);
+    html+='<div class="re-slot-lvl'+(exhausted?' exhausted':'')+'">'+
+      '<div class="re-slot-lvl-n">'+_ROMAN[i]+'</div>'+
+      '<div class="re-slot-pips">';
+    for(var j=0;j<total;j++){
+      var isUsed=(j<used);
+      html+='<div class="re-slot-pip '+(isUsed?'used':'avail')+'" onclick="toggleReSlot('+(i+1)+','+j+')" title="'+(isUsed?'Récupérer':''+'Utiliser')+' emplacement niv.'+(i+1)+'"><div class="pip-inner"></div></div>';
+    }
+    html+='</div></div>';
+  }
+  if(!hasAny)return'';
+  return html+'</div>';
+}
+function toggleReSlot(lvl,j){
+  if(!_reChar)return;
+  if(!_reChar.usedSlots)_reChar.usedSlots={};
+  var cur=_reChar.usedSlots[lvl]||0;
+  _reChar.usedSlots[lvl]=(j<cur)?j:j+1;
+  renderReDoll();
+  var roster=getRoster();
+  var idx=roster.findIndex(function(r){return r.id===_reChar.id;});
+  if(idx>=0){roster[idx].usedSlots=_reChar.usedSlots;setRoster(roster);}
 }
 
 // ── SPRITE drag image ──────────────────────────────
