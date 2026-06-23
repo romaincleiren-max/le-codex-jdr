@@ -480,7 +480,7 @@ body.printing #ps-print{display:block!important;}
 .rdot{width:6px;height:6px;border-radius:50%;background:#2A1A08;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer;border:1px solid #3A2810;}
 .rdot.active{background:var(--gold);width:18px;border-radius:4px;border-color:var(--gold-d);}
 /* Tarot card — relief + ombre */
-.rc{min-width:150px;width:150px;
+.rc{min-width:195px;width:195px;
   background:linear-gradient(170deg,#1C1309 0%,#110C07 55%,#0D0806 100%);
   border:1px solid rgba(139,105,20,.65);
   cursor:pointer;
@@ -520,7 +520,7 @@ body.printing #ps-print{display:block!important;}
 .rc-meta{display:flex;gap:.5rem;font-family:'Share Tech Mono',monospace;font-size:8px;color:#4A3A18;margin-bottom:.4rem;}
 .rc-scenarios{font-family:'IM Fell English',serif;font-size:9px;color:#4A3A18;font-style:italic;margin-bottom:.5rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:12px;}
 .rc-btns{display:flex;gap:.3rem;margin-top:auto;}
-.rc-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.04em;padding:.32em .4em;border:1px solid #3A2810;color:#7A5A1A;background:none;cursor:pointer;transition:all .15s;flex:1;text-align:center;white-space:nowrap;}
+.rc-btn{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.04em;padding:.45em .6em;border:1px solid #3A2810;color:#7A5A1A;background:none;cursor:pointer;transition:all .15s;flex:1;text-align:center;white-space:nowrap;}
 .rc-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.05);}
 .rc-btn.primary{border-color:rgba(139,105,20,.7);color:var(--gold);}
 .rc-del{position:absolute;top:.35rem;right:.35rem;background:rgba(8,5,2,.88);border:1px solid rgba(70,25,25,.7);color:#3A2020;font-size:9px;cursor:pointer;padding:2px 5px;transition:all .15s;z-index:10;border-radius:2px;}
@@ -5416,7 +5416,7 @@ function renderRoster(){
       : clsImgUrl
         ? `<img src="${esc(clsImgUrl)}" alt="${clsName}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" data-cls-id="${esc(r.cls.id)}" onerror="rcClsImgFallback(this);">`
         : clsFallbackHtml;
-    return `<div class="rc">
+    return `<div class="rc" onclick="if(!_rcDrag.moved)openRosterEquip('${safeId}')">
       <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${safeId}')" title="Supprimer">✕</button>
       <div class="rc-portrait">${portrait}</div>
       <div class="rc-body">
@@ -5425,11 +5425,10 @@ function renderRoster(){
         <div class="rc-meta"><span>🎒 ${bagCount}</span><span>📜 ${histCount}</span></div>
         <div class="rc-scenarios">${lastScen||(!histCount?'Aucun scénario':'')}</div>
         <div class="rc-btns">
-          <button class="rc-btn primary" onclick="openRosterEquip('${safeId}')">⚔ Fiche</button>
-          <button class="rc-btn" onclick="openCharFromRoster('${safeId}')">Éditer</button>
-          <button class="rc-btn" onclick="openShareModal('${safeId}')" style="border-color:#4A2A8A;color:#A080D0;" title="Partager sur le site">📤</button>
+          <button class="rc-btn" onclick="event.stopPropagation();openShareModal('${safeId}')" style="border-color:#4A2A8A;color:#A080D0;flex:0 0 auto;padding:.45em .7em;" title="Partager sur le site">📤</button>
+          <button class="rc-btn primary" onclick="event.stopPropagation();openCharFromRoster('${safeId}')">✏ Éditer</button>
         </div>
-        ${r.supabaseId?`<button class="rc-share-admin${r.sharedWithAdmin?' shared':''}" onclick="shareCharWithAdmin('${safeId}')" title="${r.sharedWithAdmin?'Partagé avec l\'Admin — cliquer pour annuler':'Partager avec l\'Admin'}">
+        ${r.supabaseId?`<button class="rc-share-admin${r.sharedWithAdmin?' shared':''}" onclick="event.stopPropagation();shareCharWithAdmin('${safeId}')" title="${r.sharedWithAdmin?'Partagé avec l\'Admin — cliquer pour annuler':'Partager avec l\'Admin'}">
           ${r.sharedWithAdmin?'👑 Partagé ✓':'👑 Partager avec l\'Admin'}</button>`:'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#3A2A1A;margin-top:.25rem;">💾 Sauvegardez d\'abord pour partager</div>'}
       </div>
     </div>`;
@@ -5440,7 +5439,7 @@ function renderRoster(){
 
 // ── Carousel state ──
 var _rcDrag={active:false,startX:0,sl:0,moved:false,velX:0,lastX:0,lastT:0};
-var _rcCardW = 166; // card width + gap
+var _rcCardW = 211; // card width + gap
 
 function updateRosterNav(){
   var g=$('roster-grid'),prev=$('rc-prev'),next=$('rc-next'),dots=$('roster-dots');
