@@ -91,6 +91,14 @@ function findFirstImage(node) {
   return null;
 }
 
+function extractSprite(resource) {
+  var props = resource.properties || [];
+  var spriteProp = props.find(function(p) {
+    return p.type === 'IMAGE' && p.title && p.title.toUpperCase() === 'SPRITE' && p.data && p.data.url;
+  });
+  return spriteProp ? spriteProp.data.url : null;
+}
+
 function extractRarity(text) {
   var lower = text.toLowerCase();
   for (var key in RARITY_MAP) {
@@ -104,6 +112,7 @@ function extractItem(resource, categoryName) {
   var content = doc && doc.content;
 
   var image = content ? findFirstImage(content) : null;
+  var sprite = extractSprite(resource);
   var citation = content ? extractBlockquote(content) : '';
   var paragraphs = content ? extractParagraphs(content) : [];
 
@@ -204,6 +213,7 @@ function extractItem(resource, categoryName) {
     desc: desc,
     citation: citation,
     image: image || '',
+    sprite: sprite || '',
     rarity: rarity || '',
     attunement: attunement,
   };
