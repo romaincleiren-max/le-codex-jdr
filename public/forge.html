@@ -1499,6 +1499,7 @@ const CANTRIPS_TABLE={
   sorcerer:[0,4,4,4,5,5,5,5,5,5,6,6,6,6,6,6,6,6,6,6,6],
   warlock: [0,2,2,2,3,3,3,3,3,3,4,4,4,4,4,4,4,4,4,4,4],
   wizard:  [0,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,5,5,5,5],
+  artificer:[0,2,2,2,2,2,2,2,2,2,3,3,3,3,4,4,4,4,4,4,4],
 };
 // SORTS CONNUS PAR NIVEAU — classes "known" uniquement
 const SPELLS_KNOWN_TABLE={
@@ -1675,6 +1676,7 @@ const CLASS_STYLE={
   paladin:{icon:'🛡',color:'#8B7A10'},ranger:{icon:'🏹',color:'#3D7A2A'},
   rogue:{icon:'🗡',color:'#4A3A6A'},sorcerer:{icon:'🔮',color:'#4A1F7A'},
   warlock:{icon:'🌑',color:'#2A1A4A'},wizard:{icon:'✦',color:'#1A3A7A'},
+  artificer:{icon:'⚙',color:'#3A5A4A'},
 };
 
 // DATA — RACES
@@ -1829,6 +1831,7 @@ const CLASSES=[
   {id:'sorcerer',n:'Ensorceleur',tag:'CHARISME · INNÉE',hd:6,primary:'cha',armor:'aucune',weapons:'dague, fléchette, fronde, bâton, arbalète légère',saves:['con','cha'],numSk:2,skills:['Arcanes','Tromperie','Perspicacité','Intimidation','Persuasion','Religion'],armorBase:'none',features:['Magie innée : origine (archétype niv.1)','Points de sorcellerie dès niv.2'],equipment:[['Arbalète légère + 20 carreaux','Arme simple'],['Composantes','Focalisateur arcanique'],['Pack de l\'explorateur','Pack du donjon']],spellcaster:true,spellStat:'cha',prepared:false,cantripsKnown:4,spellsKnown:2,subclassLvl:1,slotsTable:'full',desc:'Magie héritée dans le sang.'},
   {id:'warlock',n:'Occultiste',tag:'CHARISME · PACTE',hd:8,primary:'cha',armor:'légère',weapons:'simples',saves:['wis','cha'],numSk:2,skills:['Arcanes','Tromperie','Histoire','Intimidation','Investigation','Nature','Religion'],armorBase:'light',features:['Magie du pacte : emplacements récupérés AU REPOS COURT','Sorts connus (pas préparés)','Invocations occultes dès niv.2'],equipment:[['Arme simple × 2','Arme simple'],['Pack du savant','Pack du donjon'],['Armure de cuir','Focalisateur arcanique','Dague × 2']],spellcaster:true,spellStat:'cha',prepared:false,cantripsKnown:2,spellsKnown:2,subclassLvl:1,slotsTable:'warlock',desc:'Serviteur d\'une entité puissante.'},
   {id:'wizard',n:'Magicien',tag:'INTELLIGENCE · ARCANE',hd:6,primary:'int',armor:'aucune',weapons:'dague, fléchette, fronde, bâton, arbalète légère',saves:['int','wis'],numSk:2,skills:['Arcanes','Histoire','Perspicacité','Investigation','Médecine','Religion'],armorBase:'none',features:['Grimoire : 6 sorts niv.1 au départ','Récupération arcanique (repos court)','Sorts préparés = niv + mod INT'],equipment:[['Bâton (1d6)','Dague (1d4)'],['Focalisateur arcanique','Composantes'],['Pack du savant','Pack de l\'explorateur']],spellcaster:true,spellStat:'int',prepared:true,cantripsKnown:3,subclassLvl:2,slotsTable:'full',desc:'Érudit de la magie arcanique.'},
+  {id:'artificer',n:'Artificier',tag:'INTELLIGENCE · INFUSIONS',hd:8,primary:'int',armor:'légère, intermédiaire, bouclier',weapons:'simples',saves:['con','int'],numSk:2,skills:['Arcanes','Histoire','Investigation','Médecine','Nature','Perception','Escamotage'],armorBase:'medium_shield',features:['Bricolage magique : conférer propriété magique mineure à un objet (INT mod objets actifs)','Sorts (INT) : préparés = bonus de maîtrise + mod INT, depuis la liste artificier','Infuser un objet dès niv.2 : 2 objets magiques actifs (4 recettes connues, évolutif)','Éclair de génie niv.7 : ajouter mod INT à un jet de sauvegarde ou de compétence (réaction)'],equipment:[['Arbalète légère + 20 carreaux','Arme simple'],['Outils de bricoleur','Focalisateur arcanique'],['Pack du donjon','Pack de l\'explorateur']],spellcaster:true,spellStat:'int',prepared:true,cantripsKnown:2,subclassLvl:3,slotsTable:'half',desc:'Inventeur génial alliant magie et technologie.'},
 ];
 
 // ═══════════════════════════════════════════════════
@@ -1963,6 +1966,12 @@ const SUBS={
     {id:'illusion',n:'Illusion',fs:['Niv.2 — Illusion mineure en bonus action (supplémentaire gratuit)','Niv.6 — Ombre malléable : modifier une illusion mentalement (bonus action)','Niv.10 — Présence illusoire : illusion donne Esquive (1×/repos long)','Niv.14 — Réalité illusoire : une illusion magique devient réelle 1 minute']},
     {id:'necromancy',n:'Nécromancie',fs:['Niv.2 — Récup. de nécromancie : regagner PV = 2×niv du sort quand on tue par un sort','Niv.6 — Sombre vitalité : morts-vivants créés = +2 attaque et max PV bonus','Niv.10 — Commandement : morts-vivants obéissent sans concentration','Niv.14 — Maître incontestable : sorts de nécromancie ignorent résistances']},
     {id:'transmutation',n:'Transmutation',fs:['Niv.2 — Alchimiste mineur : transformer matériaux non-magiques (1 min, 1 pi³)','Niv.6 — Pierre de transmutation : créer une pierre conférant un bonus choisi','Niv.10 — Façonner les corps : modifier une caractéristique physique en 8h','Niv.14 — Transmutation permanente : permanence sur sorts de transformation (1h)']},
+  ],
+  artificer:[
+    {id:'alchemist',n:'Alchimiste',fs:['Niv.3 — Sorts bonus : Guérison des blessures, Rayon de maladie (toujours préparés)','Niv.3 — Fiole expérimentale : créer 1d6 fioles/repos long à effets aléatoires bénéfiques (soin, feu, acide, foudre…)','Niv.5 — Sorts bonus : Projectile magique, Flou · Fioles améliorées : +INT mod aux effets','Niv.9 — Sorts bonus : Hâte, Forme gazeuse · Âme d\'alchimiste : résistance acide/poison, soins +INT mod','Niv.13 — Sorts bonus : Mort-vivant suprême, Boule de foudre','Niv.15 — Maître alchimiste : immunité acide et poison, soins alchimiques doublés']},
+    {id:'armorer',n:'Armurier',fs:['Niv.3 — Armure de gardien : armure arcanique non-retirable, mode Gardien (tête d\'acier tonnerre, gants repoussants) ou Infiltrateur (Foudre + avantage Discrétion)','Niv.3 — Sorts bonus : Mains brûlantes, Projectile magique','Niv.5 — Extra attaque : 2 attaques par Action d\'Attaque (armes de l\'armure)','Niv.9 — Sorts bonus : Éclairs en chaîne, Vol · Protection de l\'âme : +INT mod CA','Niv.13 — Sorts bonus : Globe d\'invulnérabilité, Mur de force','Niv.15 — Armure parfaite : l\'armure confère vitesse +5m, résistance dégâts non-magiques']},
+    {id:'artillerist',n:'Artilleur',fs:['Niv.3 — Canon arcanique : invoquer un canon (Obusier : 2d8 feu/force ; Baliste de force : 2d8 force ; Protecteur : bouclier 1d8+INT PV temp) · 1×/repos long gratuit','Niv.3 — Sorts bonus : Bouclier, Vague tonnante','Niv.5 — Baguette arcanique : baguette = focalisateur, ajouter +INT mod aux dégâts des sorts de dommage','Niv.9 — Canon explosif : détoner le canon pour 3d8 dans 4,5m (JS DEX DD8+bonus maîtrise+INT)','Niv.15 — Canon fortifié : invoquer 2 canons simultanément']},
+    {id:'battle-smith',n:'Forgeron de Bataille',fs:['Niv.3 — Maîtrise des armes magiques : attaque et dégâts avec armes magiques au mod INT (remplace FOR/DEX)','Niv.3 — Compagnon de fer : construct animé (FP ½), se renforce avec ton niveau · Sorts bonus : Héroïsme, Bouclier','Niv.5 — Extra attaque : 2 attaques par Action d\'Attaque · Compagnon peut attaquer en bonus action','Niv.9 — Sorts bonus : Aura de bravoure, Tempête d\'armes · Compagnon : CA et PV max augmentent','Niv.13 — Sorts bonus : Aura de protection, Enfer de lames','Niv.15 — Forgeron amélioré : compagnon restaure 2d8+INT PV (réaction) ; armure compte comme magique']},
   ],
 };
 
@@ -5397,7 +5406,7 @@ function renderRoster(){
     updateRosterNav();
     return;
   }
-  const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮'};
+  const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮',artificier:'⚙'};
   g.innerHTML = roster.map(r=>{
     const clsName = esc(r.cls?.n||'—');
     const clsKey = (r.cls?.n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
@@ -6707,7 +6716,7 @@ async function submitShareCharacter() {
   const r = roster.find(x => x.id === _shareCharId);
   if (!r) { document.getElementById('share-feedback').style.color='#E05050'; document.getElementById('share-feedback').textContent = '⚠ Personnage introuvable.'; return; }
 
-  const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮'};
+  const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮',artificier:'⚙'};
   const clsName = r.cls?.n||'';
   const clsKey = (r.cls?.n||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
   const emoji = Object.entries(CLASS_ICONS).find(([k])=>clsKey.includes(k))?.[1]||'⚔';
