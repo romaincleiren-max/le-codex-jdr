@@ -4,7 +4,7 @@
 // ============================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
-import { getApprovedCharacters } from '../services/charactersService';
+import { getAllCharacters } from '../services/charactersService';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
 
@@ -347,7 +347,7 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
       // Supabase en premier
       let sbChars = [];
       try {
-        sbChars = await getApprovedCharacters();
+        sbChars = await getAllCharacters();
       } catch {}
 
       // Forge locale en complément (dédoublonnage par nom)
