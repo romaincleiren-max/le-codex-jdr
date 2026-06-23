@@ -1330,8 +1330,14 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
 <!-- BESTIAIRE OVERLAY -->
 <div id="bestiary-overlay">
   <div id="bestiary-hdr">
-    <div><span id="bestiary-hdr-title">🐉 Bestiaire</span></div>
-    <button class="re-close" onclick="closeBestiary()">✕ Fermer</button>
+    <div style="display:flex;align-items:center;gap:1rem;">
+      <span id="bestiary-hdr-title">🐉 Bestiaire</span>
+      <span id="bst-api-status" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#4A3A1A;"></span>
+    </div>
+    <div style="display:flex;gap:.5rem;align-items:center;">
+      <button class="bst-sheet-btn" onclick="localStorage.removeItem('bst_open5e_v1');_bstApiMonsters=null;loadBestiaryAPI();" title="Recharger depuis Open5e">↺ Actualiser</button>
+      <button class="re-close" onclick="closeBestiary()">✕ Fermer</button>
+    </div>
   </div>
   <div id="bestiary-body">
     <div id="bestiary-list-col">
@@ -7295,19 +7301,144 @@ var BST_SRD=[
 var _bstFamily=null;
 var _bstMonster=null;
 var _bstSearch='';
+var _bstApiMonsters=null;
+var BST_API_KEY='bst_open5e_v1';
+var BST_API_TTL=7*24*3600*1000;
 
 function getBstCustom(){try{return JSON.parse(localStorage.getItem('bst_custom')||'[]');}catch(e){return[];}}
 function saveBstCustom(list){localStorage.setItem('bst_custom',JSON.stringify(list));}
-function getAllMonsters(){return BST_SRD.concat(getBstCustom());}
+
+function getBstApiCache(){
+  try{var r=JSON.parse(localStorage.getItem(BST_API_KEY)||'null');if(r&&(Date.now()-r.ts)<BST_API_TTL)return r.data;}catch(e){}return null;
+}
+function saveBstApiCache(data){
+  try{localStorage.setItem(BST_API_KEY,JSON.stringify({ts:Date.now(),data:data}));}catch(e){console.warn('BST cache full',e);}
+}
+
+function bstFtToM(ft){
+  if(!ft)return null;
+  var m=Math.round(ft*0.3*2)/2;
+  return m+' m';
+}
+function bstParseSpeed(spd){
+  if(!spd)return '—';
+  var parts=[];
+  if(spd.walk)parts.push(bstFtToM(spd.walk));
+  if(spd.fly)parts.push('vol '+bstFtToM(spd.fly));
+  if(spd.swim)parts.push('nage '+bstFtToM(spd.swim));
+  if(spd.climb)parts.push('escalade '+bstFtToM(spd.climb));
+  if(spd.burrow)parts.push('creusement '+bstFtToM(spd.burrow));
+  if(spd.hover)parts.push('(vol stationnaire)');
+  return parts.join(', ')||'—';
+}
+function bstParseCr(cr){
+  if(cr===0.125||cr==='0.125')return'1/8';
+  if(cr===0.25||cr==='0.25')return'1/4';
+  if(cr===0.5||cr==='0.5')return'1/2';
+  return String(cr||'0');
+}
+var BST_TYPE_MAP={
+  'aberration':'Aberrations','beast':'Bêtes','celestial':'Célestes','construct':'Construits',
+  'dragon':'Dragons','elemental':'Élémentaires','fey':'Fées','fiend':'Fiélons',
+  'giant':'Géants','humanoid':'Humanoïdes','monstrosity':'Monstruosités',
+  'ooze':'Vases','plant':'Plantes','undead':'Morts-vivants'
+};
+var BST_SIZE_MAP={'Tiny':'TP','Small':'P','Medium':'M','Large':'G','Huge':'TG','Gargantuan':'Gig'};
+
+function mapOpen5e(m){
+  var typeLow=(m.type||'').toLowerCase().replace(/\(.*\)/,'').trim();
+  var fam=BST_TYPE_MAP[typeLow]||'Monstruosités';
+  var savLbls=['FOR','DEX','CON','INT','SAG','CHA'];
+  var savKeys=['strength_save','dexterity_save','constitution_save','intelligence_save','wisdom_save','charisma_save'];
+  var sav={};
+  savKeys.forEach(function(k,i){if(m[k]!=null){sav[savLbls[i]]=(m[k]>=0?'+':'')+m[k];}});
+  var ski={};
+  if(m.skills)Object.keys(m.skills).forEach(function(k){ski[k.charAt(0).toUpperCase()+k.slice(1)]=(m.skills[k]>=0?'+':'')+m.skills[k];});
+  function splitStr(s){return(s||'').split(/[;,]/).map(function(x){return x.trim();}).filter(Boolean);}
+  function mapArr(arr){return(arr||[]).map(function(a){return{n:a.name,d:a.desc};});}
+  return{
+    id:'api_'+m.slug,n:m.name,fam:fam,
+    cr:bstParseCr(m.challenge_rating),
+    sz:BST_SIZE_MAP[m.size]||'M',
+    type:m.type||'',al:m.alignment||'—',
+    ac:m.armor_class||10,
+    acN:m.armor_desc?'('+m.armor_desc+')':'',
+    hp:m.hit_points||0,hpD:m.hit_dice||'',
+    spd:bstParseSpeed(m.speed),
+    str:m.strength||10,dex:m.dexterity||10,con:m.constitution||10,
+    int:m.intelligence||10,wis:m.wisdom||10,cha:m.charisma||10,
+    sav:sav,ski:ski,
+    imm:splitStr(m.damage_immunities),
+    res:splitStr(m.damage_resistances),
+    vul:splitStr(m.damage_vulnerabilities),
+    cim:splitStr(m.condition_immunities),
+    sen:m.senses||'—',lng:m.languages||'—',
+    spe:mapArr(m.special_abilities),
+    act:mapArr(m.actions),
+    rea:mapArr(m.reactions),
+    leg:mapArr(m.legendary_actions),
+    lgD:m.legendary_desc||'',
+    src:'api',
+  };
+}
+
+async function fetchOpen5eAll(onProgress){
+  var url='https://api.open5e.com/v1/monsters/?limit=500&format=json';
+  var all=[];
+  while(url){
+    var resp=await fetch(url);
+    var data=await resp.json();
+    all=all.concat(data.results||[]);
+    if(onProgress)onProgress(all.length,data.count||0);
+    url=data.next||null;
+  }
+  return all.map(mapOpen5e);
+}
+
+function getAllMonsters(){
+  var api=_bstApiMonsters;
+  if(api&&api.length){
+    var apiIds=new Set(api.map(function(m){return m.id;}));
+    var srdOnly=BST_SRD.filter(function(m){return!apiIds.has('api_'+m.id);});
+    return api.concat(srdOnly).concat(getBstCustom());
+  }
+  return BST_SRD.concat(getBstCustom());
+}
+
+function bstSetStatus(msg){
+  var el=$('bst-api-status');if(el)el.textContent=msg;
+}
+
+function loadBestiaryAPI(){
+  var cached=getBstApiCache();
+  if(cached){_bstApiMonsters=cached;renderBstList();bstSetStatus(cached.length+' monstres (cache)');return;}
+  bstSetStatus('Connexion à Open5e…');
+  var listEl=$('bestiary-list-scroll');
+  if(listEl)listEl.innerHTML='<div style="padding:.8rem;font-family:\'Share Tech Mono\',monospace;font-size:9px;color:#6A5A3A;text-align:center;line-height:1.8;">⏳ Chargement du bestiaire…<br><span id="bst-prog">0 / ? monstres</span></div>';
+  fetchOpen5eAll(function(loaded,total){
+    var prog=$('bst-prog');if(prog)prog.textContent=loaded+' / '+total+' monstres';
+  }).then(function(monsters){
+    _bstApiMonsters=monsters;
+    saveBstApiCache(monsters);
+    bstSetStatus(monsters.length+' monstres chargés');
+    renderBstList();
+    var sh=$('bestiary-sheet');
+    if(sh&&sh.querySelector('.bst-empty'))sh.innerHTML='<div class="bst-empty">Sélectionnez un monstre dans la liste</div>';
+  }).catch(function(err){
+    console.warn('Open5e error',err);
+    bstSetStatus('Hors-ligne — données locales');
+    renderBstList();
+  });
+}
 
 function openBestiary(){
   var o=$('bestiary-overlay');if(!o)return;
   o.classList.add('open');
   _bstFamily=null;_bstMonster=null;_bstSearch='';
-  renderBstList();
-  $('bestiary-sheet').innerHTML='<div class="bst-empty">Sélectionnez un monstre dans la liste</div>';
   if($('bestiary-search'))$('bestiary-search').value='';
+  $('bestiary-sheet').innerHTML='<div class="bst-empty">Sélectionnez un monstre dans la liste</div>';
   setForgeScale();
+  if(_bstApiMonsters){renderBstList();}else{loadBestiaryAPI();}
 }
 function closeBestiary(){var o=$('bestiary-overlay');if(o)o.classList.remove('open');}
 
