@@ -480,7 +480,7 @@ body.printing #ps-print{display:block!important;}
 .rdot{width:6px;height:6px;border-radius:50%;background:#2A1A08;transition:all .28s cubic-bezier(.4,0,.2,1);cursor:pointer;border:1px solid #3A2810;}
 .rdot.active{background:var(--gold);width:18px;border-radius:4px;border-color:var(--gold-d);}
 /* Tarot card — relief + ombre */
-.rc{min-width:195px;width:195px;
+.rc{min-width:254px;width:254px;
   background:linear-gradient(170deg,#1C1309 0%,#110C07 55%,#0D0806 100%);
   border:1px solid rgba(139,105,20,.65);
   cursor:pointer;
@@ -1279,7 +1279,6 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
       <div class="badge" id="badge">CRÉATION</div>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="saveToRoster();this.textContent='✓ Sauvegardé';setTimeout(()=>this.textContent='💾 Sauvegarder',1500)">💾 Sauvegarder</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="showTitle()">↩ Accueil</button>
-      <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;background:#1A1520;border-color:#4A3A70;color:#A090D0;" onclick="saveToRoster();showTitle()">← Mes persos</button>
     </div>
   </div>
   <div id="dh-nav">
@@ -1300,7 +1299,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <span class="scn-title" id="scn-title-bar">La Maîtresse des Doigts</span>
     <span class="scn-phase" id="scn-phase-bar"></span>
     <span class="scn-xp" id="scn-xp-bar">0 XP</span>
-    <button class="btn btn-s" onclick="saveToRoster();showTitle()" style="margin-left:.5rem;font-size:9px;">← Mes persos</button>
+    <button class="btn btn-s" onclick="showTitle()" style="margin-left:.5rem;font-size:9px;">↩ Accueil</button>
   </div>
   <div id="layout">
     <div id="rp">
@@ -5431,7 +5430,6 @@ function renderRoster(){
       <div class="rc-body">
         <div class="rc-name">${safeName}</div>
         <div class="rc-sub">${clsName} · ${raceName} · Niv ${r.level||1}</div>
-        <div class="rc-meta"><span>🎒 ${bagCount}</span><span>📜 ${histCount}</span></div>
         <div class="rc-scenarios">${lastScen||(!histCount?'Aucun scénario':'')}</div>
         <div class="rc-btns">
           <button class="rc-btn" onclick="event.stopPropagation();openShareModal('${safeId}')" style="border-color:#4A2A8A;color:#A080D0;flex:0 0 auto;padding:.45em .7em;" title="Partager sur le site">📤</button>
@@ -5448,7 +5446,7 @@ function renderRoster(){
 
 // ── Carousel state ──
 var _rcDrag={active:false,startX:0,sl:0,moved:false,velX:0,lastX:0,lastT:0};
-var _rcCardW = 211; // card width + gap
+var _rcCardW = 270; // card width + gap
 
 function updateRosterNav(){
   var g=$('roster-grid'),prev=$('rc-prev'),next=$('rc-next'),dots=$('roster-dots');
@@ -5500,13 +5498,12 @@ function initRosterDrag(){
     _rcDrag.velX=0;
     _rcDrag.lastX=_rcDrag.startX;
     _rcDrag.lastT=Date.now();
-    g.classList.add('dragging');
   }
   function onMove(e){
     if(!_rcDrag.active) return;
     var cx=e.clientX||(e.touches&&e.touches[0].clientX)||0;
     var dx=cx-_rcDrag.startX;
-    if(Math.abs(dx)>4) _rcDrag.moved=true;
+    if(Math.abs(dx)>4){_rcDrag.moved=true;g.classList.add('dragging');}
     if(_rcDrag.moved && e.cancelable) e.preventDefault();
     var now=Date.now(),dt=now-_rcDrag.lastT||1;
     _rcDrag.velX=(cx-_rcDrag.lastX)/dt*16;
