@@ -1380,7 +1380,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <div class="roster-dots" id="roster-dots"></div>
   </div>
   <div id="admin-panel">
-    <div class="admin-hdr">👑 Personnages partagés avec moi</div>
+    <div class="admin-hdr">👑 Personnages des joueurs</div>
     <div class="admin-grid" id="admin-char-grid">
       <div class="admin-empty">Chargement...</div>
     </div>
@@ -6796,8 +6796,7 @@ async function loadAdminPanel(){
   const sc=getSupaClient();
   try{
     const {data,error}=await sc.from('characters')
-      .select('id,char_name,race_name,class_name,level,sheet_data,user_id')
-      .eq('shared_with_admin',true)
+      .select('id,char_name,race_name,class_name,level,sheet_data,user_id,player_name')
       .neq('status','archived');
     if(error||!data){$('admin-char-grid').innerHTML='<div class="admin-empty">Erreur de chargement.</div>';return;}
     if(!data.length){$('admin-char-grid').innerHTML='<div class="admin-empty">Aucun personnage partagé pour l\'instant.</div>';return;}
@@ -6807,7 +6806,7 @@ async function loadAdminPanel(){
       var cls=esc(row.class_name||sd.cls?.n||'—');
       var race=esc(row.race_name||sd.race?.n||'—');
       var lvl=esc(row.level||sd.level||1);
-      var player=esc(sd.player||'');
+      var player=esc(row.player_name||sd.player||sd.playerName||'');
       var sid=esc(row.id);
       return '<div class="admin-card" onclick="adminOpenChar(\''+sid+'\')" title="Ouvrir la fiche">'
         +'<div class="admin-card-name">'+name+'</div>'
