@@ -586,7 +586,7 @@ body.printing #ps-print{display:block!important;}
 .re-sp-notice{font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;}
 #re-body{display:flex;flex:1;overflow:hidden;}
 /* Bag column */
-#re-bag-col{flex:0 0 25%;width:25%;min-width:0;background:#130D06;border-right:1px solid #2A1A08;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
+#re-bag-col{flex:0 0 20%;width:20%;min-width:0;background:#130D06;border-right:1px solid #2A1A08;display:flex;flex-direction:column;flex-shrink:0;overflow:hidden;}
 .re-col-t{font-family:'Cinzel',serif;font-size:clamp(8px,1vh,11px);letter-spacing:.18em;color:var(--gold-d);text-transform:uppercase;padding:clamp(.4rem,.8vh,.7rem) clamp(.6rem,1vw,.9rem);border-bottom:1px solid #1E1208;flex-shrink:0;background:#0F0A06;}
 #re-bag-list2{flex:0 0 auto;max-height:clamp(140px,26vh,260px);overflow-y:auto;padding:.3rem .5rem;}
 #re-bag-list2::-webkit-scrollbar{width:3px;}#re-bag-list2::-webkit-scrollbar-thumb{background:#3A2810;}
@@ -623,10 +623,13 @@ body.printing #ps-print{display:block!important;}
 .re-stat-pill{text-align:center;}
 .re-stat-pill-v{font-family:'Cinzel Decorative',serif;font-size:clamp(14px,2.2vh,26px);color:var(--parch);display:block;}
 .re-stat-pill-l{font-family:'Cinzel',serif;font-size:clamp(7px,1vh,11px);letter-spacing:.1em;color:var(--gold-d);display:block;text-transform:uppercase;margin-top:2px;}
-.re-doll-slot-icon{font-size:clamp(20px,3vh,32px);width:clamp(24px,3.2vh,36px);text-align:center;flex-shrink:0;line-height:1;}
+.re-doll-slot-icon{width:clamp(24px,3vh,38px);height:clamp(24px,3vh,38px);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:clamp(16px,2.2vh,26px);line-height:1;overflow:hidden;border-radius:3px;}
+.re-doll-slot-icon img{width:100%;height:100%;object-fit:contain;}
 .re-doll-slot-info{flex:1;min-width:0;}
-.re-doll-slot-lbl{font-family:'Cinzel',serif;font-size:clamp(7px,1vh,11px);letter-spacing:.1em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.4;}
-.re-doll-slot-nm{font-family:'IM Fell English',serif;font-size:clamp(11px,1.6vh,17px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.3;}
+.re-doll-slot-lbl{font-family:'Cinzel',serif;font-size:clamp(6px,.75vh,9px);letter-spacing:.1em;color:var(--gold-d);text-transform:uppercase;display:block;line-height:1.3;}
+.re-doll-slot-nm{font-family:'IM Fell English',serif;font-size:clamp(9px,1.2vh,13px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.2;}
+.re-doll-slot.equipped{transition:transform .12s,border-color .12s,background .12s;}
+.re-doll-slot.equipped:hover{transform:scale(1.04);z-index:2;}
 .re-doll-slot-del{background:none;border:none;color:#5A2A2A;font-size:clamp(11px,1.6vh,17px);cursor:pointer;padding:1px 5px;flex-shrink:0;transition:.1s;}
 .re-doll-slot-del:hover{color:var(--blood-l);}
 /* Drag image sprite */
@@ -5177,7 +5180,7 @@ function reSlotHtml(slot, col, row){
     ' ondragover="reDollDragOver(event,\''+slot.id+'\')"'+
     ' ondragleave="this.classList.remove(\'drag-over\',\'drag-invalid\')"'+
     ' ondrop="reDollDrop(event,\''+slot.id+'\')"'+hoverAttrs+'>'+
-    '<div class="re-doll-slot-icon">'+slot.icon+'</div>'+
+    '<div class="re-doll-slot-icon">'+(item&&item.image?'<img src="'+item.image+'" onerror="this.style.display=\'none\'">':slot.icon)+'</div>'+
     '<div class="re-doll-slot-info">'+
       '<span class="re-doll-slot-lbl">'+slot.label+'</span>'+
       '<div class="re-doll-slot-nm" style="color:'+nmCol+';">'+(item?item.n:'&#8212; vide')+'</div>'+
@@ -5442,7 +5445,7 @@ function reAddCodexItem(idx){
   var bagId='codex-'+(e.id||e.name).replace(/['"\\]/g,'_');
   var ex=_reChar.bag.find(function(b){return b.id===bagId;});
   if(ex)ex.qty++;
-  else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,dnd_type:e.dnd_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
+  else _reChar.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,dnd_type:e.dnd_type||null,rarity:e.rarity||null,bonus:e.bonus||null,image:e.image||null,attunement:e.attunement||false});
   renderReBag();
 }
 
