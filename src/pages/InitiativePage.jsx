@@ -4,6 +4,7 @@
 // ============================================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
+import { getApprovedCharacters } from '../services/charactersService';
 
 // ── Constantes ──────────────────────────────────────────────────────────────
 
@@ -104,6 +105,31 @@ function rosterCharToCombatant(r) {
     conditions:    [],
     notes:         '',
     sheetData:     r,
+  };
+}
+
+function supabaseCharToCombatant(c) {
+  const sd = c.sheet_data || {};
+  const dexMod = statMod(sd.stats?.dex ?? sd.dex ?? 10);
+  return {
+    id: 'supabase_' + c.id,
+    supabaseId: c.id,
+    type: 'player',
+    name: c.char_name || '—',
+    playerName: c.player_name || '',
+    className: c.class_name || '',
+    level: c.level || 1,
+    raceName: c.race_name || '',
+    portraitUrl: c.portrait_url || null,
+    portraitEmoji: c.portrait_emoji || '⚔',
+    currentHp: c.current_hp || c.max_hp || 10,
+    maxHp: c.max_hp || 10,
+    ac: c.ac || 10,
+    dexMod,
+    initiative: null,
+    conditions: [],
+    notes: '',
+    sheetData: sd,
   };
 }
 
@@ -309,22 +335,54 @@ function CombatantCard({ combatant, isActive, rank, onUpdate, onRemove, isAdmin 
   );
 }
 
-// ── Modal sélection depuis la forge ──────────────────────────────────────────
+// ── Modal sélection personnages (Supabase + forge locale) ────────────────────
 
 function SelectCharModal({ onAdd, onClose, onGoForge }) {
-  const [roster, setRoster] = useState([]);
+  const [entries, setEntries] = useState([]);
   const [selected, setSelected] = useState(new Set());
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => { setRoster(readForgeRoster()); }, []);
+  useEffect(() => {
+    const load = async () => {
+      // Supabase en premier
+      let sbChars = [];
+      try {
+        sbChars = await getApprovedCharacters();
+      } catch {}
 
-  const toggle = (id) => setSelected(s => {
+      // Forge locale en complément (dédoublonnage par nom)
+      const local = readForgeRoster();
+      const sbNames = new Set(sbChars.map(c => (c.char_name || '').toLowerCase()));
+      const localOnly = local.filter(r => !sbNames.has((r.name || '').toLowerCase()));
+
+      const all = [
+        ...sbChars.map(c => ({ ...c, _key: 'sb_' + c.id, _src: 'supabase',
+          _displayName: c.char_name, _sub: `${c.class_name || '—'} · ${c.race_name || '—'} · Niv. ${c.level || 1}`,
+          _stats: `❤️ ${c.current_hp ?? c.max_hp ?? '?'} / ${c.max_hp || '?'} PV · 🛡 CA ${c.ac || '?'}`,
+          _portrait: c.portrait_url, _emoji: c.portrait_emoji || '⚔', _playerName: c.player_name || '' })),
+        ...localOnly.map(r => ({ ...r, _key: 'local_' + r.id, _src: 'local',
+          _displayName: r.name, _sub: `${r.cls?.n || '—'} · ${r.race?.n || '—'} · Niv. ${r.level || 1}`,
+          _stats: `❤️ ${r.hp || '?'} PV · 🛡 CA ${r.ac || '?'}`,
+          _portrait: r.photo, _emoji: '⚔', _playerName: r.playerName || '' })),
+      ];
+
+      setEntries(all);
+      setLoading(false);
+    };
+    load();
+  }, []);
+
+  const toggle = (key) => setSelected(s => {
     const n = new Set(s);
-    n.has(id) ? n.delete(id) : n.add(id);
+    n.has(key) ? n.delete(key) : n.add(key);
     return n;
   });
 
   const confirm = () => {
-    roster.filter(r => selected.has(r.id)).forEach(r => onAdd(rosterCharToCombatant(r)));
+    entries.filter(e => selected.has(e._key)).forEach(e => {
+      if (e._src === 'supabase') onAdd(supabaseCharToCombatant(e));
+      else onAdd(rosterCharToCombatant(e));
+    });
     onClose();
   };
 
@@ -333,47 +391,51 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
       <div className="bg-slate-900 border-2 border-amber-700/50 rounded-2xl p-6 w-full max-w-lg shadow-2xl max-h-[80vh] flex flex-col">
         <div className="flex justify-between items-center mb-4 flex-shrink-0">
           <h3 className="text-xl font-bold text-amber-300" style={{ fontFamily: 'Cinzel, serif' }}>
-            Mes personnages
+            Personnages
           </h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-200 text-xl">✕</button>
         </div>
 
         <div className="flex-1 overflow-y-auto space-y-2 mb-4">
-          {roster.length === 0 ? (
+          {loading ? (
+            <div className="text-center py-10 text-slate-500">Chargement…</div>
+          ) : entries.length === 0 ? (
             <div className="text-center py-8">
               <div className="text-4xl mb-3">⚔️</div>
-              <p className="text-slate-400 text-sm mb-4">Aucun personnage sauvegardé dans la forge.</p>
+              <p className="text-slate-400 text-sm mb-4">Aucun personnage approuvé.</p>
               <button onClick={onGoForge}
                 className="px-5 py-2.5 rounded-xl bg-violet-800 hover:bg-violet-700 border border-violet-600 text-violet-100 font-bold text-sm">
                 ✦ Créer un personnage
               </button>
             </div>
           ) : (
-            roster.map(r => {
-              const isSelected = selected.has(r.id);
-              const avatarBg = nameToColor(r.name || '');
+            entries.map(e => {
+              const isSelected = selected.has(e._key);
+              const avatarBg = nameToColor(e._displayName || '');
               return (
-                <button key={r.id} onClick={() => toggle(r.id)}
+                <button key={e._key} onClick={() => toggle(e._key)}
                   className="w-full flex items-center gap-3 p-3 rounded-xl border transition-all text-left"
                   style={{
                     borderColor: isSelected ? '#C9A84C' : '#374151',
                     background: isSelected ? 'rgba(201,168,76,0.08)' : 'rgba(15,10,6,0.6)',
                   }}>
-                  {/* Portrait */}
                   <div className="w-12 h-12 rounded-full flex-shrink-0 border-2 overflow-hidden"
                     style={{ borderColor: isSelected ? '#C9A84C' : '#374151' }}>
-                    {r.photo
-                      ? <img src={r.photo} alt={r.name} className="w-full h-full object-cover" />
+                    {e._portrait
+                      ? <img src={e._portrait} alt={e._displayName} className="w-full h-full object-cover" />
                       : <div className="w-full h-full flex items-center justify-center font-black text-xl"
                           style={{ background: avatarBg, color: 'rgba(255,255,255,0.85)', fontFamily: 'Cinzel, serif' }}>
-                          {(r.name || '?')[0].toUpperCase()}
+                          {e._src === 'supabase' ? (e._emoji || '⚔') : (e._displayName || '?')[0].toUpperCase()}
                         </div>
                     }
                   </div>
-                  <div className="flex-1">
-                    <div className="font-bold text-slate-200" style={{ fontFamily: 'Cinzel, serif' }}>{r.name}</div>
-                    <div className="text-xs text-slate-500">{r.cls?.n || '—'} · {r.race?.n || '—'} · Niv. {r.level || 1}</div>
-                    <div className="text-xs text-slate-600 mt-0.5">❤️ {r.hp || '?'} PV · 🛡 CA {r.ac || '?'}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-slate-200 truncate" style={{ fontFamily: 'Cinzel, serif' }}>{e._displayName}</span>
+                      {e._playerName && <span className="text-xs text-slate-500 flex-shrink-0">({e._playerName})</span>}
+                    </div>
+                    <div className="text-xs text-slate-500 truncate">{e._sub}</div>
+                    <div className="text-xs text-slate-600 mt-0.5">{e._stats}</div>
                   </div>
                   <div className="w-5 h-5 rounded border flex items-center justify-center flex-shrink-0"
                     style={{ borderColor: isSelected ? '#C9A84C' : '#374151', background: isSelected ? '#92400E' : 'transparent' }}>
@@ -385,7 +447,7 @@ function SelectCharModal({ onAdd, onClose, onGoForge }) {
           )}
         </div>
 
-        {roster.length > 0 && (
+        {!loading && (
           <div className="flex gap-3 flex-shrink-0">
             <button onClick={onGoForge}
               className="px-4 py-2.5 rounded-xl border border-violet-600 text-violet-300 hover:bg-violet-900/30 text-sm font-bold">
