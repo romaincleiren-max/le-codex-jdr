@@ -594,9 +594,8 @@ body.printing #ps-print{display:block!important;}
 #re-slot-tooltip{position:fixed;z-index:99999;pointer-events:none;opacity:0;transition:opacity .12s;background:#130D06;border:1px solid #3A2810;border-radius:6px;padding:.5rem .7rem;max-width:220px;box-shadow:0 6px 24px rgba(0,0,0,.7);}
 #re-slot-tooltip.visible{opacity:1;}
 #re-slot-tooltip .rst-name{font-family:'Cinzel',serif;font-size:12px;color:#C9A84C;margin-bottom:3px;}
-#re-slot-tooltip .rst-type{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;}
 #re-slot-tooltip .rst-rarity{font-family:'Share Tech Mono',monospace;font-size:9px;border-radius:2px;padding:1px 5px;margin-top:4px;display:inline-block;}
-#re-slot-tooltip .rst-desc{font-size:10px;color:#8A7A5A;margin-top:5px;line-height:1.4;}
+#re-slot-tooltip .rst-attune{font-family:'Cinzel',serif;font-size:9px;color:#A080D0;margin-top:5px;letter-spacing:.06em;}
 .re-bag-row{display:flex;align-items:center;gap:.5rem;padding:clamp(.25rem,.6vh,.5rem) clamp(.2rem,.4vw,.4rem);border-bottom:1px solid #1A1208;cursor:grab;}
 .re-bag-row:last-child{border-bottom:none;}
 .re-bag-row:hover{background:#1A1208;}
@@ -5095,7 +5094,7 @@ function renderReBag(){
     var rBadge=rc?'<span class="re-rarity" style="background:'+rc+'33;color:'+rc+';border:1px solid '+rc+'55;">'+e.rarity+'</span>':'';
     var qty=e.qty>1?' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);">\xd7'+e.qty+'</span>':'';
     var eqBadge=equippedIds.includes(e.id)?'<span class="re-equipped-badge" title="Équipé">✓</span>':'';
-    return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')" title="Glissez vers un emplacement">'+
+    return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')" onmouseenter="showBagTooltip(event,'+i+')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'+
       '<span style="font-size:10px;color:#5A4A3A;cursor:grab;">&#x2837;</span>'+
       '<div style="flex:1;font-family:\'IM Fell English\',serif;font-size:11px;color:var(--parch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+e.n+rBadge+qty+'</div>'+
       eqBadge+
@@ -5137,17 +5136,22 @@ function renderReStats(){
   renderReSlots();
 }
 
-function showSlotTooltip(ev, slotId){
-  var tt=$('re-slot-tooltip'); if(!tt)return;
-  var item=_reChar&&_reChar.equipped&&_reChar.equipped[slotId]; if(!item)return;
+function showItemTooltip(ev, item){
+  var tt=$('re-slot-tooltip'); if(!tt||!item)return;
   var rc=item.rarity&&_RE_RC?_RE_RC[item.rarity]:null;
   var rarHtml=item.rarity?'<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+(rc||'#C9A84C')+';">'+item.rarity+'</div>':'';
-  var desc=(item.description||item.d||'');
-  var descHtml=desc?'<div class="rst-desc">'+desc.substring(0,120)+(desc.length>120?'…':'')+'</div>':'';
-  tt.innerHTML='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+
-    '<div class="rst-type">'+(item.type||item.cat||'Objet')+'</div>'+rarHtml+descHtml;
+  var harmHtml=item.attunement?'<div class="rst-attune">⧁ Harmonisation requise</div>':'';
+  tt.innerHTML='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+rarHtml+harmHtml;
   posSlotTooltip(ev);
   tt.classList.add('visible');
+}
+function showSlotTooltip(ev, slotId){
+  var item=_reChar&&_reChar.equipped&&_reChar.equipped[slotId]; if(!item)return;
+  showItemTooltip(ev, item);
+}
+function showBagTooltip(ev, idx){
+  var item=_reChar&&_reChar.bag&&_reChar.bag[idx]; if(!item)return;
+  showItemTooltip(ev, item);
 }
 function posSlotTooltip(ev){
   var tt=$('re-slot-tooltip'); if(!tt)return;
