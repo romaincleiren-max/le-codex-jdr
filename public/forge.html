@@ -1219,7 +1219,38 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
 #bestiary-sheet-col{flex:1;overflow-y:auto;padding:1.4rem 2rem;background:#0D0805;}
 #bestiary-sheet-col::-webkit-scrollbar{width:5px;}
 #bestiary-sheet-col::-webkit-scrollbar-thumb{background:#2A1A08;}
-#bestiary-sheet{max-width:820px;margin:0 auto;}
+#bestiary-sheet{max-width:1100px;margin:0 auto;display:flex;gap:1.4rem;align-items:flex-start;}
+#bestiary-sheet-stats{flex:1;min-width:0;}
+#bestiary-sheet-img{flex:0 0 210px;width:210px;display:flex;flex-direction:column;gap:.5rem;position:sticky;top:0;}
+.bst-img-frame{width:100%;aspect-ratio:9/16;background:#0F0A06;border:1px solid #2A1A08;border-radius:6px;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+.bst-img-frame img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block;}
+.bst-img-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:.5rem;color:#2A1A08;font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;text-align:center;padding:.5rem;}
+.bst-img-placeholder-icon{font-size:28px;opacity:.25;}
+.bst-img-url-wrap{display:flex;flex-direction:column;gap:.25rem;}
+.bst-img-url-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#4A3A1A;text-transform:uppercase;}
+.bst-img-url-row{display:flex;gap:.25rem;}
+.bst-img-url-input{flex:1;background:#0F0A06;border:1px solid #1E1208;border-radius:3px;padding:.25rem .35rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--parch);outline:none;min-width:0;}
+.bst-img-url-input::placeholder{color:#2A1A08;}
+.bst-img-url-btn{background:#1A1208;border:1px solid #2A1A08;border-radius:3px;padding:.25rem .4rem;font-size:9px;color:#6A5A3A;cursor:pointer;flex-shrink:0;}
+.bst-img-url-btn:hover{border-color:var(--gold-d);color:var(--gold);}
+/* ── Parchment stat block ── */
+.bst-parchment{background:#FDF1DC;border:1px solid #8B1A1A;border-radius:3px;padding:1rem 1.1rem;color:#1A0E08;font-family:'IM Fell English',serif;font-size:12px;line-height:1.5;}
+.bst-parch-title{font-family:'Cinzel Decorative',serif;font-size:17px;color:#7A1A1A;margin-bottom:.1rem;font-variant:small-caps;}
+.bst-parch-sub{font-family:'IM Fell English',serif;font-size:11px;font-style:italic;color:#4A2818;margin-bottom:.35rem;}
+.bst-parch-hr{border:none;border-top:2px solid #8B1A1A;margin:.45rem 0;}
+.bst-parch-prop{font-size:11px;line-height:1.6;color:#1A0E08;}
+.bst-parch-prop b,.bst-parch-prop strong{font-family:'Cinzel',serif;font-size:10px;color:#1A0E08;}
+.bst-parch-stats{width:100%;border-collapse:collapse;text-align:center;margin:.35rem 0;}
+.bst-parch-stats th{font-family:'Cinzel',serif;font-size:9px;color:#7A1A1A;padding:.15rem .2rem;border-bottom:1px solid #C8A060;}
+.bst-parch-stats td{font-size:11px;padding:.1rem .2rem;color:#1A0E08;}
+.bst-parch-section{font-family:'Cinzel',serif;font-size:13px;color:#7A1A1A;margin:.55rem 0 .25rem;border-bottom:1px solid #8B1A1A;padding-bottom:.1rem;font-variant:small-caps;letter-spacing:.06em;}
+.bst-parch-trait{font-size:11px;line-height:1.6;margin-bottom:.2rem;color:#1A0E08;}
+.bst-parch-trait em strong,.bst-parch-trait strong em{font-variant:small-caps;}
+/* Homebrew modal tab */
+.bst-modal-tabs{display:flex;gap:.3rem;margin-bottom:.7rem;border-bottom:1px solid #2A1A08;padding-bottom:.5rem;}
+.bst-modal-tab{background:none;border:1px solid #2A1A08;border-radius:4px 4px 0 0;padding:.25rem .8rem;font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#6A5A3A;cursor:pointer;transition:.1s;}
+.bst-modal-tab.active{background:#1A1208;color:var(--gold);border-color:var(--gold-d);}
+.bst-modal-tab:hover:not(.active){color:var(--parch);}
 .bst-empty{font-family:'IM Fell English',serif;font-size:14px;color:#4A3A1A;font-style:italic;text-align:center;margin-top:3rem;}
 /* Sheet components */
 .bst-sheet-name{font-family:'Cinzel Decorative',serif;font-size:26px;color:var(--gold);margin-bottom:.2rem;}
@@ -7899,18 +7930,57 @@ function bstSearch(q){
 
 function statMod(v){var m=Math.floor((v-10)/2);return(m>=0?'+':'')+m;}
 
+function getBstImages(){try{return JSON.parse(localStorage.getItem('bst_images')||'{}');}catch(e){return{};}}
+function saveBstImage(id,url){var imgs=getBstImages();if(url)imgs[id]=url;else delete imgs[id];localStorage.setItem('bst_images',JSON.stringify(imgs));}
+function bstApplyImage(id){
+  var url=($('bst-img-input-'+id)||{}).value||'';
+  saveBstImage(id,url.trim());
+  var frame=$('bst-img-frame-'+id);
+  if(frame){
+    frame.innerHTML=url.trim()
+      ?'<img src="'+url.trim()+'" onerror="this.parentNode.innerHTML=\'<div class=bst-img-placeholder><div class=bst-img-placeholder-icon>🖼</div><span>Image introuvable</span></div>\'">'
+      :'<div class="bst-img-placeholder"><div class="bst-img-placeholder-icon">🖼</div><span>FORMAT 9:16</span></div>';
+  }
+}
+
 function renderBstSheet(m){
   var el=$('bestiary-sheet');if(!el)return;
   var custom=(m.src==='custom');
-  var html='';
-  // Action buttons
+  var imgs=getBstImages();
+  var imgUrl=(m.img||imgs[m.id]||'');
+
+  // ── Colonne image (droite) ──
+  var imgFrameContent=imgUrl
+    ?'<img src="'+imgUrl+'" onerror="this.parentNode.innerHTML=\'<div class=bst-img-placeholder><div class=bst-img-placeholder-icon>🖼</div><span>Image introuvable</span></div>\'">'
+    :'<div class="bst-img-placeholder"><div class="bst-img-placeholder-icon">🖼</div><span>FORMAT 9:16</span></div>';
+  var safeId=m.id.replace(/[^a-zA-Z0-9_]/g,'_');
+  var imgColHtml=
+    '<div id="bestiary-sheet-img">'+
+      '<div class="bst-img-frame" id="bst-img-frame-'+safeId+'">'+imgFrameContent+'</div>'+
+      '<div class="bst-img-url-wrap">'+
+        '<div class="bst-img-url-lbl">Image URL</div>'+
+        '<div class="bst-img-url-row">'+
+          '<input class="bst-img-url-input" id="bst-img-input-'+safeId+'" placeholder="https://…" value="'+imgUrl+'" onkeydown="if(event.key===\'Enter\')bstApplyImage(\''+safeId+'\')">'+
+          '<button class="bst-img-url-btn" onclick="bstApplyImage(\''+safeId+'\')">✓</button>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  // ── Colonne stats (gauche) ──
+  var actionBtns='';
   if(custom){
-    html+='<div class="bst-sheet-actions">'+
+    actionBtns='<div class="bst-sheet-actions">'+
       '<button class="bst-sheet-btn" onclick="bstEditMonster(\''+m.id+'\')">✎ Modifier</button>'+
       '<button class="bst-sheet-btn danger" onclick="bstDeleteMonster(\''+m.id+'\')">✕ Supprimer</button>'+
     '</div>';
   }
+  // If homebrew raw text exists, render parchment view
+  if(m.raw){
+    el.innerHTML='<div id="bestiary-sheet-stats">'+actionBtns+renderBstParchment(m.raw)+'</div>'+imgColHtml;
+    return;
+  }
   // Header
+  var html=actionBtns;
   html+='<div class="bst-sheet-name">'+m.n+'</div>';
   var szMap={TP:'Très petite',P:'Petite',M:'Moyenne',G:'Grande',TG:'Très grande',Gig:'Gigantesque',Colo:'Colossale'};
   html+='<div class="bst-sheet-sub">'+(szMap[m.sz]||m.sz)+' '+m.type+' · '+m.al+'</div>';
@@ -7984,7 +8054,92 @@ function renderBstSheet(m){
       html+='<div class="bst-trait"><span class="bst-trait-name">'+a.n+'.</span> <span class="bst-trait-desc">'+a.d+'</span></div>';
     });
   }
-  el.innerHTML=html;
+  el.innerHTML='<div id="bestiary-sheet-stats">'+html+'</div>'+imgColHtml;
+}
+
+/* ── Homebrew parser & parchment renderer ── */
+function parseBstHomebrew(text){
+  var lines=text.split('\n');
+  var m={id:'custom_'+Date.now(),src:'custom',n:'',fam:'Personnalisé',cr:'0',sz:'M',type:'',al:'—',ac:10,acN:'',hp:0,hpD:'',spd:'—',str:10,dex:10,con:10,int:10,wis:10,cha:10,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'—',lng:'—',spe:[],act:[],bac:[],rea:[],leg:[],lgD:'',raw:text};
+  var cur=null;var i=0;
+  while(i<lines.length){
+    var t=lines[i].trim();
+    if(!t||t==='___'||t.startsWith('{{')||t.startsWith('}}')||t.startsWith('!')){i++;continue;}
+    if(t.startsWith('## ')){m.n=t.slice(3).trim();}
+    else if(/^\*[^*]/.test(t)&&/\*$/.test(t)&&!t.startsWith('***')){
+      var sub=t.replace(/^\*|\*$/g,'').trim();m.type=sub;
+      var szM=sub.match(/taille\s+(Très petite|Très grande|Petite|Moyenne|Grande|Gigantesque)/i);
+      if(szM){var sfr={'Très petite':'TP','Petite':'P','Moyenne':'M','Grande':'G','Très grande':'TG','Gigantesque':'Gig'};m.sz=sfr[szM[1]]||'M';}
+      var alM=sub.match(/,\s*(.+)$/);if(alM)m.al=alM[1].trim();
+    }
+    else if(/^\*\*[^*]+\*\*\s*::/.test(t)){
+      var pm=t.match(/^\*\*([^*]+)\*\*\s*::\s*(.+)/);
+      if(pm){var k=pm[1].trim().toLowerCase(),v=pm[2].trim();
+        if(k.includes('armure')||k==='ca'){var acM=v.match(/^(\d+)/);if(acM)m.ac=parseInt(acM[1]);var acNM=v.match(/\(([^)]+)\)/);if(acNM)m.acN='('+acNM[1]+')';}
+        else if(k.includes('vie')||k==='pv'){var hpM=v.match(/^(\d+)/);if(hpM)m.hp=parseInt(hpM[1]);var hpDM=v.match(/\(([^)]+)\)/);if(hpDM)m.hpD=hpDM[1];}
+        else if(k.includes('vitesse')){m.spd=v;}
+        else if(k.includes('compétence')){v.split(',').forEach(function(s){var sm=s.trim().match(/^(.+?)\s*([+-]\d+)$/);if(sm)m.ski[sm[1].trim()]=sm[2];});}
+        else if(k.includes('sauvegarde')||k.includes('jets de')){v.split(',').forEach(function(s){var sm=s.trim().match(/^([A-ZÉÀÂ]{2,3})\s*([+-]\d+)$/i);if(sm)m.sav[sm[1].toUpperCase()]=sm[2];});}
+        else if(k.includes('sens')){m.sen=v;}
+        else if(k.includes('danger')||k==='ic'||k==='cr'){var crM=v.match(/^([\d/]+)/);if(crM)m.cr=crM[1];}
+        else if(k.includes('immunité')&&k.includes('dégât')){m.imm=v.split(',').map(function(s){return s.trim();}).filter(Boolean);}
+        else if(k.includes('résistance')){m.res=v.split(',').map(function(s){return s.trim();}).filter(Boolean);}
+        else if(k.includes('vulnér')){m.vul=v.split(',').map(function(s){return s.trim();}).filter(Boolean);}
+        else if(k.includes('immunité')){m.cim=v.split(',').map(function(s){return s.trim();}).filter(Boolean);}
+        else if(k.includes('langue')){m.lng=v;}
+      }
+    }
+    else if(/^\|FOR\|/i.test(t)||/^\|STR\|/i.test(t)){
+      i++;if(i<lines.length&&lines[i].includes(':---:'))i++;
+      if(i<lines.length){var cells=lines[i].trim().split('|').filter(function(c){return c.trim();});var sk=['str','dex','con','int','wis','cha'];cells.slice(0,6).forEach(function(c,idx){var nM=c.trim().match(/^(\d+)/);if(nM&&idx<6)m[sk[idx]]=parseInt(nM[1]);});}
+    }
+    else if(t.startsWith('### ')){
+      var sn=t.slice(4).trim().toLowerCase();
+      if(sn.includes('bonus'))cur='bac';else if(sn.includes('réaction')||sn.includes('reaction'))cur='rea';else if(sn.includes('légendaire')||sn.includes('legendaire'))cur='leg';else cur='act';
+    }
+    else if(t.startsWith('***')){
+      var trM=t.match(/^\*\*\*([^*]+?\.?)\*\*\*\s*(.*)/);
+      if(trM){var tn=trM[1].replace(/\.$/,'').trim(),td=trM[2].trim();
+        while(i+1<lines.length){var nx=lines[i+1].trim();if(!nx||nx.startsWith('***')||nx.startsWith('###')||nx==='___')break;td+=' '+nx;i++;}
+        var tr={n:tn,d:td};
+        if(cur==='act')m.act.push(tr);else if(cur==='bac')m.bac.push(tr);else if(cur==='rea')m.rea.push(tr);else if(cur==='leg')m.leg.push(tr);else m.spe.push(tr);
+      }
+    }
+    i++;
+  }
+  var tl=m.type.toLowerCase();
+  if(tl.includes('bête'))m.fam='Bêtes';else if(tl.includes('mort-vivant')||tl.includes('mort vivant'))m.fam='Morts-vivants';else if(tl.includes('dragon'))m.fam='Dragons';else if(tl.includes('humanoïde'))m.fam='Humanoïdes';else if(tl.includes('aberration'))m.fam='Aberrations';else if(tl.includes('céleste'))m.fam='Célestes';else if(tl.includes('construit'))m.fam='Construits';else if(tl.includes('élémentaire'))m.fam='Élémentaires';else if(tl.includes('fée'))m.fam='Fées';else if(tl.includes('fiélon'))m.fam='Fiélons';else if(tl.includes('géant'))m.fam='Géants';else if(tl.includes('monstruos'))m.fam='Monstruosités';
+  return m;
+}
+
+function renderBstParchment(raw){
+  var lines=raw.split('\n');
+  var html='<div class="bst-parchment">';
+  var inTbody=false;
+  function mdInline(s){return(s||'').replace(/\*\*\*([^*]+)\*\*\*/g,'<strong><em>$1</em></strong>').replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/\*([^*]+)\*/g,'<em>$1</em>');}
+  for(var i=0;i<lines.length;i++){
+    var t=lines[i].trim();
+    if(!t||t.startsWith('{{')||t.startsWith('}}')||t.startsWith('!'))continue;
+    if(t==='___'){if(inTbody){html+='</tbody></table>';inTbody=false;}html+='<hr class="bst-parch-hr">';}
+    else if(t.startsWith('## ')){html+='<div class="bst-parch-title">'+t.slice(3)+'</div>';}
+    else if(/^\*[^*]/.test(t)&&/\*$/.test(t)&&!t.startsWith('***')){html+='<div class="bst-parch-sub">'+t.replace(/^\*|\*$/g,'')+'</div>';}
+    else if(/^\*\*[^*]+\*\*\s*::/.test(t)){var pm=t.match(/^\*\*([^*]+)\*\*\s*::\s*(.+)/);if(pm)html+='<div class="bst-parch-prop"><strong>'+pm[1]+'</strong> '+pm[2]+'</div>';}
+    else if(/^\|FOR\|/i.test(t)||/^\|STR\|/i.test(t)){var hs=t.split('|').filter(function(c){return c.trim();});html+='<table class="bst-parch-stats"><thead><tr>'+hs.map(function(h){return'<th>'+h+'</th>';}).join('')+'</tr></thead><tbody>';inTbody=true;}
+    else if(t.startsWith('|:---:')){/* skip */}
+    else if(inTbody&&t.startsWith('|')){var cs=t.split('|').filter(function(c){return c.trim();});html+='<tr>'+cs.map(function(c){return'<td>'+c.trim()+'</td>';}).join('')+'</tr>';}
+    else if(t.startsWith('### ')){if(inTbody){html+='</tbody></table>';inTbody=false;}html+='<div class="bst-parch-section">'+t.slice(4)+'</div>';}
+    else if(t.startsWith('***')){var tm=t.match(/^\*\*\*([^*]+?\.?)\*\*\*\s*(.*)/);if(tm)html+='<div class="bst-parch-trait"><strong><em>'+tm[1]+'</em></strong> '+mdInline(tm[2])+'</div>';}
+    else if(!t.startsWith('|')){html+='<div class="bst-parch-trait">'+mdInline(t)+'</div>';}
+  }
+  if(inTbody)html+='</tbody></table>';
+  html+='</div>';return html;
+}
+
+function bstModalSwitchTab(tab){
+  var form=$('bst-tab-form'),hb=$('bst-tab-hb'),btnForm=$('bst-tab-btn-form'),btnHb=$('bst-tab-btn-hb');
+  if(!form||!hb)return;
+  if(tab==='hb'){form.style.display='none';hb.style.display='block';if(btnForm)btnForm.classList.remove('active');if(btnHb)btnHb.classList.add('active');}
+  else{hb.style.display='none';form.style.display='block';if(btnHb)btnHb.classList.remove('active');if(btnForm)btnForm.classList.add('active');}
 }
 
 /* ── Add / Edit modal ── */
@@ -7994,47 +8149,61 @@ function openAddMonster(id){
   var existing=id?custom.find(function(m){return m.id===id;}):null;
   var e=existing||{id:'',n:'',fam:'Humanoïdes',cr:'1',sz:'M',type:'',al:'Neutre',ac:10,acN:'',hp:10,hpD:'2d8',spd:'9 m',str:10,dex:10,con:10,int:10,wis:10,cha:10,sav:{},ski:{},imm:[],res:[],vul:[],cim:[],sen:'Perception passive 10',lng:'—',spe:[],act:[],rea:[],leg:[],lgD:'',src:'custom'};
   var famOpts=BESTIARY_FAMILIES.concat(['Personnalisé']).map(function(f){return '<option value="'+f+'"'+(e.fam===f?' selected':'')+'>'+f+'</option>';}).join('');
+  var isHb=!!(existing&&e.raw);
   modal.querySelector('#bst-modal-inner').innerHTML=
     '<button class="bst-modal-close" onclick="closeBstModal()">✕</button>'+
     '<div class="bst-modal-title">'+(existing?'Modifier':'Ajouter un monstre')+'</div>'+
     '<input type="hidden" id="bst-edit-id" value="'+(existing?e.id:'')+'">'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group" style="flex:3"><label>Nom</label><input id="be-n" value="'+e.n+'"></div>'+
-      '<div class="bst-form-group"><label>Famille</label><select id="be-fam">'+famOpts+'</select></div>'+
+    '<div class="bst-modal-tabs">'+
+      '<button class="bst-modal-tab'+(isHb?'':' active')+'" id="bst-tab-btn-form" onclick="bstModalSwitchTab(\'form\')">📋 Formulaire</button>'+
+      '<button class="bst-modal-tab'+(isHb?' active':'')+'" id="bst-tab-btn-hb" onclick="bstModalSwitchTab(\'hb\')">📜 Homebrew</button>'+
     '</div>'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group"><label>IC (Danger)</label><input id="be-cr" value="'+e.cr+'"></div>'+
-      '<div class="bst-form-group"><label>Taille</label><select id="be-sz"><option value="TP">TP</option><option value="P">P</option><option value="M"'+(e.sz==='M'?' selected':'')+'>M</option><option value="G"'+(e.sz==='G'?' selected':'')+'>G</option><option value="TG">TG</option><option value="Gig">Gig</option></select></div>'+
-      '<div class="bst-form-group" style="flex:2"><label>Type</label><input id="be-type" value="'+e.type+'"></div>'+
-      '<div class="bst-form-group" style="flex:2"><label>Alignement</label><input id="be-al" value="'+e.al+'"></div>'+
+    /* ── Formulaire tab ── */
+    '<div id="bst-tab-form" style="display:'+(isHb?'none':'block')+'">'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group" style="flex:3"><label>Nom</label><input id="be-n" value="'+e.n+'"></div>'+
+        '<div class="bst-form-group"><label>Famille</label><select id="be-fam">'+famOpts+'</select></div>'+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group"><label>IC (Danger)</label><input id="be-cr" value="'+e.cr+'"></div>'+
+        '<div class="bst-form-group"><label>Taille</label><select id="be-sz"><option value="TP">TP</option><option value="P">P</option><option value="M"'+(e.sz==='M'?' selected':'')+'>M</option><option value="G"'+(e.sz==='G'?' selected':'')+'>G</option><option value="TG">TG</option><option value="Gig">Gig</option></select></div>'+
+        '<div class="bst-form-group" style="flex:2"><label>Type</label><input id="be-type" value="'+e.type+'"></div>'+
+        '<div class="bst-form-group" style="flex:2"><label>Alignement</label><input id="be-al" value="'+e.al+'"></div>'+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group"><label>CA</label><input id="be-ac" type="number" value="'+e.ac+'"></div>'+
+        '<div class="bst-form-group" style="flex:2"><label>Note CA</label><input id="be-acn" value="'+e.acN+'"></div>'+
+        '<div class="bst-form-group"><label>PV</label><input id="be-hp" type="number" value="'+e.hp+'"></div>'+
+        '<div class="bst-form-group"><label>Dés PV</label><input id="be-hpd" value="'+e.hpD+'"></div>'+
+        '<div class="bst-form-group"><label>Vitesse</label><input id="be-spd" value="'+e.spd+'"></div>'+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        ['str','dex','con','int','wis','cha'].map(function(k,i){return '<div class="bst-form-group"><label>'+['FOR','DEX','CON','INT','SAG','CHA'][i]+'</label><input id="be-'+k+'" type="number" value="'+e[k]+'"></div>';}).join('')+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group" style="flex:1"><label>Sens</label><input id="be-sen" value="'+e.sen+'"></div>'+
+        '<div class="bst-form-group" style="flex:1"><label>Langues</label><input id="be-lng" value="'+e.lng+'"></div>'+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group" style="flex:1"><label>Immunités dégâts (séparées par virgule)</label><input id="be-imm" value="'+e.imm.join(', ')+'"></div>'+
+        '<div class="bst-form-group" style="flex:1"><label>Résistances dégâts</label><input id="be-res" value="'+e.res.join(', ')+'"></div>'+
+        '<div class="bst-form-group" style="flex:1"><label>Vulnérabilités</label><input id="be-vul" value="'+e.vul.join(', ')+'"></div>'+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group"><label>Traits spéciaux (nom | description, un par ligne)</label><textarea id="be-spe">'+e.spe.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group"><label>Actions (nom | description, un par ligne)</label><textarea id="be-act">'+e.act.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+      '</div>'+
+      '<div class="bst-form-row">'+
+        '<div class="bst-form-group"><label>Réactions (nom | description, un par ligne)</label><textarea id="be-rea">'+e.rea.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+      '</div>'+
     '</div>'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group"><label>CA</label><input id="be-ac" type="number" value="'+e.ac+'"></div>'+
-      '<div class="bst-form-group" style="flex:2"><label>Note CA</label><input id="be-acn" value="'+e.acN+'"></div>'+
-      '<div class="bst-form-group"><label>PV</label><input id="be-hp" type="number" value="'+e.hp+'"></div>'+
-      '<div class="bst-form-group"><label>Dés PV</label><input id="be-hpd" value="'+e.hpD+'"></div>'+
-      '<div class="bst-form-group"><label>Vitesse</label><input id="be-spd" value="'+e.spd+'"></div>'+
-    '</div>'+
-    '<div class="bst-form-row">'+
-      ['str','dex','con','int','wis','cha'].map(function(k,i){return '<div class="bst-form-group"><label>'+['FOR','DEX','CON','INT','SAG','CHA'][i]+'</label><input id="be-'+k+'" type="number" value="'+e[k]+'"></div>';}).join('')+
-    '</div>'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group" style="flex:1"><label>Sens</label><input id="be-sen" value="'+e.sen+'"></div>'+
-      '<div class="bst-form-group" style="flex:1"><label>Langues</label><input id="be-lng" value="'+e.lng+'"></div>'+
-    '</div>'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group" style="flex:1"><label>Immunités dégâts (séparées par virgule)</label><input id="be-imm" value="'+e.imm.join(', ')+'"></div>'+
-      '<div class="bst-form-group" style="flex:1"><label>Résistances dégâts</label><input id="be-res" value="'+e.res.join(', ')+'"></div>'+
-      '<div class="bst-form-group" style="flex:1"><label>Vulnérabilités</label><input id="be-vul" value="'+e.vul.join(', ')+'"></div>'+
-    '</div>'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group"><label>Traits spéciaux (nom | description, un par ligne)</label><textarea id="be-spe">'+e.spe.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
-    '</div>'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group"><label>Actions (nom | description, un par ligne)</label><textarea id="be-act">'+e.act.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
-    '</div>'+
-    '<div class="bst-form-row">'+
-      '<div class="bst-form-group"><label>Réactions (nom | description, un par ligne)</label><textarea id="be-rea">'+e.rea.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+    /* ── Homebrew tab ── */
+    '<div id="bst-tab-hb" style="display:'+(isHb?'block':'none')+'">'+
+      '<div style="font-family:\'Cinzel\',serif;font-size:8px;color:#4A3A1A;letter-spacing:.1em;margin-bottom:.4rem;">FORMAT HOMEBREWERY — coller le texte markdown de la fiche</div>'+
+      '<textarea id="be-raw" style="width:100%;height:340px;resize:vertical;background:#080503;border:1px solid #1E1208;border-radius:4px;padding:.6rem;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#C8A060;line-height:1.5;outline:none;box-sizing:border-box;">'+((e.raw||'').replace(/</g,'&lt;').replace(/>/g,'&gt;'))+'</textarea>'+
+      '<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#2A1A08;margin-top:.3rem;">Supporte ## Nom, *Sous-titre*, **Propriété** :: valeur, table stats, ***Trait.*** desc, ### Actions</div>'+
     '</div>'+
     '<div style="display:flex;gap:.6rem;justify-content:flex-end;margin-top:.8rem;">'+
       '<button class="bst-sheet-btn" onclick="closeBstModal()">Annuler</button>'+
@@ -8049,8 +8218,15 @@ function parseTrait(txt){
 function splitList(s){return(s||'').split(',').map(function(x){return x.trim();}).filter(Boolean);}
 function saveBstMonster(){
   var existing=$('bst-edit-id')&&$('bst-edit-id').value;
+  var rawEl=$('be-raw');
+  var useHb=rawEl&&$('bst-tab-hb')&&$('bst-tab-hb').style.display!=='none';
+  var m;
+  if(useHb&&rawEl.value.trim()){
+    m=parseBstHomebrew(rawEl.value.trim());
+    if(existing)m.id=existing;
+  } else {
   var id=existing||('custom_'+Date.now());
-  var m={
+  m={
     id:id,src:'custom',
     n:$('be-n').value.trim(),
     fam:$('be-fam').value,
@@ -8081,6 +8257,7 @@ function saveBstMonster(){
     rea:parseTrait($('be-rea').value),
     leg:[],lgD:'',
   };
+  }
   var list=getBstCustom();
   if(existing){var idx=list.findIndex(function(x){return x.id===existing;});if(idx>=0)list[idx]=m;else list.push(m);}
   else list.push(m);
