@@ -1273,6 +1273,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <!-- CENTER: Paper doll -->
     <div id="re-doll-col">
       <div id="re-doll-inner"></div>
+      <div id="re-doll-hint" style="margin-top:auto;padding:.3rem 0;text-align:center;font-family:'Share Tech Mono',monospace;font-size:7px;color:#6A5A3A;letter-spacing:.04em;text-shadow:0 1px 4px #000;flex-shrink:0;">☷ Glissez du sac ou du catalogue ▶ emplacement · ✕ déséquiper</div>
     </div>
     <!-- RIGHT: Catalog -->
     <div id="re-cat-col">
@@ -5554,9 +5555,7 @@ function renderReDoll(){
       '<div style="grid-column:2;grid-row:1/7;"></div>'+
       rightSlots+
     '</div>'+
-    '<div style="text-align:center;font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#6A5A3A;margin:.1rem 0;letter-spacing:.04em;text-shadow:0 1px 4px #000;">'+
-      '☷ Glissez du sac ou du catalogue ▶ emplacement · ✕ déséquiper'+
-    '</div>';
+    '';
 }
 
 var _ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX'];
