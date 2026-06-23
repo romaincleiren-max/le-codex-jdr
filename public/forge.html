@@ -593,13 +593,13 @@ body.printing #ps-print{display:block!important;}
 #re-hp-input::-webkit-inner-spin-button,#re-hp-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 #re-hp-input{-moz-appearance:textfield;}
 #re-stats-mini{padding:.5rem .6rem;border-top:1px solid #1E1208;flex-shrink:0;background:#0F0A06;}
-#re-slot-tooltip{position:fixed;z-index:99999;pointer-events:none;opacity:0;transition:opacity .12s;background:#130D06;border:1px solid #3A2810;border-radius:6px;padding:.6rem .8rem;max-width:280px;box-shadow:0 6px 24px rgba(0,0,0,.7);}
+#re-slot-tooltip{position:fixed;z-index:99999;pointer-events:none;opacity:0;transition:opacity .12s;background:#130D06;border:1px solid #3A2810;border-radius:8px;padding:.8rem 1rem;max-width:360px;box-shadow:0 8px 32px rgba(0,0,0,.85);}
 #re-slot-tooltip.visible{opacity:1;}
-#re-slot-tooltip.spell-tt{max-width:340px;}
-#re-slot-tooltip .rst-name{font-family:'Cinzel',serif;font-size:13px;color:#C9A84C;margin-bottom:3px;}
+#re-slot-tooltip.spell-tt{max-width:480px;padding:1rem 1.2rem;}
+#re-slot-tooltip .rst-name{font-family:'Cinzel',serif;font-size:14px;color:#C9A84C;margin-bottom:4px;}
 #re-slot-tooltip .rst-rarity{font-family:'Share Tech Mono',monospace;font-size:9px;border-radius:2px;padding:1px 5px;margin-top:4px;display:inline-block;}
 #re-slot-tooltip .rst-attune{font-family:'Cinzel',serif;font-size:9px;color:#A080D0;margin-top:5px;letter-spacing:.06em;}
-#re-slot-tooltip .rst-desc{font-size:11px;color:#8A7A5A;margin-top:5px;line-height:1.45;max-height:140px;overflow:hidden;}
+#re-slot-tooltip .rst-desc{font-size:12px;color:#9A8A6A;margin-top:7px;line-height:1.5;max-height:200px;overflow:hidden;border-top:1px solid #2A1A08;padding-top:6px;}
 .re-bag-row{display:flex;align-items:center;gap:.5rem;padding:clamp(.25rem,.6vh,.5rem) clamp(.2rem,.4vw,.4rem);border-bottom:1px solid #1A1208;cursor:grab;}
 .re-bag-row:last-child{border-bottom:none;}
 .re-bag-row:hover{background:#1A1208;}
@@ -5424,8 +5424,10 @@ function showItemTooltip(ev, item){
     metaHtml+='</div>';
   }
   var harmHtml=item.attunement?'<div class="rst-attune">⧁ Harmonisation requise</div>':'';
-  var desc=item.d||item.description||'';
-  var descHtml=desc?'<div class="rst-desc">'+desc.substring(0,220)+(desc.length>220?'…':'')+'</div>':'';
+  var rawDesc=item.d||item.description||'';
+  var effectMatch=rawDesc.match(/Effets?\s*:\s*([\s\S]+)/i);
+  var effect=effectMatch?effectMatch[1].trim():rawDesc;
+  var descHtml=effect?'<div class="rst-desc">'+effect.substring(0,320)+(effect.length>320?'…':'')+'</div>':'';
   tt.innerHTML='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+typeHtml+rarHtml+metaHtml+harmHtml+descHtml;
   posSlotTooltip(ev);
   tt.classList.add('visible');
@@ -5434,7 +5436,7 @@ function showSpellTooltip(ev, name){
   var tt=$('re-slot-tooltip'); if(!tt)return;
   tt.classList.add('spell-tt');
   var desc=SPELL_DESC[name]||'';
-  tt.innerHTML='<div class="rst-name" style="font-size:16px;">'+name+'</div>'+(desc?'<div class="rst-desc" style="font-size:13px;margin-top:6px;max-height:none;">'+desc+'</div>':'');
+  tt.innerHTML='<div class="rst-name" style="font-size:18px;margin-bottom:8px;">'+name+'</div>'+(desc?'<div class="rst-desc" style="font-size:14px;margin-top:0;max-height:none;border-top:none;padding-top:0;color:#B0A07A;">'+desc+'</div>':'');
   posSlotTooltip(ev);
   tt.classList.add('visible');
 }
