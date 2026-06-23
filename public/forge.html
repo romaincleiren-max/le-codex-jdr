@@ -5365,11 +5365,19 @@ function reDollDrop(e,slotId){
 }
 function reDollUnequip(slotId){
   if(!_reChar||!_reChar.equipped) return;
+  var item=_reChar.equipped[slotId];
+  if(item){
+    if(!_reChar.bag) _reChar.bag=[];
+    var ex=_reChar.bag.find(function(b){return b.id===item.id;});
+    if(ex) ex.qty=(ex.qty||1)+1;
+    else _reChar.bag.push(Object.assign({qty:1},item));
+    renderReBag();
+  }
   delete _reChar.equipped[slotId];
   renderReDoll();
   var roster=getRoster();
   var idx=roster.findIndex(function(r){return r.id===_reChar.id;});
-  if(idx>=0){roster[idx].equipped=_reChar.equipped;setRoster(roster);}
+  if(idx>=0){roster[idx].equipped=_reChar.equipped;roster[idx].bag=_reChar.bag;setRoster(roster);}
 }
 
 function reBagRemove(idx){
