@@ -7,7 +7,7 @@ import './index.css';
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom';
-import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock, Menu } from 'lucide-react';
+import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock, Menu, User, LogOut } from 'lucide-react';
 import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
@@ -2581,37 +2581,24 @@ export default function App() {
               </button>
 
               {/* Navigation centrale - cachee sur mobile */}
-              <div className="hidden md:flex gap-1 lg:gap-2 items-center flex-1 justify-start ml-4">
+              <div className="hidden md:flex gap-0 items-center flex-1 ml-2">
                 {['home', 'submit', 'forge', 'bestiaire', 'initiative', 'admin', 'stats', 'about']
                   .filter(page => {
-                    if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
-                      return false;
-                    }
+                    if ((page === 'admin' || page === 'stats') && !isAuthenticated) return false;
                     return true;
                   })
                   .map(page => {
                     const isActive = currentPage === page;
-                    const icons = {
-                      home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
-                      submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
-                      forge: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
-                      bestiaire: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
-                      initiative: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
-                      admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
-                      stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
-                      about: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Scroll%20logo_wthback.png'
-                    };
                     const labels = {
                       home: t('nav.home'),
                       submit: t('nav.submit'),
-                      forge: '✦ Forge',
-                      bestiaire: '🐉 Bestiaire',
-                      initiative: '⚔️ Initiative',
+                      forge: 'Forge',
+                      bestiaire: 'Bestiaire',
+                      initiative: 'Initiative',
                       admin: t('nav.admin'),
                       stats: t('nav.stats'),
-                      about: t('nav.about')
+                      about: t('nav.about'),
                     };
-                    
                     return (
                       <button
                         key={page}
@@ -2624,21 +2611,18 @@ export default function App() {
                             setCurrentPage(page);
                           }
                         }}
-                        className="nav-button group relative px-2 py-3 font-bold text-sm transition-colors duration-300"
+                        className="nav-button group relative px-3 lg:px-4 py-3 transition-colors duration-200"
                         data-active={isActive}>
-                        <span className={`flex items-center gap-1.5 transition-colors duration-300 whitespace-nowrap ${
-                          isActive ? 'text-amber-300' : 'text-amber-300/70 group-hover:text-amber-200'
-                        }`}>
-                          <img src={icons[page]} alt={labels[page]} className="w-5 h-5 object-contain" />
-                          <span>{labels[page]}</span>
+                        <span className={`text-[11px] lg:text-xs font-semibold tracking-widest uppercase whitespace-nowrap transition-colors duration-200 ${
+                          isActive ? 'text-amber-300' : 'text-amber-100/60 group-hover:text-amber-200'
+                        }`} style={{ fontFamily: "'Cinzel', serif" }}>
+                          {labels[page]}
                         </span>
-                        
-                        {/* Ligne élégante qui s'élargit depuis le centre */}
                         <span className={`
                           absolute bottom-0 left-1/2 -translate-x-1/2 h-0.5 bg-amber-400
                           transition-all duration-300 ease-out
-                          ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}
-                        `}></span>
+                          ${isActive ? 'w-full' : 'w-0 group-hover:w-3/4'}
+                        `}/>
                       </button>
                     );
                   })}
@@ -2668,31 +2652,31 @@ export default function App() {
                     </svg>
                   )}
                 </button>
-                {/* Bouton Panier */}
+                {/* Panier */}
                 <button
                   onClick={() => setShowCart(!showCart)}
-                  className="relative group px-2 py-1.5 md:px-4 md:py-2.5 rounded-lg md:rounded-xl bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 text-white font-semibold flex items-center gap-1 md:gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                  <ShoppingCart size={16} className="md:w-5 md:h-5 group-hover:rotate-12 transition-transform duration-300" />
-                  <span className="hidden sm:inline text-sm md:text-base">{t('nav.cart')}</span>
+                  className="relative group p-2 rounded-lg text-amber-100/60 hover:text-amber-300 transition-colors duration-200"
+                  title={t('nav.cart')}>
+                  <ShoppingCart size={18} className="group-hover:scale-110 transition-transform duration-200" />
                   {cartItemCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 md:-top-2 md:-right-2 bg-red-500 text-white text-[10px] md:text-xs font-bold rounded-full w-4 h-4 md:w-6 md:h-6 flex items-center justify-center animate-pulse shadow-lg">
+                    <span className="absolute -top-0.5 -right-0.5 bg-amber-500 text-black text-[9px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
                       {cartItemCount}
                     </span>
                   )}
                 </button>
 
-                {/* Bouton profil / connexion — visible si pas admin */}
+                {/* Profil / connexion */}
                 {!isAuthenticated && (
                   <a
                     href="/player"
-                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-amber-700 to-amber-800 hover:from-amber-600 hover:to-amber-700 text-amber-100 font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg"
+                    className="hidden md:flex p-2 rounded-lg text-amber-100/60 hover:text-amber-300 transition-colors duration-200"
+                    title={isLoggedIn ? 'Mon profil' : 'Se connecter'}
                     style={{ textDecoration: 'none' }}>
-                    <span>⚔️</span>
-                    <span className="hidden lg:inline">{isLoggedIn ? 'Mon profil' : 'Se connecter'}</span>
+                    <User size={18} />
                   </a>
                 )}
 
-                {/* Bouton Déconnexion admin - caché sur mobile */}
+                {/* Déconnexion admin */}
                 {isAuthenticated && (
                   <button
                     onClick={async () => {
@@ -2704,10 +2688,9 @@ export default function App() {
                         window.location.href = '/';
                       }
                     }}
-                    className="hidden md:flex px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-semibold items-center gap-2 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl hover:shadow-red-900/50"
+                    className="hidden md:flex p-2 rounded-lg text-amber-100/60 hover:text-red-400 transition-colors duration-200"
                     title={t('nav.logoutTitle')}>
-                    <Lock size={18} />
-                    <span className="hidden lg:inline">{t('nav.logout')}</span>
+                    <LogOut size={18} />
                   </button>
                 )}
 
