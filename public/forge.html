@@ -1349,6 +1349,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
 </style>
 </head>
 <body>
+<script>if(new URLSearchParams(location.search).get('bestiaire')==='1'){document.documentElement.style.cssText='overflow:hidden';document.addEventListener('DOMContentLoaded',function(){var ts=document.getElementById('ts');if(ts)ts.style.display='none';});}</script>
 <!-- TITLE -->
 <div id="ts">
   <div style="font-size:52px;margin-bottom:.8rem;">⚔</div>
@@ -6858,7 +6859,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   else{ renderRoster(); initRosterDrag(); }
   fetchGameSystemImages();
   loadForgeFromSupabase();
-  if(new URLSearchParams(location.search).get('bestiaire')==='1') setTimeout(openBestiary,400);
+  if(new URLSearchParams(location.search).get('bestiaire')==='1') openBestiary();
   const ts=$('ts');
   ts.addEventListener('dragover',e=>e.preventDefault());
   ts.addEventListener('drop',e=>{
