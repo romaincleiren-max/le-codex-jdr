@@ -27,6 +27,7 @@ import { processCheckout } from './services/stripeService';
 import StatsDisplay from './components/StatsDisplay';
 import InitiativePage from './pages/InitiativePage';
 import ForgePage from './pages/ForgePage';
+import BestiaireRoutePage from './pages/BestiaireRoutePage';
 import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters, grantLevelUp, revokeLevelUp, getAllCharactersWithUsers } from './services/charactersService';
 import { validateSubmissionForm, validatePDFFile } from './utils/validation';
 import { submissionRateLimiter } from './utils/rateLimiter';
@@ -2581,7 +2582,7 @@ export default function App() {
 
               {/* Navigation centrale - cachee sur mobile */}
               <div className="hidden md:flex gap-6 lg:gap-12 items-center flex-1 justify-center">
-                {['home', 'submit', 'forge', 'initiative', 'admin', 'stats', 'about']
+                {['home', 'submit', 'forge', 'bestiaire', 'initiative', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
                       return false;
@@ -2594,6 +2595,7 @@ export default function App() {
                       home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
                       submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
                       forge: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                      bestiaire: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                       initiative: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                       admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                       stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
@@ -2603,6 +2605,7 @@ export default function App() {
                       home: t('nav.home'),
                       submit: t('nav.submit'),
                       forge: '✦ Forge',
+                      bestiaire: '🐉 Bestiaire',
                       initiative: '⚔️ Initiative',
                       admin: t('nav.admin'),
                       stats: t('nav.stats'),
@@ -2615,6 +2618,8 @@ export default function App() {
                         onClick={() => {
                           if (page === 'forge' && !isLoggedIn) {
                             navigate('/login', { state: { from: { pathname: '/', search: '?page=forge' } } });
+                          } else if (page === 'bestiaire') {
+                            navigate('/bestiaire');
                           } else {
                             setCurrentPage(page);
                           }
@@ -2767,7 +2772,7 @@ export default function App() {
 
             {/* Liens de navigation */}
             <nav className="p-4 space-y-2">
-              {['home', 'submit', 'initiative', 'admin', 'stats', 'about']
+              {['home', 'submit', 'forge', 'bestiaire', 'initiative', 'admin', 'stats', 'about']
                 .filter(page => {
                   if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
                     return false;
@@ -2779,6 +2784,8 @@ export default function App() {
                   const icons = {
                     home: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Tavern%20logo_wthback.png',
                     submit: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                    forge: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Feather%20logo_wthback.png',
+                    bestiaire: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                     initiative: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                     admin: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Gear%20logo_wthback.png',
                     stats: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Book%20logo_wthback.png',
@@ -2787,6 +2794,8 @@ export default function App() {
                   const labels = {
                     home: t('nav.home'),
                     submit: t('nav.submit'),
+                    forge: '✦ Forge',
+                    bestiaire: '🐉 Bestiaire',
                     initiative: '⚔️ Initiative',
                     admin: t('nav.admin'),
                     stats: t('nav.statistics'),
@@ -2797,8 +2806,16 @@ export default function App() {
                     <button
                       key={page}
                       onClick={() => {
-                        setCurrentPage(page);
-                        setMobileMenuOpen(false);
+                        if (page === 'bestiaire') {
+                          navigate('/bestiaire');
+                          setMobileMenuOpen(false);
+                        } else if (page === 'forge' && !isLoggedIn) {
+                          navigate('/login', { state: { from: { pathname: '/', search: '?page=forge' } } });
+                          setMobileMenuOpen(false);
+                        } else {
+                          setCurrentPage(page);
+                          setMobileMenuOpen(false);
+                        }
                       }}
                       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
                         isActive
@@ -4245,6 +4262,7 @@ function AppRouter() {
       {/* Routes joueurs */}
       <Route path="/player" element={<PlayerRoute><PlayerDashboard /></PlayerRoute>} />
       <Route path="/forge" element={<PlayerRoute><ForgeRouteWrapper /></PlayerRoute>} />
+      <Route path="/bestiaire" element={<BestiaireRoutePage />} />
       <Route path="/character/:id" element={<PlayerRoute><CharacterSheetPage /></PlayerRoute>} />
       <Route path="/character/:id/levelup" element={<PlayerRoute><LevelUpWizardPage /></PlayerRoute>} />
 

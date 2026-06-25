@@ -1359,13 +1359,8 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
   <div class="tdiv"></div>
   <div class="tbtns">
     <button class="btn btn-p" onclick="newChar()">✦ Créer un Personnage</button>
-    <div class="dz" onclick="document.getElementById('fi').click()">
-      ↑ Charger (.json) ou glissez ici
-      <input type="file" id="fi" accept=".json" style="display:none" onchange="loadChar(event)">
-    </div>
   </div>
   <div style="margin-top:.8rem;display:flex;gap:.6rem;justify-content:center;flex-wrap:wrap;">
-    <button class="btn btn-s" style="padding:.4em 1.4em;font-size:10px;letter-spacing:.12em;" onclick="openBestiary()">🐉 Bestiaire</button>
     <button class="btn btn-s" style="padding:.4em 1.4em;font-size:10px;letter-spacing:.12em;" onclick="openInitiative()">⚔ Initiative</button>
   </div>
   <div id="roster-sec">
@@ -6863,6 +6858,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   else{ renderRoster(); initRosterDrag(); }
   fetchGameSystemImages();
   loadForgeFromSupabase();
+  if(new URLSearchParams(location.search).get('bestiaire')==='1') setTimeout(openBestiary,400);
   const ts=$('ts');
   ts.addEventListener('dragover',e=>e.preventDefault());
   ts.addEventListener('drop',e=>{
