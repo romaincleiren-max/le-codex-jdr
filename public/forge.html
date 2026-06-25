@@ -5656,7 +5656,7 @@ function showItemTooltip(ev, item){
   var ttImgSrc=item.sprite||item.image||null;
   var textBlock='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+typeHtml+rarHtml+metaHtml+harmHtml+descHtml;
   tt.innerHTML=ttImgSrc
-    ?'<div style="display:flex;gap:16px;align-items:flex-start;"><img src="'+ttImgSrc+'" style="width:90px;height:90px;object-fit:contain;border-radius:8px;flex-shrink:0;border:1px solid #3A2810;background:#0D0805;"><div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
+    ?'<div style="display:flex;gap:16px;align-items:flex-start;"><img src="'+ttImgSrc+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;flex-shrink:0;border:1px solid #3A2810;background:#0D0805;"><div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
     :textBlock;
   posSlotTooltip(ev);
   tt.classList.add('visible');
