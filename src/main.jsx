@@ -2581,7 +2581,7 @@ export default function App() {
               </button>
 
               {/* Navigation centrale - cachee sur mobile */}
-              <div className="hidden md:flex gap-6 lg:gap-12 items-center flex-1 justify-center">
+              <div className="hidden md:flex gap-1 lg:gap-2 items-center flex-1 justify-start ml-4">
                 {['home', 'submit', 'forge', 'bestiaire', 'initiative', 'admin', 'stats', 'about']
                   .filter(page => {
                     if ((page === 'admin' || page === 'stats') && !isAuthenticated) {
@@ -2624,12 +2624,12 @@ export default function App() {
                             setCurrentPage(page);
                           }
                         }}
-                        className="nav-button group relative px-5 py-3.5 font-bold text-lg transition-colors duration-300"
+                        className="nav-button group relative px-2 py-3 font-bold text-sm transition-colors duration-300"
                         data-active={isActive}>
-                        <span className={`flex items-center gap-3 transition-colors duration-300 whitespace-nowrap ${
+                        <span className={`flex items-center gap-1.5 transition-colors duration-300 whitespace-nowrap ${
                           isActive ? 'text-amber-300' : 'text-amber-300/70 group-hover:text-amber-200'
                         }`}>
-                          <img src={icons[page]} alt={labels[page]} className="w-8 h-8 object-contain" />
+                          <img src={icons[page]} alt={labels[page]} className="w-5 h-5 object-contain" />
                           <span>{labels[page]}</span>
                         </span>
                         
