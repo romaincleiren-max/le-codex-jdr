@@ -3888,7 +3888,7 @@ function addCodexToBag(safeId){
   const bagId='codex-'+safeId;
   const ex=C.bag.find(b=>b.id===bagId);
   if(ex)ex.qty++;
-  else C.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,dnd_type:e.dnd_type||null,rarity:e.rarity||null,bonus:e.bonus||null});
+  else C.bag.push({id:bagId,n:e.name,qty:1,w:0,c:'—',d:(e.desc||'').substring(0,300),cat:e.category||'Codex',item_type:e.item_type||null,dnd_type:e.dnd_type||null,rarity:e.rarity||null,bonus:e.bonus||null,sprite:e.sprite||null,image:e.image||null});
   renderBagList();
 }
 
@@ -5656,7 +5656,11 @@ function showItemTooltip(ev, item){
   var effectMatch=rawDesc.match(/Effets?\s*:\s*([\s\S]+)/i);
   var effect=effectMatch?effectMatch[1].trim():rawDesc;
   var descHtml=effect?'<div class="rst-desc">'+effect.substring(0,320)+(effect.length>320?'…':'')+'</div>':'';
-  tt.innerHTML='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+typeHtml+rarHtml+metaHtml+harmHtml+descHtml;
+  var ttImgSrc=item.sprite||item.image||null;
+  var textBlock='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+typeHtml+rarHtml+metaHtml+harmHtml+descHtml;
+  tt.innerHTML=ttImgSrc
+    ?'<div style="display:flex;gap:16px;align-items:flex-start;"><img src="'+ttImgSrc+'" style="width:90px;height:90px;object-fit:contain;border-radius:8px;flex-shrink:0;border:1px solid #3A2810;background:#0D0805;"><div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
+    :textBlock;
   posSlotTooltip(ev);
   tt.classList.add('visible');
 }
@@ -5830,12 +5834,11 @@ function reCreateDragImage(item){
   el.className='re-drag-ghost';
   if(rc) el.style.borderColor=rc;
   var inner='';
-  if(item.sprite){
-    // URL sprite (Codex SPRITE field — disponible plus tard)
-    inner='<img class="re-drag-ghost-img" src="'+item.sprite+'" alt="">';
+  var imgSrc=item.sprite||item.image||null;
+  if(imgSrc){
+    inner='<img class="re-drag-ghost-img" src="'+imgSrc+'" alt="">';
   } else {
-    // Fallback emoji selon catégorie
-    var emoji=_RE_CAT_EMOJI[item.cat]||'📦';
+    var emoji=_RE_CAT_EMOJI[item.cat]||'⚙';
     inner='<div style="font-size:clamp(28px,4vw,40px);line-height:1;margin-bottom:4px;">'+emoji+'</div>';
   }
   inner+='<div class="re-drag-ghost-nm">'+item.n+'</div>';
