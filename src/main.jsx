@@ -2114,6 +2114,7 @@ export default function App() {
   }, [supabaseSiteSettings]);
 
   // Charger les paramètres du site (logo, etc.)
+  const [logoError, setLogoError] = useState(false);
   const [siteSettings, setSiteSettings] = useState(() => {
     const savedSettings = localStorage.getItem('le-codex-site-settings');
     return savedSettings ? JSON.parse(savedSettings) : {
@@ -2555,12 +2556,12 @@ export default function App() {
                 className="group flex items-center gap-1.5 md:gap-4 hover:scale-105 transition-all duration-300 flex-shrink-0">
                 {/* Container du logo avec bordure */}
                 <div className="relative">
-                  {siteSettings.logoUrl ? (
+                  {siteSettings.logoUrl && !logoError ? (
                     <img
                       src={siteSettings.logoUrl}
                       alt={siteSettings.siteName}
                       className="h-8 w-8 md:h-28 md:w-28 object-contain rounded md:rounded-xl border md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50"
-                      onError={(e) => { e.target.style.display = 'none'; }}
+                      onError={() => setLogoError(true)}
                     />
                   ) : (
                     <div className="text-xl md:text-6xl p-0.5 md:p-2 rounded md:rounded-xl border md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
