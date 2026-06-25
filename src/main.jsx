@@ -2668,7 +2668,7 @@ export default function App() {
                 {/* Profil / connexion */}
                 {!isAuthenticated && (
                   <a
-                    href="/player"
+                    href="/"
                     className="hidden md:flex p-2 rounded-lg text-amber-100/60 hover:text-amber-300 transition-colors duration-200"
                     title={isLoggedIn ? 'Mon profil' : 'Se connecter'}
                     style={{ textDecoration: 'none' }}>

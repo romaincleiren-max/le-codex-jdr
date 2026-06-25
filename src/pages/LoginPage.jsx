@@ -52,7 +52,7 @@ export const LoginPage = () => {
       .from('admin_users').select('id').eq('email', data.user.email).single();
 
     const isAdmin = !adminError && !!adminCheck;
-    const defaultDest = isAdmin ? '/admin' : '/player';
+    const defaultDest = isAdmin ? '/admin' : '/';
     const from = location.state?.from?.pathname || defaultDest;
     navigate(from, { replace: true });
   };
@@ -81,7 +81,7 @@ export const LoginPage = () => {
     // Tentative de connexion directe (si Supabase a "auto-confirm" activé)
     const { data, error: loginError } = await supabase.auth.signInWithPassword({ email, password });
     if (!loginError && data.user) {
-      navigate(location.state?.from?.pathname || '/player', { replace: true });
+      navigate(location.state?.from?.pathname || '/', { replace: true });
     } else {
       // Confirmation email requise
       setSuccess('Compte créé ! Vérifiez votre boîte mail pour confirmer votre adresse.');
