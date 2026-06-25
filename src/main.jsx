@@ -16,7 +16,6 @@ import { PlayerRoute } from './components/PlayerRoute';
 import PlayerDashboard from './pages/PlayerDashboard';
 import CharacterSheetPage from './pages/CharacterSheetPage';
 import LevelUpWizardPage from './pages/LevelUpWizardPage';
-// CharacterForgePage supprimé — la Forge du Héros (forge.html) est utilisée à la place
 import { inject } from '@vercel/analytics';
 import { LanguageProvider, useLanguage } from './i18n';
 import { useSupabaseData } from './hooks/useSupabaseData';
@@ -28,7 +27,7 @@ import StatsDisplay from './components/StatsDisplay';
 import InitiativePage from './pages/InitiativePage';
 import ForgePage from './pages/ForgePage';
 import BestiaireRoutePage from './pages/BestiaireRoutePage';
-import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters, grantLevelUp, revokeLevelUp, getAllCharactersWithUsers } from './services/charactersService';
+import { approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters, grantLevelUp, revokeLevelUp } from './services/charactersService';
 import { validateSubmissionForm, validatePDFFile } from './utils/validation';
 import { submissionRateLimiter } from './utils/rateLimiter';
 
@@ -1649,7 +1648,7 @@ const SubmissionsTab = () => {
 };
 
 // ── Composant Admin — Gestion des Personnages ─────────────────────────────────
-const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters, grantLevelUp, revokeLevelUp, getAllCharactersWithUsers }) => {
+const AdminPersonnagesTab = ({ approveCharacter, rejectCharacter, deleteCharacter, toggleSession, getPendingCharacters, getApprovedCharacters, grantLevelUp, revokeLevelUp }) => {
   const [pending, setPending] = React.useState([]);
   const [approved, setApproved] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -2136,16 +2135,10 @@ export default function App() {
 
   const [currentTheme, setCurrentTheme] = useState(themes[0]);
   const [showBook, setShowBook] = useState(false);
-  const [bookOpen, setBookOpen] = useState(false);
   const [currentScenario, setCurrentScenario] = useState(0);
   const [currentSagaIndex, setCurrentSagaIndex] = useState(0);
   const [currentPage, setCurrentPage] = useState('home');
-  const [selectedScenario, setSelectedScenario] = useState(null);
-  const [viewMode, setViewMode] = useState('list'); // 'list' ou 'detail'
   const [adminTab, setAdminTab] = useState('campagnes');
-  const [statsTab, setStatsTab] = useState('general');
-  const [filterType, setFilterType] = useState('all');
-  const [showCampaignMenu, setShowCampaignMenu] = useState(false);
   const [cart, setCart] = useState([]);
   const [showCart, setShowCart] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -3712,7 +3705,6 @@ export default function App() {
                     getApprovedCharacters={getApprovedCharacters}
                     grantLevelUp={grantLevelUp}
                     revokeLevelUp={revokeLevelUp}
-                    getAllCharactersWithUsers={getAllCharactersWithUsers}
                   />
                 )}
               </div>

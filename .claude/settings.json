@@ -113,7 +113,10 @@
       "Bash(node scripts/build_codex_index.js)",
       "Skill(run)",
       "Skill(run:*)",
-      "Bash(start /B npx vite --port 5174)"
+      "Bash(start /B npx vite --port 5174)",
+      "Bash(grep -r \"codex_index\" --include=\"*.js\" --include=\"*.ts\" --include=\"*.mjs\" -l)",
+      "Bash(ls *.js *.mjs *.ts)",
+      "Bash(node -e \"const d=require\\('./data/CODEX.json'\\); const r=d.resources[0]; console.log\\(JSON.stringify\\(Object.keys\\(r\\)\\)\\); console.log\\(JSON.stringify\\(r\\).slice\\(0,500\\)\\);\")"
     ],
     "additionalDirectories": [
       "d:\\Projets\\Projet - Jeux vidéo\\TavernGame",
