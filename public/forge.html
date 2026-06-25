@@ -594,7 +594,7 @@ body.printing #ps-print{display:block!important;}
 #re-hp-input::-webkit-inner-spin-button,#re-hp-input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
 #re-hp-input{-moz-appearance:textfield;}
 #re-stats-mini{padding:.5rem .6rem;border-top:1px solid #1E1208;flex-shrink:0;background:#0F0A06;}
-#re-slot-tooltip{position:fixed;z-index:99999;pointer-events:none;opacity:0;transition:opacity .12s;background:#130D06;border:1px solid #3A2810;border-radius:10px;padding:1.4rem 1.8rem;max-width:700px;box-shadow:0 12px 48px rgba(0,0,0,.9);}
+#re-slot-tooltip{position:fixed;z-index:99999;pointer-events:none;opacity:0;transition:opacity .12s;background:#130D06;border:1px solid #3A2810;border-radius:10px;padding:1.4rem 1.8rem;max-width:700px;max-height:85vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.9);}
 #re-slot-tooltip.visible{opacity:1;}
 #re-slot-tooltip.spell-tt{max-width:800px;padding:1.6rem 2rem;}
 #re-slot-tooltip .rst-name{font-family:'Cinzel',serif;font-size:22px;color:#C9A84C;margin-bottom:8px;}
@@ -5671,7 +5671,54 @@ function showSpellTooltip(ev, name){
 }
 function showSlotTooltip(ev, slotId){
   var item=_reChar&&_reChar.equipped&&_reChar.equipped[slotId]; if(!item)return;
-  showItemTooltip(ev, item);
+  var tt=$('re-slot-tooltip'); if(!tt)return;
+  tt.classList.remove('spell-tt');
+  // Lookup registre riche
+  var rich=_richItems&&_richItems[item.id];
+  var d=rich||{
+    name:item.name||item.n||'—',type:item.cat||item.type||'Objet',
+    rarity:item.rarity||null,description:item.d||item.description||'—',
+    weight:item.w||0,cost:item.c||null,stats:item.stats||[],
+    abilities:item.abilities||[],properties:item.properties||[],
+    attunement:item.attunement||false,attunement_note:item.attunement_note||null,
+    cursed:item.cursed||false,image:item.image||item.sprite||null,found_at:item.found_at||null,source:item.source||null
+  };
+  var rc=d.rarity&&_RE_RC?_RE_RC[d.rarity]:null;
+  var colN=rc||'#C9A84C';
+  // Image
+  var imgH=d.image?'<img src="'+d.image+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;border:1px solid #3A2810;background:#0D0805;flex-shrink:0;">':'';
+  // Entête
+  var hdr='<div class="rst-name" style="color:'+colN+';">'+d.name+'</div>';
+  hdr+='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+d.type+'</div>';
+  if(d.rarity) hdr+='<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+colN+';">'+d.rarity+'</div>';
+  // Méta
+  var metaItems=[];
+  if(d.attunement) metaItems.push('<span style="color:#A080D0;">⧁ Accordage requis</span>');
+  if(d.weight>0) metaItems.push(d.weight+' lb');
+  if(d.cost&&d.cost!=='—') metaItems.push(d.cost);
+  if(metaItems.length) hdr+='<div style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:#5A4A2A;margin-top:4px;">'+metaItems.join(' · ')+'</div>';
+  // Propriétés
+  var propsH='';
+  if(d.properties&&d.properties.length) propsH='<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;">'+d.properties.map(function(p){return'<span style="background:#160E06;border:1px solid #3A2810;color:#C9A84C;font-family:\'Share Tech Mono\',monospace;font-size:9px;padding:2px 7px;">'+p+'</span>';}).join('')+'</div>';
+  // Stats
+  var statsH='';
+  if(d.stats&&d.stats.length) statsH='<div style="margin-top:10px;border-top:1px solid #2A1A08;padding-top:8px;">'+d.stats.map(function(s){return'<div style="display:flex;justify-content:space-between;font-size:11px;color:#9A8A6A;padding:2px 0;"><span>'+s.name+'</span><span style="color:'+colN+';">'+s.value+'</span></div>';}).join('')+'</div>';
+  // Capacités
+  var abilH='';
+  if(d.abilities&&d.abilities.length) abilH='<div style="margin-top:10px;border-top:1px solid #2A1A08;padding-top:8px;">'+d.abilities.map(function(a){return'<div style="margin-bottom:6px;"><div style="font-family:\'Cinzel\',serif;font-size:11px;color:'+colN+';">'+a.name+'<span style="font-size:9px;color:#5A4A2A;margin-left:6px;">'+a.cost+'</span></div><div style="font-size:11px;color:#9A8A6A;line-height:1.5;">'+a.text+'</div></div>';}).join('')+'</div>';
+  // Description complète
+  var desc=d.description||'';
+  var descH=desc&&desc!=='—'?'<div class="rst-desc" style="max-height:none;font-size:13px;">'+desc+'</div>':'';
+  // Malédiction
+  var curseH=d.cursed?'<div style="margin-top:8px;font-family:\'Cinzel\',serif;font-size:11px;color:#C0392B;letter-spacing:.06em;">☠ OBJET MAUDIT</div>':'';
+  // Source
+  var srcH=(d.found_at||d.source)?'<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#4A3A2A;margin-top:8px;border-top:1px solid #2A1A08;padding-top:6px;">'+(d.found_at||'')+(d.source?' · '+d.source:'')+'</div>':'';
+  var textBlock=hdr+propsH+statsH+abilH+descH+curseH+srcH;
+  tt.innerHTML=imgH
+    ?'<div style="display:flex;gap:16px;align-items:flex-start;">'+imgH+'<div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
+    :textBlock;
+  posSlotTooltip(ev);
+  tt.classList.add('visible');
 }
 function showBagTooltip(ev, idx){
   var item=_reChar&&_reChar.bag&&_reChar.bag[idx]; if(!item)return;
@@ -5679,9 +5726,10 @@ function showBagTooltip(ev, idx){
 }
 function posSlotTooltip(ev){
   var tt=$('re-slot-tooltip'); if(!tt)return;
-  var x=ev.clientX+14, y=ev.clientY+10;
-  if(x+230>window.innerWidth) x=ev.clientX-234;
-  if(y+160>window.innerHeight) y=ev.clientY-164;
+  var tw=tt.offsetWidth||320, th=tt.offsetHeight||200;
+  var x=ev.clientX+18, y=ev.clientY+10;
+  if(x+tw>window.innerWidth-8) x=ev.clientX-tw-14;
+  if(y+th>window.innerHeight-8) y=Math.max(8,window.innerHeight-th-8);
   tt.style.left=x+'px'; tt.style.top=y+'px';
 }
 function hideSlotTooltip(){
