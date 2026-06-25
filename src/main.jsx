@@ -2119,7 +2119,7 @@ export default function App() {
     const savedSettings = localStorage.getItem('le-codex-site-settings');
     return savedSettings ? JSON.parse(savedSettings) : {
       siteName: 'Le Codex',
-      logoUrl: '',
+      logoUrl: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif',
       tagline: 'Bibliothèque de scénarios JDR'
     };
   });
@@ -2470,7 +2470,7 @@ export default function App() {
       localStorage.setItem('le-codex-themes', JSON.stringify(cleanThemes));
       localStorage.setItem('le-codex-site-settings', JSON.stringify({
         siteName: 'Le Codex',
-        logoUrl: '',
+        logoUrl: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif',
         tagline: 'Bibliothèque de scénarios JDR'
       }));
       
