@@ -2114,13 +2114,15 @@ export default function App() {
   }, [supabaseSiteSettings]);
 
   // Charger les paramètres du site (logo, etc.)
+  const LOGO_DEFAULT = 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif';
   const [logoError, setLogoError] = useState(false);
   const [siteSettings, setSiteSettings] = useState(() => {
     const savedSettings = localStorage.getItem('le-codex-site-settings');
-    return savedSettings ? JSON.parse(savedSettings) : {
-      siteName: 'Le Codex',
-      logoUrl: 'https://csgndyapcoymkynbvckg.supabase.co/storage/v1/object/public/images/logos/Logo_5.gif',
-      tagline: 'Bibliothèque de scénarios JDR'
+    const parsed = savedSettings ? JSON.parse(savedSettings) : {};
+    return {
+      siteName: parsed.siteName || 'Le Codex',
+      logoUrl: parsed.logoUrl || LOGO_DEFAULT,
+      tagline: parsed.tagline || 'Bibliothèque de scénarios JDR',
     };
   });
   
@@ -2556,16 +2558,12 @@ export default function App() {
                 className="group flex items-center gap-1.5 md:gap-4 hover:scale-105 transition-all duration-300 flex-shrink-0">
                 {/* Container du logo avec bordure */}
                 <div className="relative">
-                  {siteSettings.logoUrl && !logoError ? (
-                    <img
-                      src={siteSettings.logoUrl}
-                      alt={siteSettings.siteName}
-                      className="h-8 w-8 md:h-28 md:w-28 object-contain rounded md:rounded-xl border md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50"
-                      onError={() => setLogoError(true)}
-                    />
-                  ) : (
-                    <div className="text-xl md:text-6xl p-0.5 md:p-2 rounded md:rounded-xl border md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50">📚</div>
-                  )}
+                  <img
+                    src={(!logoError && siteSettings.logoUrl) ? siteSettings.logoUrl : LOGO_DEFAULT}
+                    alt={siteSettings.siteName}
+                    className="h-8 w-8 md:h-28 md:w-28 object-contain rounded md:rounded-xl border md:border-4 border-amber-600 group-hover:border-amber-400 transition-all duration-300 bg-slate-900/50"
+                    onError={() => setLogoError(true)}
+                  />
                 </div>
 
                 {/* Texte */}
