@@ -3449,19 +3449,25 @@ function renderFeatSection(){
     return `<div class="feat-tag" title="${f.d}">${f.n} <button onclick="removeFeat('${fid}')" style="background:none;border:none;color:#CA5A5A;cursor:pointer;padding:0 0 0 4px;font-size:11px;">✕</button></div>`;
   }).join('')}</div>`:''}
   ${canTakeFeat?`<details><summary class="feat-picker-sum">+ Ajouter un don (coûte 1 slot ASI complet)</summary>
+  <input type="text" id="feat-search" placeholder="🔍 Rechercher un don…" autocomplete="off"
+    style="width:100%;box-sizing:border-box;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.35rem .5rem;margin:.3rem 0 .25rem;outline:none;"
+    oninput="filterFeatPicker(this.value)">
   <div class="feat-picker-grid" id="feat-picker-grid"></div></details>`:'<div style="font-size:10px;color:#5A4A2A;font-style:italic;">Plus de slots disponibles — réinitialisez les ASI pour libérer un slot.</div>'}`;
   if(canTakeFeat)renderFeatPicker();
 }
-function renderFeatPicker(){
+function renderFeatPicker(q){
   const g=$('feat-picker-grid');if(!g)return;
   const taken=new Set(C.feats);
-  g.innerHTML=FEATS.filter(f=>!taken.has(f.id)).map(f=>
-    `<div class="feat-pick-card" onclick="addFeat('${f.id}')" title="${f.d}">
-      <div class="feat-pick-name">${f.n}</div>
-      <div class="feat-pick-desc">${f.d.substring(0,70)}${f.d.length>70?'…':''}</div>
-    </div>`
-  ).join('');
+  const query=(q||'').toLowerCase().trim();
+  const list=FEATS.filter(f=>!taken.has(f.id)&&(!query||f.n.toLowerCase().includes(query)||f.d.toLowerCase().includes(query)));
+  g.innerHTML=list.length
+    ?list.map(f=>`<div class="feat-pick-card" onclick="addFeat('${f.id}')" title="${f.d}">
+        <div class="feat-pick-name">${f.n}</div>
+        <div class="feat-pick-desc">${f.d.substring(0,70)}${f.d.length>70?'…':''}</div>
+      </div>`).join('')
+    :`<div style="font-size:10px;color:#5A4A2A;font-style:italic;padding:.3rem;">Aucun don trouvé.</div>`;
 }
+function filterFeatPicker(q){renderFeatPicker(q);}
 function addFeat(id){
   if(!C.feats)C.feats=[];
   if(asiLeft()<2)return;
