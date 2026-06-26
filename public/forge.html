@@ -1404,6 +1404,100 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
   </div>
 </div>
 
+<!-- FAMILIER OVERLAY -->
+<div id="familiar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:10001;overflow-y:auto;padding:20px 12px 40px;">
+  <div style="max-width:480px;margin:0 auto;background:linear-gradient(160deg,#140E06,#0D0A05);border:1px solid #3A2A10;border-radius:10px;overflow:hidden;">
+    <!-- Toolbar -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:#0A0705;border-bottom:1px solid #2A1A08;padding:.6rem 1rem;">
+      <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.18em;color:var(--gold-d);">🐾 FICHE FAMILIER</span>
+      <button onclick="closeFamiliarModal()" style="background:none;border:1px solid #3A2A10;color:#8A7A5A;font-size:12px;padding:.2rem .6rem;cursor:pointer;border-radius:3px;">✕ Fermer</button>
+    </div>
+    <!-- Corps -->
+    <div style="padding:1rem;">
+      <!-- Image + Nom + Type -->
+      <div style="display:grid;grid-template-columns:110px 1fr;gap:.8rem;margin-bottom:.8rem;align-items:start;">
+        <!-- Zone image drop/click -->
+        <div id="familiar-img-zone" onclick="$('familiar-file-input').click()"
+          ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.6)';"
+          ondragleave="this.style.borderColor='rgba(201,168,76,.2)';"
+          ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.2)';handleFamiliarImgFile(event.dataTransfer.files[0])"
+          style="width:110px;height:110px;border:2px dashed rgba(201,168,76,.25);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.3);overflow:hidden;position:relative;">
+          <div id="familiar-img-placeholder" style="text-align:center;">
+            <div style="font-size:32px;margin-bottom:4px;">🐾</div>
+            <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;">Importer<br>image</div>
+          </div>
+        </div>
+        <input id="familiar-file-input" type="file" accept="image/*" style="display:none;" onchange="handleFamiliarImgFile(this.files[0])">
+        <!-- Nom + Type -->
+        <div>
+          <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">NOM</label>
+          <input type="text" id="fm-name" oninput="familiarSet('name',this.value)"
+            style="width:100%;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:12px;padding:.35rem .5rem;outline:none;margin-bottom:.5rem;box-sizing:border-box;" placeholder="Ex: Ombre, Cendre…">
+          <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">TYPE</label>
+          <input type="text" id="fm-type" oninput="familiarSet('type',this.value)"
+            style="width:100%;background:#0E0905;border:1px solid #3A2A10;color:var(--parch2);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .5rem;outline:none;box-sizing:border-box;" placeholder="Bête, Mort-vivant…">
+        </div>
+      </div>
+      <!-- PV / CA / Vitesse -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.4rem;margin-bottom:.7rem;">
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.4rem;text-align:center;">
+          <label style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;display:block;margin-bottom:2px;">PV MAX</label>
+          <input type="number" id="fm-hp" min="0" oninput="familiarSet('hp',parseInt(this.value)||0)"
+            style="width:100%;background:none;border:none;border-bottom:1px solid #3A2A10;color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:18px;text-align:center;outline:none;padding:0;" placeholder="—">
+        </div>
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.4rem;text-align:center;">
+          <label style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;display:block;margin-bottom:2px;">CA</label>
+          <input type="number" id="fm-ac" min="0" oninput="familiarSet('ac',parseInt(this.value)||0)"
+            style="width:100%;background:none;border:none;border-bottom:1px solid #3A2A10;color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:18px;text-align:center;outline:none;padding:0;" placeholder="—">
+        </div>
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.4rem;text-align:center;">
+          <label style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;display:block;margin-bottom:2px;">VIT. (ft)</label>
+          <input type="number" id="fm-speed" min="0" oninput="familiarSet('speed',parseInt(this.value)||0)"
+            style="width:100%;background:none;border:none;border-bottom:1px solid #3A2A10;color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:18px;text-align:center;outline:none;padding:0;" placeholder="—">
+        </div>
+      </div>
+      <!-- 6 Caractéristiques -->
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#5A4530;margin-bottom:.4rem;">CARACTÉRISTIQUES</div>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.3rem;margin-bottom:.7rem;">
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .2rem;text-align:center;"><div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A20;margin-bottom:2px;">FOR</div><input type="number" id="fm-str" min="1" max="30" value="10" oninput="familiarSet('str',parseInt(this.value)||10);renderFamiliarMod('str')" style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;padding:0;"><div id="fm-mod-str" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#C9983A;margin-top:2px;">+0</div></div>
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .2rem;text-align:center;"><div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A20;margin-bottom:2px;">DEX</div><input type="number" id="fm-dex" min="1" max="30" value="10" oninput="familiarSet('dex',parseInt(this.value)||10);renderFamiliarMod('dex')" style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;padding:0;"><div id="fm-mod-dex" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#C9983A;margin-top:2px;">+0</div></div>
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .2rem;text-align:center;"><div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A20;margin-bottom:2px;">CON</div><input type="number" id="fm-con" min="1" max="30" value="10" oninput="familiarSet('con',parseInt(this.value)||10);renderFamiliarMod('con')" style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;padding:0;"><div id="fm-mod-con" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#C9983A;margin-top:2px;">+0</div></div>
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .2rem;text-align:center;"><div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A20;margin-bottom:2px;">INT</div><input type="number" id="fm-int" min="1" max="30" value="10" oninput="familiarSet('int',parseInt(this.value)||10);renderFamiliarMod('int')" style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;padding:0;"><div id="fm-mod-int" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#C9983A;margin-top:2px;">+0</div></div>
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .2rem;text-align:center;"><div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A20;margin-bottom:2px;">SAG</div><input type="number" id="fm-wis" min="1" max="30" value="10" oninput="familiarSet('wis',parseInt(this.value)||10);renderFamiliarMod('wis')" style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;padding:0;"><div id="fm-mod-wis" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#C9983A;margin-top:2px;">+0</div></div>
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .2rem;text-align:center;"><div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A20;margin-bottom:2px;">CHA</div><input type="number" id="fm-cha" min="1" max="30" value="10" oninput="familiarSet('cha',parseInt(this.value)||10);renderFamiliarMod('cha')" style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:13px;text-align:center;outline:none;padding:0;"><div id="fm-mod-cha" style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#C9983A;margin-top:2px;">+0</div></div>
+      </div>
+      <!-- Attaques -->
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#5A4530;margin-bottom:.4rem;">ATTAQUES</div>
+      <div id="fm-attacks-list" style="margin-bottom:.4rem;"></div>
+      <div style="display:flex;gap:.3rem;margin-bottom:.7rem;flex-wrap:wrap;">
+        <input type="text" id="fma-name" placeholder="Nom" style="flex:2;min-width:80px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.25rem .4rem;outline:none;">
+        <input type="text" id="fma-atk" placeholder="+3" style="width:40px;background:#0E0905;border:1px solid #3A2A10;color:var(--gold);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.25rem .4rem;outline:none;text-align:center;">
+        <input type="text" id="fma-dmg" placeholder="1d4+1" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--blood-l);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.25rem .4rem;outline:none;text-align:center;">
+        <input type="text" id="fma-type" placeholder="Perc." style="width:48px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch2);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.25rem .4rem;outline:none;">
+        <button onclick="addFamiliarAttack()" style="background:#1A1008;border:1px solid #3A2A10;color:var(--gold-d);font-size:11px;padding:.25rem .5rem;cursor:pointer;border-radius:3px;">+ Ajouter</button>
+      </div>
+      <!-- Traits -->
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#5A4530;margin-bottom:.4rem;">TRAITS & CAPACITÉS</div>
+      <div id="fm-traits-list" style="margin-bottom:.4rem;"></div>
+      <div style="display:flex;gap:.3rem;margin-bottom:.7rem;flex-wrap:wrap;">
+        <input type="text" id="fmt-name" placeholder="Nom du trait" style="flex:1;min-width:100px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.25rem .4rem;outline:none;">
+        <input type="text" id="fmt-desc" placeholder="Description…" style="flex:2;background:#0E0905;border:1px solid #3A2A10;color:var(--parch2);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.25rem .4rem;outline:none;">
+        <button onclick="addFamiliarTrait()" style="background:#1A1008;border:1px solid #3A2A10;color:var(--gold-d);font-size:11px;padding:.25rem .5rem;cursor:pointer;border-radius:3px;">+ Ajouter</button>
+      </div>
+      <!-- Notes -->
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#5A4530;margin-bottom:.4rem;">NOTES</div>
+      <textarea id="fm-notes" oninput="familiarSet('notes',this.value)"
+        style="width:100%;box-sizing:border-box;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.4rem .5rem;outline:none;min-height:60px;resize:vertical;line-height:1.5;"
+        placeholder="Localisation, lien magique, conditions…"></textarea>
+      <!-- Boutons bas -->
+      <div style="display:flex;justify-content:flex-end;gap:.4rem;margin-top:.7rem;">
+        <button onclick="removeFamiliar()" style="background:none;border:1px solid #3A2A10;color:#6A4A4A;font-family:'Cinzel',serif;font-size:9px;padding:.3rem .7rem;cursor:pointer;border-radius:3px;">🗑 Supprimer</button>
+        <button onclick="closeFamiliarModal()" style="background:linear-gradient(135deg,#2A1808,#3A2010);border:1px solid var(--gold-d);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;padding:.35rem 1rem;cursor:pointer;border-radius:3px;">✓ Sauvegarder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- BESTIAIRE OVERLAY -->
 <div id="initiative-overlay">
   <div id="init-hdr">
@@ -2908,7 +3002,7 @@ let C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null
   stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
   level:1,xp:0,profBonus:2,traits:[],alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
   asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,dice3d6:{},dice3d6RerollUsed:false,
-  feats:[],currency:{pp:0,gp:0,sp:0,cp:0,ep:0,other:''},notes:''};
+  feats:[],currency:{pp:0,gp:0,sp:0,cp:0,ep:0,other:''},notes:'',familiar:null,hpTemp:0,conditions:[]};
 let CUR=0;
 let _expandedFamily=null;
 let _selectedRaceFamily=null;
@@ -3137,7 +3231,7 @@ function newChar(){
     height:'',weight:'',eyes:'',hair:'',skin:'',
     alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
     asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e',dice3d6:{},dice3d6RerollUsed:false,
-    feats:[],currency:{pp:0,gp:0,sp:0,cp:0,ep:0,other:''},notes:''};
+    feats:[],currency:{pp:0,gp:0,sp:0,cp:0,ep:0,other:''},notes:'',familiar:null,hpTemp:0,conditions:[]};
   showSysSel();
 }
 function loadChar(e){
@@ -4417,36 +4511,71 @@ function renderSummary(){
   const divider=`<div style="border-top:1px solid #2A1A08;margin:.7rem 0;"></div>`;
 
   $('lp').innerHTML=`
-  <!-- ══ BANNIÈRE PERSONNAGE ══ -->
-  <div style="position:relative;overflow:hidden;border-radius:8px;margin-bottom:.7rem;background:linear-gradient(160deg,#1A0808 0%,#0D0818 45%,#080508 100%);border:1px solid #3A2010;">
-    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.06),transparent 65%);pointer-events:none;"></div>
-    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.4),transparent);"></div>
-    <div style="padding:1.2rem 1rem 1rem;text-align:center;position:relative;">
-      <div style="font-size:44px;line-height:1;margin-bottom:.5rem;filter:drop-shadow(0 0 12px rgba(201,168,76,.2));">${_clsIconSum}</div>
-      <div style="font-family:'Cinzel Decorative',serif;font-size:clamp(15px,3.5vw,22px);color:#E8D5A0;letter-spacing:.06em;line-height:1.2;margin-bottom:.35rem;">${C.name||'Héros Sans Nom'}</div>
-      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem;margin-bottom:.25rem;">
-        ${C.race?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;background:rgba(139,90,26,.25);border:1px solid rgba(139,90,26,.4);color:#C8A060;padding:.15rem .5rem;border-radius:20px;">${C.race.n}</span>`:''}
-        ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;background:rgba(139,26,26,.25);border:1px solid rgba(139,26,26,.4);color:#E08080;padding:.15rem .5rem;border-radius:20px;">${C.cls.n} Niv.${primaryLvl()}</span>`:''}
-        ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;background:rgba(80,40,120,.25);border:1px solid rgba(80,40,120,.4);color:#C0A0E0;padding:.15rem .5rem;border-radius:20px;">${C.sub.n}</span>`:''}
+  <!-- ══ BANNIÈRE PERSONNAGE + FAMILIER ══ -->
+  <div style="display:grid;grid-template-columns:1fr 88px;gap:.5rem;margin-bottom:.7rem;align-items:stretch;">
+    <div style="position:relative;border-radius:8px;background:linear-gradient(160deg,#1A0808 0%,#0D0818 45%,#080508 100%);border:1px solid #3A2010;">
+      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.4),transparent);pointer-events:none;"></div>
+      <div style="padding:1.1rem 1rem .9rem;text-align:center;">
+        <div style="font-size:38px;line-height:1;margin-bottom:.4rem;filter:drop-shadow(0 0 10px rgba(201,168,76,.2));">${_clsIconSum}</div>
+        <div style="font-family:'Cinzel Decorative',serif;font-size:clamp(13px,3vw,19px);color:#E8D5A0;letter-spacing:.05em;line-height:1.2;margin-bottom:.3rem;">${C.name||'Héros Sans Nom'}</div>
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.25rem;margin-bottom:.2rem;">
+          ${C.race?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:rgba(139,90,26,.25);border:1px solid rgba(139,90,26,.4);color:#C8A060;padding:.12rem .45rem;border-radius:20px;">${C.race.n}</span>`:''}
+          ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:rgba(139,26,26,.25);border:1px solid rgba(139,26,26,.4);color:#E08080;padding:.12rem .45rem;border-radius:20px;">${C.cls.n} Niv.${primaryLvl()}</span>`:''}
+          ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:rgba(80,40,120,.25);border:1px solid rgba(80,40,120,.4);color:#C0A0E0;padding:.12rem .45rem;border-radius:20px;">${C.sub.n}</span>`:''}
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4530;letter-spacing:.07em;">${alignLine}${C.background?' · '+C.background.n:''}</div>
       </div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5A4530;letter-spacing:.08em;">${alignLine}${C.background?' · '+C.background.n:''}</div>
+      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.2),transparent);pointer-events:none;"></div>
     </div>
-    <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent);"></div>
+    <!-- SLOT FAMILIER -->
+    <div onclick="openFamiliarModal()" title="Familier — cliquer pour éditer"
+      ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.55)';"
+      ondragleave="this.style.borderColor='rgba(201,168,76,.2)';"
+      ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.2)';if(event.dataTransfer.files[0]){handleFamiliarImgFile(event.dataTransfer.files[0]);}"
+      style="border:2px dashed rgba(201,168,76,.2);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.25);overflow:hidden;position:relative;min-height:110px;">
+      ${C.familiar?.img
+        ?`<img src="${C.familiar.img}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">`
+        :''}
+      <div style="position:relative;text-align:center;padding:.3rem;">
+        <div style="font-size:${C.familiar?.img?'0':'26px'};margin-bottom:3px;">🐾</div>
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:${C.familiar?.img?'rgba(255,255,255,0)':'#4A3A20'};">FAMILIER</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:${C.familiar?.img?'rgba(255,255,255,0)':'#2A1A10'};margin-top:2px;">${C.familiar?.img?'':'importer image'}</div>
+      </div>
+      ${C.familiar?.name?`<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));font-family:'Cinzel',serif;font-size:8px;color:#C9983A;text-align:center;padding:6px 3px 3px;pointer-events:none;">${C.familiar.name}</div>`:''}
+    </div>
   </div>
 
   <!-- ══ PV + STATS DE COMBAT ══ -->
-  <div style="display:grid;grid-template-columns:auto 1fr;gap:.5rem;margin-bottom:.6rem;align-items:center;">
-    <div style="background:linear-gradient(135deg,#4A0808,#2A0505);border:2px solid #8B1F1F;border-radius:6px;padding:.5rem 1rem;text-align:center;min-width:90px;">
-      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#C06060;margin-bottom:1px;">POINTS DE VIE</div>
-      <div style="font-family:'Cinzel Decorative',serif;font-size:28px;color:#F0A0A0;line-height:1;">${C.maxHp||calcHP()||'?'}</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8B3030;">PV MAX</div>
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:.5rem;margin-bottom:.5rem;align-items:start;">
+    <!-- PV Max + Temp + États -->
+    <div style="background:linear-gradient(135deg,#4A0808,#2A0505);border:2px solid #8B1F1F;border-radius:6px;padding:.5rem .7rem;text-align:center;min-width:88px;">
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:#C06060;margin-bottom:1px;">PV MAX</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:26px;color:#F0A0A0;line-height:1;">${calcHP()||'?'}</div>
+      <div style="border-top:1px solid rgba(139,31,31,.4);margin:.4rem 0 .3rem;"></div>
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">PV TEMP.</div>
+      <input type="number" min="0" placeholder="0"
+        value="${C.hpTemp||''}"
+        oninput="C.hpTemp=parseInt(this.value)||0"
+        style="width:100%;background:none;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#E8B0B0;font-family:'Share Tech Mono',monospace;font-size:16px;text-align:center;outline:none;padding:0;">
+      <div style="border-top:1px solid rgba(139,31,31,.3);margin:.4rem 0 .3rem;"></div>
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">ÉTAT</div>
+      <select oninput="addCondition(this.value);this.value=''"
+        style="width:100%;background:#200808;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#C09090;font-family:'Share Tech Mono',monospace;font-size:8px;text-align:center;outline:none;cursor:pointer;padding:.1rem 0;">
+        <option value="">+</option>
+        ${['Aveuglé','Charmé','Assourdi','Effrayé','Agrippé','Incapacité','Invisible','Paralysé','Pétrifié','Empoisonné','À terre','Entravé','Étourdi','Inconscient','Épuisement 1','Épuisement 2','Épuisement 3','Épuisement 4','Épuisement 5','Épuisement 6'].map(c=>`<option value="${c}">${c}</option>`).join('')}
+      </select>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:.3rem;">
-      ${[['CA',calcCA(),'#C9983A'],['INIT',mods(mod(effStat('dex'))),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
-      <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .4rem;text-align:center;">
-        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#4A3A20;margin-bottom:1px;">${l}</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:${col};font-weight:bold;">${v}</div>
-      </div>`).join('')}
+    <!-- Droite: CA + Init + Vitesse + Perc. + conditions actives -->
+    <div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;margin-bottom:.3rem;">
+        ${[['CA',calcCA(),'#C9983A'],['INIT',mods(mod(effStat('dex'))),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .4rem;text-align:center;">
+          <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#4A3A20;margin-bottom:1px;">${l}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:15px;color:${col};font-weight:bold;">${v}</div>
+        </div>`).join('')}
+      </div>
+      <!-- Conditions actives -->
+      ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.2rem;">${(C.conditions||[]).map((c,i)=>`<span onclick="removeCondition(${i})" title="Retirer" style="font-family:'Share Tech Mono',monospace;font-size:8px;background:#200A10;border:1px solid #6A1A2A;color:#E08090;padding:.15rem .4rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`).join('')}</div>`:''}
     </div>
   </div>
 
@@ -4807,6 +4936,95 @@ function renderAdventure(){
 function launchAdv(id){
   if(id==='maitresse') { MDG.xp=0; MDG.flags={}; MDG.phase=1; renderScenario('L1'); }
   else alert('Bientôt disponible !');
+}
+
+// ══════════════════════════════════════════════════
+// CONDITIONS D&D5
+// ══════════════════════════════════════════════════
+function addCondition(c){if(!c)return;if(!C.conditions)C.conditions=[];if(!C.conditions.includes(c))C.conditions.push(c);renderSummary();}
+function removeCondition(i){if(!C.conditions)return;C.conditions.splice(i,1);renderSummary();}
+
+// ══════════════════════════════════════════════════
+// FAMILIER
+// ══════════════════════════════════════════════════
+function openFamiliarModal(){
+  if(!C.familiar)C.familiar={name:'',type:'',img:null,hp:null,ac:null,speed:null,str:10,dex:10,con:10,int:10,wis:10,cha:10,attacks:[],traits:[],notes:''};
+  const fm=C.familiar;
+  const setVal=(id,v)=>{const el=$('fm-'+id);if(el&&v!=null)el.value=v;};
+  setVal('name',fm.name);setVal('type',fm.type);setVal('hp',fm.hp);setVal('ac',fm.ac);setVal('speed',fm.speed);
+  ['str','dex','con','int','wis','cha'].forEach(k=>{setVal(k,fm[k]||10);renderFamiliarMod(k);});
+  if($('fm-notes'))$('fm-notes').value=fm.notes||'';
+  // image
+  const imgZone=$('familiar-img-zone');
+  if(imgZone){
+    const ph=$('familiar-img-placeholder');
+    const existImg=imgZone.querySelector('img.familiar-img-preview');
+    if(existImg)existImg.remove();
+    if(fm.img){
+      const img=document.createElement('img');img.src=fm.img;img.className='familiar-img-preview';
+      img.style.cssText='width:100%;height:100%;object-fit:cover;position:absolute;inset:0;';
+      imgZone.appendChild(img);if(ph)ph.style.display='none';
+    } else {if(ph)ph.style.display='';}
+  }
+  renderFamiliarAttacksList();renderFamiliarTraitsList();
+  $('familiar-overlay').style.display='block';
+}
+function closeFamiliarModal(){$('familiar-overlay').style.display='none';renderSummary();}
+function removeFamiliar(){C.familiar=null;closeFamiliarModal();}
+function familiarSet(k,v){if(!C.familiar)C.familiar={};C.familiar[k]=v;}
+function renderFamiliarMod(k){
+  const v=parseInt($('fm-'+k)?.value)||10;const m=Math.floor((v-10)/2);const el=$('fm-mod-'+k);
+  if(el)el.textContent=(m>=0?'+':'')+m;if(C.familiar)C.familiar[k]=v;
+}
+function handleFamiliarImgFile(file){
+  if(!file||!file.type.startsWith('image/'))return;
+  const r=new FileReader();r.onload=e=>{
+    if(!C.familiar)C.familiar={};C.familiar.img=e.target.result;
+    const imgZone=$('familiar-img-zone');if(!imgZone)return;
+    const ph=$('familiar-img-placeholder');
+    const old=imgZone.querySelector('img.familiar-img-preview');if(old)old.remove();
+    const img=document.createElement('img');img.src=e.target.result;img.className='familiar-img-preview';
+    img.style.cssText='width:100%;height:100%;object-fit:cover;position:absolute;inset:0;';
+    imgZone.appendChild(img);if(ph)ph.style.display='none';
+  };r.readAsDataURL(file);
+}
+function addFamiliarAttack(){
+  const n=($('fma-name')?.value||'').trim();if(!n)return;
+  if(!C.familiar)C.familiar={};if(!C.familiar.attacks)C.familiar.attacks=[];
+  C.familiar.attacks.push({n,atk:$('fma-atk')?.value||'',dmg:$('fma-dmg')?.value||'',type:$('fma-type')?.value||''});
+  ['fma-name','fma-atk','fma-dmg','fma-type'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  renderFamiliarAttacksList();
+}
+function removeFamiliarAttack(i){C.familiar.attacks.splice(i,1);renderFamiliarAttacksList();}
+function renderFamiliarAttacksList(){
+  const el=$('fm-attacks-list');if(!el)return;
+  const atks=C.familiar?.attacks||[];
+  el.innerHTML=atks.length?atks.map((a,i)=>`
+    <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.25rem;background:#0A0705;border:1px solid #2A1A08;border-radius:3px;padding:.25rem .4rem;">
+      <span style="flex:1;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--parch);">${a.n}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);">${a.atk}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blood-l);">${a.dmg}</span>
+      <span style="font-size:9px;color:#6A5A3A;">${a.type}</span>
+      <button onclick="removeFamiliarAttack(${i})" style="background:none;border:none;color:#6A3A3A;cursor:pointer;font-size:11px;">✕</button>
+    </div>`).join(''):'<div style="font-size:9px;color:#4A3A20;font-style:italic;padding:.2rem 0;">Aucune attaque.</div>';
+}
+function addFamiliarTrait(){
+  const n=($('fmt-name')?.value||'').trim();if(!n)return;
+  if(!C.familiar)C.familiar={};if(!C.familiar.traits)C.familiar.traits=[];
+  C.familiar.traits.push({n,d:$('fmt-desc')?.value||''});
+  ['fmt-name','fmt-desc'].forEach(id=>{const el=$(id);if(el)el.value='';});
+  renderFamiliarTraitsList();
+}
+function removeFamiliarTrait(i){C.familiar.traits.splice(i,1);renderFamiliarTraitsList();}
+function renderFamiliarTraitsList(){
+  const el=$('fm-traits-list');if(!el)return;
+  const traits=C.familiar?.traits||[];
+  el.innerHTML=traits.length?traits.map((t,i)=>`
+    <div style="background:#0A0705;border:1px solid #2A1A08;border-radius:3px;padding:.3rem .5rem;margin-bottom:.25rem;display:flex;align-items:start;gap:.4rem;">
+      <div style="flex:1;"><div style="font-family:'Cinzel',serif;font-size:9px;color:var(--gold-d);">${t.n}</div>${t.d?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-top:1px;">${t.d}</div>`:''}
+      </div>
+      <button onclick="removeFamiliarTrait(${i})" style="background:none;border:none;color:#6A3A3A;cursor:pointer;font-size:11px;">✕</button>
+    </div>`).join(''):'<div style="font-size:9px;color:#4A3A20;font-style:italic;padding:.2rem 0;">Aucun trait.</div>';
 }
 
 // ══════════════════════════════════════════════════
