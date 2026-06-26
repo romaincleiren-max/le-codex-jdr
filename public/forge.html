@@ -3831,6 +3831,14 @@ async function switchInvSource(src){
   }else{renderInvGrid();}
 }
 
+function preloadCodexData(){
+  if(_codexData||_codexLoading)return;
+  _codexLoading=true;
+  fetch('codex_index.json')
+    .then(function(r){return r.ok?r.json():Promise.reject('HTTP '+r.status);})
+    .then(function(data){_codexData=data;_codexLoading=false;})
+    .catch(function(){_codexLoading=false;});
+}
 async function loadCodexIndex(){
   _codexLoading=true;
   const g=$('inv-grid');
@@ -5363,6 +5371,7 @@ function openRosterEquip(id){
   if(!_reChar) return;
   if(!_reChar.bag) _reChar.bag=[];
   if(!_reChar.equipped) _reChar.equipped={};
+  preloadCodexData();
   _reSrc='srd'; _reQ=''; _reView='equip';
   var hn=$('re-hdr-name'); if(hn) hn.textContent=_reChar.name||'—';
   // Afficher le bouton "Sorts" seulement si le perso est lanceur de sorts
