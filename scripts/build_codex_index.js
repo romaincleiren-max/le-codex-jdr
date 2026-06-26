@@ -59,7 +59,7 @@ function extractText(node) {
 function extractParagraphs(node, results) {
   results = results || [];
   if (!node) return results;
-  if (node.type === 'paragraph') {
+  if (node.type === 'paragraph' || node.type === 'heading') {
     const text = extractText(node).trim();
     if (text) results.push(text);
   }
@@ -116,15 +116,19 @@ function extractItem(resource, categoryName) {
   var citation = content ? extractBlockquote(content) : '';
   var paragraphs = content ? extractParagraphs(content) : [];
 
-  // Patterns that indicate template placeholders or pure section labels — skip them
+  // Section headers → remplacés par marqueurs §SECTION pour filtrage dans forge.html
+  var SECTION_MARKERS = {
+    'Effets': '§EFFETS', 'Effet': '§EFFETS', 'Propriétés': '§EFFETS',
+    'Histoire': '§HISTOIRE',
+    'Information secrète': '§SECRETS', 'Informations secrètes': '§SECRETS',
+  };
+  // Patterns template à ignorer complètement
   var SKIP_EXACT = [
     'X', 'x', 'Description', 'Contenu', 'contenu', 'Titre', 'Sous-titre',
     'Première. Description', 'Deuxième. Description', 'Troisième. Description',
     'Description physique', 'Description physique de la plante',
     'Ingrédients', 'Ingrédient', 'Ingrédient de la recette', 'Quantité',
-    'Type de recette', 'Détails', 'Effets', 'Effet', 'Propriétés',
-    'Histoire', 'Information clés', 'Informations', 'Intérêt',
-    'Information secrète', 'Informations secrètes',
+    'Type de recette', 'Détails', 'Information clés', 'Informations', 'Intérêt',
     'Nom vernaculaire de la plante / Surnom',
     'Nom scientifique : de la plante', 'Nom de l\'Habitat',
     'Citation dans une littérature scientifique ou utilisation de la plante lors d\'un évènement majeur...',
@@ -133,11 +137,9 @@ function extractItem(resource, categoryName) {
     'Potion', 'Cuisine',
   ];
   var SKIP_STARTS = ['Raret', 'Temps de fabrication', 'Jets de sauvegarde', 'Titre :', 'Titre:'];
-  // Strip leading placeholder "X " from paragraphs (LegendKeeper field label pattern)
   function cleanXPrefix(p) {
     return p.replace(/^X\s+/, '').replace(/^x\s+/, '');
   }
-  // Lines that are only placeholder X with possible surrounding spaces
   function isXPlaceholder(p) {
     return /^\s*[Xx]\s*$/.test(p);
   }
@@ -145,24 +147,26 @@ function extractItem(resource, categoryName) {
 
   var descParts = paragraphs
     .map(cleanXPrefix)
+    .map(function(p) {
+      // Convertir les headers de section en marqueurs §
+      var marker = SECTION_MARKERS[p.trim()];
+      return marker ? marker : p;
+    })
     .filter(function(p) {
       if (!p || !p.trim()) return false;
-      // Skip pure X placeholders
+      // Garder les marqueurs §
+      if (p.startsWith('§')) return true;
       if (isXPlaceholder(p)) return false;
-      // Skip exact label matches
       for (var i = 0; i < SKIP_EXACT.length; i++) {
         if (p.trim() === SKIP_EXACT[i]) return false;
       }
       var lower = p.toLowerCase();
-      // Skip lines starting with certain labels
       for (var j = 0; j < SKIP_STARTS.length; j++) {
         if (p.startsWith(SKIP_STARTS[j])) return false;
       }
-      // Skip lines containing secret info
       for (var k = 0; k < SKIP_CONTAINS.length; k++) {
         if (lower.includes(SKIP_CONTAINS[k])) return false;
       }
-      // Skip very short lines that are probably leftover labels (1-3 chars)
       if (p.trim().length <= 3) return false;
       return true;
     });

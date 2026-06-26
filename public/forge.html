@@ -5670,15 +5670,15 @@ function showSpellTooltip(ev, name){
   tt.classList.add('visible');
 }
 function _filterItemDesc(raw){
-  // Exclut les sections "Secret(s)" et "Histoire", garde tout le reste
-  var HIDE=/^(secrets?|histoire)\s*:/i;
-  var SEP=/^(effets?|secrets?|histoire|capacités?|propriétés?)\s*:/i;
   var lines=raw.split('\n');
-  var out=[],skip=false;
+  var hasEffets=lines.some(function(l){return l.trim()==='§EFFETS';});
+  // §EFFETS present → show only that section; otherwise show all except §HISTOIRE/§SECRETS
+  var out=[],showing=!hasEffets;
   for(var i=0;i<lines.length;i++){
-    var l=lines[i];
-    if(SEP.test(l.trim())) skip=HIDE.test(l.trim());
-    if(!skip) out.push(l);
+    var t=lines[i].trim();
+    if(t==='§EFFETS'){showing=true;continue;}
+    if(t==='§HISTOIRE'||t==='§SECRETS'){showing=false;continue;}
+    if(showing) out.push(lines[i]);
   }
   return out.join('\n').replace(/\n{3,}/g,'\n\n').trim();
 }
