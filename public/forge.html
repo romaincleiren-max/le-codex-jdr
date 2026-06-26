@@ -5638,25 +5638,19 @@ function reSaveChar(){
 function showItemTooltip(ev, item){
   var tt=$('re-slot-tooltip'); if(!tt||!item)return;
   tt.classList.remove('spell-tt');
-  var rc=item.rarity&&_RE_RC?_RE_RC[item.rarity]:null;
-  var rarHtml=item.rarity?'<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+(rc||'#C9A84C')+';">'+item.rarity+'</div>':'';
-  var typeHtml=(item.cat||item.item_type||item.type)?'<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-top:3px;">'+(item.cat||item.item_type||item.type)+'</div>':'';
-  var metaHtml='';
-  if((item.w&&item.w>0)||item.c){
-    metaHtml='<div style="font-family:\'Share Tech Mono\',monospace;font-size:8px;color:#5A4A2A;margin-top:3px;">';
-    if(item.w&&item.w>0)metaHtml+=item.w+' lb  ';
-    if(item.c)metaHtml+=item.c;
-    metaHtml+='</div>';
-  }
-  var harmHtml=item.attunement?'<div class="rst-attune">⧁ Harmonisation requise</div>':'';
-  var rawDesc=item.d||item.description||'';
-  var effectMatch=rawDesc.match(/Effets?\s*:\s*([\s\S]+)/i);
-  var effect=effectMatch?effectMatch[1].trim():rawDesc;
-  var descHtml=effect?'<div class="rst-desc">'+effect.substring(0,320)+(effect.length>320?'…':'')+'</div>':'';
-  var ttImgSrc=item.sprite||item.image||null;
-  var textBlock='<div class="rst-name">'+(item.name||item.n||'—')+'</div>'+typeHtml+rarHtml+metaHtml+harmHtml+descHtml;
-  tt.innerHTML=ttImgSrc
-    ?'<div style="display:flex;gap:16px;align-items:flex-start;"><img src="'+ttImgSrc+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;flex-shrink:0;border:1px solid #3A2810;background:#0D0805;"><div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
+  var d=_getFullItemData(item);
+  var rc=d.rarity&&_RE_RC?_RE_RC[d.rarity]:null;
+  var colN=rc||'#C9A84C';
+  var sprH=d.sprite?'<img src="'+d.sprite+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;border:1px solid #3A2810;background:#0D0805;flex-shrink:0;">':'';
+  var hdr='<div class="rst-name" style="color:'+colN+';">'+d.name+'</div>';
+  if(d.type) hdr+='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+d.type+'</div>';
+  if(d.rarity) hdr+='<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+colN+';">'+d.rarity+'</div>';
+  if(d.attunement) hdr+='<div style="font-family:\'Cinzel\',serif;font-size:12px;color:#A080D0;margin-top:6px;">⧁ Harmonisation requise'+(d.attunement_note?' — '+d.attunement_note:'')+'</div>';
+  var filtered=d.desc?_filterItemDesc(d.desc):'';
+  var descH=filtered?'<div class="rst-desc" style="max-height:none;font-size:13px;white-space:pre-line;">'+filtered+'</div>':'';
+  var textBlock=hdr+descH;
+  tt.innerHTML=sprH
+    ?'<div style="display:flex;gap:16px;align-items:flex-start;">'+sprH+'<div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
     :textBlock;
   posSlotTooltip(ev);
   tt.classList.add('visible');
