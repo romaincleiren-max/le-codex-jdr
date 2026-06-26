@@ -4493,6 +4493,7 @@ function renderDiceRoller(){
   renderDiceList();
 }
 
+let _sumTab='fiche';
 function renderSummary(){
   const subLine=C.sub?` · ${C.sub.n}`:'';
   const alignLine=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
@@ -4510,7 +4511,113 @@ function renderSummary(){
   const sectionHdr=(label)=>`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;color:#6A5030;margin-bottom:.45rem;">${label}</div>`;
   const divider=`<div style="border-top:1px solid #2A1A08;margin:.7rem 0;"></div>`;
 
-  $('lp').innerHTML=`
+  // ─── TAB STRIP ───
+  const tabStrip=`<div style="display:flex;border:1px solid #2A1A08;border-radius:6px;overflow:hidden;margin-bottom:.7rem;">
+    <button onclick="_sumTab='fiche';renderSummary()" style="flex:1;padding:.45rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;cursor:pointer;background:${_sumTab==='fiche'?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab==='fiche'?'#C9A84C':'#5A4A30'};border:none;border-right:1px solid #2A1A08;transition:background .15s;">📋 FICHE</button>
+    <button onclick="_sumTab='inventaire';renderSummary()" style="flex:1;padding:.45rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;cursor:pointer;background:${_sumTab==='inventaire'?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab==='inventaire'?'#C9A84C':'#5A4A30'};border:none;border-right:1px solid #2A1A08;transition:background .15s;">🎒 INVENTAIRE</button>
+    <button onclick="_sumTab='notes';renderSummary()" style="flex:1;padding:.45rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;cursor:pointer;background:${_sumTab==='notes'?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab==='notes'?'#C9A84C':'#5A4A30'};border:none;transition:background .15s;">📝 NOTES</button>
+  </div>`;
+
+  // ─── ONGLET INVENTAIRE ───
+  if(_sumTab==='inventaire'){
+    $('lp').innerHTML=tabStrip+`
+    <div class="inv-src" id="inv-src-bar">
+      <button class="inv-src-btn ${_invSource==='srd'?'active':''}" data-src="srd" onclick="switchInvSource('srd')">⚔ Objets SRD</button>
+      <button class="inv-src-btn ${_invSource==='codex'?'active':''}" data-src="codex" onclick="switchInvSource('codex')">✦ Codex Sigil Saga</button>
+    </div>
+    <input class="inv-search" id="inv-q" placeholder="${_invSource==='srd'?'Rechercher un objet... (torche, dague, corde...)':'Rechercher dans le Codex... (Arcanite, Eldralithe...)'}" value="${_invSource==='srd'?_invQ:_codexQ}" oninput="${_invSource==='srd'?'_invQ=this.value;renderInvGrid()':'_codexQ=this.value;renderCodexGrid()'}">
+    <div class="inv-cats" id="inv-cats-bar" style="display:${_invSource==='srd'?'flex':'none'}">${ITEM_CATS.map(c=>`<div class="inv-cat ${_invCat===c?'active':''}" onclick="_invCat='${c}';renderInvGrid()">${c}</div>`).join('')}</div>
+    <div class="inv-cats" id="inv-rarity-bar" style="display:${_invSource==='srd'?'flex':'none'}">${ITEM_RARITIES.map(r=>{const rc=r!=='Tous'?(_IP_RARITY[r]||{}):null;const style=rc&&_invRarity===r?`background:${rc.badge};color:${rc.badgeTxt};border-color:${rc.badge};`:'';return`<div class="inv-cat ${_invRarity===r?'active':''}" style="${style}" onclick="_invRarity='${r}';renderInvGrid()">${r==='Tous'?'✦ Rareté':r}</div>`;}).join('')}</div>
+    <div class="inv-grid" id="inv-grid"></div>
+    <div class="bag-sec">
+      <div class="bag-hdr"><span>⚔ CONTENU DU SAC</span><span id="bag-weight-hdr" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);"></span></div>
+      <div id="bag-list"></div>
+    </div>
+    <div id="armor-equip-sec"></div>
+    <div id="equip-lp-sec"></div>
+    <details id="manual-item-details" style="margin-bottom:.5rem;">
+      <summary style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);cursor:pointer;padding:.4rem .5rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;list-style:none;user-select:none;">✏ Ajouter un objet manuellement</summary>
+      <div style="background:#0A0805;border:1px solid #2A1A08;border-top:none;border-radius:0 0 4px 4px;padding:.6rem .7rem;">
+        <div style="display:grid;grid-template-columns:1fr auto auto;gap:.4rem;margin-bottom:.4rem;align-items:end;">
+          <div>
+            <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">NOM *</label>
+            <input type="text" id="mi-name" class="inv-search" style="margin-bottom:0;width:100%;" placeholder="Ex: Amulette de Tyr">
+          </div>
+          <div>
+            <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">TYPE</label>
+            <select id="mi-cat" style="background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;border-radius:3px;">
+              ${['Équipement','Arme','Armure','Outil','Magie','Potion','Trésor','Autre'].map(c=>'<option value="'+c+'">'+c+'</option>').join('')}
+            </select>
+          </div>
+          <div style="display:flex;gap:.3rem;">
+            <div>
+              <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">POIDS (lb)</label>
+              <input type="number" id="mi-weight" min="0" step="0.1" placeholder="0" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;text-align:center;">
+            </div>
+            <div>
+              <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">VALEUR</label>
+              <input type="text" id="mi-cost" placeholder="2 po" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;">
+            </div>
+          </div>
+        </div>
+        <textarea id="mi-desc" class="ifl" style="min-height:48px;font-size:10px;margin-bottom:.5rem;" placeholder="Description (optionnelle)…"></textarea>
+        <button class="btn btn-p" style="font-size:10px;padding:.35em 1em;" onclick="addManualItem()">+ Ajouter au sac</button>
+      </div>
+    </details>
+    <div class="import-zone">
+      <div class="import-hdr">⬇ Importer des objets (format JSON)</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-bottom:.4rem;">Format : [{"id":"dagger","n":"Dague","qty":2,"w":1,"c":"2 po","d":"...","cat":"Arme"}]</div>
+      <textarea class="import-ta" id="import-ta" placeholder='[{"id":"epee-magique","n":"Épée +1","qty":1,"w":3,"c":"—","d":"Arme magique.","cat":"Arme"}]'></textarea>
+      <div class="btn-row" style="margin-top:.5rem;"><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="importItems()">⬇ Importer</button><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="exportBagJSON()">⬆ Exporter le sac</button></div>
+    </div>`;
+    if(!C.equipped)C.equipped={};
+    renderBagList();
+    if(_invSource==='codex')renderCodexGrid();else renderInvGrid();
+    renderEquipPanel();
+    return;
+  }
+
+  // ─── ONGLET NOTES ───
+  if(_sumTab==='notes'){
+    $('lp').innerHTML=tabStrip+`
+    <div class="sh" style="font-size:13px;margin:.4rem 0 .3rem;">🎲 Lancer les dés</div>
+    <div id="dice-roller-panel"></div>
+    <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">💰 Monnaie</div>
+    <div class="currency-row">
+      ${[['pp','PP','#E0D8F0'],['gp','PO','#C9A84C'],['sp','PA','#AAB0B8'],['cp','PC','#8B5A3A']].map(([k,lbl,col])=>`
+      <div class="currency-cell">
+        <label class="currency-lbl" style="color:${col};">${lbl}</label>
+        <input type="number" class="currency-inp" min="0" value="${(C.currency||{})[k]||0}"
+          oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency['${k}']=parseInt(this.value)||0">
+      </div>`).join('')}
+    </div>
+    <details style="margin-top:.3rem;">
+      <summary style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);cursor:pointer;padding:.25rem 0;list-style:none;user-select:none;">▸ Autre (PE, gemmes, bijoux…)</summary>
+      <div style="display:flex;gap:.5rem;margin-top:.3rem;align-items:flex-start;">
+        <div class="currency-cell" style="flex:0 0 64px;">
+          <label class="currency-lbl" style="color:#8B6EC6;">PE</label>
+          <input type="number" class="currency-inp" min="0" value="${(C.currency||{}).ep||0}"
+            oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.ep=parseInt(this.value)||0">
+        </div>
+        <textarea style="flex:1;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;min-height:42px;resize:vertical;line-height:1.4;"
+          placeholder="Gemmes, bijoux, objets de valeur…"
+          oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.other=this.value">${(C.currency||{}).other||''}</textarea>
+      </div>
+    </details>
+    <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📝 Notes</div>
+    <textarea class="ifl" style="min-height:140px;font-size:11px;" placeholder="Notes libres, rappels, objectifs…"
+      oninput="C.notes=this.value">${C.notes||''}</textarea>
+    <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+      <button class="btn btn-g" onclick="exportJSON()">↓ JSON</button>
+      <button class="btn btn-b" onclick="viewOfficialPDF()">📜 Fiche D&D</button>
+      <button class="btn btn-p" style="flex:1;" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">💾 Sauvegarder</button>
+    </div>`;
+    renderDiceRoller();
+    return;
+  }
+
+  // ─── ONGLET FICHE ───
+  $('lp').innerHTML=tabStrip+`
   <!-- ══ BANNIÈRE PERSONNAGE + FAMILIER ══ -->
   <div style="display:grid;grid-template-columns:1fr 88px;gap:.5rem;margin-bottom:.7rem;align-items:stretch;">
     <div style="position:relative;border-radius:8px;background:linear-gradient(160deg,#1A0808 0%,#0D0818 45%,#080508 100%);border:1px solid #3A2010;">
@@ -4700,40 +4807,6 @@ function renderSummary(){
     </div>`;
   })()}
 
-  <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">🎲 Lancer les dés</div>
-  <div id="dice-roller-panel"></div>
-
-  ${C.bag.length?`<div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">🎒 Sac d'aventurier</div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:2px 1rem;margin-bottom:.4rem;">${C.bag.map(e=>`<div style="font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--parch2);">▸ ${e.n}${e.qty>1?' ×'+e.qty:''} <span style="color:var(--gold-d);">${e.w>0?'('+e.w*e.qty+' lb)':''}</span></div>`).join('')}</div>
-  <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);">Poids total : ${C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0).toFixed(1)} lb / cap. ${(effStat('str')*15)} lb</div>`:''}
-
-  <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">💰 Monnaie</div>
-  <div class="currency-row">
-    ${[['pp','PP','#E0D8F0'],['gp','PO','#C9A84C'],['sp','PA','#AAB0B8'],['cp','PC','#8B5A3A']].map(([k,lbl,col])=>`
-    <div class="currency-cell">
-      <label class="currency-lbl" style="color:${col};">${lbl}</label>
-      <input type="number" class="currency-inp" min="0" value="${(C.currency||{})[k]||0}"
-        oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency['${k}']=parseInt(this.value)||0">
-    </div>`).join('')}
-  </div>
-  <details style="margin-top:.3rem;">
-    <summary style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);cursor:pointer;padding:.25rem 0;list-style:none;user-select:none;">▸ Autre (PE, gemmes, bijoux…)</summary>
-    <div style="display:flex;gap:.5rem;margin-top:.3rem;align-items:flex-start;">
-      <div class="currency-cell" style="flex:0 0 64px;">
-        <label class="currency-lbl" style="color:#8B6EC6;">PE</label>
-        <input type="number" class="currency-inp" min="0" value="${(C.currency||{}).ep||0}"
-          oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.ep=parseInt(this.value)||0">
-      </div>
-      <textarea style="flex:1;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;min-height:42px;resize:vertical;line-height:1.4;"
-        placeholder="Gemmes, bijoux, objets de valeur…"
-        oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.other=this.value">${(C.currency||{}).other||''}</textarea>
-    </div>
-  </details>
-
-  <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📝 Notes</div>
-  <textarea class="ifl" style="min-height:80px;font-size:11px;" placeholder="Notes libres, rappels, objectifs…"
-    oninput="C.notes=this.value">${C.notes||''}</textarea>
-
   <div id="equip-lp-sec"></div>
   <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;">
     <button class="btn btn-s" onclick="go(5)">← Identité</button>
@@ -4744,7 +4817,6 @@ function renderSummary(){
   </div>`;
   if(!C.equipped) C.equipped={};
   renderEquipPanel();
-  renderDiceRoller();
 }
 
 function exportJSON(){
