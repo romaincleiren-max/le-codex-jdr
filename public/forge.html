@@ -2907,7 +2907,7 @@ let C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null
   stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
   level:1,xp:0,profBonus:2,traits:[],alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
   asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,dice3d6:{},dice3d6RerollUsed:false,
-  feats:[],currency:{gp:0,sp:0,cp:0,ep:0},notes:''};
+  feats:[],currency:{pp:0,gp:0,sp:0,cp:0,ep:0,other:''},notes:''};
 let CUR=0;
 let _expandedFamily=null;
 let _selectedRaceFamily=null;
@@ -3136,7 +3136,7 @@ function newChar(){
     height:'',weight:'',eyes:'',hair:'',skin:'',
     alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
     asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,system:'dnd5e',dice3d6:{},dice3d6RerollUsed:false,
-    feats:[],currency:{gp:0,sp:0,cp:0,ep:0},notes:''};
+    feats:[],currency:{pp:0,gp:0,sp:0,cp:0,ep:0,other:''},notes:''};
   showSysSel();
 }
 function loadChar(e){
@@ -4420,13 +4420,26 @@ function renderSummary(){
     const clf=C.cls&&CLS_LVL_FEAT[C.cls.id];
     if(!clf)return'';
     const lvl=C.level||1;
-    const entries=Object.entries(clf).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
+    // Merge class features + subclass features
+    const merged={};
+    Object.entries(clf).forEach(([l,fs])=>{merged[l]=[...fs];});
+    if(C.sub?.fs){
+      C.sub.fs.forEach(f=>{
+        const m=f.match(/^Niv\.(\d+)\s*[—–]\s*(.+)/);
+        if(!m)return;
+        const lk=m[1];
+        const short=(m[2].split(':')[0]||m[2]).trim();
+        if(!merged[lk])merged[lk]=[];
+        merged[lk].push('❖ '+short); // ❖ préfixe pour les features de sous-classe
+      });
+    }
+    const entries=Object.entries(merged).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
     if(!entries.length)return'';
     return`<div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📖 Capacités de classe par niveau</div>
     <div class="cls-feat-timeline">${entries.map(([l,fs])=>`
       <div class="cft-row">
         <div class="cft-lvl">Niv.${l}</div>
-        <div class="cft-feats">${fs.map(f=>`<span class="cft-tag">${f}</span>`).join('')}</div>
+        <div class="cft-feats">${fs.map(f=>f.startsWith('❖')?`<span class="cft-tag" style="border-color:rgba(160,128,208,.45);color:#C0A0E0;">${f}</span>`:`<span class="cft-tag">${f}</span>`).join('')}</div>
       </div>`).join('')}
     </div>`;
   })()}
@@ -4440,13 +4453,26 @@ function renderSummary(){
 
   <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">💰 Monnaie</div>
   <div class="currency-row">
-    ${[['gp','PO','#C9A84C'],['sp','PA','#AAB0B8'],['ep','PE','#8B6EC6'],['cp','PC','#8B5A3A']].map(([k,lbl,col])=>`
+    ${[['pp','PP','#E0D8F0'],['gp','PO','#C9A84C'],['sp','PA','#AAB0B8'],['cp','PC','#8B5A3A']].map(([k,lbl,col])=>`
     <div class="currency-cell">
       <label class="currency-lbl" style="color:${col};">${lbl}</label>
       <input type="number" class="currency-inp" min="0" value="${(C.currency||{})[k]||0}"
-        oninput="if(!C.currency)C.currency={gp:0,sp:0,cp:0,ep:0};C.currency['${k}']=parseInt(this.value)||0">
+        oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency['${k}']=parseInt(this.value)||0">
     </div>`).join('')}
   </div>
+  <details style="margin-top:.3rem;">
+    <summary style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);cursor:pointer;padding:.25rem 0;list-style:none;user-select:none;">▸ Autre (PE, gemmes, bijoux…)</summary>
+    <div style="display:flex;gap:.5rem;margin-top:.3rem;align-items:flex-start;">
+      <div class="currency-cell" style="flex:0 0 64px;">
+        <label class="currency-lbl" style="color:#8B6EC6;">PE</label>
+        <input type="number" class="currency-inp" min="0" value="${(C.currency||{}).ep||0}"
+          oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.ep=parseInt(this.value)||0">
+      </div>
+      <textarea style="flex:1;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;min-height:42px;resize:vertical;line-height:1.4;"
+        placeholder="Gemmes, bijoux, objets de valeur…"
+        oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.other=this.value">${(C.currency||{}).other||''}</textarea>
+    </div>
+  </details>
 
   <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📝 Notes</div>
   <textarea class="ifl" style="min-height:80px;font-size:11px;" placeholder="Notes libres, rappels, objectifs…"
