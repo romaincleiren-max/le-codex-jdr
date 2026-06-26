@@ -1037,8 +1037,8 @@ body{background:var(--bg);}
 .identity-badges{display:flex;gap:3px;flex-wrap:wrap;margin-bottom:3px;}
 .bonus-badge-c{background:#2A4A1E;color:#7AA66A;font-family:'Share Tech Mono',monospace;font-size:clamp(6px,.6vw,9px);padding:2px 5px;border:1px solid rgba(122,166,106,.22);}
 /* Right panel — step content */
-#lp{width:auto!important;max-width:none!important;padding:0!important;flex:unset!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;}
-#lp.lp-scroll-mode{overflow-y:auto!important;display:block!important;}
+#lp{width:auto!important;max-width:none!important;padding:0!important;flex:unset!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-left:1px solid var(--bd-subtle)!important;}
+#lp.lp-scroll-mode{overflow-y:auto!important;display:block!important;padding:.8rem clamp(.6rem,.8vw,1.2rem)!important;}
 .rp-panel-title{font-family:'Cinzel',serif;font-size:clamp(10px,.95vw,15px);letter-spacing:.07em;color:var(--gold);padding:clamp(.4rem,.5vw,.7rem) clamp(.5rem,.6vw,.9rem);border-bottom:1px solid var(--bd-subtle);flex-shrink:0;}
 /* Family tabs (race panel) */
 .family-tabs-wrap{overflow-x:auto;flex-shrink:0;padding:.3rem .45rem .2rem;border-bottom:1px solid var(--bd-subtle);display:flex;gap:2px;scrollbar-width:thin;scrollbar-color:var(--gold-d) transparent;}
@@ -3326,15 +3326,17 @@ function toggleSub(el,id){
 function renderStats(){
   const pb=calcProfBonus();
   const asiCount=asiAvailable();
-  $('lp').innerHTML=`<div class="sh">Caractéristiques & Compétences</div><div class="ss">Achat de points (27) · OU Lancer les dés (4d6, garder les 3 meilleurs)</div>
+  $('lp').innerHTML=`<div class="sh">Caractéristiques & Compétences</div><div class="ss">Achat de points · 4d6-drop1 · 3d6 par stat · ou Choix libre</div>
   <div style="display:flex;gap:.4rem;margin-bottom:.8rem;flex-wrap:wrap;">
-    <button class="dmode-btn ${!C.diceRolls.length&&!Object.keys(C.dice3d6||{}).length?'active':''}" onclick="setDiceMode('points')">📊 Achat de points</button>
+    <button class="dmode-btn ${!C.diceRolls.length&&!Object.keys(C.dice3d6||{}).length&&!C.freeStats?'active':''}" onclick="setDiceMode('points')">📊 Achat de points</button>
     <button class="dmode-btn ${C.diceRolls.length?'active':''}" onclick="setDiceMode('4d6')">🎲 4d6-drop1</button>
     <button class="dmode-btn ${Object.keys(C.dice3d6||{}).length?'active':''}" onclick="setDiceMode('3d6')">⚄ 3d6 par stat</button>
+    <button class="dmode-btn ${C.freeStats?'active':''}" onclick="setDiceMode('free')">✏ Choix libre</button>
   </div>
   <div id="dice-area-wrap"></div>
   <div id="dice3d6-wrap"></div>
-  <div class="pts" id="pts-disp" style="display:${!C.diceRolls.length&&!Object.keys(C.dice3d6||{}).length?'block':'none'}">Points restants : <span id="pl">${ptsLeft()}</span> / 27</div>
+  <div id="free-stats-wrap"></div>
+  <div class="pts" id="pts-disp" style="display:${!C.diceRolls.length&&!Object.keys(C.dice3d6||{}).length&&!C.freeStats?'block':'none'}">Points restants : <span id="pl">${ptsLeft()}</span> / 27</div>
   <div class="sg" id="sg2"></div>
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">Compétences maîtrisées</div>
@@ -3352,6 +3354,7 @@ function renderStats(){
   </div>`;
   renderDiceArea();
   render3d6Area();
+  renderFreeStatsArea();
   renderStatBoxes();
   renderSkillList();
   if(asiCount>0){renderASIGrid();renderFeatSection();}
@@ -3464,11 +3467,17 @@ function rollDice(){
     }
   },55);
 }
-function resetDice(){C.diceRolls=[];C.diceAssigned={};C.dice3d6={};C.dice3d6RerollUsed=false;applyRace();renderStats();}
+function resetDice(){C.diceRolls=[];C.diceAssigned={};C.dice3d6={};C.dice3d6RerollUsed=false;C.freeStats=null;applyRace();renderStats();}
 function setDiceMode(mode){
   if(mode==='points'){resetDice();return;}
-  if(mode==='4d6'){C.dice3d6={};C.dice3d6RerollUsed=false;rollDice();return;}
-  if(mode==='3d6'){C.diceRolls=[];C.diceAssigned={};roll3d6All();return;}
+  if(mode==='4d6'){C.freeStats=null;C.dice3d6={};C.dice3d6RerollUsed=false;rollDice();return;}
+  if(mode==='3d6'){C.freeStats=null;C.diceRolls=[];C.diceAssigned={};roll3d6All();return;}
+  if(mode==='free'){
+    C.diceRolls=[];C.diceAssigned={};C.dice3d6={};C.dice3d6RerollUsed=false;
+    if(!C.freeStats)C.freeStats={str:8,dex:8,con:8,int:8,wis:8,cha:8};
+    applyFreeStats();
+    renderStats();
+  }
 }
 function assignDice(rollIdx,stat){
   if(!C.diceRolls.length)return;
@@ -3582,11 +3591,49 @@ function render3d6Area(){
   </div>`;
 }
 
+// ── Mode Choix libre ───────────────────────────────────────────────────────────
+function applyFreeStats(){
+  if(!C.freeStats)return;
+  applyRace();
+  STAT_KEYS.forEach(k=>{
+    const rb=C.race?.bonus?.[k]||0;
+    C.stats[k]=(C.freeStats[k]||8)+rb;
+  });
+}
+function renderFreeStatsArea(){
+  const w=$('free-stats-wrap');if(!w)return;
+  if(!C.freeStats){w.innerHTML='';return;}
+  const fs=C.freeStats;
+  if($('pts-disp'))$('pts-disp').style.display='none';
+  w.innerHTML=`<div class="d3-area">
+    <div class="dice-h">✏ Valeurs libres — entrez chaque caractéristique (3–18)</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;padding:.4rem 0;">
+      ${STAT_KEYS.map(k=>`
+        <div style="background:#1A1510;border:1px solid #3A2A10;border-radius:3px;padding:.5rem .4rem;text-align:center;">
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);margin-bottom:.15rem;">${k.toUpperCase()}</div>
+          <input type="number" min="3" max="18" value="${fs[k]||8}"
+            style="width:100%;background:transparent;border:none;border-bottom:1px solid #3A2810;color:var(--gold);font-family:'Cinzel Decorative',serif;font-size:22px;text-align:center;padding:.15rem 0;outline:none;-moz-appearance:textfield;"
+            oninput="setFreeStat('${k}',this.value)">
+          <div style="font-size:9px;color:#6A5A3A;margin-top:.25rem;">${STAT_LABELS_FR[k]}</div>
+        </div>
+      `).join('')}
+    </div>
+  </div>`;
+}
+function setFreeStat(k,v){
+  if(!C.freeStats)C.freeStats={str:8,dex:8,con:8,int:8,wis:8,cha:8};
+  const clamped=Math.min(18,Math.max(3,parseInt(v)||3));
+  C.freeStats[k]=clamped;
+  const rb=C.race?.bonus?.[k]||0;
+  C.stats[k]=clamped+rb;
+  renderStatBoxes();updateRight();
+}
+
 function renderStatBoxes(){
   const sg=$('sg2');if(!sg)return;sg.innerHTML='';
   STAT_KEYS.forEach(s=>{
     const v=C.stats[s];
-    const usingDice=C.diceRolls.length>0;
+    const usingDice=C.diceRolls.length>0||!!C.freeStats;
     const canUp=!usingDice&&v<15&&ptsLeft()>=(pbcost(v+1)-pbcost(v));
     const canDn=!usingDice&&v>8;
     const cell=document.createElement('div');cell.className='sbox';
