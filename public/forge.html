@@ -3840,6 +3840,7 @@ function preloadCodexData(){
     .catch(function(){_codexLoading=false;});
 }
 async function loadCodexIndex(){
+  if(_codexData){renderCodexGrid();return;}
   _codexLoading=true;
   const g=$('inv-grid');
   if(g)g.innerHTML='<div class="codex-msg">Chargement du Codex Sigil Saga...</div>';
@@ -6922,6 +6923,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   else{ renderRoster(); initRosterDrag(); }
   fetchGameSystemImages();
   loadForgeFromSupabase();
+  preloadCodexData();
   if(new URLSearchParams(location.search).get('bestiaire')==='1') openBestiary();
   const ts=$('ts');
   ts.addEventListener('dragover',e=>e.preventDefault());
