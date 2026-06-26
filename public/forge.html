@@ -1568,6 +1568,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <div style="display:flex;gap:.5rem;align-items:center;">
       <button class="re-view-btn active" data-v="equip" onclick="toggleReView('equip')">⚔ Équipement</button>
       <button class="re-view-btn" data-v="spells" id="re-spell-btn" onclick="toggleReView('spells')" style="display:none;">📖 Sorts</button>
+      <button id="re-edit-btn" class="re-close" style="border-color:#4A2A8A;color:#C090F0;" onclick="openCharFromRoster(_reChar?.id)">✏ Modifier</button>
       <button class="re-close" onclick="closeReOverlay()">✕ Fermer</button>
     </div>
   </div>
@@ -4182,7 +4183,16 @@ function renderBagList(){
   const bl=$('bag-list');const wh=$('bag-weight-hdr');if(!bl)return;
   if(!C.bag.length){bl.innerHTML='<div class="bag-empty">Sac vide — ajoutez des objets via la recherche ci-dessus.</div>';if(wh)wh.textContent='';return;}
   const total=C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0);
-  bl.innerHTML=C.bag.map((e,i)=>{
+  // Filtres actifs (mêmes que le catalogue)
+  const q=(_invSource==='srd'?_invQ:_codexQ).toLowerCase().trim();
+  const filtered=C.bag.filter((e,i)=>{
+    if(_invCat&&_invCat!=='Tous'&&e.cat!==_invCat)return false;
+    if(_invRarity&&_invRarity!=='Tous'&&e.rarity!==_invRarity)return false;
+    if(q&&!e.n.toLowerCase().includes(q))return false;
+    return true;
+  });
+  const bagHtml=filtered.map(e=>{
+    const i=C.bag.indexOf(e);
     const rc=e.rarity?(_IP_RARITY[e.rarity]||null):null;
     const rowStyle=rc?`border-left:3px solid ${rc.badge};background:${rc.badge}22;`:'';
     const nmStyle=rc?`color:${rc.name};`:'';
@@ -4197,7 +4207,9 @@ function renderBagList(){
     <div class="bag-w">${e.w>0?(e.w*e.qty)+' lb':'—'}</div>
     <button class="bag-del" onclick="bagRemove(${i})" title="Retirer">✕</button>
   </div>`;
-  }).join('')+`<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)</div>`;
+  }).join('');
+  const filterNote=filtered.length<C.bag.length?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#6A5030;padding:.2rem .3rem;">${filtered.length}/${C.bag.length} objets affichés</div>`:'';
+  bl.innerHTML=filterNote+bagHtml+`<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)</div>`;
   if(wh)wh.textContent=`${total.toFixed(1)} lb`;
   renderArmorEquip();
 }
@@ -4564,12 +4576,7 @@ function renderSummary(){
         <button class="btn btn-p" style="font-size:10px;padding:.35em 1em;" onclick="addManualItem()">+ Ajouter au sac</button>
       </div>
     </details>
-    <div class="import-zone">
-      <div class="import-hdr">⬇ Importer des objets (format JSON)</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-bottom:.4rem;">Format : [{"id":"dagger","n":"Dague","qty":2,"w":1,"c":"2 po","d":"...","cat":"Arme"}]</div>
-      <textarea class="import-ta" id="import-ta" placeholder='[{"id":"epee-magique","n":"Épée +1","qty":1,"w":3,"c":"—","d":"Arme magique.","cat":"Arme"}]'></textarea>
-      <div class="btn-row" style="margin-top:.5rem;"><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="importItems()">⬇ Importer</button><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="exportBagJSON()">⬆ Exporter le sac</button></div>
-    </div>`;
+    `;
     renderBagList();
     if(_invSource==='codex')renderCodexGrid();else renderInvGrid();
     return;
@@ -6114,6 +6121,7 @@ function openRosterEquip(id){
   // Afficher le bouton "Sorts" seulement si le perso est lanceur de sorts
   var spBtn=$('re-spell-btn');
   if(spBtn) spBtn.style.display=(_reChar.cls&&_reChar.cls.spellcaster)?'':'none';
+  var editBtn=$('re-edit-btn'); if(editBtn) editBtn.style.display='';
   toggleReView('equip');
   renderReSheet();
   renderReInv();
@@ -6156,6 +6164,7 @@ function openReForEdit(){
   var hn=$('re-hdr-name'); if(hn) hn.textContent=C.name||'—';
   var spBtn=$('re-spell-btn');
   if(spBtn) spBtn.style.display=(C.cls&&C.cls.spellcaster)?'':'none';
+  var editBtn=$('re-edit-btn'); if(editBtn) editBtn.style.display='none';
   toggleReView('equip');
   renderReSheet(); renderReInv();
   $('re-overlay').classList.add('open');
@@ -6835,7 +6844,7 @@ function renderRoster(){
         : clsFallbackHtml;
     const isDraft=r._draft_step!=null&&r._draft_step<6;
     const draftLabel=isDraft?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:#1A1A2A;color:#A080D0;border:1px solid #3A2A6A;padding:2px 5px;border-radius:2px;margin-left:4px;">EN COURS · ${STEP_NAMES[r._draft_step]||''}</span>`:'';
-    return `<div class="rc" style="${isDraft?'border-color:#3A2A6A;':''}opacity:${isDraft?.85:1}" onclick="if(!_rcDrag.moved)openCharFromRoster('${safeId}')">
+    return `<div class="rc" style="${isDraft?'border-color:#3A2A6A;':''}opacity:${isDraft?.85:1}" onclick="if(!_rcDrag.moved)openRosterEquip('${safeId}')">
       <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${safeId}')" title="Supprimer">✕</button>
       <div class="rc-portrait" style="${isDraft?'opacity:.7':'}'}">${portrait}</div>
       <div class="rc-body">
