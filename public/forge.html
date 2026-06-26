@@ -3858,12 +3858,15 @@ function renderEquipSpells(){
   })()}
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">✦ Capacités Spéciales</div>
-  <div class="ss">Capacités hors SRD · Nommez-la et lancez 1D100 pour en déterminer la valeur</div>
+  <div class="ss">Capacités hors SRD · Entrez un nom, saisissez une valeur (1–100) ou lancez le dé</div>
   <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem;">
-    <input type="text" class="inv-search" id="cap-name" style="flex:1;min-width:150px;margin-bottom:0;" placeholder="Nom de la capacité..." onkeydown="if(event.key==='Enter')rollD100Cap()">
-    <button class="btn btn-d" style="white-space:nowrap;flex-shrink:0;" onclick="rollD100Cap()">🎲 Lancer 1D100</button>
+    <input type="text" class="inv-search" id="cap-name" style="flex:1;min-width:130px;margin-bottom:0;" placeholder="Nom de la capacité…" onkeydown="if(event.key==='Enter')addSpecialAbilityDirect()">
+    <input type="number" id="cap-val" min="1" max="100" placeholder="—"
+      style="width:58px;text-align:center;background:#0E0905;border:1px solid #3A2A10;color:var(--gold);font-family:'Cinzel Decorative',serif;font-size:18px;padding:.2rem .3rem;outline:none;-moz-appearance:textfield;"
+      title="Valeur libre (1–100)" onkeydown="if(event.key==='Enter')addSpecialAbilityDirect()">
+    <button class="btn btn-d" style="white-space:nowrap;flex-shrink:0;" title="Lancer 1D100" onclick="rollD100Cap()">🎲</button>
+    <button class="btn btn-p" style="white-space:nowrap;flex-shrink:0;" onclick="addSpecialAbilityDirect()">✓ Ajouter</button>
   </div>
-  <div id="cap-roll-result"></div>
   <div id="cap-list"></div>
   <div class="btn-row"><button class="btn btn-s" onclick="go(3)">← Background</button><button class="btn btn-p" onclick="go(5)">Suivant : Identité →</button></div>`;
   if(!C.equipped) C.equipped={};
@@ -3873,29 +3876,31 @@ function renderEquipSpells(){
 // ── CAPACITÉS SPÉCIALES ─────────────────────────────
 function rollD100Cap(){
   const nameEl=$('cap-name');
-  const name=nameEl?nameEl.value.trim():'';
-  if(!name){nameEl&&nameEl.focus();return;}
+  if(!nameEl?.value.trim()){nameEl?.focus();return;}
   const roll=Math.ceil(Math.random()*100);
-  _d100Result={name,roll};
-  const res=$('cap-roll-result');
-  if(res)res.innerHTML=`<div class="cap-result-box">
-    <div class="cap-result-name">${name}</div>
-    <div class="cap-result-num">${roll} <span>/ 100</span></div>
-    <button class="btn btn-s" style="font-size:10px;padding:.3em 1.1em;margin-top:.6rem;" onclick="addSpecialAbility()">✓ Ajouter au personnage</button>
-  </div>`;
+  const valEl=$('cap-val');if(valEl){valEl.value=roll;valEl.style.color='var(--gold)';}
 }
-function addSpecialAbility(){
-  if(!_d100Result)return;
+function addSpecialAbilityDirect(){
+  const nameEl=$('cap-name');const valEl=$('cap-val');
+  const name=nameEl?.value.trim();
+  if(!name){nameEl?.focus();return;}
+  const parsed=parseInt(valEl?.value);
+  const roll=(!isNaN(parsed)&&parsed>=1)?Math.min(100,parsed):Math.ceil(Math.random()*100);
   if(!C.specialAbilities)C.specialAbilities=[];
-  C.specialAbilities.push({name:_d100Result.name,roll:_d100Result.roll});
-  _d100Result=null;
-  const nameEl=$('cap-name');if(nameEl)nameEl.value='';
-  const res=$('cap-roll-result');if(res)res.innerHTML='';
+  C.specialAbilities.push({name,roll});
+  if(nameEl)nameEl.value='';
+  if(valEl)valEl.value='';
   renderSpecialAbilities();
 }
 function removeSpecialAbility(i){
   C.specialAbilities.splice(i,1);
   renderSpecialAbilities();
+}
+function editCapRoll(i,v){
+  if(!C.specialAbilities?.[i])return;
+  const n=parseInt(v);
+  C.specialAbilities[i].roll=(!isNaN(n)&&n>=1)?Math.min(100,n):null;
+  updateRight();
 }
 function renderSpecialAbilities(){
   const el=$('cap-list');if(!el)return;
@@ -3905,7 +3910,12 @@ function renderSpecialAbilities(){
   }
   el.innerHTML=C.specialAbilities.map((a,i)=>`<div class="cap-item">
     <div class="cap-item-name">${a.name}</div>
-    <div class="cap-item-roll">${a.roll}<span> /100</span></div>
+    <div style="display:flex;align-items:baseline;gap:3px;">
+      <input type="number" min="1" max="100" value="${a.roll??''}"
+        style="width:50px;text-align:center;background:transparent;border:none;border-bottom:1px solid #5A3A10;color:var(--blood);font-family:'Cinzel Decorative',serif;font-size:18px;padding:.05rem .2rem;outline:none;-moz-appearance:textfield;"
+        title="Modifier la valeur" oninput="editCapRoll(${i},this.value)">
+      <span class="cap-item-roll" style="font-size:10px;color:#6A5A3A;">/100</span>
+    </div>
     <button class="cap-del" onclick="removeSpecialAbility(${i})" title="Supprimer">✕</button>
   </div>`).join('');
 }
