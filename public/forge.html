@@ -1586,6 +1586,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
         <div class="pill" id="p4" onclick="go(4)">5 · Équipement</div>
         <div class="pill" id="p5" onclick="go(5)">6 · Identité</div>
         <div class="pill" id="p6" onclick="go(6)">7 · Résumé</div>
+        <div class="pill" id="p7" onclick="go(7)">8 · Capacités</div>
         <div class="pill" id="p8" onclick="go(8)" style="display:none;">⚔ Scénario</div>
       </div>
       <div id="img-actions">
@@ -3170,7 +3171,7 @@ function go(n){
   else { scnBar.style.display='none'; navBar.style.display='flex'; }
   if(n!==8){
     document.querySelectorAll('.pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
-    [renderRace,renderClass,renderStats,renderBackground,renderEquipSpells,renderIdentity,renderSummary,renderAdventure][n]?.();
+    [renderRace,renderClass,renderStats,renderBackground,renderEquipSpells,renderIdentity,renderSummary,renderCapacities,renderAdventure][n]?.();
     // Non-race steps: make #lp scrollable
     if(n!==0){ $('lp').className='lp-scroll-mode'; }
   }
@@ -3841,6 +3842,37 @@ function renderEquipSpells(){
   </div>
   <div id="armor-equip-sec"></div>
   <div id="equip-lp-sec"></div>
+  <!-- ══ AJOUT MANUEL ══ -->
+  <details id="manual-item-details" style="margin-bottom:.5rem;">
+    <summary style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);cursor:pointer;padding:.4rem .5rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;list-style:none;user-select:none;">✏ Ajouter un objet manuellement</summary>
+    <div style="background:#0A0805;border:1px solid #2A1A08;border-top:none;border-radius:0 0 4px 4px;padding:.6rem .7rem;">
+      <div style="display:grid;grid-template-columns:1fr auto auto;gap:.4rem;margin-bottom:.4rem;align-items:end;">
+        <div>
+          <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">NOM *</label>
+          <input type="text" id="mi-name" class="inv-search" style="margin-bottom:0;width:100%;" placeholder="Ex: Amulette de Tyr">
+        </div>
+        <div>
+          <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">TYPE</label>
+          <select id="mi-cat" style="background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;border-radius:3px;">
+            ${['Équipement','Arme','Armure','Outil','Magie','Potion','Trésor','Autre'].map(c=>`<option value="${c}">${c}</option>`).join('')}
+          </select>
+        </div>
+        <div style="display:flex;gap:.3rem;">
+          <div>
+            <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">POIDS (lb)</label>
+            <input type="number" id="mi-weight" min="0" step="0.1" placeholder="0" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;text-align:center;">
+          </div>
+          <div>
+            <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">VALEUR</label>
+            <input type="text" id="mi-cost" placeholder="2 po" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;">
+          </div>
+        </div>
+      </div>
+      <textarea id="mi-desc" class="ifl" style="min-height:48px;font-size:10px;margin-bottom:.5rem;" placeholder="Description (optionnelle)…"></textarea>
+      <button class="btn btn-p" style="font-size:10px;padding:.35em 1em;" onclick="addManualItem()">+ Ajouter au sac</button>
+    </div>
+  </details>
+
   <div class="import-zone">
     <div class="import-hdr">⬇ Importer des objets (format JSON)</div>
     <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-bottom:.4rem;">Format : [{"id":"dagger","n":"Dague","qty":2,"w":1,"c":"2 po","d":"...","cat":"Arme"}]<br>Ou collez le JSON d'un objet custom défini par votre MJ.</div>
@@ -4115,6 +4147,19 @@ function bagQty(i,d){
   renderBagList();
 }
 function bagRemove(i){C.bag.splice(i,1);renderBagList();}
+function addManualItem(){
+  const name=($('mi-name')?.value||'').trim();
+  if(!name){$('mi-name')?.focus();return;}
+  const cat=$('mi-cat')?.value||'Équipement';
+  const w=parseFloat($('mi-weight')?.value)||0;
+  const cost=($('mi-cost')?.value||'—').trim();
+  const desc=($('mi-desc')?.value||'').trim();
+  const id='custom_'+Date.now();
+  C.bag.push({id,n:name,qty:1,w,c:cost,d:desc,cat});
+  $('mi-name').value='';$('mi-desc').value='';$('mi-weight').value='';$('mi-cost').value='';
+  const det=$('manual-item-details');if(det)det.removeAttribute('open');
+  renderBagList();
+}
 
 function importItems(){
   const ta=$('import-ta');if(!ta)return;
@@ -4357,7 +4402,6 @@ function renderDiceRoller(){
 function renderSummary(){
   const subLine=C.sub?` · ${C.sub.n}`:'';
   const alignLine=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
-  const allEq=[...C.equipment.map(e=>e.replace(/_g\d+$/,'')),...(C.background?.equipment||[])];
   const slots=getSlots();
   const _clsIconSum=(CLASS_STYLE[C.cls?.id]||{icon:'⚔'}).icon;
   const multiLine=(C.multiclasses||[]).filter(m=>m.cls).map(m=>{
@@ -4365,57 +4409,140 @@ function renderSummary(){
     return `${icon} ${m.cls.n}${m.sub?' ('+m.sub.n+')':''} Niv.${m.lvl}`;
   }).join(' / ');
   const classDisplay=C.cls?(C.cls.n+(subLine)+' Niv.'+primaryLvl()+(multiLine?' / '+multiLine:'')):'?';
-  $('lp').innerHTML=`<div class="orn">✦ · ✦ · ✦</div>
-  <div class="sumcard">
-    <div class="sum-banner-hdr">
-      <span class="sum-banner-icon">${_clsIconSum}</span>
-      <div class="sum-title">${C.name||'Héros Sans Nom'}</div>
-      <div class="sum-sub">${C.race?.n||'?'} · ${classDisplay} · ${alignLine}</div>
+  const pb=calcProfBonus();
+
+  // Helpers visuels
+  const darkCard=(content,style='')=>`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:6px;padding:.6rem .8rem;${style}">${content}</div>`;
+  const sectionHdr=(label)=>`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;color:#6A5030;margin-bottom:.45rem;">${label}</div>`;
+  const divider=`<div style="border-top:1px solid #2A1A08;margin:.7rem 0;"></div>`;
+
+  $('lp').innerHTML=`
+  <!-- ══ BANNIÈRE PERSONNAGE ══ -->
+  <div style="position:relative;overflow:hidden;border-radius:8px;margin-bottom:.7rem;background:linear-gradient(160deg,#1A0808 0%,#0D0818 45%,#080508 100%);border:1px solid #3A2010;">
+    <div style="position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.06),transparent 65%);pointer-events:none;"></div>
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.4),transparent);"></div>
+    <div style="padding:1.2rem 1rem 1rem;text-align:center;position:relative;">
+      <div style="font-size:44px;line-height:1;margin-bottom:.5rem;filter:drop-shadow(0 0 12px rgba(201,168,76,.2));">${_clsIconSum}</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:clamp(15px,3.5vw,22px);color:#E8D5A0;letter-spacing:.06em;line-height:1.2;margin-bottom:.35rem;">${C.name||'Héros Sans Nom'}</div>
+      <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.3rem;margin-bottom:.25rem;">
+        ${C.race?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;background:rgba(139,90,26,.25);border:1px solid rgba(139,90,26,.4);color:#C8A060;padding:.15rem .5rem;border-radius:20px;">${C.race.n}</span>`:''}
+        ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;background:rgba(139,26,26,.25);border:1px solid rgba(139,26,26,.4);color:#E08080;padding:.15rem .5rem;border-radius:20px;">${C.cls.n} Niv.${primaryLvl()}</span>`:''}
+        ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;background:rgba(80,40,120,.25);border:1px solid rgba(80,40,120,.4);color:#C0A0E0;padding:.15rem .5rem;border-radius:20px;">${C.sub.n}</span>`:''}
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#5A4530;letter-spacing:.08em;">${alignLine}${C.background?' · '+C.background.n:''}</div>
     </div>
-    <div style="text-align:center;margin-bottom:1rem;"><div class="sumhp">${C.maxHp||calcHP()||'?'} PV</div></div>
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.4rem;margin-bottom:.8rem;">
-      <div class="cstat"><span class="cstat-l">CA</span><div class="cstat-v">${calcCA()}</div></div>
-      <div class="cstat"><span class="cstat-l">INITIATIVE</span><div class="cstat-v">${mods(effStat('dex'))}</div></div>
-      <div class="cstat"><span class="cstat-l">VITESSE</span><div class="cstat-v">${C.race?.speed||30}ft</div></div>
-      <div class="cstat"><span class="cstat-l">PERC. PASSIVE</span><div class="cstat-v">${calcPassivePerc()}</div></div>
-    </div>
-    <div class="sumg">
-      <div class="sumbl"><div class="sumbl-t">CARACTÉRISTIQUES</div>
-        ${STAT_KEYS.map(s=>{const eff=effStat(s);const asi=C.asi?.[s]||0;return`<div class="sumr"><span>${STAT_LABELS[s]}${asi?` <span style="font-size:8px;color:#6A9A5A;">+${asi}ASI</span>`:''}</span><span>${eff} (${mods(eff)})</span></div>`;}).join('')}
-        <div class="sumr"><span>Bonus maîtrise</span><span>+${calcProfBonus()}</span></div>
-      </div>
-      <div class="sumbl"><div class="sumbl-t">JETS DE SAUVEGARDE</div>
-        ${STAT_KEYS.map(s=>{const p=C.cls?.saves.includes(s);const pb=calcProfBonus();const v=mod(effStat(s))+(p?pb:0);return`<div class="sumr"><span>${STAT_LABELS[s].substring(0,3)}${p?' ✦':''}</span><span>${mods(v)}</span></div>`;}).join('')}
-      </div>
-      <div class="sumbl"><div class="sumbl-t">COMPÉTENCES MAÎTRISÉES</div>
-        ${C.skills.map(s=>{const sk=ALL_SKILLS.find(x=>x.n===s);const v=mod(effStat(sk?.s||'str'))+calcProfBonus();return`<div class="sumr"><span>${s}</span><span>${mods(v)}</span></div>`;}).join('')||'<div style="font-size:10px;color:#8A7A5A;">Aucune</div>'}
-      </div>
-      <div class="sumbl"><div class="sumbl-t">MAGIE</div>
-        ${(()=>{if(!C.cls?.spellcaster)return'<div style="font-size:10px;color:#8A7A5A;font-style:italic;">Non-magicien</div>';
-          const spStat=C.cls.spellStat;const spMod=mod(effStat(spStat));const pb=calcProfBonus();
-          const dc=8+pb+spMod;const atk=pb+spMod;
-          return`<div class="sumr" style="margin-bottom:3px;"><span>DD des sorts</span><span style="color:var(--blood);">${dc}</span></div>
-          <div class="sumr" style="margin-bottom:6px;"><span>Bonus d\'attaque magique</span><span style="color:var(--blood);">+${atk}</span></div>`;})()}
-        ${C.cantrips.length?`<div style="font-size:9px;color:var(--gold-d);margin-bottom:2px;">CANTRIPS</div>${C.cantrips.map(s=>`<div style="font-size:10px;">▸ ${s}</div>`).join('')}`:''}
-        ${C.spells.length?`<div style="font-size:9px;color:var(--ocean);margin-top:3px;margin-bottom:2px;">SORTS</div>${C.spells.map(s=>`<div style="font-size:10px;">▸ ${s}</div>`).join('')}`:(!C.cantrips.length&&!C.cls?.spellcaster?'':'') }
-        ${slots?`<div style="font-size:9px;color:var(--gold-d);margin-top:3px;">EMPLACEMENTS DE SORTS</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--forest);">${slots.map((n,i)=>n>0?`Niv.${i+1}: ${n}`:null).filter(Boolean).join(' · ')}</div>`:''}
-      </div>
-    </div>
-    ${C.sub?`<div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">ARCHÉTYPE</div><div style="font-size:12px;margin-bottom:.7rem;">${C.sub.n}<br><span style="font-size:10px;color:#8A7A5A;font-style:italic;">${C.sub.fs[0]}</span></div>`:''}
-    ${(C.feats||[]).length?`<div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">DONS</div>
-    <div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.7rem;">${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid,d:''};return`<div class="feat-tag" title="${f.d}">${f.n}</div>`;}).join('')}</div>`:''}
-    <div class="sumbl-t" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:var(--gold-d);margin-bottom:3px;">LANGUES</div>
-    <div style="font-size:11px;margin-bottom:.7rem;">${getLanguages().join(' · ')||'—'}</div>
-    ${(C.traits[0]||C.ideals||C.bonds||C.flaws)?`
-    <div class="div"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:.5rem;">
-      ${C.traits[0]?`<div class="sumbl"><div class="sumbl-t">⚡ TRAITS</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.traits.join('<br>')}</div></div>`:''}
-      ${C.ideals?`<div class="sumbl"><div class="sumbl-t">🌟 IDÉAUX</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.ideals}</div></div>`:''}
-      ${C.bonds?`<div class="sumbl"><div class="sumbl-t">⚓ LIENS</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.bonds}</div></div>`:''}
-      ${C.flaws?`<div class="sumbl"><div class="sumbl-t">💀 DÉFAUTS</div><div style="font-size:11px;font-style:italic;color:#8A7A5A;">${C.flaws}</div></div>`:''}
-    </div>`:''}
+    <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.25),transparent);"></div>
   </div>
+
+  <!-- ══ PV + STATS DE COMBAT ══ -->
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:.5rem;margin-bottom:.6rem;align-items:center;">
+    <div style="background:linear-gradient(135deg,#4A0808,#2A0505);border:2px solid #8B1F1F;border-radius:6px;padding:.5rem 1rem;text-align:center;min-width:90px;">
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#C06060;margin-bottom:1px;">POINTS DE VIE</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:28px;color:#F0A0A0;line-height:1;">${C.maxHp||calcHP()||'?'}</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8B3030;">PV MAX</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:.3rem;">
+      ${[['CA',calcCA(),'#C9983A'],['INIT',mods(mod(effStat('dex'))),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
+      <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .4rem;text-align:center;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#4A3A20;margin-bottom:1px;">${l}</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:16px;color:${col};font-weight:bold;">${v}</div>
+      </div>`).join('')}
+    </div>
+  </div>
+
+  <!-- ══ CARACTÉRISTIQUES ══ -->
+  ${darkCard(`
+    ${sectionHdr('CARACTÉRISTIQUES · Bonus maîtrise +'+pb)}
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.3rem;">
+      ${STAT_KEYS.map(s=>{
+        const eff=effStat(s);const m_=mod(eff);const asi=C.asi?.[s]||0;
+        const isSave=C.cls?.saves.includes(s);
+        return`<div style="background:#130D06;border:1px solid ${isSave?'rgba(192,168,80,.3)':'#1A1008'};border-radius:4px;padding:.4rem .2rem;text-align:center;">
+          <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#5A4530;margin-bottom:2px;">${STAT_LABELS[s].substring(0,3).toUpperCase()}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:${m_>=0?'#D4A85A':'#E08080'};font-weight:bold;line-height:1;">${mods(m_)}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6A5A3A;margin-top:1px;">${eff}</div>
+          ${asi?`<div style="font-size:7px;color:#6A9A5A;margin-top:1px;">+${asi}ASI</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`)}
+
+  <!-- ══ SAVES + COMPÉTENCES ══ -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.5rem 0;">
+    ${darkCard(`
+      ${sectionHdr('JETS DE SAUVEGARDE')}
+      ${STAT_KEYS.map(s=>{
+        const isSave=C.cls?.saves.includes(s);const v=mod(effStat(s))+(isSave?pb:0);
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${isSave?'#D4A85A':'#6A5A3A'};">${isSave?'✦ ':'   '}${STAT_LABELS[s].substring(0,3)}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${v>=0?'#80C080':'#E08080'};font-weight:bold;">${mods(v)}</span>
+        </div>`;
+      }).join('')}`)}
+    ${darkCard(`
+      ${sectionHdr('COMPÉTENCES MAÎTRISÉES')}
+      ${C.skills.length?C.skills.map(s=>{
+        const sk=ALL_SKILLS.find(x=>x.n===s);const v=mod(effStat(sk?.s||'str'))+pb;
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C0A860;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80%;">✦ ${s}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#80C080;font-weight:bold;">${mods(v)}</span>
+        </div>`;
+      }).join(''):`<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucune</div>`}`)}
+  </div>
+
+  <!-- ══ MAGIE ══ -->
+  ${(()=>{
+    if(!C.cls?.spellcaster&&!C.cantrips?.length&&!C.spells?.length)return'';
+    const spStat=C.cls?.spellStat;const spMod=spStat?mod(effStat(spStat)):0;
+    const dc=8+pb+spMod;const atk=pb+spMod;
+    return darkCard(`
+      ${sectionHdr('MAGIE'+(spStat?' — '+STAT_LABELS[spStat]:''))}
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;">
+        <div style="text-align:center;background:#0D0818;border:1px solid #2A1A3A;border-radius:4px;padding:.3rem .6rem;min-width:52px;">
+          <div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A6A;letter-spacing:.1em;">DD</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#E06080;font-weight:bold;">${dc}</div>
+        </div>
+        <div style="text-align:center;background:#0D0818;border:1px solid #2A1A3A;border-radius:4px;padding:.3rem .6rem;min-width:52px;">
+          <div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A6A;letter-spacing:.1em;">ATT.</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#80A0E0;font-weight:bold;">+${atk}</div>
+        </div>
+        ${slots?`<div style="background:#0D1818;border:1px solid #1A3A2A;border-radius:4px;padding:.3rem .6rem;flex:1;">
+          <div style="font-family:'Cinzel',serif;font-size:7px;color:#3A5A3A;letter-spacing:.1em;margin-bottom:2px;">EMPLACEMENTS</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#60B060;">${slots.map((n,i)=>n>0?`<span style="margin-right:.4rem;">Niv.${i+1}:${n}</span>`:null).filter(Boolean).join('')}</div>
+        </div>`:''}
+      </div>
+      ${C.cantrips?.length?`<div style="font-size:7px;font-family:'Cinzel',serif;letter-spacing:.15em;color:#5A3A4A;margin-bottom:3px;">CANTRIPS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.2rem;margin-bottom:.4rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #3A1A2A;color:#D090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.15rem .4rem;border-radius:3px;">✧ ${s}</span>`).join('')}</div>`:''}
+      ${C.spells?.length?`<div style="font-size:7px;font-family:'Cinzel',serif;letter-spacing:.15em;color:#3A4A5A;margin-bottom:3px;">SORTS CONNUS</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.2rem;">${C.spells.map(s=>`<span style="background:#080F18;border:1px solid #1A2A3A;color:#80A0D0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.15rem .4rem;border-radius:3px;">⚡ ${s}</span>`).join('')}</div>`:''}
+    `);
+  })()}
+
+  <!-- ══ INFOS DIVERSES ══ -->
+  ${darkCard(`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
+      <div>
+        ${sectionHdr('LANGUES')}
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#8A7A5A;line-height:1.6;">${getLanguages().join('<br>')||'—'}</div>
+      </div>
+      <div>
+        ${sectionHdr('MAÎTRISES')}
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#8A7A5A;line-height:1.5;">Armures : ${C.cls?.armor||'—'}<br>Armes : ${C.cls?.weapons||'—'}</div>
+      </div>
+    </div>
+    ${(C.feats||[]).length?`${divider}${sectionHdr('DONS')}
+    <div style="display:flex;flex-wrap:wrap;gap:.25rem;">${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid};return`<span style="background:#120A18;border:1px solid rgba(160,128,208,.3);color:#B090D0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.2rem .45rem;border-radius:3px;" title="${FEATS.find(x=>x.id===fid)?.d||''}">${f.n}</span>`;}).join('')}</div>`:''}
+    ${C.sub?`${divider}${sectionHdr('ARCHÉTYPE')}
+    <div style="font-size:10px;color:#C0A0E0;font-family:'Share Tech Mono',monospace;">${C.sub.n}</div>`:''}
+  `)}
+
+  <!-- ══ TRAITS DE PERSONNALITÉ ══ -->
+  ${(C.traits[0]||C.ideals||C.bonds||C.flaws)?`
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;">
+    ${C.traits[0]?darkCard(`${sectionHdr('⚡ TRAITS')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.traits.join('<br>')}</div>`):''}
+    ${C.ideals?darkCard(`${sectionHdr('🌟 IDÉAUX')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.ideals}</div>`):''}
+    ${C.bonds?darkCard(`${sectionHdr('⚓ LIENS')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.bonds}</div>`):''}
+    ${C.flaws?darkCard(`${sectionHdr('💀 DÉFAUTS')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.flaws}</div>`):''}
+  </div>`:''}
+
   ${(()=>{
     const clf=C.cls&&CLS_LVL_FEAT[C.cls.id];
     if(!clf)return'';
@@ -4479,12 +4606,12 @@ function renderSummary(){
     oninput="C.notes=this.value">${C.notes||''}</textarea>
 
   <div id="equip-lp-sec"></div>
-  <div class="orn">✦ · ✦ · ✦</div>
-  <div class="btn-row" style="justify-content:center;">
+  <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;">
+    <button class="btn btn-s" onclick="go(5)">← Identité</button>
+    <button class="btn btn-p" style="flex:1;" onclick="go(7)">Capacités & Sorts →</button>
     <button class="btn btn-g" onclick="exportJSON()">↓ JSON</button>
-    <button class="btn btn-b" onclick="viewOfficialPDF()">📜 Voir la fiche D&D</button>
-    <button class="btn btn-p" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">Sauvegarder & Voir mes persos →</button>
-    <button class="btn btn-s" onclick="go(5)">← Modifier</button>
+    <button class="btn btn-b" onclick="viewOfficialPDF()">📜 Fiche D&D</button>
+    <button class="btn btn-p" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">💾 Sauvegarder</button>
   </div>`;
   if(!C.equipped) C.equipped={};
   renderEquipPanel();
@@ -4675,11 +4802,156 @@ function renderAdventure(){
       <div class="adv-price">${a.ok?`✦ ${a.price} — Disponible`:'⧖ Bientôt disponible'}</div>
     </div>
   </div>`).join('')}</div>
-  <div class="btn-row"><button class="btn btn-s" onclick="go(6)">← Résumé</button></div>`;
+  <div class="btn-row"><button class="btn btn-s" onclick="go(7)">← Capacités</button></div>`;
 }
 function launchAdv(id){
   if(id==='maitresse') { MDG.xp=0; MDG.flags={}; MDG.phase=1; renderScenario('L1'); }
   else alert('Bientôt disponible !');
+}
+
+// ══════════════════════════════════════════════════
+// CAPACITÉS & SORTS — step 7
+// ══════════════════════════════════════════════════
+function renderCapacities(){
+  $('badge').textContent='CAPACITÉS & SORTS';
+  $('lp').className='lp-scroll-mode';
+
+  const pb=calcProfBonus();
+  const isCaster=!!C.cls?.spellcaster;
+  const spStat=C.cls?.spellStat;
+  const spMod=spStat?mod(effStat(spStat)):0;
+  const spDC=isCaster?8+pb+spMod:null;
+  const spAtk=isCaster?pb+spMod:null;
+  const slots=getSlots();
+
+  // Armes : mainhand équipé + armes du sac
+  const weaponSources=[];
+  if(C.equipped?.mainhand)weaponSources.push(C.equipped.mainhand);
+  (C.bag||[]).filter(b=>WEAPON_PROPS[b.id]).forEach(w=>{if(!weaponSources.find(x=>x.id===w.id))weaponSources.push(w);});
+
+  // Features classe + sous-classe mergées
+  const clf=C.cls&&CLS_LVL_FEAT[C.cls.id];
+  const lvl=C.level||1;
+  const merged={};
+  if(clf)Object.entries(clf).forEach(([l,fs])=>{merged[l]=fs.map(f=>({n:f,d:'',sub:false}));});
+  if(C.sub?.fs){
+    C.sub.fs.forEach(f=>{
+      const m=f.match(/^Niv\.(\d+)\s*[—–]\s*(.+)/);
+      if(!m)return;
+      const lk=m[1],full=m[2];
+      const short=(full.split(':')[0]||full).trim();
+      const desc=full.split(':').slice(1).join(':').trim();
+      if(!merged[lk])merged[lk]=[];
+      merged[lk].push({n:short,d:desc,sub:true});
+    });
+  }
+  const clsEntries=Object.entries(merged).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
+
+  const sect=(icon,title,sub,content)=>`
+    <div style="margin-bottom:1.1rem;">
+      <div style="display:flex;align-items:baseline;gap:.5rem;margin-bottom:.5rem;padding-bottom:.25rem;border-bottom:1px solid #2A1A08;">
+        <span style="font-size:15px;">${icon}</span>
+        <span style="font-family:'Cinzel',serif;font-size:11px;letter-spacing:.15em;color:var(--gold-d);">${title}</span>
+        ${sub?`<span style="font-size:9px;color:#6A5A3A;font-style:italic;">${sub}</span>`:''}
+      </div>
+      ${content}
+    </div>`;
+
+  const tag=(txt,isSubclass,title)=>isSubclass
+    ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .45rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.15rem;" title="${title||''}">${txt}</span>`
+    :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .45rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.15rem;" title="${txt}">${txt}</span>`;
+
+  $('lp').innerHTML=`<div style="padding:.5rem 0 2.5rem;">
+
+  ${weaponSources.length?sect('⚔','ACTIONS DE COMBAT','',`
+    <table style="width:100%;border-collapse:collapse;">
+      <thead><tr style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5A3A;">
+        <th style="text-align:left;padding:2px 6px 4px;">ARME</th>
+        <th style="text-align:center;padding:2px 6px 4px;">ATQ</th>
+        <th style="text-align:center;padding:2px 6px 4px;">DÉGÂTS</th>
+        <th style="text-align:left;padding:2px 6px 4px;">TYPE</th>
+      </tr></thead>
+      <tbody>${weaponSources.map(w=>{
+        const p=WEAPON_PROPS[w.id];
+        if(!p){const a=mod(effStat('str'))+pb;return`<tr><td style="padding:3px 6px;font-size:10px;">${w.n}</td><td style="text-align:center;color:#D4A85A;">${mods(a)}</td><td style="text-align:center;color:var(--blood);">1d4${mods(a)}</td><td style="font-size:9px;color:#6A5A3A;">—</td></tr>`;}
+        const info=getWeaponAtkBonus(w);
+        return`<tr style="border-top:1px solid #1A1008;">
+          <td style="padding:4px 6px;font-size:10px;color:var(--parch);">${w.n}${w.bonus?`<span style="font-size:8px;color:#80D080;"> +${w.bonus}</span>`:''}</td>
+          <td style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;color:#D4A85A;">${mods(info.atk)}</td>
+          <td style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--blood);">${info.dice}${mods(info.dmgMod)}</td>
+          <td style="font-size:9px;color:#6A5A3A;">${info.type}</td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>
+    <div style="font-size:8px;color:#4A3A20;font-family:'Share Tech Mono',monospace;margin-top:.4rem;">
+      Prof. +${pb} · FOR ${mods(mod(effStat('str')))} · DEX ${mods(mod(effStat('dex')))}
+    </div>`):
+  sect('⚔','ACTIONS DE COMBAT','',`<div style="font-size:10px;color:#4A3A20;font-style:italic;">Aucune arme — ajoutez des armes à l'inventaire.</div>`)}
+
+  ${(C.race?.traits?.length)?sect('🧬','TRAITS RACIAUX',C.race.n,`
+    <div style="display:flex;flex-wrap:wrap;gap:.25rem;">
+      ${C.race.traits.map(t=>{const nm=t.split(':')[0].trim();const desc=t.includes(':')?t.split(':').slice(1).join(':').trim():'';return tag(nm,false,desc);}).join('')}
+    </div>`):''}
+
+  ${(clf||C.sub)?sect('📖','CAPACITÉS DE CLASSE',C.cls?.n+(C.sub?' — '+C.sub.n:''),`
+    <div class="cls-feat-timeline">
+    ${clsEntries.map(([l,fs])=>`
+      <div class="cft-row">
+        <div class="cft-lvl">Niv.${l}</div>
+        <div class="cft-feats">${fs.map(f=>tag(f.n,f.sub,f.d)).join('')}</div>
+      </div>`).join('')}
+    </div>`):''}
+
+  ${(C.feats||[]).length?sect('⭐','DONS','',`
+    <div style="display:flex;flex-direction:column;gap:.45rem;">
+      ${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid,d:''};return`
+      <div style="background:#0E0A05;border:1px solid #2A1A08;border-left:2px solid var(--gold-d);border-radius:0 4px 4px 0;padding:.4rem .7rem;">
+        <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold-d);margin-bottom:2px;">${f.n}</div>
+        <div style="font-size:9px;color:#8A7A5A;line-height:1.55;">${f.d}</div>
+      </div>`;}).join('')}
+    </div>`):''}
+
+  ${(C.specialAbilities||[]).length?sect('✨','CAPACITÉS SPÉCIALES','',`
+    <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
+      ${(C.specialAbilities||[]).map(a=>`
+      <div style="display:flex;align-items:center;gap:.5rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .6rem;">
+        <span style="font-size:10px;color:var(--parch);">${a.name}</span>
+        ${a.roll!=null?`<span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--blood);font-weight:bold;">${a.roll}</span>`:''}
+      </div>`).join('')}
+    </div>`):''}
+
+  ${isCaster?sect('🔮','MAGIE',STAT_LABELS[spStat]||spStat,`
+    <div style="display:flex;gap:.4rem;margin-bottom:.6rem;">
+      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:4px;padding:.4rem .8rem;text-align:center;min-width:60px;">
+        <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#6A5A8A;margin-bottom:2px;">DD SORTS</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:var(--blood);font-weight:bold;">${spDC}</div>
+      </div>
+      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:4px;padding:.4rem .8rem;text-align:center;min-width:60px;">
+        <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#6A5A8A;margin-bottom:2px;">ATT. MAG.</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#80A0E0;font-weight:bold;">+${spAtk}</div>
+      </div>
+      ${slots?`<div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:4px;padding:.4rem .8rem;flex:1;">
+        <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#6A5A8A;margin-bottom:4px;">EMPLACEMENTS</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--forest);">
+          ${slots.map((n,i)=>n>0?`<span style="margin-right:.6rem;">Niv.${i+1}:${n}</span>`:null).filter(Boolean).join('')}
+        </div>
+      </div>`:''}
+    </div>
+    ${C.cantrips.length?`<div style="font-size:8px;font-family:'Cinzel',serif;letter-spacing:.12em;color:#6A5A3A;margin-bottom:.3rem;">CANTRIPS — À VOLONTÉ</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.25rem;margin-bottom:.6rem;">
+      ${C.cantrips.map(s=>`<span style="background:#180A10;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .5rem;border-radius:3px;">✧ ${s}</span>`).join('')}
+    </div>`:''}
+    ${C.spells.length?`<div style="font-size:8px;font-family:'Cinzel',serif;letter-spacing:.12em;color:#6A5A3A;margin-bottom:.3rem;">SORTS CONNUS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.25rem;">
+      ${C.spells.map(s=>`<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .5rem;border-radius:3px;">⚡ ${s}</span>`).join('')}
+    </div>`:''}
+  `):''}
+
+  <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.5rem;display:flex;gap:.5rem;">
+    <button class="btn btn-s" onclick="go(6)">← Résumé</button>
+    <button class="btn btn-s" onclick="renderAdventure()">⚔ Choisir une aventure →</button>
+  </div>
+  </div>`;
 }
 
 // ══════════════════════════════════════════════════
