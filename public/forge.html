@@ -1513,7 +1513,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <div class="tb-t">⚔ Forge du Héros <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold-d);letter-spacing:.1em;">v3.0</span></div>
     <div class="tb-r">
       <div class="badge" id="badge">CRÉATION</div>
-      <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="saveToRoster();this.textContent='✓ Sauvegardé';setTimeout(()=>this.textContent='💾 Sauvegarder',1500)">💾 Sauvegarder</button>
+      <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="saveDraft();this.textContent='✓ Sauvegardé';setTimeout(()=>this.textContent='💾 Sauvegarder',1500)">💾 Sauvegarder</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="showTitle()">↩ Accueil</button>
     </div>
   </div>
@@ -3047,6 +3047,7 @@ function clsShortStr(){
   return mcs.length?[C.cls.n,...mcs.map(m=>m.cls.n)].join('/'):C.cls.n;
 }
 function calcHP(){
+  if(C.hpOverride!=null)return C.hpOverride;
   if(!C.cls)return 0;
   const conM=mod(effStat('con'));
   // Niveau 1 : max du dé de la classe principale
@@ -3509,7 +3510,7 @@ function rollDice(){
     }
   },55);
 }
-function resetDice(){C.diceRolls=[];C.diceAssigned={};C.dice3d6={};C.dice3d6RerollUsed=false;C.freeStats=null;applyRace();renderStats();}
+function resetDice(){C.diceRolls=[];C.diceAssigned={};C.dice3d6={};C.dice3d6RerollUsed=false;C.freeStats=null;C.hpOverride=null;applyRace();renderStats();}
 function setDiceMode(mode){
   if(mode==='points'){resetDice();return;}
   if(mode==='4d6'){C.freeStats=null;C.dice3d6={};C.dice3d6RerollUsed=false;rollDice();return;}
@@ -3647,6 +3648,15 @@ function renderFreeStatsArea(){
   if(!C.freeStats){w.innerHTML='';return;}
   const fs=C.freeStats;
   if($('pts-disp'))$('pts-disp').style.display='none';
+  const autoHP=(() => {
+    if(!C.cls)return'?';
+    const conM=mod(effStat('con'));
+    let hp=C.cls.hd+conM;
+    hp+=Math.max(0,(C.level||1)-1)*(Math.floor(C.cls.hd/2)+1+conM);
+    (C.multiclasses||[]).forEach(m=>{if(m.cls&&m.lvl>0)hp+=m.lvl*(Math.floor(m.cls.hd/2)+1+conM);});
+    return hp;
+  })();
+  const hpVal=C.hpOverride!=null?C.hpOverride:autoHP;
   w.innerHTML=`<div class="d3-area">
     <div class="dice-h">✏ Valeurs libres — entrez chaque caractéristique (3–18)</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;padding:.4rem 0;">
@@ -3660,7 +3670,24 @@ function renderFreeStatsArea(){
         </div>
       `).join('')}
     </div>
+    <div style="margin-top:.6rem;padding:.5rem;background:#1A1510;border:1px solid #3A2A10;border-radius:3px;display:flex;align-items:center;gap:.7rem;">
+      <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);white-space:nowrap;">PV MAX</div>
+      <input type="number" min="1" max="999" value="${hpVal}"
+        style="flex:1;background:transparent;border:none;border-bottom:1px solid var(--blood);color:var(--blood);font-family:'Cinzel Decorative',serif;font-size:22px;text-align:center;padding:.1rem 0;outline:none;-moz-appearance:textfield;"
+        oninput="setHPOverride(this.value)">
+      ${C.hpOverride!=null?`<button onclick="clearHPOverride()" style="background:none;border:1px solid #3A2A10;color:#6A5A3A;font-size:9px;padding:2px 6px;cursor:pointer;border-radius:2px;" title="Revenir au calcul automatique">↺ auto</button>`:'<span style="font-size:9px;color:#4A3A20;font-style:italic;">auto</span>'}
+    </div>
   </div>`;
+}
+function setHPOverride(v){
+  const n=parseInt(v);
+  C.hpOverride=(isNaN(n)||n<1)?null:n;
+  updateRight();
+}
+function clearHPOverride(){
+  C.hpOverride=null;
+  renderFreeStatsArea();
+  updateRight();
 }
 function setFreeStat(k,v){
   if(!C.freeStats)C.freeStats={str:8,dex:8,con:8,int:8,wis:8,cha:8};
@@ -5320,17 +5347,33 @@ const ROSTER_KEY = 'forge_roster_v1';
 function getRoster(){ try{ return JSON.parse(localStorage.getItem(ROSTER_KEY)||'[]'); }catch{ return []; } }
 function setRoster(r){ localStorage.setItem(ROSTER_KEY, JSON.stringify(r)); }
 
-function saveToRoster(){
+const STEP_NAMES=['Race','Classe','Caractéristiques','Background','Équipement','Identité','Résumé'];
+function saveDraft(){
+  if(!C.id) C.id='char_'+Date.now();
+  if(!C.name){
+    const parts=[];
+    if(C.race) parts.push(C.race.n);
+    if(C.cls) parts.push(C.cls.n);
+    C.name='Brouillon'+(parts.length?' — '+parts.join(' '):'');
+  }
+  C._draft_step=CUR;
+  saveToRoster(true);
+}
+function saveToRoster(isDraft){
   if(!C.name) return;
   if(!C.id) C.id = 'char_'+Date.now();
   if(!C.scenarioHistory) C.scenarioHistory = [];
+  if(typeof CUR !== 'undefined'){
+    if(CUR<6) C._draft_step=CUR;
+    else delete C._draft_step;
+  }
   const roster = getRoster();
   const idx = roster.findIndex(r=>r.id===C.id);
   const entry = Object.assign({}, C, {_savedAt: new Date().toISOString()});
   if(idx>=0) roster[idx]=entry; else roster.push(entry);
   setRoster(roster);
   renderRoster();
-  syncCharToSupabase(entry); // fire-and-forget
+  if(!isDraft) syncCharToSupabase(entry); // fire-and-forget
 }
 
 function deleteFromRoster(id){
@@ -5367,7 +5410,8 @@ function openCharFromRoster(id){
     showGame();goCT(4);
   } else {
     $('nav').style.display='flex';$('dh-nav').classList.remove('active');$('ct-nav').classList.remove('active');
-    showGame();go(6);updateRight();
+    const resumeStep=(entry._draft_step!=null&&entry._draft_step<6)?entry._draft_step:6;
+    showGame();go(resumeStep);updateRight();
   }
 }
 
@@ -6168,11 +6212,13 @@ function renderRoster(){
       : clsImgUrl
         ? `<img src="${esc(clsImgUrl)}" alt="${clsName}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" data-cls-id="${esc(r.cls.id)}" onerror="rcClsImgFallback(this);">`
         : clsFallbackHtml;
-    return `<div class="rc" onclick="if(!_rcDrag.moved)openRosterEquip('${safeId}')">
+    const isDraft=r._draft_step!=null&&r._draft_step<6;
+    const draftLabel=isDraft?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:#1A1A2A;color:#A080D0;border:1px solid #3A2A6A;padding:2px 5px;border-radius:2px;margin-left:4px;">EN COURS · ${STEP_NAMES[r._draft_step]||''}</span>`:'';
+    return `<div class="rc" style="${isDraft?'border-color:#3A2A6A;':''}opacity:${isDraft?.85:1}" onclick="if(!_rcDrag.moved)openRosterEquip('${safeId}')">
       <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${safeId}')" title="Supprimer">✕</button>
-      <div class="rc-portrait">${portrait}</div>
+      <div class="rc-portrait" style="${isDraft?'opacity:.7':'}'}">${portrait}</div>
       <div class="rc-body">
-        <div class="rc-name">${safeName}</div>
+        <div class="rc-name">${safeName}${draftLabel}</div>
         <div class="rc-sub">${clsName} · ${raceName} · Niv ${r.level||1}</div>
         <div class="rc-scenarios">${lastScen||(!histCount?'Aucun scénario':'')}</div>
         <div class="rc-btns">
