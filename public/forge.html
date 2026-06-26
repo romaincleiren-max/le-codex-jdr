@@ -1681,7 +1681,6 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
         <div class="pill" id="p5" onclick="go(5)">6 · Identité</div>
         <div class="pill" id="p6" onclick="go(6)">7 · Résumé</div>
         <div class="pill" id="p7" onclick="go(7)">8 · Capacités</div>
-        <div class="pill" id="p8" onclick="go(8)" style="display:none;">⚔ Scénario</div>
       </div>
       <div id="img-actions">
         <button class="img-action-btn" onclick="$('photo-input').click()">Changer</button>
@@ -3258,6 +3257,7 @@ function loadChar(e){
 }
 function go(n){
   if(n!==4 && n!==6) hideEquipPanel();
+  if(n!==6 && _reFromEdit) closeReOverlay();
   CUR=n;
   const scnBar=$('scn-bar');
   const navBar=$('nav');
@@ -3265,10 +3265,11 @@ function go(n){
   else { scnBar.style.display='none'; navBar.style.display='flex'; }
   if(n!==8){
     document.querySelectorAll('.pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
-    [renderRace,renderClass,renderStats,renderBackground,renderEquipSpells,renderIdentity,renderSummary,renderCapacities,renderAdventure][n]?.();
+    [renderRace,renderClass,renderStats,renderBackground,renderEquipSpells,renderIdentity,renderSummary,renderCapacities][n]?.();
     // Non-race steps: make #lp scrollable
     if(n!==0){ $('lp').className='lp-scroll-mode'; }
   }
+  if(n===6) openReForEdit();
   $('lp').scrollTop=0;
   updateCenterBand();
 }
@@ -4534,7 +4535,6 @@ function renderSummary(){
       <div id="bag-list"></div>
     </div>
     <div id="armor-equip-sec"></div>
-    <div id="equip-lp-sec"></div>
     <details id="manual-item-details" style="margin-bottom:.5rem;">
       <summary style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);cursor:pointer;padding:.4rem .5rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;list-style:none;user-select:none;">✏ Ajouter un objet manuellement</summary>
       <div style="background:#0A0805;border:1px solid #2A1A08;border-top:none;border-radius:0 0 4px 4px;padding:.6rem .7rem;">
@@ -4570,10 +4570,8 @@ function renderSummary(){
       <textarea class="import-ta" id="import-ta" placeholder='[{"id":"epee-magique","n":"Épée +1","qty":1,"w":3,"c":"—","d":"Arme magique.","cat":"Arme"}]'></textarea>
       <div class="btn-row" style="margin-top:.5rem;"><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="importItems()">⬇ Importer</button><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="exportBagJSON()">⬆ Exporter le sac</button></div>
     </div>`;
-    if(!C.equipped)C.equipped={};
     renderBagList();
     if(_invSource==='codex')renderCodexGrid();else renderInvGrid();
-    renderEquipPanel();
     return;
   }
 
@@ -4807,7 +4805,6 @@ function renderSummary(){
     </div>`;
   })()}
 
-  <div id="equip-lp-sec"></div>
   <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;">
     <button class="btn btn-s" onclick="go(5)">← Identité</button>
     <button class="btn btn-p" style="flex:1;" onclick="go(7)">Capacités & Sorts →</button>
@@ -4815,8 +4812,6 @@ function renderSummary(){
     <button class="btn btn-b" onclick="viewOfficialPDF()">📜 Fiche D&D</button>
     <button class="btn btn-p" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">💾 Sauvegarder</button>
   </div>`;
-  if(!C.equipped) C.equipped={};
-  renderEquipPanel();
 }
 
 function exportJSON(){
@@ -5239,7 +5234,6 @@ function renderCapacities(){
 
   <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.5rem;display:flex;gap:.5rem;">
     <button class="btn btn-s" onclick="go(6)">← Résumé</button>
-    <button class="btn btn-s" onclick="renderAdventure()">⚔ Choisir une aventure →</button>
   </div>
   </div>`;
 }
@@ -6085,6 +6079,7 @@ function addScenarioToChar(charId, scenarioName, status){
 // ROSTER EQUIPMENT OVERLAY — RPG Paper Doll
 // ══════════════════════════════════════════════════
 let _reChar = null;
+let _reFromEdit = false;
 let _reSrc = 'srd';
 let _reQ = '';
 let _reBagDragItem = null;
@@ -6127,6 +6122,13 @@ function openRosterEquip(id){
 }
 
 function closeReOverlay(){
+  if(_reFromEdit){
+    saveToRoster();
+    $('re-overlay').classList.remove('open');
+    _reChar = null;
+    _reFromEdit = false;
+    return;
+  }
   if(_reChar){
     var roster = getRoster();
     var idx = roster.findIndex(function(r){return r.id===_reChar.id;});
@@ -6143,6 +6145,21 @@ function closeReOverlay(){
   $('re-overlay').classList.remove('open');
   _reChar = null;
   renderRoster();
+}
+
+function openReForEdit(){
+  if(!C.equipped) C.equipped={};
+  _reChar = C;
+  _reFromEdit = true;
+  preloadCodexData();
+  _reSrc='srd'; _reQ=''; _reView='equip';
+  var hn=$('re-hdr-name'); if(hn) hn.textContent=C.name||'—';
+  var spBtn=$('re-spell-btn');
+  if(spBtn) spBtn.style.display=(C.cls&&C.cls.spellcaster)?'':'none';
+  toggleReView('equip');
+  renderReSheet(); renderReInv();
+  $('re-overlay').classList.add('open');
+  setForgeScale();
 }
 
 var _reView='equip';
@@ -6818,7 +6835,7 @@ function renderRoster(){
         : clsFallbackHtml;
     const isDraft=r._draft_step!=null&&r._draft_step<6;
     const draftLabel=isDraft?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:#1A1A2A;color:#A080D0;border:1px solid #3A2A6A;padding:2px 5px;border-radius:2px;margin-left:4px;">EN COURS · ${STEP_NAMES[r._draft_step]||''}</span>`:'';
-    return `<div class="rc" style="${isDraft?'border-color:#3A2A6A;':''}opacity:${isDraft?.85:1}" onclick="if(!_rcDrag.moved)openRosterEquip('${safeId}')">
+    return `<div class="rc" style="${isDraft?'border-color:#3A2A6A;':''}opacity:${isDraft?.85:1}" onclick="if(!_rcDrag.moved)openCharFromRoster('${safeId}')">
       <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${safeId}')" title="Supprimer">✕</button>
       <div class="rc-portrait" style="${isDraft?'opacity:.7':'}'}">${portrait}</div>
       <div class="rc-body">
@@ -6827,7 +6844,6 @@ function renderRoster(){
         <div class="rc-scenarios">${lastScen||(!histCount?'Aucun scénario':'')}</div>
         <div class="rc-btns">
           <button class="rc-btn" onclick="event.stopPropagation();openShareModal('${safeId}')" style="border-color:#4A2A8A;color:#A080D0;flex:0 0 auto;padding:.45em .7em;" title="Partager sur le site">📤</button>
-          <button class="rc-btn primary" onclick="event.stopPropagation();openCharFromRoster('${safeId}')">✏ Éditer</button>
         </div>
         ${r.supabaseId?`<button class="rc-share-admin${r.sharedWithAdmin?' shared':''}" onclick="event.stopPropagation();shareCharWithAdmin('${safeId}')" title="${r.sharedWithAdmin?'Partagé avec l\'Admin — cliquer pour annuler':'Partager avec l\'Admin'}">
           ${r.sharedWithAdmin?'👑 Partagé ✓':'👑 Partager avec l\'Admin'}</button>`:'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#3A2A1A;margin-top:.25rem;">💾 Sauvegardez d\'abord pour partager</div>'}
