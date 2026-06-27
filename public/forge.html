@@ -1698,6 +1698,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
         <div class="identity-name" id="identity-name">—</div>
         <div class="identity-sub" id="identity-sub">Race · Classe · Niv. 1</div>
       </div>
+      <div id="sum-doll" style="display:none;position:absolute;inset:0;z-index:4;"></div>
     </div>
     <div id="lp"></div>
   </div>
@@ -3222,7 +3223,12 @@ function setForgeScale(){
   }
 }
 window.addEventListener('resize',setForgeScale);
-function showTitle(){$('ts').style.display='flex';$('gs').style.display='none';updateLoginStatus();}
+function showTitle(){
+  if(CUR===6&&_reFromEdit&&C.name){saveToRoster();}
+  _reChar=null;_reFromEdit=false;
+  var _sd=$('sum-doll');if(_sd)_sd.style.display='none';
+  $('ts').style.display='flex';$('gs').style.display='none';updateLoginStatus();
+}
 function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';setForgeScale();}
 function newChar(){
   C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',race:null,cls:null,sub:null,multiclasses:[],background:null,alignment:null,
@@ -3258,19 +3264,33 @@ function loadChar(e){
 }
 function go(n){
   if(n!==4 && n!==6) hideEquipPanel();
-  if(n!==6 && _reFromEdit) closeReOverlay();
+  // Quitter le step 6 : fermer overlay re-edit si ouvert
+  if(n!==6 && _reFromEdit){
+    var _sd=$('sum-doll'); if(_sd) _sd.style.display='none';
+    _reChar=null; _reFromEdit=false;
+    $('re-overlay').classList.remove('open');
+  }
   CUR=n;
   const scnBar=$('scn-bar');
   const navBar=$('nav');
   if(n===8){ scnBar.style.display='flex'; navBar.style.display='none'; }
-  else { scnBar.style.display='none'; navBar.style.display='flex'; }
+  else if(n===6){ scnBar.style.display='none'; navBar.style.display='none'; }
+  else { scnBar.style.display='none'; navBar.style.display='flex'; var _sd=$('sum-doll'); if(_sd) _sd.style.display='none'; }
   if(n!==8){
     document.querySelectorAll('.pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
     [renderRace,renderClass,renderStats,renderBackground,renderEquipSpells,renderIdentity,renderSummary,renderCapacities][n]?.();
-    // Non-race steps: make #lp scrollable
     if(n!==0){ $('lp').className='lp-scroll-mode'; }
   }
-  if(n===6) openReForEdit();
+  if(n===6){
+    if(!C.equipped) C.equipped={};
+    _reChar=C; _reFromEdit=true;
+    preloadCodexData();
+    var _sd=$('sum-doll'); if(_sd) _sd.style.display='block';
+    var _ia=$('img-actions'); if(_ia) _ia.style.display='none';
+    var _iz=$('img-import-zone'); if(_iz) _iz.style.display='none';
+    var _ib=$('identity-band'); if(_ib) _ib.style.display='none';
+    renderSumCenterDoll();
+  }
   $('lp').scrollTop=0;
   updateCenterBand();
 }
@@ -4506,39 +4526,48 @@ function renderDiceRoller(){
   renderDiceList();
 }
 
+function doShortRest(){
+  if(C.cls&&C.cls.id==='warlock'){if(_reChar)_reChar.usedSlots={};else C.usedSlots={};}
+  saveToRoster();
+  var btn=$('short-rest-btn');
+  if(btn){btn.textContent='✓ Repos court !';setTimeout(function(){btn.textContent='⭕ Repos Court';},1500);}
+}
+function doLongRest(){
+  C.hpTemp=0; C.conditions=[];
+  if(_reChar) _reChar.usedSlots={}; else C.usedSlots={};
+  saveToRoster();
+  renderSummary();
+}
+
 let _sumTab='fiche';
 function renderSummary(){
-  const subLine=C.sub?` · ${C.sub.n}`:'';
   const alignLine=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
   const slots=getSlots();
+  const isCaster=!!C.cls?.spellcaster;
+  const spStat=C.cls?.spellStat;
+  const spMod=spStat?mod(effStat(spStat)):0;
+  const spDC=isCaster?8+calcProfBonus()+spMod:null;
+  const spAtk=isCaster?calcProfBonus()+spMod:null;
   const _clsIconSum=(CLASS_STYLE[C.cls?.id]||{icon:'⚔'}).icon;
-  const multiLine=(C.multiclasses||[]).filter(m=>m.cls).map(m=>{
-    const icon=(CLASS_STYLE[m.cls.id]||{icon:'⚔'}).icon;
-    return `${icon} ${m.cls.n}${m.sub?' ('+m.sub.n+')':''} Niv.${m.lvl}`;
-  }).join(' / ');
-  const classDisplay=C.cls?(C.cls.n+(subLine)+' Niv.'+primaryLvl()+(multiLine?' / '+multiLine:'')):'?';
   const pb=calcProfBonus();
 
-  // Helpers visuels
-  const darkCard=(content,style='')=>`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:6px;padding:.6rem .8rem;${style}">${content}</div>`;
-  const sectionHdr=(label)=>`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;color:#6A5030;margin-bottom:.45rem;">${label}</div>`;
-  const divider=`<div style="border-top:1px solid #2A1A08;margin:.7rem 0;"></div>`;
+  const darkCard=(c,s='')=>`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:6px;padding:.6rem .8rem;${s}">${c}</div>`;
+  const sh=(l)=>`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;color:#6A5030;margin-bottom:.4rem;">${l}</div>`;
 
-  // ─── TAB STRIP ───
-  const tabStrip=`<div style="display:flex;border:1px solid #2A1A08;border-radius:6px;overflow:hidden;margin-bottom:.7rem;">
-    <button onclick="_sumTab='fiche';renderSummary()" style="flex:1;padding:.45rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;cursor:pointer;background:${_sumTab==='fiche'?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab==='fiche'?'#C9A84C':'#5A4A30'};border:none;border-right:1px solid #2A1A08;transition:background .15s;">📋 FICHE</button>
-    <button onclick="_sumTab='inventaire';renderSummary()" style="flex:1;padding:.45rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;cursor:pointer;background:${_sumTab==='inventaire'?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab==='inventaire'?'#C9A84C':'#5A4A30'};border:none;border-right:1px solid #2A1A08;transition:background .15s;">🎒 INVENTAIRE</button>
-    <button onclick="_sumTab='notes';renderSummary()" style="flex:1;padding:.45rem;font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;cursor:pointer;background:${_sumTab==='notes'?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab==='notes'?'#C9A84C':'#5A4A30'};border:none;transition:background .15s;">📝 NOTES</button>
+  // ─── TAB STRIP 3×2 ───
+  const TABS=[['fiche','📋','FICHE'],['capacites','⚡','CAPAC.'],['inventaire','🎒','SAC'],['sorts','🔮','SORTS'],['notes','📝','NOTES'],['familier','🐾','FAMILIER']];
+  const tabStrip=`<div style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #2A1A08;border-radius:6px;overflow:hidden;margin-bottom:.65rem;">
+    ${TABS.map(([id,icon,lbl],i)=>`<button onclick="_sumTab='${id}';renderSummary()" style="padding:.36rem .2rem;font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:.05em;cursor:pointer;background:${_sumTab===id?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab===id?'#C9A84C':'#5A4A30'};border:none;border-right:${i%3!==2?'1px solid #2A1A08':'none'};border-bottom:${i<3?'1px solid #2A1A08':'none'};transition:background .15s;line-height:1.45;">${icon}<br>${lbl}</button>`).join('')}
   </div>`;
 
-  // ─── ONGLET INVENTAIRE ───
+  // ─── ONGLET SAC / INVENTAIRE ───
   if(_sumTab==='inventaire'){
     $('lp').innerHTML=tabStrip+`
     <div class="inv-src" id="inv-src-bar">
       <button class="inv-src-btn ${_invSource==='srd'?'active':''}" data-src="srd" onclick="switchInvSource('srd')">⚔ Objets SRD</button>
       <button class="inv-src-btn ${_invSource==='codex'?'active':''}" data-src="codex" onclick="switchInvSource('codex')">✦ Codex Sigil Saga</button>
     </div>
-    <input class="inv-search" id="inv-q" placeholder="${_invSource==='srd'?'Rechercher un objet... (torche, dague, corde...)':'Rechercher dans le Codex... (Arcanite, Eldralithe...)'}" value="${_invSource==='srd'?_invQ:_codexQ}" oninput="${_invSource==='srd'?'_invQ=this.value;renderInvGrid()':'_codexQ=this.value;renderCodexGrid()'}">
+    <input class="inv-search" id="inv-q" placeholder="${_invSource==='srd'?'Rechercher un objet...':'Rechercher dans le Codex...'}" value="${_invSource==='srd'?_invQ:_codexQ}" oninput="${_invSource==='srd'?'_invQ=this.value;renderInvGrid()':'_codexQ=this.value;renderCodexGrid()'}">
     <div class="inv-cats" id="inv-cats-bar" style="display:${_invSource==='srd'?'flex':'none'}">${ITEM_CATS.map(c=>`<div class="inv-cat ${_invCat===c?'active':''}" onclick="_invCat='${c}';renderInvGrid()">${c}</div>`).join('')}</div>
     <div class="inv-cats" id="inv-rarity-bar" style="display:${_invSource==='srd'?'flex':'none'}">${ITEM_RARITIES.map(r=>{const rc=r!=='Tous'?(_IP_RARITY[r]||{}):null;const style=rc&&_invRarity===r?`background:${rc.badge};color:${rc.badgeTxt};border-color:${rc.badge};`:'';return`<div class="inv-cat ${_invRarity===r?'active':''}" style="${style}" onclick="_invRarity='${r}';renderInvGrid()">${r==='Tous'?'✦ Rareté':r}</div>`;}).join('')}</div>
     <div class="inv-grid" id="inv-grid"></div>
@@ -4563,16 +4592,16 @@ function renderSummary(){
           </div>
           <div style="display:flex;gap:.3rem;">
             <div>
-              <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">POIDS (lb)</label>
-              <input type="number" id="mi-weight" min="0" step="0.1" placeholder="0" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;text-align:center;">
+              <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">POIDS</label>
+              <input type="number" id="mi-weight" min="0" step="0.1" placeholder="0" style="width:55px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;text-align:center;">
             </div>
             <div>
               <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">VALEUR</label>
-              <input type="text" id="mi-cost" placeholder="2 po" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;">
+              <input type="text" id="mi-cost" placeholder="2 po" style="width:55px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;">
             </div>
           </div>
         </div>
-        <textarea id="mi-desc" class="ifl" style="min-height:48px;font-size:10px;margin-bottom:.5rem;" placeholder="Description (optionnelle)…"></textarea>
+        <textarea id="mi-desc" class="ifl" style="min-height:44px;font-size:10px;margin-bottom:.5rem;" placeholder="Description (optionnelle)…"></textarea>
         <button class="btn btn-p" style="font-size:10px;padding:.35em 1em;" onclick="addManualItem()">+ Ajouter au sac</button>
       </div>
     </details>
@@ -4582,12 +4611,58 @@ function renderSummary(){
     return;
   }
 
+  // ─── ONGLET SORTS ───
+  if(_sumTab==='sorts'){
+    const usedSlots=(_reChar||C).usedSlots||{};
+    const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX'];
+    let slotsHtml='';
+    if(isCaster&&slots){
+      let hasAny=false;
+      for(let i=0;i<9;i++){
+        const total=slots[i]||0; if(!total)continue; hasAny=true;
+        const used=Math.min(usedSlots[i+1]||0,total);
+        const exh=used>=total;
+        slotsHtml+=`<div style="display:flex;align-items:center;gap:.4rem;padding:.28rem 0;border-bottom:1px solid #1A1008;">
+          <div style="font-family:'Cinzel',serif;font-size:9px;color:${exh?'#6A3030':'#7A6040'};min-width:22px;">${ROMAN[i]}</div>
+          <div style="display:flex;gap:.22rem;flex:1;">
+            ${Array.from({length:total},(_,j)=>{
+              const isUsed=j<used;
+              return`<div onclick="toggleReSlot(${i+1},${j})" title="${isUsed?'Récupérer':'Utiliser'}" style="width:13px;height:13px;border-radius:50%;border:1.5px solid ${isUsed?'#5A2A2A':exh?'#4A4030':'#5A8040'};background:${isUsed?'#2A0808':exh?'#181208':'rgba(90,140,50,.12)'};cursor:pointer;transition:.1s;"></div>`;
+            }).join('')}
+          </div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#4A4030;">${used}/${total}</div>
+        </div>`;
+      }
+      if(!hasAny) slotsHtml='<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucun emplacement disponible à ce niveau.</div>';
+    }
+    $('lp').innerHTML=tabStrip+(isCaster?`
+    <div style="display:flex;gap:.35rem;margin-bottom:.55rem;flex-wrap:wrap;">
+      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">DD</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--blood);font-weight:bold;">${spDC}</div>
+      </div>
+      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">ATT.</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:20px;color:#80A0E0;font-weight:bold;">+${spAtk}</div>
+      </div>
+      ${spStat?`<div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">STAT</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:#B090D0;font-weight:bold;">${(STAT_LABELS[spStat]||spStat).substring(0,3).toUpperCase()}</div>
+      </div>`:''}
+    </div>
+    ${slotsHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.3rem;">EMPLACEMENTS DE SORTS</div><div style="margin-bottom:.65rem;">${slotsHtml}</div>`:''}
+    ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.3rem;">CANTRIPS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.2rem;margin-bottom:.55rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .42rem;border-radius:3px;">✧ ${s}</span>`).join('')}</div>`:''}
+    ${C.spells?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.3rem;">SORTS CONNUS / PRÉPARÉS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.2rem;">${C.spells.map(s=>`<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .42rem;border-radius:3px;">⚡ ${s}</span>`).join('')}</div>`:''}
+    `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`);
+    return;
+  }
+
   // ─── ONGLET NOTES ───
   if(_sumTab==='notes'){
     $('lp').innerHTML=tabStrip+`
-    <div class="sh" style="font-size:13px;margin:.4rem 0 .3rem;">🎲 Lancer les dés</div>
-    <div id="dice-roller-panel"></div>
-    <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">💰 Monnaie</div>
+    <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#6A5030;margin-bottom:.35rem;">💰 MONNAIE</div>
     <div class="currency-row">
       ${[['pp','PP','#E0D8F0'],['gp','PO','#C9A84C'],['sp','PA','#AAB0B8'],['cp','PC','#8B5A3A']].map(([k,lbl,col])=>`
       <div class="currency-cell">
@@ -4596,228 +4671,257 @@ function renderSummary(){
           oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency['${k}']=parseInt(this.value)||0">
       </div>`).join('')}
     </div>
-    <details style="margin-top:.3rem;">
-      <summary style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);cursor:pointer;padding:.25rem 0;list-style:none;user-select:none;">▸ Autre (PE, gemmes, bijoux…)</summary>
+    <details style="margin:.3rem 0 .55rem;">
+      <summary style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);cursor:pointer;padding:.25rem 0;list-style:none;user-select:none;">▸ PE + gemmes, bijoux…</summary>
       <div style="display:flex;gap:.5rem;margin-top:.3rem;align-items:flex-start;">
-        <div class="currency-cell" style="flex:0 0 64px;">
+        <div class="currency-cell" style="flex:0 0 60px;">
           <label class="currency-lbl" style="color:#8B6EC6;">PE</label>
           <input type="number" class="currency-inp" min="0" value="${(C.currency||{}).ep||0}"
             oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.ep=parseInt(this.value)||0">
         </div>
-        <textarea style="flex:1;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;min-height:42px;resize:vertical;line-height:1.4;"
+        <textarea style="flex:1;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;min-height:38px;resize:vertical;line-height:1.4;"
           placeholder="Gemmes, bijoux, objets de valeur…"
           oninput="if(!C.currency)C.currency={pp:0,gp:0,sp:0,cp:0,ep:0,other:''};C.currency.other=this.value">${(C.currency||{}).other||''}</textarea>
       </div>
     </details>
-    <div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📝 Notes</div>
-    <textarea class="ifl" style="min-height:140px;font-size:11px;" placeholder="Notes libres, rappels, objectifs…"
+    <div style="border-top:1px solid #2A1A08;margin:.3rem 0 .5rem;"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.5rem;">
+      ${C.traits[0]?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;grid-column:1/-1;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">⚡ TRAITS DE PERSONNALITÉ</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.traits.filter(Boolean).join('<br>')}</div>
+      </div>`:''}
+      ${C.ideals?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">🌟 IDÉAUX</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.ideals}</div>
+      </div>`:''}
+      ${C.bonds?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">⚓ LIENS</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.bonds}</div>
+      </div>`:''}
+      ${C.flaws?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">💀 DÉFAUTS</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.flaws}</div>
+      </div>`:''}
+    </div>
+    <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#6A5030;margin-bottom:.3rem;">📝 NOTES LIBRES</div>
+    <textarea class="ifl" style="min-height:110px;font-size:11px;" placeholder="Notes, rappels, objectifs…"
       oninput="C.notes=this.value">${C.notes||''}</textarea>
-    <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;">
-      <button class="btn btn-g" onclick="exportJSON()">↓ JSON</button>
-      <button class="btn btn-b" onclick="viewOfficialPDF()">📜 Fiche D&D</button>
-      <button class="btn btn-p" style="flex:1;" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">💾 Sauvegarder</button>
-    </div>`;
-    renderDiceRoller();
+    `;
     return;
   }
 
-  // ─── ONGLET FICHE ───
-  $('lp').innerHTML=tabStrip+`
-  <!-- ══ BANNIÈRE PERSONNAGE + FAMILIER ══ -->
-  <div style="display:grid;grid-template-columns:1fr 88px;gap:.5rem;margin-bottom:.7rem;align-items:stretch;">
-    <div style="position:relative;border-radius:8px;background:linear-gradient(160deg,#1A0808 0%,#0D0818 45%,#080508 100%);border:1px solid #3A2010;">
-      <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.4),transparent);pointer-events:none;"></div>
-      <div style="padding:1.1rem 1rem .9rem;text-align:center;">
-        <div style="font-size:38px;line-height:1;margin-bottom:.4rem;filter:drop-shadow(0 0 10px rgba(201,168,76,.2));">${_clsIconSum}</div>
-        <div style="font-family:'Cinzel Decorative',serif;font-size:clamp(13px,3vw,19px);color:#E8D5A0;letter-spacing:.05em;line-height:1.2;margin-bottom:.3rem;">${C.name||'Héros Sans Nom'}</div>
-        <div style="display:flex;flex-wrap:wrap;justify-content:center;gap:.25rem;margin-bottom:.2rem;">
-          ${C.race?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:rgba(139,90,26,.25);border:1px solid rgba(139,90,26,.4);color:#C8A060;padding:.12rem .45rem;border-radius:20px;">${C.race.n}</span>`:''}
-          ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:rgba(139,26,26,.25);border:1px solid rgba(139,26,26,.4);color:#E08080;padding:.12rem .45rem;border-radius:20px;">${C.cls.n} Niv.${primaryLvl()}</span>`:''}
-          ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:rgba(80,40,120,.25);border:1px solid rgba(80,40,120,.4);color:#C0A0E0;padding:.12rem .45rem;border-radius:20px;">${C.sub.n}</span>`:''}
-        </div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4530;letter-spacing:.07em;">${alignLine}${C.background?' · '+C.background.n:''}</div>
-      </div>
-      <div style="position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.2),transparent);pointer-events:none;"></div>
-    </div>
-    <!-- SLOT FAMILIER -->
-    <div onclick="openFamiliarModal()" title="Familier — cliquer pour éditer"
+  // ─── ONGLET FAMILIER ───
+  if(_sumTab==='familier'){
+    $('lp').innerHTML=tabStrip+`
+    <div onclick="openFamiliarModal()" title="Cliquer pour éditer"
       ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.55)';"
       ondragleave="this.style.borderColor='rgba(201,168,76,.2)';"
       ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.2)';if(event.dataTransfer.files[0]){handleFamiliarImgFile(event.dataTransfer.files[0]);}"
-      style="border:2px dashed rgba(201,168,76,.2);border-radius:8px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.25);overflow:hidden;position:relative;min-height:110px;">
-      ${C.familiar?.img
-        ?`<img src="${C.familiar.img}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">`
-        :''}
-      <div style="position:relative;text-align:center;padding:.3rem;">
-        <div style="font-size:${C.familiar?.img?'0':'26px'};margin-bottom:3px;">🐾</div>
-        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:${C.familiar?.img?'rgba(255,255,255,0)':'#4A3A20'};">FAMILIER</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:${C.familiar?.img?'rgba(255,255,255,0)':'#2A1A10'};margin-top:2px;">${C.familiar?.img?'':'importer image'}</div>
-      </div>
-      ${C.familiar?.name?`<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.8));font-family:'Cinzel',serif;font-size:8px;color:#C9983A;text-align:center;padding:6px 3px 3px;pointer-events:none;">${C.familiar.name}</div>`:''}
-    </div>
-  </div>
-
-  <!-- ══ PV + STATS DE COMBAT ══ -->
-  <div style="display:grid;grid-template-columns:auto 1fr;gap:.5rem;margin-bottom:.5rem;align-items:start;">
-    <!-- PV Max + Temp + États -->
-    <div style="background:linear-gradient(135deg,#4A0808,#2A0505);border:2px solid #8B1F1F;border-radius:6px;padding:.5rem .7rem;text-align:center;min-width:88px;">
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:#C06060;margin-bottom:1px;">PV MAX</div>
-      <div style="font-family:'Cinzel Decorative',serif;font-size:26px;color:#F0A0A0;line-height:1;">${calcHP()||'?'}</div>
-      <div style="border-top:1px solid rgba(139,31,31,.4);margin:.4rem 0 .3rem;"></div>
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">PV TEMP.</div>
-      <input type="number" min="0" placeholder="0"
-        value="${C.hpTemp||''}"
-        oninput="C.hpTemp=parseInt(this.value)||0"
-        style="width:100%;background:none;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#E8B0B0;font-family:'Share Tech Mono',monospace;font-size:16px;text-align:center;outline:none;padding:0;">
-      <div style="border-top:1px solid rgba(139,31,31,.3);margin:.4rem 0 .3rem;"></div>
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">ÉTAT</div>
-      <select oninput="addCondition(this.value);this.value=''"
-        style="width:100%;background:#200808;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#C09090;font-family:'Share Tech Mono',monospace;font-size:8px;text-align:center;outline:none;cursor:pointer;padding:.1rem 0;">
-        <option value="">+</option>
-        ${['Aveuglé','Charmé','Assourdi','Effrayé','Agrippé','Incapacité','Invisible','Paralysé','Pétrifié','Empoisonné','À terre','Entravé','Étourdi','Inconscient','Épuisement 1','Épuisement 2','Épuisement 3','Épuisement 4','Épuisement 5','Épuisement 6'].map(c=>`<option value="${c}">${c}</option>`).join('')}
-      </select>
-    </div>
-    <!-- Droite: CA + Init + Vitesse + Perc. + conditions actives -->
-    <div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.3rem;margin-bottom:.3rem;">
-        ${[['CA',calcCA(),'#C9983A'],['INIT',mods(mod(effStat('dex'))),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
-        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .4rem;text-align:center;">
-          <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#4A3A20;margin-bottom:1px;">${l}</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:15px;color:${col};font-weight:bold;">${v}</div>
-        </div>`).join('')}
-      </div>
-      <!-- Conditions actives -->
-      ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.2rem;">${(C.conditions||[]).map((c,i)=>`<span onclick="removeCondition(${i})" title="Retirer" style="font-family:'Share Tech Mono',monospace;font-size:8px;background:#200A10;border:1px solid #6A1A2A;color:#E08090;padding:.15rem .4rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`).join('')}</div>`:''}
-    </div>
-  </div>
-
-  <!-- ══ CARACTÉRISTIQUES ══ -->
-  ${darkCard(`
-    ${sectionHdr('CARACTÉRISTIQUES · Bonus maîtrise +'+pb)}
-    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.3rem;">
-      ${STAT_KEYS.map(s=>{
-        const eff=effStat(s);const m_=mod(eff);const asi=C.asi?.[s]||0;
-        const isSave=C.cls?.saves.includes(s);
-        return`<div style="background:#130D06;border:1px solid ${isSave?'rgba(192,168,80,.3)':'#1A1008'};border-radius:4px;padding:.4rem .2rem;text-align:center;">
-          <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#5A4530;margin-bottom:2px;">${STAT_LABELS[s].substring(0,3).toUpperCase()}</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:${m_>=0?'#D4A85A':'#E08080'};font-weight:bold;line-height:1;">${mods(m_)}</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#6A5A3A;margin-top:1px;">${eff}</div>
-          ${asi?`<div style="font-size:7px;color:#6A9A5A;margin-top:1px;">+${asi}ASI</div>`:''}
-        </div>`;
-      }).join('')}
-    </div>`)}
-
-  <!-- ══ SAVES + COMPÉTENCES ══ -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin:.5rem 0;">
-    ${darkCard(`
-      ${sectionHdr('JETS DE SAUVEGARDE')}
-      ${STAT_KEYS.map(s=>{
-        const isSave=C.cls?.saves.includes(s);const v=mod(effStat(s))+(isSave?pb:0);
-        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
-          <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${isSave?'#D4A85A':'#6A5A3A'};">${isSave?'✦ ':'   '}${STAT_LABELS[s].substring(0,3)}</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:${v>=0?'#80C080':'#E08080'};font-weight:bold;">${mods(v)}</span>
-        </div>`;
-      }).join('')}`)}
-    ${darkCard(`
-      ${sectionHdr('COMPÉTENCES MAÎTRISÉES')}
-      ${C.skills.length?C.skills.map(s=>{
-        const sk=ALL_SKILLS.find(x=>x.n===s);const v=mod(effStat(sk?.s||'str'))+pb;
-        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
-          <span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C0A860;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80%;">✦ ${s}</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#80C080;font-weight:bold;">${mods(v)}</span>
-        </div>`;
-      }).join(''):`<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucune</div>`}`)}
-  </div>
-
-  <!-- ══ MAGIE ══ -->
-  ${(()=>{
-    if(!C.cls?.spellcaster&&!C.cantrips?.length&&!C.spells?.length)return'';
-    const spStat=C.cls?.spellStat;const spMod=spStat?mod(effStat(spStat)):0;
-    const dc=8+pb+spMod;const atk=pb+spMod;
-    return darkCard(`
-      ${sectionHdr('MAGIE'+(spStat?' — '+STAT_LABELS[spStat]:''))}
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;">
-        <div style="text-align:center;background:#0D0818;border:1px solid #2A1A3A;border-radius:4px;padding:.3rem .6rem;min-width:52px;">
-          <div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A6A;letter-spacing:.1em;">DD</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#E06080;font-weight:bold;">${dc}</div>
-        </div>
-        <div style="text-align:center;background:#0D0818;border:1px solid #2A1A3A;border-radius:4px;padding:.3rem .6rem;min-width:52px;">
-          <div style="font-family:'Cinzel',serif;font-size:7px;color:#4A3A6A;letter-spacing:.1em;">ATT.</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:18px;color:#80A0E0;font-weight:bold;">+${atk}</div>
-        </div>
-        ${slots?`<div style="background:#0D1818;border:1px solid #1A3A2A;border-radius:4px;padding:.3rem .6rem;flex:1;">
-          <div style="font-family:'Cinzel',serif;font-size:7px;color:#3A5A3A;letter-spacing:.1em;margin-bottom:2px;">EMPLACEMENTS</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#60B060;">${slots.map((n,i)=>n>0?`<span style="margin-right:.4rem;">Niv.${i+1}:${n}</span>`:null).filter(Boolean).join('')}</div>
-        </div>`:''}
-      </div>
-      ${C.cantrips?.length?`<div style="font-size:7px;font-family:'Cinzel',serif;letter-spacing:.15em;color:#5A3A4A;margin-bottom:3px;">CANTRIPS</div>
-      <div style="display:flex;flex-wrap:wrap;gap:.2rem;margin-bottom:.4rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #3A1A2A;color:#D090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.15rem .4rem;border-radius:3px;">✧ ${s}</span>`).join('')}</div>`:''}
-      ${C.spells?.length?`<div style="font-size:7px;font-family:'Cinzel',serif;letter-spacing:.15em;color:#3A4A5A;margin-bottom:3px;">SORTS CONNUS</div>
-      <div style="display:flex;flex-wrap:wrap;gap:.2rem;">${C.spells.map(s=>`<span style="background:#080F18;border:1px solid #1A2A3A;color:#80A0D0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.15rem .4rem;border-radius:3px;">⚡ ${s}</span>`).join('')}</div>`:''}
-    `);
-  })()}
-
-  <!-- ══ INFOS DIVERSES ══ -->
-  ${darkCard(`
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;">
-      <div>
-        ${sectionHdr('LANGUES')}
-        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#8A7A5A;line-height:1.6;">${getLanguages().join('<br>')||'—'}</div>
-      </div>
-      <div>
-        ${sectionHdr('MAÎTRISES')}
-        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#8A7A5A;line-height:1.5;">Armures : ${C.cls?.armor||'—'}<br>Armes : ${C.cls?.weapons||'—'}</div>
+      style="border:2px dashed rgba(201,168,76,.22);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.2);overflow:hidden;position:relative;min-height:170px;margin-bottom:.65rem;">
+      ${C.familiar?.img?`<img src="${C.familiar.img}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:.88;">`:''}
+      <div style="position:relative;text-align:center;padding:1rem;">
+        <div style="font-size:${C.familiar?.img?'0':'38px'};margin-bottom:.3rem;">🐾</div>
+        <div style="font-family:'Cinzel Decorative',serif;font-size:${C.familiar?.name?'13px':'10px'};color:${C.familiar?.img?'#FFF':'#6A5030'};text-shadow:0 2px 5px #000;">${C.familiar?.name||'Aucun familier'}</div>
+        ${C.familiar?.type?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${C.familiar?.img?'rgba(255,255,255,.7)':'#4A3A20'};margin-top:2px;">${C.familiar.type}</div>`:''}
+        ${!C.familiar?.img?`<div style="font-size:8px;color:#3A2A10;margin-top:.35rem;">Cliquer pour éditer · Glisser une image</div>`:''}
       </div>
     </div>
-    ${(C.feats||[]).length?`${divider}${sectionHdr('DONS')}
-    <div style="display:flex;flex-wrap:wrap;gap:.25rem;">${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid};return`<span style="background:#120A18;border:1px solid rgba(160,128,208,.3);color:#B090D0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.2rem .45rem;border-radius:3px;" title="${FEATS.find(x=>x.id===fid)?.d||''}">${f.n}</span>`;}).join('')}</div>`:''}
-    ${C.sub?`${divider}${sectionHdr('ARCHÉTYPE')}
-    <div style="font-size:10px;color:#C0A0E0;font-family:'Share Tech Mono',monospace;">${C.sub.n}</div>`:''}
-  `)}
+    ${C.familiar?.notes?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:6px;padding:.5rem .65rem;margin-bottom:.55rem;">
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:#6A5030;margin-bottom:.3rem;">NOTES FAMILIER</div>
+      <div style="font-size:9px;color:#8A7A5A;line-height:1.5;">${C.familiar.notes}</div>
+    </div>`:''}
+    <button class="btn btn-p" style="width:100%;font-size:10px;" onclick="openFamiliarModal()">🐾 Éditer le familier</button>
+    `;
+    return;
+  }
 
-  <!-- ══ TRAITS DE PERSONNALITÉ ══ -->
-  ${(C.traits[0]||C.ideals||C.bonds||C.flaws)?`
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;">
-    ${C.traits[0]?darkCard(`${sectionHdr('⚡ TRAITS')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.traits.join('<br>')}</div>`):''}
-    ${C.ideals?darkCard(`${sectionHdr('🌟 IDÉAUX')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.ideals}</div>`):''}
-    ${C.bonds?darkCard(`${sectionHdr('⚓ LIENS')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.bonds}</div>`):''}
-    ${C.flaws?darkCard(`${sectionHdr('💀 DÉFAUTS')}<div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.flaws}</div>`):''}
-  </div>`:''}
-
-  ${(()=>{
+  // ─── ONGLET CAPACITÉS ───
+  if(_sumTab==='capacites'){
+    const weaponSources=[];
+    if(C.equipped?.mainhand) weaponSources.push(C.equipped.mainhand);
+    (C.bag||[]).filter(b=>WEAPON_PROPS[b.id]).forEach(w=>{if(!weaponSources.find(x=>x.id===w.id))weaponSources.push(w);});
     const clf=C.cls&&CLS_LVL_FEAT[C.cls.id];
-    if(!clf)return'';
     const lvl=C.level||1;
-    // Merge class features + subclass features
     const merged={};
-    Object.entries(clf).forEach(([l,fs])=>{merged[l]=[...fs];});
+    if(clf) Object.entries(clf).forEach(([l,fs])=>{merged[l]=fs.map(f=>({n:f,d:'',sub:false}));});
     if(C.sub?.fs){
       C.sub.fs.forEach(f=>{
         const m=f.match(/^Niv\.(\d+)\s*[—–]\s*(.+)/);
         if(!m)return;
-        const lk=m[1];
-        const short=(m[2].split(':')[0]||m[2]).trim();
+        const lk=m[1],full=m[2];
+        const short=(full.split(':')[0]||full).trim();
+        const desc=full.split(':').slice(1).join(':').trim();
         if(!merged[lk])merged[lk]=[];
-        merged[lk].push('❖ '+short); // ❖ préfixe pour les features de sous-classe
+        merged[lk].push({n:short,d:desc,sub:true});
       });
     }
-    const entries=Object.entries(merged).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
-    if(!entries.length)return'';
-    return`<div class="sh" style="font-size:13px;margin:.7rem 0 .3rem;">📖 Capacités de classe par niveau</div>
-    <div class="cls-feat-timeline">${entries.map(([l,fs])=>`
-      <div class="cft-row">
-        <div class="cft-lvl">Niv.${l}</div>
-        <div class="cft-feats">${fs.map(f=>f.startsWith('❖')?`<span class="cft-tag" style="border-color:rgba(160,128,208,.45);color:#C0A0E0;">${f}</span>`:`<span class="cft-tag">${f}</span>`).join('')}</div>
-      </div>`).join('')}
+    const clsEntries=Object.entries(merged).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
+    const tag=(txt,isSub,title)=>isSub
+      ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.12rem;" title="${title||''}">${txt}</span>`
+      :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.12rem;" title="${txt}">${txt}</span>`;
+    $('lp').innerHTML=tabStrip+`<div style="padding:.1rem 0 2rem;">
+    ${weaponSources.length?`
+    <div style="margin-bottom:.75rem;">
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">⚔ ACTIONS DE COMBAT</div>
+      <table style="width:100%;border-collapse:collapse;">
+        <thead><tr style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#5A4A30;">
+          <th style="text-align:left;padding:2px 5px 4px;">ARME</th>
+          <th style="text-align:center;padding:2px 5px 4px;">ATQ</th>
+          <th style="text-align:center;padding:2px 5px 4px;">DÉGÂTS</th>
+        </tr></thead>
+        <tbody>${weaponSources.map(w=>{
+          const p=WEAPON_PROPS[w.id];
+          if(!p){const a=mod(effStat('str'))+pb;return`<tr><td style="padding:3px 5px;font-size:10px;">${w.n}</td><td style="text-align:center;font-family:'Share Tech Mono',monospace;color:#D4A85A;">${mods(a)}</td><td style="text-align:center;color:var(--blood);">1d4</td></tr>`;}
+          const info=getWeaponAtkBonus(w);
+          return`<tr style="border-top:1px solid #1A1008;">
+            <td style="padding:3px 5px;font-size:10px;color:var(--parch);">${w.n}${w.bonus?`<span style="font-size:7px;color:#80D080;"> +${w.bonus}</span>`:''}</td>
+            <td style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;color:#D4A85A;">${mods(info.atk)}</td>
+            <td style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--blood);">${info.dice}${mods(info.dmgMod)}</td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>
+    </div>`:`<div style="font-size:9px;color:#4A3A20;font-style:italic;margin-bottom:.55rem;">Aucune arme équipée ou dans le sac.</div>`}
+    ${C.race?.traits?.length?`
+    <div style="margin-bottom:.75rem;">
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">🧬 TRAITS RACIAUX · ${C.race.n}</div>
+      <div style="display:flex;flex-wrap:wrap;">${C.race.traits.map(t=>{const nm=t.split(':')[0].trim();const desc=t.includes(':')?t.split(':').slice(1).join(':').trim():'';return tag(nm,false,desc);}).join('')}</div>
+    </div>`:''}
+    ${(clf||C.sub)?`
+    <div style="margin-bottom:.75rem;">
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">📖 CAPACITÉS DE CLASSE · ${C.cls?.n||''}${C.sub?' — '+C.sub.n:''}</div>
+      <div class="cls-feat-timeline">${clsEntries.map(([l,fs])=>`
+        <div class="cft-row">
+          <div class="cft-lvl">Niv.${l}</div>
+          <div class="cft-feats">${fs.map(f=>tag(f.n,f.sub,f.d)).join('')}</div>
+        </div>`).join('')}
+      </div>
+    </div>`:''}
+    ${(C.feats||[]).length?`
+    <div style="margin-bottom:.75rem;">
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">⭐ DONS</div>
+      <div style="display:flex;flex-direction:column;gap:.38rem;">
+        ${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid,d:''};return`
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-left:2px solid var(--gold-d);border-radius:0 4px 4px 0;padding:.32rem .55rem;">
+          <div style="font-family:'Cinzel',serif;font-size:9.5px;color:var(--gold-d);margin-bottom:2px;">${f.n}</div>
+          ${f.d?`<div style="font-size:8.5px;color:#8A7A5A;line-height:1.5;">${f.d}</div>`:''}
+        </div>`;}).join('')}
+      </div>
+    </div>`:''}
+    ${(C.specialAbilities||[]).length?`
+    <div>
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">✨ CAPACITÉS SPÉCIALES</div>
+      <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
+        ${(C.specialAbilities||[]).map(a=>`
+        <div style="display:flex;align-items:center;gap:.4rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.28rem .55rem;">
+          <span style="font-size:10px;color:var(--parch);">${a.name}</span>
+          ${a.roll!=null?`<span style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--blood);font-weight:bold;">${a.roll}</span>`:''}
+        </div>`).join('')}
+      </div>
+    </div>`:''}
     </div>`;
-  })()}
+    return;
+  }
 
-  <div style="border-top:1px solid #2A1A08;padding-top:.8rem;margin-top:.7rem;display:flex;gap:.4rem;flex-wrap:wrap;">
-    <button class="btn btn-s" onclick="go(5)">← Identité</button>
-    <button class="btn btn-p" style="flex:1;" onclick="go(7)">Capacités & Sorts →</button>
+  // ─── ONGLET FICHE (défaut) ───
+  $('lp').innerHTML=tabStrip+`
+  <div style="background:linear-gradient(135deg,#120808 0%,#080518 50%,#060408 100%);border:1px solid #2A1A08;border-radius:6px;padding:.65rem .85rem .55rem;margin-bottom:.45rem;text-align:center;position:relative;">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.3),transparent);"></div>
+    <div style="font-size:26px;margin-bottom:.15rem;">${_clsIconSum}</div>
+    <div style="font-family:'Cinzel Decorative',serif;font-size:clamp(11px,2.5vw,15px);color:#E8D5A0;letter-spacing:.04em;">${C.name||'Héros Sans Nom'}</div>
+    <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:.18rem;margin:.25rem 0;">
+      ${C.race?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(139,90,26,.2);border:1px solid rgba(139,90,26,.3);color:#C8A060;padding:.1rem .35rem;border-radius:20px;">${C.race.n}</span>`:''}
+      ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(139,26,26,.2);border:1px solid rgba(139,26,26,.3);color:#E08080;padding:.1rem .35rem;border-radius:20px;">${C.cls.n} Niv.${primaryLvl()}</span>`:''}
+      ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(80,40,120,.2);border:1px solid rgba(80,40,120,.3);color:#C0A0E0;padding:.1rem .35rem;border-radius:20px;">${C.sub.n}</span>`:''}
+    </div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#4A3A20;">${alignLine}${C.background?' · '+C.background.n:''}</div>
+  </div>
+
+  <div style="display:flex;gap:.35rem;margin-bottom:.45rem;">
+    <button id="short-rest-btn" class="btn btn-s" style="flex:1;font-size:9px;" onclick="doShortRest()">⭕ Repos Court</button>
+    <button id="long-rest-btn" class="btn btn-s" style="flex:1;font-size:9px;" onclick="doLongRest()">🌙 Repos Long</button>
+  </div>
+
+  <div style="display:grid;grid-template-columns:auto 1fr;gap:.4rem;margin-bottom:.4rem;align-items:start;">
+    <div style="background:linear-gradient(135deg,#4A0808,#2A0505);border:2px solid #8B1F1F;border-radius:6px;padding:.42rem .55rem;text-align:center;min-width:76px;">
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:#C06060;margin-bottom:1px;">PV MAX</div>
+      <div style="font-family:'Cinzel Decorative',serif;font-size:24px;color:#F0A0A0;line-height:1;">${calcHP()||'?'}</div>
+      <div style="border-top:1px solid rgba(139,31,31,.4);margin:.3rem 0 .25rem;"></div>
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">PV TEMP.</div>
+      <input type="number" min="0" placeholder="0" value="${C.hpTemp||''}"
+        oninput="C.hpTemp=parseInt(this.value)||0"
+        style="width:100%;background:none;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#E8B0B0;font-family:'Share Tech Mono',monospace;font-size:14px;text-align:center;outline:none;padding:0;">
+      <div style="border-top:1px solid rgba(139,31,31,.3);margin:.3rem 0 .2rem;"></div>
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">ÉTAT</div>
+      <select oninput="addCondition(this.value);this.value=''"
+        style="width:100%;background:#200808;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#C09090;font-family:'Share Tech Mono',monospace;font-size:7.5px;text-align:center;outline:none;cursor:pointer;padding:.1rem 0;">
+        <option value="">+</option>
+        ${['Aveuglé','Charmé','Assourdi','Effrayé','Agrippé','Incapacité','Invisible','Paralysé','Pétrifié','Empoisonné','À terre','Entravé','Étourdi','Inconscient','Épuisement 1','Épuisement 2','Épuisement 3','Épuisement 4','Épuisement 5','Épuisement 6'].map(c=>`<option value="${c}">${c}</option>`).join('')}
+      </select>
+    </div>
+    <div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.25rem;margin-bottom:.25rem;">
+        ${[['CA',calcCA(),'#C9983A'],['INIT',mods(mod(effStat('dex'))),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
+        <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.25rem .32rem;text-align:center;">
+          <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.1em;color:#4A3A20;margin-bottom:1px;">${l}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:${col};font-weight:bold;">${v}</div>
+        </div>`).join('')}
+      </div>
+      ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.15rem;">${(C.conditions||[]).map((c,i)=>`<span onclick="removeCondition(${i})" title="Retirer" style="font-family:'Share Tech Mono',monospace;font-size:7.5px;background:#200A10;border:1px solid #6A1A2A;color:#E08090;padding:.12rem .32rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`).join('')}</div>`:''}
+    </div>
+  </div>
+
+  ${darkCard(`
+    ${sh('CARACTÉRISTIQUES · Bonus maîtrise +'+pb)}
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.22rem;">
+      ${STAT_KEYS.map(s=>{
+        const eff=effStat(s);const m_=mod(eff);const asi=C.asi?.[s]||0;
+        const isSave=C.cls?.saves.includes(s);
+        return`<div style="background:#130D06;border:1px solid ${isSave?'rgba(192,168,80,.3)':'#1A1008'};border-radius:4px;padding:.32rem .12rem;text-align:center;">
+          <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.07em;color:#5A4530;margin-bottom:1px;">${STAT_LABELS[s].substring(0,3).toUpperCase()}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:17px;color:${m_>=0?'#D4A85A':'#E08080'};font-weight:bold;line-height:1;">${mods(m_)}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-top:1px;">${eff}</div>
+          ${asi?`<div style="font-size:6px;color:#6A9A5A;margin-top:1px;">+${asi}ASI</div>`:''}
+        </div>`;
+      }).join('')}
+    </div>`)}
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin:.4rem 0;">
+    ${darkCard(`
+      ${sh('JETS DE SAUVEGARDE')}
+      ${STAT_KEYS.map(s=>{
+        const isSave=C.cls?.saves.includes(s);const v=mod(effStat(s))+(isSave?pb:0);
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:8.5px;color:${isSave?'#D4A85A':'#6A5A3A'};">${isSave?'✦ ':'   '}${STAT_LABELS[s].substring(0,3)}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:9.5px;color:${v>=0?'#80C080':'#E08080'};font-weight:bold;">${mods(v)}</span>
+        </div>`;
+      }).join('')}`)}
+    ${darkCard(`
+      ${sh('COMPÉTENCES MAÎTRISÉES')}
+      ${C.skills.length?C.skills.map(s=>{
+        const sk=ALL_SKILLS.find(x=>x.n===s);const v=mod(effStat(sk?.s||'str'))+pb;
+        return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
+          <span style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#C0A860;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80%;">✦ ${s}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:9.5px;color:#80C080;font-weight:bold;">${mods(v)}</span>
+        </div>`;
+      }).join(''):`<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucune</div>`}`)}
+  </div>
+
+  ${darkCard(`
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem;">
+      <div>
+        ${sh('LANGUES')}
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8.5px;color:#8A7A5A;line-height:1.6;">${getLanguages().join('<br>')||'—'}</div>
+      </div>
+      <div>
+        ${sh('MAÎTRISES')}
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8A7A5A;line-height:1.5;">Armures : ${C.cls?.armor||'—'}<br>Armes : ${C.cls?.weapons||'—'}</div>
+      </div>
+    </div>`)}
+
+  <div style="border-top:1px solid #2A1A08;padding-top:.65rem;margin-top:.55rem;display:flex;gap:.35rem;flex-wrap:wrap;">
     <button class="btn btn-g" onclick="exportJSON()">↓ JSON</button>
     <button class="btn btn-b" onclick="viewOfficialPDF()">📜 Fiche D&D</button>
-    <button class="btn btn-p" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">💾 Sauvegarder</button>
+    <button class="btn btn-p" style="flex:1;" onclick="saveToRoster();window.parent.postMessage('go:initiative','*')">💾 Sauvegarder</button>
   </div>`;
 }
 
@@ -5915,12 +6019,10 @@ function updateCenterBand(){
   if(bgEl){
     if(C.photo){
       bgEl.style.backgroundImage=`url(${C.photo})`;
-      if(importZone)importZone.style.display='none';
-      if(imgActions)imgActions.style.display='flex';
+      if(CUR!==6){if(importZone)importZone.style.display='none';if(imgActions)imgActions.style.display='flex';}
     }else{
       bgEl.style.backgroundImage='';
-      if(importZone)importZone.style.display='flex';
-      if(imgActions)imgActions.style.display='none';
+      if(CUR!==6){if(importZone)importZone.style.display='flex';if(imgActions)imgActions.style.display='none';}
     }
   }
 }
@@ -6110,23 +6212,20 @@ const RE_HEAD = {id:'head', label:'Tête', icon:'⛑'};
 const _RE_RC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très rare':'#4A1F7A','Légendaire':'#7B4000','Artefact':'#7B1010'};
 
 function openRosterEquip(id){
-  var roster = getRoster();
-  _reChar = roster.find(function(r){return r.id===id;});
-  if(!_reChar) return;
-  if(!_reChar.bag) _reChar.bag=[];
-  if(!_reChar.equipped) _reChar.equipped={};
-  preloadCodexData();
-  _reSrc='srd'; _reQ=''; _reView='equip';
-  var hn=$('re-hdr-name'); if(hn) hn.textContent=_reChar.name||'—';
-  // Afficher le bouton "Sorts" seulement si le perso est lanceur de sorts
-  var spBtn=$('re-spell-btn');
-  if(spBtn) spBtn.style.display=(_reChar.cls&&_reChar.cls.spellcaster)?'':'none';
-  var editBtn=$('re-edit-btn'); if(editBtn) editBtn.style.display='';
-  toggleReView('equip');
-  renderReSheet();
-  renderReInv();
-  $('re-overlay').classList.add('open');
-  setForgeScale();
+  var roster=getRoster();
+  var ch=roster.find(function(r){return r.id===id;});
+  if(!ch) return;
+  Object.keys(C).forEach(function(k){delete C[k];});
+  Object.assign(C,JSON.parse(JSON.stringify(ch)));
+  if(!C.bag) C.bag=[];
+  if(!C.equipped) C.equipped={};
+  if(!C.scenarioHistory) C.scenarioHistory=[];
+  if(!C.asi) C.asi={str:0,dex:0,con:0,int:0,wis:0,cha:0};
+  if(C.equippedArmorId===undefined) C.equippedArmorId=null;
+  if(C.cls_lvl===undefined) C.cls_lvl=primaryLvl();
+  showGame();
+  go(6);
+  updateRight();
 }
 
 function closeReOverlay(){
@@ -6584,6 +6683,30 @@ function calcReCA(r){
   return 10+dexM+shieldBonus+magicAC;
 }
 
+function renderSumCenterDoll(){
+  var el=$('sum-doll'); if(!el) return;
+  var r=_reChar; if(!r) return;
+  if(!r.equipped) r.equipped={};
+  var bg=$('center-bg');
+  if(bg){
+    if(r.photo){ bg.style.backgroundImage='url("'+r.photo+'")'; bg.style.backgroundSize='cover'; bg.style.backgroundPosition='center top'; bg.style.backgroundRepeat='no-repeat'; }
+    else bg.style.backgroundImage='none';
+  }
+  var leftSlots=RE_SLOTS_LEFT.map(function(s,i){return reSlotHtml(s,1,i+2);}).join('');
+  var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
+  var headSlot=reSlotHtml(RE_HEAD,2,1);
+  el.innerHTML=
+    '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 25%,transparent 75%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1;"></div>'+
+    '<div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(.5rem,1.5vh,1rem) clamp(.5rem,1.5vw,1.5rem);">'+
+      '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(r.name||'—')+'</div>'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.15em;color:var(--gold-d);text-shadow:0 1px 5px #000;margin-bottom:clamp(.4rem,1.2vh,.8rem);">'+
+        (r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+
+      '</div>'+
+      '<div class="doll-grid">'+headSlot+leftSlots+rightSlots+'</div>'+
+      '<div style="margin-top:clamp(.4rem,1vh,.7rem);font-family:\'Share Tech Mono\',monospace;font-size:8px;color:rgba(201,168,76,.35);letter-spacing:.1em;text-shadow:0 1px 3px #000;">Glisser du sac ou du catalogue ▸ déposer sur un emplacement</div>'+
+    '</div>';
+}
+
 function renderReDoll(){
   var r=_reChar; if(!r)return;
   if(!r.equipped) r.equipped={};
@@ -6643,7 +6766,7 @@ function toggleReSlot(lvl,j){
   if(!_reChar.usedSlots)_reChar.usedSlots={};
   var cur=_reChar.usedSlots[lvl]||0;
   _reChar.usedSlots[lvl]=(j<cur)?j:j+1;
-  renderReStats();
+  if(CUR===6) renderSummary(); else renderReStats();
   var roster=getRoster();
   var idx=roster.findIndex(function(r){return r.id===_reChar.id;});
   if(idx>=0){roster[idx].usedSlots=_reChar.usedSlots;setRoster(roster);}
@@ -6715,7 +6838,8 @@ function reDollDrop(e,slotId){
   if(!_reChar.equipped) _reChar.equipped={};
   _reChar.equipped[slotId]=Object.assign({},_reBagDragItem);
   _reBagDragItem=null;
-  renderReDoll();
+  if(CUR===6) renderSumCenterDoll(); else renderReDoll();
+  if(CUR===6) renderBagList();
   var roster=getRoster();
   var idx=roster.findIndex(function(r){return r.id===_reChar.id;});
   if(idx>=0){roster[idx].equipped=_reChar.equipped;setRoster(roster);}
@@ -6728,10 +6852,10 @@ function reDollUnequip(slotId){
     var ex=_reChar.bag.find(function(b){return b.id===item.id;});
     if(ex) ex.qty=(ex.qty||1)+1;
     else _reChar.bag.push(Object.assign({qty:1},item));
-    renderReBag();
+    if(CUR!==6) renderReBag(); else renderBagList();
   }
   delete _reChar.equipped[slotId];
-  renderReDoll();
+  if(CUR===6) renderSumCenterDoll(); else renderReDoll();
   var roster=getRoster();
   var idx=roster.findIndex(function(r){return r.id===_reChar.id;});
   if(idx>=0){roster[idx].equipped=_reChar.equipped;roster[idx].bag=_reChar.bag;setRoster(roster);}
