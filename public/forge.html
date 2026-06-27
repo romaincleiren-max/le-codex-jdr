@@ -4985,7 +4985,7 @@ function renderSummary(){
           <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:${col};font-weight:bold;">${v}</div>
         </div>`).join('')}
       </div>
-      ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.15rem;">${(C.conditions||[]).map((c,i)=>`<span onclick="removeCondition(${i})" title="Retirer" style="font-family:'Share Tech Mono',monospace;font-size:7.5px;background:#200A10;border:1px solid #6A1A2A;color:#E08090;padding:.12rem .32rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`).join('')}</div>`:''}
+      ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.15rem;">${(C.conditions||[]).map((c,i)=>{const info=CONDITIONS_INFO[c];const col=info?info.col:'#E08090';return`<span onclick="removeCondition(${i})" onmouseenter="showCondTooltip(event,'${c.replace(/'/g,"\\'")}');event.stopPropagation()" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="font-family:'Share Tech Mono',monospace;font-size:7.5px;background:${col}18;border:1px solid ${col}66;color:${col};padding:.12rem .38rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`;}).join('')}</div>`:''}
     </div>
   </div>
 
@@ -6696,6 +6696,49 @@ function _getFullItemData(item){
     attunement_note:item.attunement_note||null,sprite:item.sprite||null,
     desc:item.d||item.description||''
   };
+}
+const CONDITIONS_INFO={
+  'Aveuglé':{icon:'🕶',col:'#9AA0AA',desc:"Ne voit rien. Échoue automatiquement à tout test nécessitant la vue.",effects:['Désavantage à tous les jets d\'attaque','Avantage aux jets d\'attaque des adversaires']},
+  'Charmé':{icon:'💫',col:'#E080D0',desc:"Ne peut pas attaquer le charmeur ni le cibler avec des effets nuisibles.",effects:['Le charmeur a avantage aux tests de CHA contre vous']},
+  'Assourdi':{icon:'🔇',col:'#8090A0',desc:"N'entend rien. Échoue automatiquement à tout test nécessitant l'ouïe.",effects:['Échec automatique aux tests basés sur l\'ouïe']},
+  'Effrayé':{icon:'😨',col:'#E0A060',desc:"Désavantage aux jets et tests tant que la source de la peur est visible. Ne peut pas se rapprocher d'elle.",effects:['Désavantage aux tests de caractéristiques','Désavantage aux jets d\'attaque (source visible)','Mouvement vers la source impossible']},
+  'Agrippé':{icon:'✊',col:'#C08060',desc:"Pris dans l'étreinte d'une créature ou d'un effet.",effects:['Vitesse réduite à 0','Vitesse ne peut pas être augmentée']},
+  'Incapacité':{icon:'🚫',col:'#E06060',desc:"Impossible d'agir.",effects:['Aucune action possible','Aucune réaction possible']},
+  'Invisible':{icon:'👻',col:'#C0D0E0',desc:"Impossible à voir sans sens spécial. Considéré comme dans l'obscurité totale.",effects:['Avantage à tous les jets d\'attaque','Désavantage aux jets d\'attaque des adversaires']},
+  'Paralysé':{icon:'⚡',col:'#E0E060',desc:"Totalement immobilisé. Les coups au corps à corps sont automatiquement des coups critiques.",effects:['Incapacité (aucune action ni réaction)','Vitesse 0 — ne peut ni bouger ni parler','Échec automatique aux jets de SAU FOR et DEX','Avantage aux jets d\'attaque des adversaires','Coup critique automatique à portée de mêlée']},
+  'Pétrifié':{icon:'🗿',col:'#A0A090',desc:"Transformé en substance inerte (pierre). Inconscient du monde environnant.",effects:['Incapacité — vitesse 0','Échec automatique aux jets de SAU FOR et DEX','Résistance à tous les dégâts','Immunité au poison et aux maladies']},
+  'Empoisonné':{icon:'☠',col:'#80C060',desc:"Malade ou affaibli par un poison ou un effet néfaste.",effects:['Désavantage aux jets d\'attaque','Désavantage aux tests de caractéristiques']},
+  'À terre':{icon:'⬇',col:'#C0A070',desc:"Allongé au sol, rampant ou renversé.",effects:['Ne peut que ramper (coût ×2) ou se relever (demi-mouvement)','Désavantage aux jets d\'attaque au corps à corps','Avantage aux attaques de mêlée reçues','Désavantage aux attaques à distance reçues']},
+  'Entravé':{icon:'⛓',col:'#C07040',desc:"Liens, sorts ou effets limitent gravement les mouvements.",effects:['Vitesse 0','Désavantage aux jets d\'attaque','Désavantage aux jets de SAU DEX','Avantage aux jets d\'attaque des adversaires']},
+  'Étourdi':{icon:'💫',col:'#D0A0E0',desc:"Désorienté, incapable d'agir ou de réagir normalement.",effects:['Incapacité (aucune action ni réaction)','Vitesse 0 — ne peut pas bouger','Échec automatique aux jets de SAU FOR et DEX','Avantage aux jets d\'attaque des adversaires']},
+  'Inconscient':{icon:'😴',col:'#7090B0',desc:"Sans connaissance, lâche tout ce qu'il tenait, tombe à terre.",effects:['Incapacité — vitesse 0','Considéré À terre','Échec automatique aux jets de SAU FOR et DEX','Avantage aux jets d\'attaque des adversaires','Coup critique automatique à portée de mêlée']},
+  'Épuisement 1':{icon:'😓',col:'#D0B040',desc:"Épuisement niveau 1 — effets cumulatifs avec les niveaux suivants.",effects:['Désavantage aux tests de caractéristiques']},
+  'Épuisement 2':{icon:'😓',col:'#C09030',desc:"Épuisement niveau 2.",effects:['Désavantage aux tests de caractéristiques','Vitesse divisée par 2']},
+  'Épuisement 3':{icon:'😓',col:'#B07020',desc:"Épuisement niveau 3.",effects:['Désavantage aux tests de caractéristiques','Vitesse ÷2','Désavantage aux jets d\'attaque et de sauvegarde']},
+  'Épuisement 4':{icon:'😓',col:'#A05010',desc:"Épuisement niveau 4.",effects:['Désavantage aux tests, attaques et sauvegardes','Vitesse ÷2','PV maximum divisé par 2']},
+  'Épuisement 5':{icon:'💀',col:'#903010',desc:"Épuisement niveau 5 — état critique.",effects:['Désavantage aux tests, attaques et sauvegardes','Vitesse 0','PV maximum divisé par 2']},
+  'Épuisement 6':{icon:'💀',col:'#801010',desc:"Épuisement niveau 6 — mort.",effects:['Mort instantanée']},
+};
+function showCondTooltip(ev,cond){
+  var tt=$('re-slot-tooltip'); if(!tt)return;
+  var info=CONDITIONS_INFO[cond];
+  if(!info){tt.innerHTML='<div class="rst-name">'+cond+'</div>';posSlotTooltip(ev);tt.classList.add('visible');return;}
+  tt.classList.remove('spell-tt');
+  var effectsHtml=info.effects.map(function(e){
+    var col=e.startsWith('Désavantage')||e.startsWith('Échec')||e.startsWith('Coup critique')||e.startsWith('Mort')?'#E08080':e.startsWith('Avantage')?'#E0D080':'#A09070';
+    var pfx=e.startsWith('Désavantage')||e.startsWith('Échec')||e.startsWith('Mort')?'▼ ':e.startsWith('Avantage')?'▲ ':'· ';
+    return'<div style="font-size:13px;color:'+col+';padding:2px 0;border-bottom:1px solid #1A1008;">'+pfx+e+'</div>';
+  }).join('');
+  tt.innerHTML=
+    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">'+
+      '<span style="font-size:28px;line-height:1;">'+info.icon+'</span>'+
+      '<div class="rst-name" style="color:'+info.col+';font-size:20px;margin-bottom:0;">'+cond+'</div>'+
+    '</div>'+
+    '<div style="font-size:13px;color:#9A8A6A;margin-bottom:10px;font-style:italic;line-height:1.5;">'+info.desc+'</div>'+
+    '<div style="display:flex;flex-direction:column;gap:1px;">'+effectsHtml+'</div>'+
+    '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#4A3A20;margin-top:10px;padding-top:6px;border-top:1px solid #2A1A08;">Cliquer sur l\'état pour le retirer</div>';
+  posSlotTooltip(ev);
+  tt.classList.add('visible');
 }
 function showSlotTooltip(ev, slotId){
   var item=_reChar&&_reChar.equipped&&_reChar.equipped[slotId]; if(!item)return;
