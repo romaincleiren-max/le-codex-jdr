@@ -6794,6 +6794,27 @@ function reSlotHtml(slot, col, row){
     :('<div class="re-doll-slot-icon">'+(item&&item.sprite?'<img src="'+item.sprite+'" onerror="this.style.display=\'none\'">':slot.icon)+'</div>');
   var gridCol=(CUR===6&&col===2)?'1/-1':String(col);
   var fullSpan=(CUR===6&&col===2)?'data-fullspan="1" ':'';
+  if(CUR===6){
+    // Forme et taille IDENTIQUES vide/\u00e9quip\u00e9 \u2014 seule la transparence change
+    var sBg=item?'rgba(10,6,2,0.20)':'rgba(10,6,2,0.40)';
+    var sBd=item?'rgba(201,168,76,0.38)':'rgba(201,168,76,0.18)';
+    var sLbl='rgba(201,168,76,0.55)';
+    var sNm=item?(rc||'rgba(255,255,255,0.9)'):'rgba(255,255,255,0.28)';
+    var sRar=rarTag.replace(/color:[^;'"]+/g,'color:'+(rc||'rgba(201,168,76,.5)'));
+    return '<div class="re-doll-slot'+(item?' equipped':'')+'" '+fullSpan+
+      ' style="grid-column:'+gridCol+';grid-row:'+row+';background:'+sBg+';border:1px solid '+sBd+';border-left:2px solid '+sBd+';border-radius:6px;"'+
+      ' ondragover="reDollDragOver(event,\''+slot.id+'\')"'+
+      ' ondragleave="this.classList.remove(\'drag-over\',\'drag-invalid\')"'+
+      ' ondrop="reDollDrop(event,\''+slot.id+'\')"'+hoverAttrs+'>'+
+      iconHtml+
+      '<div class="re-doll-slot-info">'+
+        '<span class="re-doll-slot-lbl" style="color:'+sLbl+';">'+slot.label+'</span>'+
+        '<div class="re-doll-slot-nm" style="color:'+sNm+';font-size:clamp(8px,1vh,12px);">'+(item?item.n:'&#8212;')+'</div>'+
+        sRar+
+      '</div>'+
+      (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper" style="color:rgba(201,168,76,0.4);">\u2715</button>':'')+
+    '</div>';
+  }
   return '<div class="re-doll-slot'+(item?' equipped':'')+'" '+fullSpan+
     ' style="grid-column:'+gridCol+';grid-row:'+row+';border-left-color:'+leftBorder+';border-color:#2A1A08;border-left-color:'+leftBorder+';background:'+bg+';"'+
     ' ondragover="reDollDragOver(event,\''+slot.id+'\')"'+
@@ -6863,7 +6884,7 @@ function renderSumCenterDoll(){
   var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
   var headSlot=reSlotHtml(RE_HEAD,2,1);
   el.innerHTML=
-    '<style>#sum-doll .doll-grid{grid-template-columns:1.9fr 0.2fr 1.9fr;grid-template-rows:repeat(6,clamp(54px,7.2vh,82px));gap:clamp(4px,.5vh,8px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(9px,1.15vh,13px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}</style>'+
+    '<style>#sum-doll .doll-grid{grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(6,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);transition:border-color .15s,background .15s;}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(8px,1vh,12px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}#sum-doll .re-doll-slot.equipped:hover{transform:none !important;}#sum-doll .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.55)!important;}#sum-doll .re-doll-slot.drag-over{background:rgba(201,168,76,.15)!important;border-color:rgba(201,168,76,.7)!important;}</style>'+
     '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 25%,transparent 75%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1;"></div>'+
     '<div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(.6rem,2vh,1.2rem) clamp(.5rem,1.5vw,1.5rem) 0;">'+
       '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(r.name||'—')+'</div>'+
