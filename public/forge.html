@@ -4804,7 +4804,7 @@ function renderSummary(){
     const spellsGroupedHtml=spellLvlKeys.map(lvl=>`
       <div style="margin-bottom:.55rem;">
         <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">${lvl===99?'DIVERS':('NIVEAU '+ROMAN[lvl-1])}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:.22rem;">${spellsByLvl[lvl].map(s=>`<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;">⚡ ${s}</span>`).join('')}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:.22rem;">${spellsByLvl[lvl].map(s=>`<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">⚡ ${s}</span>`).join('')}</div>
       </div>`).join('');
     const rollDisplay=_capRoll?`<div style="display:flex;align-items:center;gap:.55rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.3);border-radius:5px;padding:.42rem .65rem;margin-bottom:.5rem;animation:re-pulse .5s ease-out;">
       <div style="font-family:'Share Tech Mono',monospace;font-size:28px;color:#C9A84C;font-weight:bold;min-width:36px;text-align:center;">${_capRoll.total}</div>
@@ -4828,7 +4828,7 @@ function renderSummary(){
     </div>
     ${slotsHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">EMPLACEMENTS DE SORTS</div><div style="margin-bottom:.7rem;">${slotsHtml}</div>`:''}
     ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">CANTRIPS</div>
-    <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;">✧ ${s}</span>`).join('')}</div>`:''}
+    <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
     ${spellsGroupedHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.4rem;">SORTS CONNUS / PRÉPARÉS</div>${spellsGroupedHtml}`:''}
     `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`);
     return;
@@ -4979,9 +4979,13 @@ function renderSummary(){
       });
     }
     const clsEntries=Object.entries(merged).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
-    const tag=(txt,isSub,title)=>isSub
-      ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.12rem;" title="${title||''}">${txt}</span>`
-      :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.12rem;" title="${txt}">${txt}</span>`;
+    const tag=(txt,isSub,desc)=>{
+      const safe=txt.replace(/'/g,"\\'");const safeD=(desc||'').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+      const evts=`onmouseenter="showCapTooltip(event,'${safe}','${safeD}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"`;
+      return isSub
+        ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.12rem;cursor:default;" ${evts}>${txt}</span>`
+        :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.12rem;cursor:default;" ${evts}>${txt}</span>`;
+    };
     const capRollDisplay=_capRoll?`<div style="display:flex;align-items:center;gap:.55rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.3);border-radius:5px;padding:.42rem .65rem;margin-bottom:.5rem;">
       <div style="font-family:'Share Tech Mono',monospace;font-size:30px;color:#C9A84C;font-weight:bold;min-width:38px;text-align:center;">${_capRoll.total}</div>
       <div>
@@ -5015,7 +5019,7 @@ function renderSummary(){
     ${C.race?.traits?.length?`
     <div style="margin-bottom:.75rem;">
       <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">🧬 TRAITS RACIAUX · ${C.race.n}</div>
-      <div style="display:flex;flex-direction:column;gap:.28rem;">${C.race.traits.map(t=>{const nm=t.split(':')[0].trim();const desc=t.includes(':')?t.split(':').slice(1).join(':').trim():'';const diceMatch=desc.match(/(\d+d\d+)/i);const rollBtn=diceMatch?rbtn(nm,diceMatch[1],0):'';return`<div style="display:flex;align-items:center;gap:.35rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.27rem .5rem;"><span style="flex:1;font-family:'Share Tech Mono',monospace;font-size:8.5px;color:var(--parch2);" title="${desc}">${nm}</span>${rollBtn}</div>`;}).join('')}</div>
+      <div style="display:flex;flex-direction:column;gap:.28rem;">${C.race.traits.map(t=>{const nm=t.split(':')[0].trim();const desc=t.includes(':')?t.split(':').slice(1).join(':').trim():'';const diceMatch=desc.match(/(\d+d\d+)/i);const rollBtn=diceMatch?rbtn(nm,diceMatch[1],0):'';const safe=nm.replace(/'/g,"\\'");const safeD=desc.replace(/'/g,"\\'").replace(/\n/g,'\\n');return`<div style="display:flex;align-items:center;gap:.35rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.27rem .5rem;" onmouseenter="showCapTooltip(event,'${safe}','${safeD}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"><span style="flex:1;font-family:'Share Tech Mono',monospace;font-size:8.5px;color:var(--parch2);cursor:default;">${nm}</span>${rollBtn}</div>`;}).join('')}</div>
     </div>`:''}
     ${(clf||C.sub)?`
     <div style="margin-bottom:.75rem;">
@@ -6785,6 +6789,13 @@ function showSpellTooltip(ev, name){
   tt.classList.add('spell-tt');
   var desc=SPELL_DESC[name]||'';
   tt.innerHTML='<div class="rst-name" style="font-size:26px;margin-bottom:10px;">'+name+'</div>'+(desc?'<div class="rst-desc" style="font-size:18px;margin-top:0;max-height:none;border-top:none;padding-top:0;color:#B0A07A;line-height:1.6;">'+desc+'</div>':'');
+  posSlotTooltip(ev);
+  tt.classList.add('visible');
+}
+function showCapTooltip(ev, name, desc){
+  var tt=$('re-slot-tooltip'); if(!tt)return;
+  tt.classList.add('spell-tt');
+  tt.innerHTML='<div class="rst-name" style="font-size:22px;margin-bottom:8px;">'+name+'</div>'+(desc?'<div class="rst-desc" style="font-size:16px;margin-top:0;max-height:none;border-top:none;padding-top:0;color:#B0A07A;line-height:1.6;">'+desc.replace(/\\n/g,'<br>')+'</div>':'<div style="font-size:14px;color:#4A3A20;font-style:italic;">Aucune description disponible.</div>');
   posSlotTooltip(ev);
   tt.classList.add('visible');
 }
