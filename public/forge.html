@@ -8084,9 +8084,13 @@ async function updateLoginStatus(){
     }catch(e){}
     const adminBadge=_isAdmin?` <span style="font-family:'Cinzel',serif;font-size:8px;background:rgba(122,80,192,.2);border:1px solid #6A40A0;color:#C090F0;padding:1px 6px;border-radius:3px;letter-spacing:.06em;">👑 ADMIN</span>`:'';
     el.innerHTML=`<span style="color:#6ABF6A;">● Connecté</span> <span style="color:#7A6A4A;font-size:9px;">${session.user.email}</span>${adminBadge}`;
-    syncAllRosterToSupabase(); // pousse les persos locaux qui n'ont pas encore de supabaseId
-    if(_isAdmin) loadAdminPanel();
-    else{const ap=$('admin-panel');if(ap)ap.style.display='none';}
+    if(_isAdmin){
+      await syncAllRosterToSupabase(); // attend que les persos soient en base avant d'afficher le panel
+      loadAdminPanel();
+    } else {
+      syncAllRosterToSupabase(); // sync silencieuse pour les joueurs
+      const ap=$('admin-panel');if(ap)ap.style.display='none';
+    }
   } else {
     _isAdmin=false;
     const ap=$('admin-panel');if(ap)ap.style.display='none';
