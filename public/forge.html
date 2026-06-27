@@ -4719,25 +4719,70 @@ function renderSummary(){
 
   // ─── ONGLET FAMILIER ───
   if(_sumTab==='familier'){
+    if(!C.familiar)C.familiar={name:'',type:'',img:null,hp:null,ac:null,speed:null,str:10,dex:10,con:10,int:10,wis:10,cha:10,attacks:[],traits:[],notes:''};
+    const fm=C.familiar;
+    const fmMod=v=>{const m=Math.floor(((v||10)-10)/2);return(m>=0?'+':'')+m;};
+    const statLabels=[['str','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','SAG'],['cha','CHA']];
     $('lp').innerHTML=tabStrip+`
-    <div onclick="openFamiliarModal()" title="Cliquer pour éditer"
+    <input type="file" id="fm-tab-file" accept="image/*" style="display:none" onchange="handleFamiliarImgFile(this.files[0])">
+    <div
+      onclick="$('fm-tab-file').click()"
       ondragover="event.preventDefault();this.style.borderColor='rgba(201,168,76,.55)';"
       ondragleave="this.style.borderColor='rgba(201,168,76,.2)';"
-      ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.2)';if(event.dataTransfer.files[0]){handleFamiliarImgFile(event.dataTransfer.files[0]);}"
-      style="border:2px dashed rgba(201,168,76,.22);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(0,0,0,.2);overflow:hidden;position:relative;min-height:221px;margin-bottom:.65rem;">
-      ${C.familiar?.img?`<img src="${C.familiar.img}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;opacity:.88;">`:''}
-      <div style="position:relative;text-align:center;padding:1rem;">
-        <div style="font-size:${C.familiar?.img?'0':'38px'};margin-bottom:.3rem;">🐾</div>
-        <div style="font-family:'Cinzel Decorative',serif;font-size:${C.familiar?.name?'13px':'10px'};color:${C.familiar?.img?'#FFF':'#6A5030'};text-shadow:0 2px 5px #000;">${C.familiar?.name||'Aucun familier'}</div>
-        ${C.familiar?.type?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${C.familiar?.img?'rgba(255,255,255,.7)':'#4A3A20'};margin-top:2px;">${C.familiar.type}</div>`:''}
-        ${!C.familiar?.img?`<div style="font-size:8px;color:#3A2A10;margin-top:.35rem;">Cliquer pour éditer · Glisser une image</div>`:''}
+      ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.2)';if(event.dataTransfer.files[0])handleFamiliarImgFile(event.dataTransfer.files[0]);"
+      title="Cliquer ou glisser une image"
+      style="border:2px dashed rgba(201,168,76,.22);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);overflow:hidden;position:relative;height:221px;margin-bottom:.6rem;">
+      ${fm.img?`<img src="${fm.img}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">`:''}
+      <div style="position:relative;text-align:center;padding:1rem;pointer-events:none;">
+        ${!fm.img?`<div style="font-size:38px;margin-bottom:.35rem;">🐾</div>
+        <div style="font-family:'Cinzel',serif;font-size:9px;color:#4A3A20;">Cliquer ou glisser une image</div>`:''}
+      </div>
+      ${fm.img?`<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.75));padding:.4rem .6rem .5rem;pointer-events:none;">
+        <div style="font-family:'Cinzel Decorative',serif;font-size:13px;color:#F0E0C0;text-shadow:0 1px 4px #000;">${fm.name||''}</div>
+        ${fm.type?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(201,168,76,.75);margin-top:1px;">${fm.type}</div>`:''}
+      </div>`:''}
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-bottom:.35rem;">
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;margin-bottom:3px;">NOM</div>
+        <input type="text" value="${fm.name||''}" placeholder="Grand Vyre à Cou Clair…"
+          oninput="familiarSet('name',this.value)"
+          style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Cinzel',serif;font-size:10px;padding:.28rem .4rem;outline:none;">
+      </div>
+      <div>
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;margin-bottom:3px;">TYPE</div>
+        <input type="text" value="${fm.type||''}" placeholder="Bête, Fée, Fiélon…"
+          oninput="familiarSet('type',this.value)"
+          style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.28rem .4rem;outline:none;">
       </div>
     </div>
-    ${C.familiar?.notes?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:6px;padding:.5rem .65rem;margin-bottom:.55rem;">
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:#6A5030;margin-bottom:.3rem;">NOTES FAMILIER</div>
-      <div style="font-size:9px;color:#8A7A5A;line-height:1.5;">${C.familiar.notes}</div>
-    </div>`:''}
-    <button class="btn btn-p" style="width:100%;font-size:10px;" onclick="openFamiliarModal()">🐾 Éditer le familier</button>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.35rem;margin-bottom:.45rem;">
+      ${[['PV MAX','hp'],['CA','ac'],['VITESSE (ft)','speed']].map(([lbl,k])=>`
+      <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .35rem;text-align:center;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#5A4530;margin-bottom:3px;">${lbl}</div>
+        <input type="number" min="0" value="${fm[k]||''}" placeholder="—"
+          oninput="familiarSet('${k}',parseInt(this.value)||0)"
+          style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:16px;text-align:center;outline:none;padding:0;">
+      </div>`).join('')}
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.22rem;margin-bottom:.45rem;">
+      ${statLabels.map(([k,lbl])=>{const v=fm[k]||10;const ms=fmMod(v);return`
+      <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .12rem;text-align:center;">
+        <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.07em;color:#5A4530;margin-bottom:2px;">${lbl}</div>
+        <input type="number" min="1" max="30" value="${v}"
+          oninput="familiarSet('${k}',parseInt(this.value)||10);this.nextElementSibling.textContent=(()=>{const m=Math.floor(((parseInt(this.value)||10)-10)/2);return m>=0?'+'+m:''+m;})()"
+          style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:14px;text-align:center;outline:none;padding:0;">
+        <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#C9983A;margin-top:2px;">${ms}</div>
+      </div>`;}).join('')}
+    </div>
+
+    <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;margin-bottom:.28rem;">NOTES & CAPACITÉS</div>
+    <textarea class="ifl" style="min-height:90px;font-size:10px;" placeholder="Attaques, capacités spéciales, comportement…"
+      oninput="familiarSet('notes',this.value)">${fm.notes||''}</textarea>
+    ${fm.img||fm.name?`<button class="btn btn-s" style="width:100%;font-size:9px;margin-top:.4rem;" onclick="if(confirm('Supprimer ce familier ?')){C.familiar=null;renderSummary();}">✕ Supprimer le familier</button>`:''}
     `;
     return;
   }
@@ -5169,6 +5214,7 @@ function handleFamiliarImgFile(file){
   if(!file||!file.type.startsWith('image/'))return;
   const r=new FileReader();r.onload=e=>{
     if(!C.familiar)C.familiar={};C.familiar.img=e.target.result;
+    if(CUR===6&&_sumTab==='familier'){renderSummary();return;}
     const imgZone=$('familiar-img-zone');if(!imgZone)return;
     const ph=$('familiar-img-placeholder');
     const old=imgZone.querySelector('img.familiar-img-preview');if(old)old.remove();
