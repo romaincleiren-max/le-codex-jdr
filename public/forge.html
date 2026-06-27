@@ -4541,6 +4541,98 @@ function rollCap(label,formula,bonus){
   _capRoll={label:label,total:total,detail:detail,ts:Date.now()};
   renderSummary();
 }
+// ── LEVEL-UP ──────────────────────────────────────────
+const _ASI_LVL={fighter:[4,6,8,12,14,16,19],rogue:[4,8,10,12,16,18],default:[4,8,12,16,19]};
+function openLevelUp(){
+  var ov=$('lvlup-overlay');if(!ov)return;
+  var cur=C.level||1,nl=cur+1,cl=C.cls;
+  var hd=cl&&cl.hd?cl.hd:8;
+  var conM=mod(effStat('con'));
+  var asiLvls=_ASI_LVL[cl&&cl.id||'default']||_ASI_LVL.default;
+  var isASI=asiLvls.indexOf(nl)>=0;
+  var curPB=cur<5?2:cur<9?3:cur<13?4:cur<17?5:6;
+  var newPB=nl<5?2:nl<9?3:nl<13?4:nl<17?5:6;
+  var sn={str:'Force',dex:'Dextérité',con:'Constitution',int:'Intelligence',wis:'Sagesse',cha:'Charisme'};
+  var opts=['str','dex','con','int','wis','cha'].map(function(s){return'<option value="'+s+'">'+sn[s]+' ('+effStat(s)+')</option>';}).join('');
+  var conStr=(conM>=0?'+':'')+conM;
+  var asiHtml='';
+  if(isASI){asiHtml=
+    '<div style="background:#0A0805;border:1px solid #2A1A08;border-radius:5px;padding:.8rem;margin-bottom:.8rem;">'+
+    '<div style="font-family:\'Cinzel\',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.5rem;">AMÉLIORATION DE CARACTÉRISTIQUE</div>'+
+    '<div style="display:flex;flex-direction:column;gap:.4rem;">'+
+      '<label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--parch);"><input type="radio" name="asi-choice" value="2one" onchange="updateASIPanel()"> +2 à une caractéristique</label>'+
+      '<div id="asi-2one" style="display:none;padding:.3rem .5rem;background:#130D06;border-radius:3px;"><select id="asi-stat-a" style="background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:\'Share Tech Mono\',monospace;font-size:11px;padding:.3rem;outline:none;border-radius:3px;">'+opts+'</select></div>'+
+      '<label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--parch);"><input type="radio" name="asi-choice" value="1one1" onchange="updateASIPanel()"> +1 à deux caractéristiques</label>'+
+      '<div id="asi-1one1" style="display:none;padding:.3rem .5rem;background:#130D06;border-radius:3px;flex-direction:row;align-items:center;gap:.5rem;">'+
+        '<select id="asi-stat-b" style="background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:\'Share Tech Mono\',monospace;font-size:11px;padding:.3rem;outline:none;border-radius:3px;">'+opts+'</select>'+
+        '<span style="color:#5A4A2A;"> + </span>'+
+        '<select id="asi-stat-c" style="background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:\'Share Tech Mono\',monospace;font-size:11px;padding:.3rem;outline:none;border-radius:3px;">'+opts+'</select>'+
+      '</div>'+
+      '<label style="display:flex;align-items:center;gap:.5rem;cursor:pointer;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:var(--parch);"><input type="radio" name="asi-choice" value="feat" onchange="updateASIPanel()"> Don (à noter manuellement dans Capacités)</label>'+
+    '</div></div>';}
+  var pbHtml=newPB!==curPB?'<div style="background:#0A0805;border:1px solid #2A1A08;border-radius:5px;padding:.55rem .8rem;margin-bottom:.8rem;font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#8A7060;">Bonus de Maîtrise : +'+curPB+' → <span style="color:#6BAF4A;font-size:12px;">+'+newPB+'</span></div>':'';
+  $('lvlup-content').innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.9rem;">'+
+      '<div style="font-family:\'Cinzel Decorative\',serif;font-size:14px;color:var(--gold);">Montée de Niveau</div>'+
+      '<button onclick="closeLevelUp()" style="background:none;border:1px solid #3A2A10;color:#6A5A3A;padding:.15rem .55rem;cursor:pointer;border-radius:3px;font-size:15px;">✕</button>'+
+    '</div>'+
+    '<div style="font-family:\'Cinzel\',serif;font-size:11px;color:var(--parch);letter-spacing:.07em;margin-bottom:.9rem;">'+
+      (cl&&cl.n?cl.n:'?')+' · Niv.'+cur+' <span style="color:#4A3A20;font-size:14px;">→</span> <span style="color:var(--gold);font-family:\'Cinzel Decorative\',serif;font-size:18px;">'+nl+'</span>'+
+    '</div>'+
+    '<div style="background:#0A0805;border:1px solid #2A1A08;border-radius:5px;padding:.8rem;margin-bottom:.8rem;">'+
+      '<div style="font-family:\'Cinzel\',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.45rem;">POINTS DE VIE</div>'+
+      '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#8A7060;margin-bottom:.6rem;">Lancez votre d'+hd+' et entrez le résultat. Mod. CON : <span style="color:var(--parch);">'+conStr+'</span></div>'+
+      '<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;">'+
+        '<input type="number" id="lvlup-hp-roll" min="1" max="'+hd+'" placeholder="—"'+
+          ' style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--gold);font-family:\'Cinzel Decorative\',serif;font-size:24px;text-align:center;padding:.2rem;outline:none;border-radius:3px;-moz-appearance:textfield;"'+
+          ' oninput="updateLvlupHPPreview()">'+
+        '<span style="color:#5A4A2A;font-family:\'Share Tech Mono\',monospace;font-size:11px;">'+conStr+' (CON) =</span>'+
+        '<div id="lvlup-hp-total" style="font-family:\'Cinzel Decorative\',serif;font-size:26px;color:#6BAF4A;">—</div>'+
+        '<span style="color:#4A3A20;font-size:9px;font-family:\'Share Tech Mono\',monospace;">PV gagnés</span>'+
+      '</div>'+
+    '</div>'+
+    asiHtml+pbHtml+
+    '<button onclick="applyLevelUp()"'+
+      ' style="width:100%;font-family:\'Cinzel\',serif;font-size:11px;letter-spacing:.1em;padding:.65rem;background:rgba(201,168,76,.1);border:1px solid var(--gold-d);color:var(--gold);cursor:pointer;border-radius:4px;margin-top:.2rem;transition:.15s;"'+
+      ' onmouseenter="this.style.background=\'rgba(201,168,76,.22)\'" onmouseleave="this.style.background=\'rgba(201,168,76,.1)\'">'+
+      '⬆ Appliquer · Niveau '+nl+
+    '</button>';
+  ov.style.display='flex';
+}
+function closeLevelUp(){var ov=$('lvlup-overlay');if(ov)ov.style.display='none';}
+function updateLvlupHPPreview(){
+  var roll=parseInt(($('lvlup-hp-roll')||{}).value)||0;
+  var el=$('lvlup-hp-total');
+  if(el)el.textContent=roll?'+'+Math.max(1,roll+mod(effStat('con'))):'—';
+}
+function updateASIPanel(){
+  var choice=document.querySelector('input[name="asi-choice"]:checked');
+  var val=choice?choice.value:'';
+  var a=$('asi-2one'),b=$('asi-1one1');
+  if(a)a.style.display=val==='2one'?'block':'none';
+  if(b)b.style.display=val==='1one1'?'flex':'none';
+}
+function applyLevelUp(){
+  var hpRoll=parseInt(($('lvlup-hp-roll')||{}).value)||0;
+  if(!hpRoll){alert('Entrez le résultat de votre jet de dé de vie avant de continuer.');return;}
+  var conM=mod(effStat('con'));
+  var hpGain=Math.max(1,hpRoll+conM);
+  var curMax=C.hpOverride!=null?C.hpOverride:calcHP();
+  C.level=(C.level||1)+1;
+  C.hpOverride=curMax+hpGain;
+  C.maxHp=C.hpOverride;
+  C.hp=C.hp!=null?Math.min(C.hp+hpGain,C.hpOverride):C.hpOverride;
+  var choice=document.querySelector('input[name="asi-choice"]:checked');
+  var val=choice?choice.value:'';
+  if(val==='2one'){var s=($('asi-stat-a')||{}).value;if(s){if(!C.asi)C.asi={};C.asi[s]=(C.asi[s]||0)+2;}}
+  else if(val==='1one1'){
+    var s1=($('asi-stat-b')||{}).value,s2=($('asi-stat-c')||{}).value;
+    if(s1){if(!C.asi)C.asi={};C.asi[s1]=(C.asi[s1]||0)+1;}
+    if(s2){if(!C.asi)C.asi={};C.asi[s2]=(C.asi[s2]||0)+1;}
+  }
+  closeLevelUp();saveToRoster();renderSummary();updateRight();renderSumCenterDoll();
+}
+// ── END LEVEL-UP ──────────────────────────────────────
 function adjustHP(delta){
   const maxHp=calcHP()||0;
   if(C.hp==null) C.hp=maxHp;
@@ -6888,9 +6980,10 @@ function renderSumCenterDoll(){
     '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 25%,transparent 75%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1;"></div>'+
     '<div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(.6rem,2vh,1.2rem) clamp(.5rem,1.5vw,1.5rem) 0;">'+
       '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(r.name||'—')+'</div>'+
-      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.15em;color:var(--gold-d);text-shadow:0 1px 5px #000;margin-bottom:clamp(.4rem,1.2vh,.8rem);">'+
+      '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.15em;color:var(--gold-d);text-shadow:0 1px 5px #000;margin-bottom:.2rem;">'+
         (r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+
       '</div>'+
+      '<button onclick="openLevelUp()" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.28);color:var(--gold-d);cursor:pointer;border-radius:12px;text-shadow:0 1px 4px #000;margin-bottom:clamp(.3rem,1vh,.7rem);transition:.15s;" onmouseenter="this.style.background=\'rgba(201,168,76,.2)\';this.style.borderColor=\'rgba(201,168,76,.5)\'" onmouseleave="this.style.background=\'rgba(201,168,76,.08)\';this.style.borderColor=\'rgba(201,168,76,.28)\'">⬆ Montée de niveau +1</button>'+
       '<div class="doll-grid" style="grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(6,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);width:100%;">'+headSlot+leftSlots+rightSlots+'</div>'+
       '<div style="margin-top:clamp(.4rem,1vh,.7rem);font-family:\'Share Tech Mono\',monospace;font-size:8px;color:rgba(201,168,76,.35);letter-spacing:.1em;text-shadow:0 1px 3px #000;">Glisser du sac ou du catalogue ▸ déposer sur un emplacement</div>'+
     '</div>';
@@ -8405,6 +8498,13 @@ async function viewOfficialPDF(){
     <input id="share-portrait-url" type="url" placeholder="https://… (image de profil)" style="width:100%;background:#0D0A05;border:1px solid #5A3810;color:#E8D5A0;padding:.5rem .7rem;border-radius:4px;font-family:'IM Fell English',serif;font-size:13px;margin-bottom:1.2rem;">
     <button onclick="submitShareCharacter()" style="width:100%;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.1em;padding:.7em 1.4em;background:#8B1A1A;color:#F0D090;border:2px solid #CC3333;cursor:pointer;border-radius:4px;transition:.15s;">✦ Soumettre le personnage</button>
     <div id="share-feedback" style="margin-top:.8rem;font-family:'IM Fell English',serif;font-size:12px;text-align:center;min-height:1.2em;"></div>
+  </div>
+</div>
+
+<!-- ══ LEVEL-UP OVERLAY ══ -->
+<div id="lvlup-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9600;align-items:center;justify-content:center;" onclick="if(event.target===this)closeLevelUp()">
+  <div style="background:#0D0905;border:1px solid #3A2A10;border-radius:8px;width:min(540px,96vw);max-height:90vh;overflow-y:auto;padding:1.4rem 1.6rem;position:relative;" onclick="event.stopPropagation()">
+    <div id="lvlup-content"></div>
   </div>
 </div>
 
