@@ -3987,45 +3987,6 @@ function renderEquipSpells(){
     <div class="bag-hdr"><span>⚔ CONTENU DU SAC</span><span id="bag-weight-hdr" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);"></span></div>
     <div id="bag-list"></div>
   </div>
-  <div id="armor-equip-sec"></div>
-  <div id="equip-lp-sec"></div>
-  <!-- ══ AJOUT MANUEL ══ -->
-  <details id="manual-item-details" style="margin-bottom:.5rem;">
-    <summary style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);cursor:pointer;padding:.4rem .5rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;list-style:none;user-select:none;">✏ Ajouter un objet manuellement</summary>
-    <div style="background:#0A0805;border:1px solid #2A1A08;border-top:none;border-radius:0 0 4px 4px;padding:.6rem .7rem;">
-      <div style="display:grid;grid-template-columns:1fr auto auto;gap:.4rem;margin-bottom:.4rem;align-items:end;">
-        <div>
-          <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">NOM *</label>
-          <input type="text" id="mi-name" class="inv-search" style="margin-bottom:0;width:100%;" placeholder="Ex: Amulette de Tyr">
-        </div>
-        <div>
-          <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">TYPE</label>
-          <select id="mi-cat" style="background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.3rem .4rem;outline:none;border-radius:3px;">
-            ${['Équipement','Arme','Armure','Outil','Magie','Potion','Trésor','Autre'].map(c=>`<option value="${c}">${c}</option>`).join('')}
-          </select>
-        </div>
-        <div style="display:flex;gap:.3rem;">
-          <div>
-            <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">POIDS (lb)</label>
-            <input type="number" id="mi-weight" min="0" step="0.1" placeholder="0" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;text-align:center;">
-          </div>
-          <div>
-            <label style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.1em;color:#5A4530;display:block;margin-bottom:3px;">VALEUR</label>
-            <input type="text" id="mi-cost" placeholder="2 po" style="width:60px;background:#0E0905;border:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:11px;padding:.3rem .4rem;outline:none;">
-          </div>
-        </div>
-      </div>
-      <textarea id="mi-desc" class="ifl" style="min-height:48px;font-size:10px;margin-bottom:.5rem;" placeholder="Description (optionnelle)…"></textarea>
-      <button class="btn btn-p" style="font-size:10px;padding:.35em 1em;" onclick="addManualItem()">+ Ajouter au sac</button>
-    </div>
-  </details>
-
-  <div class="import-zone">
-    <div class="import-hdr">⬇ Importer des objets (format JSON)</div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-bottom:.4rem;">Format : [{"id":"dagger","n":"Dague","qty":2,"w":1,"c":"2 po","d":"...","cat":"Arme"}]<br>Ou collez le JSON d'un objet custom défini par votre MJ.</div>
-    <textarea class="import-ta" id="import-ta" placeholder='[{"id":"epee-magique","n":"Épée +1","qty":1,"w":3,"c":"—","d":"Arme magique : +1 aux jets d\'attaque et de dégâts.","cat":"Arme"}]'></textarea>
-    <div class="btn-row" style="margin-top:.5rem;"><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="importItems()">⬇ Importer</button><button class="btn btn-s" style="font-size:10px;padding:.4em 1em;" onclick="exportBagJSON()">⬆ Exporter le sac</button></div>
-  </div>
   ${(()=>{
     if(!cl?.spellcaster)return'';
     const lvl=C.cls_lvl||C.level;
@@ -4049,7 +4010,7 @@ function renderEquipSpells(){
   <div id="cap-list"></div>
   <div class="btn-row"><button class="btn btn-s" onclick="go(3)">← Background</button><button class="btn btn-p" onclick="go(5)">Suivant : Identité →</button></div>`;
   if(!C.equipped) C.equipped={};
-  if(_invSource==='codex'){if(_codexData)renderCodexGrid();}else{renderInvGrid();}renderBagList();renderSpecialAbilities();renderEquipPanel();
+  if(_invSource==='codex'){if(_codexData)renderCodexGrid();}else{renderInvGrid();}renderBagList();renderSpecialAbilities();
 }
 
 // ── CAPACITÉS SPÉCIALES ─────────────────────────────
@@ -4442,7 +4403,7 @@ function renderIdentity(){
   </div>
 
   <label class="ilb">📖 Histoire & Motivations</label>
-  <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.bg_story=this.value">${C.bg_story||''}</textarea>
+  <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.backstory=this.value">${C.backstory||C.bg_story||''}</textarea>
 
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(4)">← Équipement</button>
