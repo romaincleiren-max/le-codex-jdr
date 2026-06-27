@@ -1608,9 +1608,15 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <div class="tb-t">⚔ Forge du Héros <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold-d);letter-spacing:.1em;">v3.0</span></div>
     <div class="tb-r">
       <div class="badge" id="badge">CRÉATION</div>
+      <button id="forge-edit-toggle" class="btn btn-s" style="display:none;padding:.25em .8em;font-size:9px;" onclick="toggleForgeEditNav()">✏ Modifier la fiche</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="saveDraft();this.textContent='✓ Sauvegardé';setTimeout(()=>this.textContent='💾 Sauvegarder',1500)">💾 Sauvegarder</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="showTitle()">↩ Accueil</button>
     </div>
+  </div>
+  <div id="forge-edit-nav" style="display:none;padding:.3rem .8rem;background:#0A0805;border-bottom:1px solid #2A1A08;display:none;flex-wrap:wrap;gap:.25rem;align-items:center;">
+    <span style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#5A4530;">ÉDITER ·</span>
+    ${[['Race',0],['Classe',1],['Stats',2],['Background',3],['Équip. & Sorts',4],['Identité',5],['Capacités',7]].map(([lbl,step])=>`<button onclick="toggleForgeEditNav(false);go(${step})" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.06em;padding:.25rem .6rem;border:1px solid var(--gold-d);background:rgba(201,168,76,.08);color:var(--gold-d);cursor:pointer;border-radius:3px;transition:.12s;" onmouseover="this.style.background='rgba(201,168,76,.18)';this.style.color='var(--gold)'" onmouseout="this.style.background='rgba(201,168,76,.08)';this.style.color='var(--gold-d)'">${lbl}</button>`).join('')}
+    <button onclick="toggleForgeEditNav(false)" style="margin-left:auto;background:none;border:none;color:#5A4530;cursor:pointer;font-size:14px;">✕</button>
   </div>
   <div id="dh-nav">
     <div class="pill" id="dh0" onclick="goDH(0)">1 · Caractéristiques</div>
@@ -3259,9 +3265,17 @@ function loadChar(e){
     }catch{alert('Fichier JSON invalide.');}
   };r.readAsText(f);
 }
+let _forgeEditNavOpen=false;
+function toggleForgeEditNav(force){
+  _forgeEditNavOpen=(force!==undefined)?force:!_forgeEditNavOpen;
+  var nav=$('forge-edit-nav');
+  if(nav)nav.style.display=_forgeEditNavOpen?'flex':'none';
+  var btn=$('forge-edit-toggle');
+  if(btn)btn.style.background=_forgeEditNavOpen?'rgba(201,168,76,.18)':'';
+}
+
 function go(n){
   if(n!==4 && n!==6) hideEquipPanel();
-  // Quitter le step 6 : fermer overlay re-edit si ouvert
   if(n!==6 && _reFromEdit){
     var _sd=$('sum-doll'); if(_sd) _sd.style.display='none';
     _reChar=null; _reFromEdit=false;
@@ -3270,9 +3284,21 @@ function go(n){
   CUR=n;
   const scnBar=$('scn-bar');
   const navBar=$('nav');
+  const editToggle=$('forge-edit-toggle');
+  const badge=$('badge');
   if(n===8){ scnBar.style.display='flex'; navBar.style.display='none'; }
-  else if(n===6){ scnBar.style.display='none'; navBar.style.display='none'; }
-  else { scnBar.style.display='none'; navBar.style.display='flex'; var _sd=$('sum-doll'); if(_sd) _sd.style.display='none'; }
+  else if(n===6){
+    scnBar.style.display='none'; navBar.style.display='none';
+    if(editToggle)editToggle.style.display='';
+    if(badge)badge.style.display='none';
+  }
+  else {
+    scnBar.style.display='none'; navBar.style.display='flex';
+    var _sd=$('sum-doll'); if(_sd) _sd.style.display='none';
+    if(editToggle)editToggle.style.display='none';
+    if(badge)badge.style.display='';
+    toggleForgeEditNav(false);
+  }
   if(n!==8){
     document.querySelectorAll('.pill').forEach((p,i)=>{p.classList.remove('active','done');if(i===n)p.classList.add('active');else if(i<n)p.classList.add('done');});
     [renderRace,renderClass,renderStats,renderBackground,renderEquipSpells,renderIdentity,renderSummary,renderCapacities][n]?.();
@@ -4572,7 +4598,7 @@ function renderSummary(){
   const sh=(l)=>`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.2em;color:#6A5030;margin-bottom:.4rem;">${l}</div>`;
 
   // ─── TAB STRIP 3×2 ───
-  const TABS=[['fiche','📋','FICHE'],['capacites','','CAPAC.'],['inventaire','','SAC'],['sorts','','SORTS'],['notes','','NOTES'],['familier','','FAMILIER']];
+  const TABS=[['fiche','','FICHE'],['capacites','','CAPAC.'],['inventaire','','SAC'],['sorts','','SORTS'],['notes','','NOTES'],['familier','','FAMILIER']];
   const tabStrip=`<div style="display:grid;grid-template-columns:repeat(3,1fr);border:1px solid #2A1A08;border-radius:6px;overflow:hidden;margin-bottom:.65rem;">
     ${TABS.map(([id,icon,lbl],i)=>`<button onclick="_sumTab='${id}';renderSummary()" style="padding:.38rem .2rem;font-family:'Cinzel',serif;font-size:7.5px;letter-spacing:.05em;cursor:pointer;background:${_sumTab===id?'rgba(201,168,76,.15)':'transparent'};color:${_sumTab===id?'#C9A84C':'#5A4A30'};border:none;border-right:${i%3!==2?'1px solid #2A1A08':'none'};border-bottom:${i<3?'1px solid #2A1A08':'none'};transition:background .15s;line-height:1.45;">${icon?icon+'<br>':''}${lbl}</button>`).join('')}
   </div>`;
@@ -4921,28 +4947,24 @@ function renderSummary(){
     <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#4A3A20;">${alignLine}${C.background?' · '+C.background.n:''}</div>
   </div>
 
-  <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.38rem;">
-    ${[['🧬','Race',0],['⚔','Classe',1],['📊','Stats',2],['📜','Background',3],['🎒','Équip.',4],['👤','Identité',5],['📖','Capacités',7]].map(([ic,lbl,step])=>`
-    <button onclick="go(${step})" style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.06em;padding:.22rem .48rem;border:1px solid #3A2A10;background:rgba(30,18,6,.6);color:#8A7050;cursor:pointer;border-radius:3px;transition:.12s;" onmouseover="this.style.borderColor='var(--gold-d)';this.style.color='var(--gold)'" onmouseout="this.style.borderColor='#3A2A10';this.style.color='#8A7050'">${ic} ${lbl}</button>`).join('')}
-  </div>
   <div style="display:flex;gap:.35rem;margin-bottom:.45rem;">
     <button id="short-rest-btn" class="btn btn-s" style="flex:1;font-size:9px;" onclick="doShortRest()">⭕ Repos Court</button>
     <button id="long-rest-btn" class="btn btn-s" style="flex:1;font-size:9px;" onclick="doLongRest()">🌙 Repos Long</button>
   </div>
 
   <div style="display:grid;grid-template-columns:auto 1fr;gap:.4rem;margin-bottom:.4rem;align-items:start;">
-    <div style="background:linear-gradient(135deg,#4A0808,#2A0505);border:2px solid #8B1F1F;border-radius:6px;padding:.42rem .55rem;text-align:center;min-width:76px;">
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:#C06060;margin-bottom:1px;">PV MAX</div>
-      <div style="font-family:'Cinzel Decorative',serif;font-size:24px;color:#F0A0A0;line-height:1;">${calcHP()||'?'}</div>
-      <div style="border-top:1px solid rgba(139,31,31,.4);margin:.3rem 0 .25rem;"></div>
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">PV TEMP.</div>
+    <div style="background:#0E0A05;border:1px solid #3A2A10;border-radius:6px;padding:.42rem .55rem;text-align:center;min-width:76px;">
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:var(--gold-d);margin-bottom:1px;">PV MAX</div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:26px;color:var(--parch);line-height:1;font-weight:bold;">${calcHP()||'?'}</div>
+      <div style="border-top:1px solid #2A1A08;margin:.3rem 0 .25rem;"></div>
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:var(--gold-d);margin-bottom:2px;">PV TEMP.</div>
       <input type="number" min="0" placeholder="0" value="${C.hpTemp||''}"
         oninput="C.hpTemp=parseInt(this.value)||0"
-        style="width:100%;background:none;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#E8B0B0;font-family:'Share Tech Mono',monospace;font-size:14px;text-align:center;outline:none;padding:0;">
-      <div style="border-top:1px solid rgba(139,31,31,.3);margin:.3rem 0 .2rem;"></div>
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#904040;margin-bottom:2px;">ÉTAT</div>
+        style="width:100%;background:none;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:14px;text-align:center;outline:none;padding:0;">
+      <div style="border-top:1px solid #2A1A08;margin:.3rem 0 .2rem;"></div>
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:var(--gold-d);margin-bottom:2px;">ÉTAT</div>
       <select oninput="addCondition(this.value);this.value=''"
-        style="width:100%;background:#200808;border:none;border-bottom:1px solid rgba(139,31,31,.3);color:#C09090;font-family:'Share Tech Mono',monospace;font-size:7.5px;text-align:center;outline:none;cursor:pointer;padding:.1rem 0;">
+        style="width:100%;background:#0E0A05;border:none;border-bottom:1px solid #3A2A10;color:var(--parch2);font-family:'Share Tech Mono',monospace;font-size:7.5px;text-align:center;outline:none;cursor:pointer;padding:.1rem 0;">
         <option value="">+</option>
         ${['Aveuglé','Charmé','Assourdi','Effrayé','Agrippé','Incapacité','Invisible','Paralysé','Pétrifié','Empoisonné','À terre','Entravé','Étourdi','Inconscient','Épuisement 1','Épuisement 2','Épuisement 3','Épuisement 4','Épuisement 5','Épuisement 6'].map(c=>`<option value="${c}">${c}</option>`).join('')}
       </select>
@@ -5970,7 +5992,12 @@ function canEquipInSlot(item, slotId){
 
 function bagDragStart(e, idx){
   _dragItem = C.bag[idx] ? {...C.bag[idx]} : null;
-  if(_dragItem) e.dataTransfer.effectAllowed='copy';
+  _reBagDragItem = _dragItem;
+  if(_dragItem){
+    e.dataTransfer.effectAllowed='copy';
+    var ghost=reCreateDragImage(_dragItem);
+    if(ghost){e.dataTransfer.setDragImage(ghost,ghost.offsetWidth/2,ghost.offsetHeight/2);}
+  }
 }
 function slotDragOver(e, slotId){
   e.preventDefault();
@@ -6714,8 +6741,10 @@ function reSlotHtml(slot, col, row){
   var iconHtml=(CUR===6)
     ?(item&&item.sprite?'<div class="re-doll-slot-icon"><img src="'+item.sprite+'" onerror="this.style.display=\'none\'"></div>':'')
     :('<div class="re-doll-slot-icon">'+(item&&item.sprite?'<img src="'+item.sprite+'" onerror="this.style.display=\'none\'">':slot.icon)+'</div>');
-  return '<div class="re-doll-slot'+(item?' equipped':'')+'"'+
-    ' style="grid-column:'+col+';grid-row:'+row+';border-left-color:'+leftBorder+';border-color:#2A1A08;border-left-color:'+leftBorder+';background:'+bg+';"'+
+  var gridCol=(CUR===6&&col===2)?'1/-1':String(col);
+  var fullSpan=(CUR===6&&col===2)?'data-fullspan="1" ':'';
+  return '<div class="re-doll-slot'+(item?' equipped':'')+'" '+fullSpan+
+    ' style="grid-column:'+gridCol+';grid-row:'+row+';border-left-color:'+leftBorder+';border-color:#2A1A08;border-left-color:'+leftBorder+';background:'+bg+';"'+
     ' ondragover="reDollDragOver(event,\''+slot.id+'\')"'+
     ' ondragleave="this.classList.remove(\'drag-over\',\'drag-invalid\')"'+
     ' ondrop="reDollDrop(event,\''+slot.id+'\')"'+hoverAttrs+'>'+
@@ -6783,7 +6812,7 @@ function renderSumCenterDoll(){
   var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
   var headSlot=reSlotHtml(RE_HEAD,2,1);
   el.innerHTML=
-    '<style>#sum-doll .doll-grid{grid-template-rows:repeat(6,clamp(52px,6.8vh,78px));gap:clamp(4px,.5vh,8px);}#sum-doll .re-doll-slot{padding:clamp(.3rem,.6vh,.7rem) clamp(.35rem,.6vw,.7rem);}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.82vh,10px);}#sum-doll .re-doll-slot-nm{font-size:clamp(8.5px,1.1vh,13px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}</style>'+
+    '<style>#sum-doll .doll-grid{grid-template-columns:1.9fr 0.2fr 1.9fr;grid-template-rows:repeat(6,clamp(54px,7.2vh,82px));gap:clamp(4px,.5vh,8px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(9px,1.15vh,13px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}</style>'+
     '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 25%,transparent 75%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1;"></div>'+
     '<div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(.6rem,2vh,1.2rem) clamp(.5rem,1.5vw,1.5rem) 0;">'+
       '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(r.name||'—')+'</div>'+
