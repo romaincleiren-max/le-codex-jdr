@@ -4403,7 +4403,7 @@ function renderIdentity(){
   </div>
 
   <label class="ilb">📖 Histoire & Motivations</label>
-  <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.backstory=this.value">${C.backstory||C.bg_story||''}</textarea>
+  <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.bg_story=this.value">${C.bg_story||''}</textarea>
 
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(4)">← Équipement</button>
@@ -4738,9 +4738,9 @@ function renderSummary(){
     <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#6A5030;margin-bottom:.3rem;">📝 NOTES LIBRES</div>
     <textarea class="ifl" style="min-height:90px;font-size:11px;" placeholder="Notes, rappels, objectifs…"
       oninput="C.notes=this.value">${C.notes||''}</textarea>
-    <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#6A5030;margin:.45rem 0 .3rem;">📖 HISTOIRE DU PERSONNAGE</div>
-    <textarea class="ifl" style="min-height:120px;font-size:10px;" placeholder="Background, origine, motivations, secrets…"
-      oninput="C.backstory=this.value">${C.backstory||''}</textarea>
+    <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#6A5030;margin:.45rem 0 .3rem;">📖 HISTOIRE & MOTIVATIONS</div>
+    <textarea class="ifl" style="min-height:120px;font-size:10px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…"
+      oninput="C.bg_story=this.value">${C.bg_story||''}</textarea>
     `;
     return;
   }
