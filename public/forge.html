@@ -459,6 +459,17 @@ body.printing #ps-print{display:block!important;}
 .admin-card-name{font-family:'Cinzel Decorative',serif;font-size:12px;color:#D0A8F0;margin-bottom:.25rem;}
 .admin-card-sub{font-family:'Cinzel',serif;font-size:9px;color:#7A60A0;letter-spacing:.08em;}
 .admin-card-player{font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A4A70;margin-top:.4rem;}
+/* Toggle montée de niveau admin */
+.lvlup-toggle-wrap{display:flex;align-items:center;gap:.5rem;margin-top:.55rem;padding-top:.45rem;border-top:1px solid #2A1A3A;}
+.lvlup-toggle-label{font-family:'Cinzel',serif;font-size:7.5px;color:#8A70A0;letter-spacing:.05em;}
+.lvlup-toggle{position:relative;width:32px;height:17px;cursor:pointer;}
+.lvlup-toggle input{opacity:0;width:0;height:0;position:absolute;}
+.lvlup-slider{position:absolute;inset:0;background:#1A1025;border:1px solid #3A2060;border-radius:17px;transition:.25s;}
+.lvlup-slider:before{content:'';position:absolute;width:11px;height:11px;left:2px;bottom:2px;background:#4A3060;border-radius:50%;transition:.25s;}
+.lvlup-toggle input:checked+.lvlup-slider{background:rgba(201,168,76,.18);border-color:rgba(201,168,76,.6);}
+.lvlup-toggle input:checked+.lvlup-slider:before{background:#C9A84C;transform:translateX(15px);box-shadow:0 0 6px rgba(201,168,76,.7);}
+/* Animation bouton joueur quand activé */
+@keyframes lvlup-glow{0%,100%{box-shadow:0 0 6px rgba(201,168,76,.25),inset 0 0 6px rgba(201,168,76,.06);}50%{box-shadow:0 0 18px rgba(201,168,76,.55),inset 0 0 10px rgba(201,168,76,.12);}}
 .admin-empty{font-family:'IM Fell English',serif;font-size:11px;color:#5A4A6A;font-style:italic;}
 /* Bouton partager admin sur roster card */
 .rc-share-admin{font-family:'Cinzel',serif;font-size:7px;padding:.2em .4em;border:1px dashed #4A3060;color:#6A50A0;background:none;cursor:pointer;border-radius:3px;transition:.12s;white-space:nowrap;}
@@ -7032,7 +7043,10 @@ function renderSumCenterDoll(){
       '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.15em;color:var(--gold-d);text-shadow:0 1px 5px #000;margin-bottom:.2rem;">'+
         (r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+
       '</div>'+
-      '<button onclick="openLevelUp()" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.28);color:var(--gold-d);cursor:pointer;border-radius:12px;text-shadow:0 1px 4px #000;margin-bottom:clamp(.3rem,1vh,.7rem);transition:.15s;" onmouseenter="this.style.background=\'rgba(201,168,76,.2)\';this.style.borderColor=\'rgba(201,168,76,.5)\'" onmouseleave="this.style.background=\'rgba(201,168,76,.08)\';this.style.borderColor=\'rgba(201,168,76,.28)\'">⬆ Montée de niveau +1</button>'+
+      (r.levelUpEnabled
+        ?'<button onclick="openLevelUp()" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.50);color:var(--gold);cursor:pointer;border-radius:12px;text-shadow:0 2px 8px #000;margin-bottom:clamp(.3rem,1vh,.7rem);transition:.15s;animation:lvlup-glow 2s ease-in-out infinite;" onmouseenter="this.style.background=\'rgba(201,168,76,.25)\'" onmouseleave="this.style.background=\'rgba(201,168,76,.10)\'">⬆ Montée de niveau +1</button>'
+        :'<button disabled title="L\'admin n\'a pas encore activé la montée de niveau" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(30,20,10,.5);border:1px solid rgba(80,60,30,.3);color:rgba(150,120,60,.3);cursor:not-allowed;border-radius:12px;text-shadow:none;margin-bottom:clamp(.3rem,1vh,.7rem);opacity:.45;filter:grayscale(.7);">⬆ Montée de niveau +1</button>'
+      )+
       '<div class="doll-grid" style="grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(6,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);width:100%;">'+headSlot+leftSlots+rightSlots+'</div>'+
       '<div style="margin-top:clamp(.4rem,1vh,.7rem);font-family:\'Share Tech Mono\',monospace;font-size:8px;color:rgba(201,168,76,.35);letter-spacing:.1em;text-shadow:0 1px 3px #000;">Glisser du sac ou du catalogue ▸ déposer sur un emplacement</div>'+
     '</div>';
@@ -8027,7 +8041,7 @@ async function loadForgeFromSupabase(){
   const sc=getSupaClient();
   try{
     const {data,error}=await sc.from('characters')
-      .select('id,sheet_data,char_name,shared_with_admin').eq('user_id',session.user.id).eq('status','approved');
+      .select('id,sheet_data,char_name,shared_with_admin,level_up_enabled').eq('user_id',session.user.id).eq('status','approved');
     if(error||!data) return;
     const roster=getRoster();
     let changed=false;
@@ -8038,6 +8052,7 @@ async function loadForgeFromSupabase(){
       if(existing){
         if(!existing.supabaseId){ existing.supabaseId=row.id; changed=true; }
         if(existing.sharedWithAdmin!==!!row.shared_with_admin){ existing.sharedWithAdmin=!!row.shared_with_admin; changed=true; }
+        if(existing.levelUpEnabled!==!!row.level_up_enabled){ existing.levelUpEnabled=!!row.level_up_enabled; changed=true; }
       } else {
         roster.push({...row.sheet_data,supabaseId:row.id});
         changed=true;
@@ -8089,11 +8104,19 @@ async function loadAdminPanel(){
       var lvl=esc(row.level||sd.level||1);
       var player=esc(row.player_name||sd.player||sd.playerName||'');
       var sid=esc(row.id);
+      var lvlEnabled=!!row.level_up_enabled;
       return '<div class="admin-card" onclick="adminOpenChar(\''+sid+'\')" title="Ouvrir la fiche">'
         +'<div class="admin-card-name">'+name+'</div>'
         +'<div class="admin-card-sub">'+cls+' · '+race+' · Niv.'+lvl+'</div>'
         +(player?'<div class="admin-card-player">Joueur : '+player+'</div>':'')
         +'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#5A4A70;margin-top:.3rem;">Cliquer pour ouvrir la fiche</div>'
+        +'<div class="lvlup-toggle-wrap" onclick="event.stopPropagation()">'
+          +'<span class="lvlup-toggle-label">⬆ Montée de niveau</span>'
+          +'<label class="lvlup-toggle" title="'+(lvlEnabled?'Désactiver':'Activer')+' la montée de niveau pour ce joueur">'
+            +'<input type="checkbox" '+(lvlEnabled?'checked':'')+' onchange="adminToggleLevelUp(\''+sid+'\',this.checked,this)">'
+            +'<span class="lvlup-slider"></span>'
+          +'</label>'
+        +'</div>'
         +'</div>';
     }).join('');
   }catch(e){$('admin-char-grid').innerHTML='<div class="admin-empty">Erreur : '+e.message+'</div>';}
@@ -8119,6 +8142,25 @@ async function adminOpenChar(supabaseId){
   }catch(e){alert('Erreur : '+e.message);}
 }
 
+async function adminToggleLevelUp(supabaseId, enabled, checkbox){
+  if(!_isAdmin){console.warn('adminToggleLevelUp: accès refusé');return;}
+  const sc=getSupaClient();
+  try{
+    const {error}=await sc.rpc('admin_toggle_level_up',{char_id:supabaseId,enabled:enabled});
+    if(error) throw error;
+    // Feedback visuel : la carte clignote brièvement
+    const wrap=checkbox?.closest('.lvlup-toggle-wrap');
+    if(wrap){
+      wrap.style.transition='background .15s';
+      wrap.style.background=enabled?'rgba(201,168,76,.12)':'rgba(80,40,120,.08)';
+      setTimeout(()=>{wrap.style.background='';},600);
+    }
+  }catch(e){
+    console.error('adminToggleLevelUp error:',e);
+    if(checkbox) checkbox.checked=!enabled; // rollback
+    alert('Erreur : '+(e.message||'impossible de modifier'));
+  }
+}
 async function shareCharWithAdmin(charId){
   const roster=getRoster();
   const entry=roster.find(function(r){return r.id===charId;});
