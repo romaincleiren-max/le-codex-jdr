@@ -4541,6 +4541,19 @@ function rollCap(label,formula,bonus){
   _capRoll={label:label,total:total,detail:detail,ts:Date.now()};
   renderSummary();
 }
+function adjustHP(delta){
+  const maxHp=calcHP()||0;
+  if(C.hp==null) C.hp=maxHp;
+  C.hp=Math.min(maxHp,Math.max(0,C.hp+delta));
+  var el=$('sum-hp-cur'); if(el) el.value=C.hp;
+  updateHPBar();
+}
+function updateHPBar(){
+  var maxHp=calcHP()||0;
+  var pct=maxHp>0?Math.round((C.hp/maxHp)*100):0;
+  var bar=$('sum-hp-bar');
+  if(bar){bar.style.width=pct+'%';bar.style.background=pct>50?'#3A7A2A':pct>25?'#8A6A10':'#8A1010';}
+}
 function doShortRest(){
   if(C.cls&&C.cls.id==='warlock'){if(_reChar)_reChar.usedSlots={};else C.usedSlots={};}
   saveToRoster();
@@ -4548,7 +4561,7 @@ function doShortRest(){
   if(btn){btn.textContent='✓ Repos court !';setTimeout(function(){btn.textContent='⭕ Repos Court';},1500);}
 }
 function doLongRest(){
-  C.hpTemp=0; C.conditions=[];
+  C.hp=calcHP(); C.hpTemp=0; C.conditions=[];
   if(_reChar) _reChar.usedSlots={}; else C.usedSlots={};
   saveToRoster();
   renderSummary();
@@ -4930,9 +4943,27 @@ function renderSummary(){
   </div>
 
   <div style="display:grid;grid-template-columns:auto 1fr;gap:.4rem;margin-bottom:.4rem;align-items:start;">
-    <div style="background:#0E0A05;border:1px solid #3A2A10;border-radius:6px;padding:.42rem .55rem;text-align:center;min-width:76px;">
-      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:var(--gold-d);margin-bottom:1px;">PV MAX</div>
-      <div style="font-family:'Share Tech Mono',monospace;font-size:26px;color:var(--parch);line-height:1;font-weight:bold;">${calcHP()||'?'}</div>
+    <div style="background:#0E0A05;border:1px solid #3A2A10;border-radius:6px;padding:.42rem .55rem;text-align:center;min-width:86px;">
+      ${(()=>{
+        const maxHp=calcHP()||0;
+        if(C.hp==null)C.hp=maxHp;
+        const cur=C.hp;
+        const pct=maxHp>0?Math.round((cur/maxHp)*100):0;
+        const barCol=pct>50?'#3A7A2A':pct>25?'#8A6A10':'#8A1010';
+        return `
+      <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.15em;color:var(--gold-d);margin-bottom:2px;">PV ACTUELS</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:3px;">
+        <button onclick="adjustHP(-1)" style="background:#1A1008;border:1px solid #3A2A10;color:#C9A84C;font-size:14px;line-height:1;width:20px;height:20px;cursor:pointer;border-radius:3px;padding:0;flex-shrink:0;">−</button>
+        <input type="number" id="sum-hp-cur" value="${cur}" min="0" max="${maxHp}"
+          oninput="C.hp=Math.min(${maxHp},Math.max(0,parseInt(this.value)||0));updateHPBar()"
+          style="width:44px;background:none;border:none;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:26px;font-weight:bold;text-align:center;outline:none;padding:0;-moz-appearance:textfield;">
+        <button onclick="adjustHP(1)" style="background:#1A1008;border:1px solid #3A2A10;color:#C9A84C;font-size:14px;line-height:1;width:20px;height:20px;cursor:pointer;border-radius:3px;padding:0;flex-shrink:0;">+</button>
+      </div>
+      <div style="height:3px;background:#1A1508;border-radius:2px;margin:.2rem .1rem .1rem;">
+        <div id="sum-hp-bar" style="height:100%;border-radius:2px;transition:width .25s,background .25s;width:${pct}%;background:${barCol};"></div>
+      </div>
+      <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#4A3A20;">/ ${maxHp} max</div>`;
+      })()}
       <div style="border-top:1px solid #2A1A08;margin:.3rem 0 .25rem;"></div>
       <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:var(--gold-d);margin-bottom:2px;">PV TEMP.</div>
       <input type="number" min="0" placeholder="0" value="${C.hpTemp||''}"
