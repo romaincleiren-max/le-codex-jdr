@@ -3922,7 +3922,7 @@ function renderBackground(){
 
 // ─── STEP 5: EQUIP & SPELLS ─────────────────────────
 // état filtre inventaire
-let _invCat='Tous',_invRarity='Tous',_invQ='',_bagSort='default';
+let _invCat='Tous',_invRarity='Tous',_invQ='',_bagSort='default',_bagQ='';
 // état Codex
 let _invSource='srd',_codexQ='',_codexData=null,_codexLoading=false;
 // état Capacités spéciales
@@ -4234,17 +4234,20 @@ function renderBagList(){
   const bl=$('bag-list');const wh=$('bag-weight-hdr');if(!bl)return;
   if(!C.bag.length){bl.innerHTML='<div class="bag-empty">Sac vide — ajoutez des objets via la recherche ci-dessus.</div>';if(wh)wh.textContent='';return;}
   const total=C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0);
-  const q=(_invSource==='srd'?_invQ:_codexQ).toLowerCase().trim();
   let indexed=C.bag.map((e,i)=>({...e,_origIdx:i}));
   if(_bagSort==='nom') indexed.sort((a,b)=>a.n.localeCompare(b.n,'fr'));
   else if(_bagSort==='type') indexed.sort((a,b)=>(a.cat||'').localeCompare(b.cat||'','fr'));
   else if(_bagSort==='poids') indexed.sort((a,b)=>((b.w||0)*b.qty)-((a.w||0)*a.qty));
-  const filtered=indexed.filter(e=>{
-    if(_invCat&&_invCat!=='Tous'&&e.cat!==_invCat)return false;
-    if(_invRarity&&_invRarity!=='Tous'&&e.rarity!==_invRarity)return false;
-    if(q&&!e.n.toLowerCase().includes(q))return false;
-    return true;
-  });
+  // En step 6 : seulement tri + recherche propre au sac (_bagQ). Pas de filtre catalogue.
+  const filtered=CUR===6
+    ?indexed.filter(e=>!_bagQ||e.n.toLowerCase().includes(_bagQ.toLowerCase()))
+    :indexed.filter(e=>{
+      const q=(_invSource==='srd'?_invQ:_codexQ).toLowerCase().trim();
+      if(_invCat&&_invCat!=='Tous'&&e.cat!==_invCat)return false;
+      if(_invRarity&&_invRarity!=='Tous'&&e.rarity!==_invRarity)return false;
+      if(q&&!e.n.toLowerCase().includes(q))return false;
+      return true;
+    });
   const bagHtml=filtered.map(e=>{
     const i=e._origIdx;
     const rc=e.rarity?(_IP_RARITY[e.rarity]||null):null;
@@ -4624,6 +4627,11 @@ function renderSummary(){
     <div class="inv-grid" id="inv-grid"></div>
     <div class="bag-sec">
       <div class="bag-hdr"><span>⚔ CONTENU DU SAC</span><span id="bag-weight-hdr" style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);"></span></div>
+      <div style="display:flex;gap:.3rem;margin-bottom:.3rem;align-items:center;">
+        <input placeholder="Rechercher dans le sac…" value="${_bagQ}" oninput="_bagQ=this.value;renderBagList()"
+          style="flex:1;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.28rem .4rem;outline:none;">
+        ${_bagQ?`<button onclick="_bagQ='';renderBagList()" style="background:none;border:none;color:#5A4A30;cursor:pointer;font-size:13px;padding:0 .3rem;">✕</button>`:''}
+      </div>
       <div style="display:flex;gap:.2rem;margin-bottom:.35rem;flex-wrap:wrap;align-items:center;">
         <span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.08em;color:#4A3A20;">TRI :</span>
         ${['default','nom','type','poids'].map(s=>{const lbl={default:'Défaut',nom:'Nom A→Z',type:'Type',poids:'Poids ↓'}[s];return`<button onclick="_bagSort='${s}';renderBagList()" style="font-family:'Cinzel',serif;font-size:7.5px;padding:.18rem .45rem;border:1px solid ${_bagSort===s?'var(--gold)':'#3A2810'};background:${_bagSort===s?'rgba(201,168,76,.12)':'transparent'};color:${_bagSort===s?'var(--gold)':'#5A4A30'};cursor:pointer;border-radius:3px;">${lbl}</button>`;}).join('')}
@@ -6891,7 +6899,7 @@ function renderSumCenterDoll(){
       '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.15em;color:var(--gold-d);text-shadow:0 1px 5px #000;margin-bottom:clamp(.4rem,1.2vh,.8rem);">'+
         (r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+
       '</div>'+
-      '<div class="doll-grid">'+headSlot+leftSlots+rightSlots+'</div>'+
+      '<div class="doll-grid" style="grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(6,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);width:100%;">'+headSlot+leftSlots+rightSlots+'</div>'+
       '<div style="margin-top:clamp(.4rem,1vh,.7rem);font-family:\'Share Tech Mono\',monospace;font-size:8px;color:rgba(201,168,76,.35);letter-spacing:.1em;text-shadow:0 1px 3px #000;">Glisser du sac ou du catalogue ▸ déposer sur un emplacement</div>'+
     '</div>';
 }
