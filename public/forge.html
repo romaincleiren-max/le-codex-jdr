@@ -41,6 +41,8 @@ body{background:var(--shadow);color:var(--ink);font-family:'IM Fell English',Geo
 .tb-t{font-family:'Cinzel Decorative',serif;font-size:15px;color:var(--gold);}
 .tb-r{display:flex;gap:.6rem;align-items:center;}
 .badge{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);border:1px solid var(--gold-d);padding:2px 7px;}
+.fen-btn{font-family:'Cinzel',serif;font-size:8px;letter-spacing:.06em;padding:.25rem .6rem;border:1px solid var(--gold-d);background:rgba(201,168,76,.08);color:var(--gold-d);cursor:pointer;border-radius:3px;transition:.12s;}
+.fen-btn:hover{background:rgba(201,168,76,.18);color:var(--gold);}
 #nav{background:var(--shadow);border-bottom:1px solid var(--gold-d);padding:.35rem .9rem;display:flex;gap:.35rem;overflow-x:auto;flex-shrink:0;}
 .pill{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:.3em .7em;border:1px solid #3A2810;color:#6A5A3A;cursor:pointer;white-space:nowrap;transition:.12s;}
 .pill.active{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.07);}
@@ -1613,10 +1615,16 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="showTitle()">↩ Accueil</button>
     </div>
   </div>
-  <div id="forge-edit-nav" style="display:none;padding:.3rem .8rem;background:#0A0805;border-bottom:1px solid #2A1A08;display:none;flex-wrap:wrap;gap:.25rem;align-items:center;">
+  <div id="forge-edit-nav" style="display:none;padding:.3rem .8rem;background:#0A0805;border-bottom:1px solid #2A1A08;flex-wrap:wrap;gap:.25rem;align-items:center;">
     <span style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#5A4530;">ÉDITER ·</span>
-    ${[['Race',0],['Classe',1],['Stats',2],['Background',3],['Équip. & Sorts',4],['Identité',5],['Capacités',7]].map(([lbl,step])=>`<button onclick="toggleForgeEditNav(false);go(${step})" style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.06em;padding:.25rem .6rem;border:1px solid var(--gold-d);background:rgba(201,168,76,.08);color:var(--gold-d);cursor:pointer;border-radius:3px;transition:.12s;" onmouseover="this.style.background='rgba(201,168,76,.18)';this.style.color='var(--gold)'" onmouseout="this.style.background='rgba(201,168,76,.08)';this.style.color='var(--gold-d)'">${lbl}</button>`).join('')}
-    <button onclick="toggleForgeEditNav(false)" style="margin-left:auto;background:none;border:none;color:#5A4530;cursor:pointer;font-size:14px;">✕</button>
+    <button class="fen-btn" onclick="toggleForgeEditNav(false);go(0)">Race</button>
+    <button class="fen-btn" onclick="toggleForgeEditNav(false);go(1)">Classe</button>
+    <button class="fen-btn" onclick="toggleForgeEditNav(false);go(2)">Stats</button>
+    <button class="fen-btn" onclick="toggleForgeEditNav(false);go(3)">Background</button>
+    <button class="fen-btn" onclick="toggleForgeEditNav(false);go(4)">Équip. &amp; Sorts</button>
+    <button class="fen-btn" onclick="toggleForgeEditNav(false);go(5)">Identité</button>
+    <button class="fen-btn" onclick="toggleForgeEditNav(false);go(7)">Capacités</button>
+    <button onclick="toggleForgeEditNav(false)" style="margin-left:auto;background:none;border:none;color:#5A4530;cursor:pointer;font-size:14px;padding:.2rem .4rem;">✕</button>
   </div>
   <div id="dh-nav">
     <div class="pill" id="dh0" onclick="goDH(0)">1 · Caractéristiques</div>
