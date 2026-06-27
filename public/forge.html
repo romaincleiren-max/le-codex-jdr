@@ -1604,12 +1604,18 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
   </div>
 </div>
 
+<!-- MUSIQUE CRÉATION -->
+<audio id="forge-music" loop preload="auto">
+  <source src="audio/Ardenvale - 2.mp3" type="audio/mpeg">
+</audio>
+
 <!-- GAME -->
 <div id="gs">
   <div id="tb">
     <div class="tb-t">⚔ Forge du Héros <span style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold-d);letter-spacing:.1em;">v3.0</span></div>
     <div class="tb-r">
       <div class="badge" id="badge">CRÉATION</div>
+      <button id="forge-music-btn" class="btn btn-s" style="display:none;padding:.25em .6em;font-size:11px;min-width:28px;" title="Couper / Remettre la musique" onclick="var m=$('forge-music');m.muted=!m.muted;this.textContent=m.muted?'🔇':'🔊';">🔊</button>
       <button id="forge-edit-toggle" class="btn btn-s" style="display:none;padding:.25em .8em;font-size:9px;" onclick="toggleForgeEditNav()">✏ Modifier la fiche</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="saveDraft();this.textContent='✓ Sauvegardé';setTimeout(()=>this.textContent='💾 Sauvegarder',1500)">💾 Sauvegarder</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="showTitle()">↩ Accueil</button>
@@ -3282,7 +3288,13 @@ function toggleForgeEditNav(force){
   if(btn)btn.style.background=_forgeEditNavOpen?'rgba(201,168,76,.18)':'';
 }
 
+function forgeMusic(play){
+  var m=$('forge-music');if(!m)return;
+  if(play){m.volume=0.35;if(m.paused)m.play().catch(function(){});}
+  else{m.pause();}
+}
 function go(n){
+  forgeMusic(n<6);
   if(n!==4 && n!==6) hideEquipPanel();
   if(n!==6 && _reFromEdit){
     var _sd=$('sum-doll'); if(_sd) _sd.style.display='none';
@@ -3294,17 +3306,20 @@ function go(n){
   const navBar=$('nav');
   const editToggle=$('forge-edit-toggle');
   const badge=$('badge');
+  const musicBtn=$('forge-music-btn');
   if(n===8){ scnBar.style.display='flex'; navBar.style.display='none'; }
   else if(n===6){
     scnBar.style.display='none'; navBar.style.display='none';
     if(editToggle)editToggle.style.display='';
     if(badge)badge.style.display='none';
+    if(musicBtn)musicBtn.style.display='none';
   }
   else {
     scnBar.style.display='none'; navBar.style.display='flex';
     var _sd=$('sum-doll'); if(_sd) _sd.style.display='none';
     if(editToggle)editToggle.style.display='none';
     if(badge)badge.style.display='';
+    if(musicBtn)musicBtn.style.display='';
     toggleForgeEditNav(false);
   }
   if(n!==8){
