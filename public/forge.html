@@ -4764,25 +4764,32 @@ function renderSummary(){
   if(_sumTab==='sorts'){
     const usedSlots=(_reChar||C).usedSlots||{};
     const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX'];
-    // ── Emplacements : carrés bleu-turquoise (classe CSS existante re-slot-pip)
+    // ── Emplacements : 3 niveaux par ligne, carrés bleu-turquoise
     let slotsHtml='';
     if(isCaster&&slots){
+      const rows=[[0,1,2],[3,4,5],[6,7,8]];
       let hasAny=false;
-      for(let i=0;i<9;i++){
-        const total=slots[i]||0; if(!total)continue; hasAny=true;
+      const cellHtml=i=>{
+        const total=slots[i]||0; if(!total)return'';
+        hasAny=true;
         const used=Math.min(usedSlots[i+1]||0,total);
         const exh=used>=total;
-        slotsHtml+=`<div class="re-slot-lvl${exh?' exhausted':''}" style="display:flex;align-items:center;gap:.5rem;padding:.32rem 0;border-bottom:1px solid #1A1008;">
-          <div style="font-family:'Cinzel',serif;font-size:11px;color:${exh?'#6A3030':'#A09060'};min-width:26px;font-weight:bold;">${ROMAN[i]}</div>
-          <div class="re-slot-pips" style="flex:1;justify-content:flex-start;">
+        return`<div class="re-slot-lvl${exh?' exhausted':''}" style="flex:1;min-width:0;background:#0A0805;border:1px solid #1E1408;border-radius:5px;padding:.3rem .4rem;text-align:center;">
+          <div style="font-family:'Cinzel',serif;font-size:10px;color:${exh?'#7A3030':'#A09060'};font-weight:bold;margin-bottom:.25rem;">${ROMAN[i]}</div>
+          <div class="re-slot-pips" style="justify-content:center;flex-wrap:wrap;gap:3px;">
             ${Array.from({length:total},(_,j)=>{
               const isUsed=j<used;
-              return`<div class="re-slot-pip ${isUsed?'used':'avail'}" onclick="toggleReSlot(${i+1},${j})" title="${isUsed?'Récupérer':'Utiliser'} emplacement niv.${i+1}"><div class="pip-inner"></div></div>`;
+              return`<div class="re-slot-pip ${isUsed?'used':'avail'}" onclick="toggleReSlot(${i+1},${j})" title="${isUsed?'Récupérer':'Utiliser'} niv.${i+1}"><div class="pip-inner"></div></div>`;
             }).join('')}
           </div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:${exh?'#6A3030':'#5A5040'};">${used}/${total}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:${exh?'#7A3030':'#4A4030'};margin-top:.2rem;">${used}/${total}</div>
         </div>`;
-      }
+      };
+      const rowsHtml=rows.map(trio=>{
+        const cells=trio.map(cellHtml).join('');
+        return cells?`<div style="display:flex;gap:.3rem;margin-bottom:.3rem;">${cells}</div>`:'';
+      }).join('');
+      slotsHtml=rowsHtml||'<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucun emplacement disponible.</div>';
       if(!hasAny) slotsHtml='<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucun emplacement disponible à ce niveau.</div>';
     }
     // ── Sorts groupés par niveau via SPELLS_BY_LEVEL
