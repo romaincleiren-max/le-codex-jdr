@@ -1386,7 +1386,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
     <div class="roster-dots" id="roster-dots"></div>
   </div>
   <div id="admin-panel">
-    <div class="admin-hdr">👑 Personnages des joueurs</div>
+    <div class="admin-hdr">👑 Personnages des joueurs <button onclick="syncAllRosterToSupabase().then(loadAdminPanel)" style="font-family:'Cinzel',serif;font-size:7px;padding:.2em .5em;border:1px solid #4A3060;color:#9A70D0;background:none;cursor:pointer;border-radius:3px;margin-left:.5rem;" title="Synchroniser mes personnages locaux vers Supabase puis recharger">↺ Sync</button></div>
     <div class="admin-grid" id="admin-char-grid">
       <div class="admin-empty">Chargement...</div>
     </div>
@@ -8001,6 +8001,12 @@ function _forgeCharPayload(entry,userId){
   };
 }
 
+async function syncAllRosterToSupabase(){
+  const session=await getForgeSession(); if(!session?.user) return;
+  const roster=getRoster();
+  const toSync=roster.filter(r=>r.name&&!r._draft_step); // persos complets uniquement
+  for(const entry of toSync) await syncCharToSupabase(entry);
+}
 async function syncCharToSupabase(entry){
   const session=await getForgeSession(); if(!session?.user) return;
   const sc=getSupaClient();
@@ -8078,6 +8084,7 @@ async function updateLoginStatus(){
     }catch(e){}
     const adminBadge=_isAdmin?` <span style="font-family:'Cinzel',serif;font-size:8px;background:rgba(122,80,192,.2);border:1px solid #6A40A0;color:#C090F0;padding:1px 6px;border-radius:3px;letter-spacing:.06em;">👑 ADMIN</span>`:'';
     el.innerHTML=`<span style="color:#6ABF6A;">● Connecté</span> <span style="color:#7A6A4A;font-size:9px;">${session.user.email}</span>${adminBadge}`;
+    syncAllRosterToSupabase(); // pousse les persos locaux qui n'ont pas encore de supabaseId
     if(_isAdmin) loadAdminPanel();
     else{const ap=$('admin-panel');if(ap)ap.style.display='none';}
   } else {
