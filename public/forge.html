@@ -8094,8 +8094,16 @@ async function loadAdminPanel(){
   const sc=getSupaClient();
   try{
     const {data,error}=await sc.rpc('get_all_characters_admin');
-    if(error||!data){$('admin-char-grid').innerHTML='<div class="admin-empty">Erreur : '+(error?.message||'chargement impossible')+'</div>';return;}
-    if(!data.length){$('admin-char-grid').innerHTML='<div class="admin-empty">Aucun personnage partagé pour l\'instant.</div>';return;}
+    console.log('[Admin] RPC result:', data, error);
+    if(error){$('admin-char-grid').innerHTML='<div class="admin-empty" style="color:#E07070;">Erreur RPC : '+error.message+'<br><span style="font-size:9px;color:#5A4A6A;">Vérifiez la console (F12)</span></div>';return;}
+    if(!data||!data.length){
+      // Fallback : requête directe pour diagnostiquer
+      const {data:rows,error:e2}=await sc.from('characters').select('id,char_name,status').limit(5);
+      console.log('[Admin] Direct query fallback:', rows, e2);
+      const hint=rows?.length?`(${rows.length} perso(s) en base, status: ${rows.map(r=>r.status).join(', ')})`:'(table vide ou accès refusé)';
+      $('admin-char-grid').innerHTML='<div class="admin-empty">Aucun personnage. '+hint+'</div>';
+      return;
+    }
     $('admin-char-grid').innerHTML=data.map(function(row){
       var sd=row.sheet_data||{};
       var name=esc(row.char_name||sd.name||'—');
