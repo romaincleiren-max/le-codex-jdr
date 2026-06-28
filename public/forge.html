@@ -4516,6 +4516,40 @@ function toggleSp(type,s,max){
   renderEquipSpells();updateRight();
 }
 
+function setDeity(id){
+  const d=id?(_codexData||[]).find(x=>x.id===id):null;
+  C.deity=d?{id:d.id,name:d.name,image:d.image||'',desc:d.desc||''}:null;
+  renderIdentity();
+}
+let _deityCardTimer=null;
+function showDeityCard(evt,id){
+  clearTimeout(_deityCardTimer);
+  const d=(_codexData||[]).find(x=>x.id===id);
+  if(!d)return;
+  let el=document.getElementById('deity-hover-card');
+  if(!el){el=document.createElement('div');el.id='deity-hover-card';
+    el.style.cssText='position:fixed;z-index:9999;background:#0F0A06;border:1px solid rgba(201,168,76,.6);border-radius:6px;box-shadow:0 8px 32px #000;padding:0;overflow:hidden;max-width:300px;pointer-events:none;transition:opacity .15s;';
+    document.body.appendChild(el);}
+  el.innerHTML=
+    (d.image?'<img src="'+d.image+'" style="width:100%;max-height:220px;object-fit:cover;object-position:center top;display:block;">':'')+
+    '<div style="padding:.7rem .85rem;">'+
+    '<div style="font-family:\'Cinzel\',serif;font-size:13px;color:#C9A84C;margin-bottom:.3rem;">'+d.name+'</div>'+
+    (d.desc&&d.desc!=='Mythes & actes'?'<div style="font-size:9px;color:#8A7050;line-height:1.5;max-height:120px;overflow-y:auto;">'+d.desc+'</div>':'<div style="font-size:9px;color:#5A4A2A;font-style:italic;">Mythes & actes — Voir le Codex</div>')+
+    '</div>';
+  // Position near cursor but inside viewport
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const ex=evt.clientX,ey=evt.clientY;
+  const W=310,H=340;
+  let left=ex+16,top=ey-20;
+  if(left+W>vw-8)left=ex-W-8;
+  if(top+H>vh-8)top=vh-H-8;
+  if(top<8)top=8;
+  el.style.left=left+'px';el.style.top=top+'px';el.style.opacity='1';el.style.display='block';
+}
+function hideDeityCard(){
+  _deityCardTimer=setTimeout(()=>{const el=document.getElementById('deity-hover-card');if(el)el.style.display='none';},120);
+}
+
 // ─── STEP 6: IDENTITY ───────────────────────────────
 function renderIdentity(){
   const photoSrc = C.photo || C.portrait_url || '';
@@ -4576,22 +4610,29 @@ function renderIdentity(){
   <div class="sh" style="font-size:14px;">⚜ Divinité</div>
   <div class="ss" style="margin-bottom:.6rem;">Quelle divinité votre personnage vénère-t-il&nbsp;? (optionnel)</div>
   ${(()=>{
-    if(!_codexData){if(!_codexLoading){preloadCodexData();setTimeout(()=>renderIdentity(),600);}return'<div style="font-size:9px;color:#6A5030;font-style:italic;">Chargement du Panthéon...</div>';};
+    if(!_codexData){if(!_codexLoading){preloadCodexData();setTimeout(()=>renderIdentity(),600);}return'<div style="font-size:9px;color:#6A5030;font-style:italic;">Chargement du Panthéon...</div>';}
     const dieux=(_codexData||[]).filter(x=>x.category==='Panthéon des Dieux').sort((a,b)=>a.name.localeCompare(b.name,'fr'));
     if(!dieux.length)return'';
     const cur=C.deity||null;
-    const sel=dieux.map(d=>`<option value="${d.id}"${cur&&cur.id===d.id?' selected':''}>${d.name}</option>`).join('');
-    const img=cur?.image?`<img id="deity-img" src="${cur.image}" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #3A2810;" onerror="this.style.display='none'">`:
-      `<img id="deity-img" src="" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #3A2810;display:none;" onerror="this.style.display='none'">`;
-    const nm=cur?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);">${cur.name}</span>`:'';
-    return`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;">
-      <select class="ifl" style="flex:1;min-width:160px;font-size:11px;padding:.3rem .5rem;" onchange="var d=this.value?(window._codexDataAll||[]).find(x=>x.id===this.value):null;C.deity=d?{id:d.id,name:d.name,image:d.image||''}:null;renderIdentity();">
+    const opts=dieux.map(d=>`<option value="${d.id}"${cur&&cur.id===d.id?' selected':''}>${d.name}</option>`).join('');
+    const card=cur?`
+      <div style="display:flex;align-items:center;gap:.7rem;margin-top:.5rem;background:#130D06;border:1px solid #3A2810;border-radius:4px;padding:.5rem .7rem;position:relative;"
+           onmouseenter="showDeityCard(event,'${cur.id}')" onmouseleave="hideDeityCard()">
+        <img src="${cur.image||''}" style="width:48px;height:48px;object-fit:cover;border-radius:3px;border:1px solid #3A2810;flex-shrink:0;${cur.image?'':'display:none'}" onerror="this.style.display='none'">
+        <div>
+          <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);">${cur.name}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#6A5030;margin-top:2px;">Survol → fiche complète</div>
+        </div>
+      </div>`:''
+    return`<div>
+      <select class="ifl" style="font-size:11px;padding:.3rem .5rem;" onchange="setDeity(this.value)">
         <option value="">— Aucune divinité —</option>
-        ${sel}
+        ${opts}
       </select>
-      ${img}${nm}
+      ${card}
     </div>`;
-  })()}  <div class="div"></div>
+  })()}
+    <div class="div"></div>
   <div class="sh" style="font-size:14px;">Personnalité</div>
   <div class="ss" style="margin-bottom:.8rem;">Les quatre piliers du background D&D 5e</div>
 
