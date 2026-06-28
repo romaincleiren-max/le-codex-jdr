@@ -4421,7 +4421,7 @@ function addToBag(itemId){
   const it=ITEMS.find(x=>x.id===itemId);if(!it)return;
   const ex=C.bag.find(e=>e.id===itemId);
   if(ex)ex.qty++;
-  else C.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,bonus:it.bonus||null});
+  else C.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,bonus:it.bonus||null,ranged:it.ranged||false,thrown:it.thrown||false,slot:it.slot||null});
   renderBagList();
 }
 function bagQty(i,d){
@@ -6268,15 +6268,20 @@ let _dragItem = null;
 // Priorité : cat SRD > slot explicite > item_type Codex > inférence nom/id
 function canEquipInSlot(item, slotId){
   if(!item) return false;
+  // Résoudre les props ranged/thrown depuis le catalogue si absentes (items créés avant le fix)
+  const src = (item.ranged==null && item.thrown==null && item.id)
+    ? (ITEMS.find(x=>x.id===item.id)||item) : item;
+  const isRanged = src.ranged||false;
+  const isThrown = src.thrown||false;
   const SHIELD_IDS=['shield','holy-symbol-shield'];
   // Armures physiques SRD (hors boucliers) → Torse
   if(item.cat==='Armure' && !SHIELD_IDS.includes(item.id)) return slotId==='chest';
   // Boucliers SRD → Main secondaire
   if(SHIELD_IDS.includes(item.id)) return slotId==='offhand';
   // Armes à distance pures SRD (arcs, arbalètes, fronde, sarbacane) → slot ranged uniquement
-  if(item.cat==='Arme' && item.ranged) return slotId==='ranged';
+  if(item.cat==='Arme' && isRanged) return slotId==='ranged';
   // Armes de lancer SRD (dague, javelot, hachette…) → main princ., second., ou ranged
-  if(item.cat==='Arme' && item.thrown) return slotId==='mainhand'||slotId==='offhand'||slotId==='ranged';
+  if(item.cat==='Arme' && isThrown) return slotId==='mainhand'||slotId==='offhand'||slotId==='ranged';
   // Armes de mêlée SRD → Main principale ou secondaire
   if(item.cat==='Arme') return slotId==='mainhand' || slotId==='offhand';
   // Slot explicite défini sur l'item (SRD magic)
@@ -7225,7 +7230,7 @@ function renderSumCenterDoll(){
   var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
   var headSlot=reSlotHtml(RE_HEAD,2,1);
   el.innerHTML=
-    '<style>#sum-doll .doll-grid{grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(6,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);transition:border-color .15s,background .15s;}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(8px,1vh,12px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}#sum-doll .re-doll-slot.equipped:hover{transform:none !important;}#sum-doll .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.55)!important;}#sum-doll .re-doll-slot.drag-over{background:rgba(201,168,76,.15)!important;border-color:rgba(201,168,76,.7)!important;}</style>'+
+    '<style>#sum-doll .doll-grid{grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(7,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);transition:border-color .15s,background .15s;}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(8px,1vh,12px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}#sum-doll .re-doll-slot.equipped:hover{transform:none !important;}#sum-doll .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.55)!important;}#sum-doll .re-doll-slot.drag-over{background:rgba(201,168,76,.15)!important;border-color:rgba(201,168,76,.7)!important;}</style>'+
     '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 25%,transparent 75%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1;"></div>'+
     '<div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(.6rem,2vh,1.2rem) clamp(.5rem,1.5vw,1.5rem) 0;">'+
       '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(r.name||'—')+'</div>'+
@@ -7459,7 +7464,7 @@ function reAddItem(id){
   var it=ITEMS.find(function(x){return x.id===id;});if(!it)return;
   var ex=_reChar.bag.find(function(b){return b.id===id;});
   if(ex)ex.qty++;
-  else _reChar.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null,bonus:it.bonus||null});
+  else _reChar.bag.push({id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null,bonus:it.bonus||null,ranged:it.ranged||false,thrown:it.thrown||false,slot:it.slot||null});
   renderReBag();
 }
 function reAddCodexItem(idx){
