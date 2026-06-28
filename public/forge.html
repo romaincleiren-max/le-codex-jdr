@@ -4167,16 +4167,21 @@ function renderSpellsByLevel(cl, prep, slots){
     :`Sorts connus <span style="color:#8A7A5A;font-size:9px;">(liste fixe par niveau)</span>`;
   const subtitle=isPrepared
     ?`${prep.label} — cochez ceux que vous préparez`
-    :`${prep.label} — Choisis : ${C.spells.length}/${prep.n}`;
+    :`${prep.label} — Choisis : ${C.spells.length} sort${C.spells.length!==1?'s':''}`;
   let h=`<div class="div"></div><div class="sh" style="font-size:14px;">${title}</div><div class="ss">${subtitle}</div>`;
   avail.forEach(({lvl,p})=>{
     const pool=p[key]||[];
     const n=slots[lvl-1];
-    h+=`<div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;color:var(--gold-d);margin:.7rem 0 .3rem;text-transform:uppercase;">Niveau ${lvl} — ${n} emplacement${n>1?'s':''}</div>
-    <div class="spg">${pool.map(s=>`<div class="spc ${C.spells.includes(s)?'sel':''}" onclick="toggleSp('s','${s.replace(/'/g,"\\'")}',${prep.n})">
+    const allAtLvl=p?Object.values(p).reduce((a,b)=>a.concat(b),[]):[];
+    const chosenAtLvl=C.spells.filter(x=>allAtLvl.includes(x)).length;
+    const lvlLabel=isPrepared?`Niveau ${lvl} — ${n} emplacement${n>1?'s':''}`:`Niveau ${lvl} — ${chosenAtLvl}/${n} choisi${chosenAtLvl!==1?'s':''}`;
+    h+=`<div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;color:var(--gold-d);margin:.7rem 0 .3rem;text-transform:uppercase;">${lvlLabel}</div>
+    <div class="spg">${pool.map(s=>{
+      const onClick=isPrepared?`toggleSp('s','${s.replace(/'/g,"\\'")}',${prep.n})`:`toggleSpLvl('${s.replace(/'/g,"\\'")}',${lvl},${n})`;
+      return`<div class="spc ${C.spells.includes(s)?'sel':''}" onclick="${onClick}">
       <div class="sp-nm">${s}</div>
       <div class="sp-mt">NIV.${lvl}${isPrepared?'':' · CONNU'}</div>
-    </div>`).join('')}</div>`;
+    </div>`;}).join('')}</div>`;
   });
   return h;
 }
@@ -4600,6 +4605,18 @@ function selEq(item,gi,gs){
 function toggleSp(type,s,max){
   if(type==='c'){if(C.cantrips.includes(s))C.cantrips=C.cantrips.filter(x=>x!==s);else if(C.cantrips.length<max)C.cantrips.push(s);}
   else{if(C.spells.includes(s))C.spells=C.spells.filter(x=>x!==s);else if(C.spells.length<max)C.spells.push(s);}
+  renderEquipSpells();updateRight();
+}
+function toggleSpLvl(s,lvl,maxAtLvl){
+  if(!C.spells)C.spells=[];
+  if(C.spells.includes(s)){C.spells=C.spells.filter(x=>x!==s);}
+  else{
+    const pool=SPELLS_BY_LEVEL[lvl];
+    const allAtLvl=pool?Object.values(pool).reduce(function(a,b){return a.concat(b);},[]):[];
+    const countAtLvl=C.spells.filter(function(x){return allAtLvl.includes(x);}).length;
+    if(countAtLvl>=maxAtLvl)return;
+    C.spells.push(s);
+  }
   renderEquipSpells();updateRight();
 }
 
