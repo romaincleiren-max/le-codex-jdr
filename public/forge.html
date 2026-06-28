@@ -8002,10 +8002,17 @@ function _forgeCharPayload(entry,userId){
 }
 
 async function syncAllRosterToSupabase(){
-  const session=await getForgeSession(); if(!session?.user) return;
+  const session=await getForgeSession();
+  console.log('[Sync] session:', session?.user?.email||'non connecté');
+  if(!session?.user) return;
   const roster=getRoster();
-  const toSync=roster.filter(r=>r.name&&!r._draft_step); // persos complets uniquement
-  for(const entry of toSync) await syncCharToSupabase(entry);
+  console.log('[Sync] roster total:', roster.length, '| à sync:', roster.filter(r=>r.name&&!r._draft_step).map(r=>r.name+'('+( r.supabaseId?'✓':'NEW')+')'));
+  const toSync=roster.filter(r=>r.name&&!r._draft_step);
+  for(const entry of toSync){
+    const res=await syncCharToSupabase(entry);
+    console.log('[Sync] done:', entry.name, '→ supabaseId:', entry.supabaseId||'(voir insert)');
+  }
+  console.log('[Sync] terminé');
 }
 async function syncCharToSupabase(entry){
   const session=await getForgeSession(); if(!session?.user) return;
