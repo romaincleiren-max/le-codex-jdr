@@ -4305,7 +4305,9 @@ function showCodexItem(idx){
 function renderBagList(){
   const bl=$('bag-list');const wh=$('bag-weight-hdr');if(!bl)return;
   if(!C.bag.length){bl.innerHTML='<div class="bag-empty">Sac vide — ajoutez des objets via la recherche ci-dessus.</div>';if(wh)wh.textContent='';return;}
-  const total=C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0);
+  const bagTotal=C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0);
+  const cur=C.currency||{};const coinW=((cur.pp||0)+(cur.gp||0)+(cur.ep||0)+(cur.sp||0)+(cur.cp||0))/50;
+  const total=bagTotal+coinW;
   let indexed=C.bag.map((e,i)=>({...e,_origIdx:i}));
   if(_bagSort==='nom') indexed.sort((a,b)=>a.n.localeCompare(b.n,'fr'));
   else if(_bagSort==='type') indexed.sort((a,b)=>(a.cat||'').localeCompare(b.cat||'','fr'));
@@ -4338,7 +4340,7 @@ function renderBagList(){
   </div>`;
   }).join('');
   const filterNote=filtered.length<C.bag.length?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#6A5030;padding:.2rem .3rem;">${filtered.length}/${C.bag.length} objets affichés</div>`:'';
-  bl.innerHTML=filterNote+bagHtml+`<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)</div>`;
+  bl.innerHTML=filterNote+bagHtml+`<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)${coinW>0?`<span style="font-size:8px;color:#6A5030;margin-left:.5rem;">dont ${coinW.toFixed(1)} lb pièces</span>`:''}</div>`;
   if(wh)wh.textContent=`${total.toFixed(1)} lb`;
   renderArmorEquip();
 }
@@ -6516,14 +6518,16 @@ function openBagFromRoster(id){
     if(!entry.bag || !entry.bag.length){
       bmoBag.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#5A4A2A;font-style:italic;">Sac vide.</div>';
     } else {
-      const total = entry.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0);
+      const bagTotal2 = entry.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0);
+      const cur2=entry.currency||{};const coinW2=((cur2.pp||0)+(cur2.gp||0)+(cur2.ep||0)+(cur2.sp||0)+(cur2.cp||0))/50;
+      const total = bagTotal2+coinW2;
       bmoBag.innerHTML = entry.bag.map(e=>`
         <div class="bag-row">
           <div class="bag-nm" onclick="showItemPanel(${JSON.stringify(e).replace(/"/g,"'")})" title="Voir la fiche">${e.n}</div>
           <div class="bag-qty" style="min-width:auto;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);">${e.qty>1?'×'+e.qty:''}</div>
           <div class="bag-w">${e.w>0?(e.w*e.qty)+' lb':'—'}</div>
         </div>`).join('')+
-        `<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)</div>`;
+        `<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)${coinW2>0?`<span style="font-size:8px;color:#6A5030;margin-left:.5rem;">dont ${coinW2.toFixed(1)} lb pièces</span>`:''}</div>`;
     }
   }
 
