@@ -49,7 +49,7 @@ body{background:var(--shadow);color:var(--ink);font-family:'IM Fell English',Geo
 .pill.done{border-color:var(--forest);color:#6BAF4A;}
 .pill.done::after{content:'✓';margin-left:2px;}
 #layout{display:flex;flex:1;overflow:hidden;}
-#lp{flex:1;padding:1.4rem;overflow-y:auto;max-width:840px;}
+#lp{flex:1;padding:1.4rem;overflow-y:auto;max-width:840px;will-change:scroll-position;}
 #rp{width:290px;background:var(--mid);border-left:1px solid var(--gold-d);padding:1.1rem;overflow-y:auto;flex-shrink:0;}
 
 /* ── TYPOGRAPHY ── */
@@ -758,8 +758,9 @@ body.printing #ps-print{display:block!important;}
 .pill.done::after{content:' ✓';font-size:8px;}
 .pill.active{border-color:rgba(201,168,76,.55);color:var(--gold);background:rgba(201,168,76,.1);box-shadow:0 0 10px rgba(201,168,76,.1);}
 /* Cards dark redesign */
-.card{background:#100C06;border:1px solid #2A1A0A;border-radius:6px;overflow:hidden;transition:.18s;contain:layout style;content-visibility:auto;contain-intrinsic-size:0 180px;}
+.card{background:#100C06;border:1px solid #2A1A0A;border-radius:6px;overflow:hidden;transition:.18s;will-change:transform;}
 .card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.5);background:#181008;}
+#lp.is-scrolling .card{pointer-events:none!important;transition:none!important;}
 .card.sel{border-color:rgba(201,168,76,.7);background:#1A1008;}
 .card.sel::after{color:var(--gold);text-shadow:0 0 8px rgba(201,168,76,.5);}
 .card-accent{height:3px;margin:-.85rem -.85rem .65rem;display:block;}
@@ -7420,6 +7421,16 @@ function initRosterDrag(){
   // Scroll natif (molette)
   g.addEventListener('scroll',function(){if(!_rcDrag.active) updateRosterNav();},{passive:true});
 }
+
+// Scroll perf : désactive pointer-events + transitions sur les cartes pendant le scroll
+(function(){
+  var t;
+  document.addEventListener('scroll',function(e){
+    var lp=$('lp');if(!lp||!lp.contains(e.target)&&e.target!==lp)return;
+    lp.classList.add('is-scrolling');
+    clearTimeout(t);t=setTimeout(function(){lp.classList.remove('is-scrolling');},120);
+  },{passive:true,capture:true});
+})();
 
 // Nettoyage drag doll
 document.addEventListener('dragend',function(){
