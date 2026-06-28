@@ -405,6 +405,8 @@ body.printing #ps-print{display:block!important;}
 .bag-w{font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;min-width:50px;text-align:right;}
 .bag-del{background:none;border:none;color:#5A3A3A;font-size:13px;cursor:pointer;padding:0 2px;}
 .bag-del:hover{color:var(--blood-l);}
+.bag-bank-btn{background:none;border:none;font-size:12px;cursor:pointer;padding:0 2px;opacity:.5;transition:.1s;flex-shrink:0;}
+.bag-bank-btn:hover{opacity:1;}
 .bag-total{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-d);padding-top:.45rem;text-align:right;border-top:1px solid #3A2810;margin-top:.2rem;}
 .bag-nm{cursor:pointer;transition:.1s;}.bag-nm:hover{color:var(--gold);}
 /* ── Item Panel Overlay ── */
@@ -3246,7 +3248,7 @@ function clsShortStr(){
   return mcs.length?[C.cls.n,...mcs.map(m=>m.cls.n)].join('/'):C.cls.n;
 }
 function calcCarryWeight(){
-  const bagTotal=(C.bag||[]).reduce((s,e)=>s+(e.w||0)*e.qty,0);
+  const bagTotal=(C.bag||[]).reduce((s,e)=>s+(e.bank?0:(e.w||0)*e.qty),0);
   const cur=C.currency||{};
   return bagTotal+((cur.pp||0)+(cur.gp||0)+(cur.ep||0)+(cur.sp||0)+(cur.cp||0))/50;
 }
@@ -4333,7 +4335,8 @@ function showCodexItem(idx){
 function renderBagList(){
   const bl=$('bag-list');const wh=$('bag-weight-hdr');if(!bl)return;
   if(!C.bag.length){bl.innerHTML='<div class="bag-empty">Sac vide — ajoutez des objets via la recherche ci-dessus.</div>';if(wh)wh.textContent='';return;}
-  const bagTotal=C.bag.reduce((s,e)=>s+(e.w||0)*e.qty,0);
+  const bagTotal=C.bag.reduce((s,e)=>s+(e.bank?0:(e.w||0)*e.qty),0);
+  const bankTotal=C.bag.reduce((s,e)=>s+(e.bank?(e.w||0)*e.qty:0),0);
   const cur=C.currency||{};const coinW=((cur.pp||0)+(cur.gp||0)+(cur.ep||0)+(cur.sp||0)+(cur.cp||0))/50;
   const total=bagTotal+coinW;
   let indexed=C.bag.map((e,i)=>({...e,_origIdx:i}));
@@ -4353,17 +4356,21 @@ function renderBagList(){
   const bagHtml=filtered.map(e=>{
     const i=e._origIdx;
     const rc=e.rarity?(_IP_RARITY[e.rarity]||null):null;
-    const rowStyle=rc?`border-left:3px solid ${rc.badge};background:${rc.badge}22;`:'';
+    const inBank=!!e.bank;
+    const rowStyle=(rc?`border-left:3px solid ${rc.badge};background:${rc.badge}22;`:'')+(inBank?'opacity:.65;':'');
     const nmStyle=rc?`color:${rc.name};`:'';
     const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:${rc.badge};color:${rc.badgeTxt};border-radius:2px;padding:1px 4px;margin-left:5px;vertical-align:middle;">${e.rarity}</span>`:'';
+    const wStyle=inBank?'opacity:.35;text-decoration:line-through;':'';
+    const bankTitle=inBank?'En banque — cliquer pour remettre sur soi':'Sur soi — cliquer pour mettre en banque';
     return`<div class="bag-row" draggable="true" ondragstart="bagDragStart(event,${i})" style="${rowStyle}" title="Glissez vers un emplacement d'équipement →">
+    <button class="bag-bank-btn" onclick="toggleBankItem(${i})" title="${bankTitle}">${inBank?'🏦':'🎒'}</button>
     <div class="bag-nm" style="${nmStyle}" onclick="showItemPanel(C.bag[${i}])" title="Voir la fiche">${e.n}${rBadge}</div>
     <div class="bag-qty-ctrl">
       <button class="bag-qty-btn" onclick="bagQty(${i},-1)">−</button>
       <div class="bag-qty">${e.qty}</div>
       <button class="bag-qty-btn" onclick="bagQty(${i},1)">+</button>
     </div>
-    <div class="bag-w">${e.w>0?(e.w*e.qty)+' lb':'—'}</div>
+    <div class="bag-w" style="${wStyle}">${e.w>0?(e.w*e.qty)+' lb':'—'}</div>
     <button class="bag-del" onclick="bagRemove(${i})" title="Retirer">✕</button>
   </div>`;
   }).join('');
@@ -4385,7 +4392,7 @@ function renderBagList(){
     ${enc.lvl===1?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#E67E22;margin-top:.3rem;">Vitesse −10 ft</div>`:''}
     ${enc.lvl===2?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C0392B;margin-top:.3rem;">Vitesse −20 ft · Désavantage FOR / DEX / CON</div>`:''}
   </div>`;
-  bl.innerHTML=filterNote+bagHtml+`<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)${coinW>0?`<span style="font-size:8px;color:#6A5030;margin-left:.5rem;">dont ${coinW.toFixed(1)} lb pièces</span>`:''}</div>`+encBar;
+  bl.innerHTML=filterNote+bagHtml+`<div class="bag-total">Poids porté : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)${coinW>0?`<span style="font-size:8px;color:#6A5030;margin-left:.5rem;">dont ${coinW.toFixed(1)} lb pièces</span>`:''}${bankTotal>0?`<span style="font-size:8px;color:#4A6A8A;margin-left:.5rem;">🏦 ${bankTotal.toFixed(1)} lb en banque</span>`:''}</div>`+encBar;
   if(wh)wh.textContent=`${total.toFixed(1)} lb`;
   renderArmorEquip();
 }
@@ -4430,6 +4437,7 @@ function bagQty(i,d){
   renderBagList();
 }
 function bagRemove(i){C.bag.splice(i,1);renderBagList();}
+function toggleBankItem(i){if(!C.bag[i])return;C.bag[i].bank=!C.bag[i].bank;saveToRoster();renderBagList();}
 function addManualItem(){
   const name=($('mi-name')?.value||'').trim();
   if(!name){$('mi-name')?.focus();return;}
@@ -6259,6 +6267,7 @@ const EQUIP_SLOTS=[
   {id:'ring2',   label:'Anneau II',    icon:'💍'},
   {id:'amulet',  label:'Amulette',     icon:'📿'},
   {id:'back',    label:'Cape / Dos',   icon:'🧣'},
+  {id:'clothes', label:'Vêtements',    icon:'👗'},
 ];
 const _ERC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très rare':'#4A1F7A','Légendaire':'#7B4000','Artefact':'#7B1010'};
 
@@ -6307,6 +6316,7 @@ function canEquipInSlot(item, slotId){
     if(/gants?|gantelets?|brassards?/.test(dndT)) return slotId==='hands';
     if(/ceinture/.test(dndT)) return slotId==='belt';
     if(/sceptre|baton|baguette|instrument|grimoire|atlas/.test(dndT)) return slotId==='mainhand';
+    if(/robe|tunique|chemise|vetement|tenue|uniforme|habit/.test(dndT)) return slotId==='clothes';
   }
   // item_type générique (fallback secondaire)
   if(type&&type!=='objet magique'&&type!=='codex'){
@@ -6320,6 +6330,7 @@ function canEquipInSlot(item, slotId){
     if(/gant|brassard/.test(type)) return slotId==='hands';
     if(/ceinture/.test(type)) return slotId==='belt';
     if(/sceptre|baton|baguette/.test(type)) return slotId==='mainhand';
+    if(/robe|tunique|chemise|vetement|tenue|uniforme|habit/.test(type)) return slotId==='clothes';
   }
   // Dernier recours : inférence par le nom de l'item
   if(/botte|chaussure|sandal|sabot|greve|soleret|pantoufle/.test(name)) return slotId==='feet';
@@ -6331,6 +6342,7 @@ function canEquipInSlot(item, slotId){
   if(/anneau|bague/.test(name)) return slotId==='ring1'||slotId==='ring2';
   if(/bouclier|targe|egide/.test(name)) return slotId==='offhand';
   if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(name)) return slotId==='mainhand';
+  if(/robe|tunique|chemise|tenue|uniforme|toge|habit[^s]|vetement|veste|pourpoint|gambison|doublet|livrée|livrée/.test(name)) return slotId==='clothes';
   return false;
 }
 
@@ -6665,6 +6677,7 @@ const RE_SLOTS_RIGHT = [
   {id:'belt',    label:'Ceinture',   icon:'🪢'},
   {id:'feet',    label:'Pieds',      icon:'👢'},
   {id:'back',    label:'Cape / Dos', icon:'🧣'},
+  {id:'clothes', label:'Vêtements',  icon:'👗'},
 ];
 const RE_HEAD = {id:'head', label:'Tête', icon:'⛑'};
 const _RE_RC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très rare':'#4A1F7A','Légendaire':'#7B4000','Artefact':'#7B1010'};
@@ -6874,10 +6887,14 @@ function renderReBag(){
     var rBadge=rc?'<span class="re-rarity" style="background:'+rc+'33;color:'+rc+';border:1px solid '+rc+'55;">'+e.rarity+'</span>':'';
     var qty=e.qty>1?' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);">\xd7'+e.qty+'</span>':'';
     var eqBadge=equippedIds.includes(e.id)?'<span class="re-equipped-badge" title="Équipé">✓</span>':'';
-    return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')" onmouseenter="showBagTooltip(event,'+i+')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'+
+    var inBank=!!e.bank;
+    var bankBtn='<button class="re-bag-del" onclick="event.stopPropagation();toggleBankItem('+i+');renderReBag();" title="'+(inBank?'En banque \u2014 remettre sur soi':'Sur soi \u2014 mettre en banque')+'" style="opacity:'+(inBank?.9:.4)+';">'+(inBank?'\ud83c\udfe6':'\ud83c\udf92')+'</button>';
+    var nmStyle=inBank?'color:#5A4A3A;text-decoration:line-through;':'';
+    return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')" onmouseenter="showBagTooltip(event,'+i+')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="'+(inBank?'opacity:.65;':'')+'">'+
       '<span style="font-size:10px;color:#5A4A3A;cursor:grab;">&#x2837;</span>'+
-      '<div style="flex:1;font-family:\'IM Fell English\',serif;font-size:11px;color:var(--parch);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+e.n+rBadge+qty+'</div>'+
+      '<div style="flex:1;font-family:\'IM Fell English\',serif;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+nmStyle+'">'+e.n+rBadge+qty+'</div>'+
       eqBadge+
+      bankBtn+
       '<button class="re-bag-del" onclick="reBagRemove('+i+')" title="Retirer un">&#8722;</button>'+
       '<button class="re-bag-del" onclick="reBagDelete('+i+')" title="Tout retirer">\u2715</button>'+
     '</div>';
@@ -7241,7 +7258,7 @@ function renderSumCenterDoll(){
         ?'<button onclick="openLevelUp()" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.50);color:var(--gold);cursor:pointer;border-radius:12px;text-shadow:0 2px 8px #000;margin-bottom:clamp(.3rem,1vh,.7rem);transition:.15s;animation:lvlup-glow 2s ease-in-out infinite;" onmouseenter="this.style.background=\'rgba(201,168,76,.25)\'" onmouseleave="this.style.background=\'rgba(201,168,76,.10)\'">⬆ Montée de niveau +1</button>'
         :'<button disabled title="L\'admin n\'a pas encore activé la montée de niveau" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(30,20,10,.5);border:1px solid rgba(80,60,30,.3);color:rgba(150,120,60,.3);cursor:not-allowed;border-radius:12px;text-shadow:none;margin-bottom:clamp(.3rem,1vh,.7rem);opacity:.45;filter:grayscale(.7);">⬆ Montée de niveau +1</button>'
       )+
-      '<div class="doll-grid" style="grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(6,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);width:100%;">'+headSlot+leftSlots+rightSlots+'</div>'+
+      '<div class="doll-grid" style="grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(7,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);width:100%;">'+headSlot+leftSlots+rightSlots+'</div>'+
       '<div style="margin-top:clamp(.4rem,1vh,.7rem);font-family:\'Share Tech Mono\',monospace;font-size:8px;color:rgba(201,168,76,.35);letter-spacing:.1em;text-shadow:0 1px 3px #000;">Glisser du sac ou du catalogue ▸ déposer sur un emplacement</div>'+
     '</div>';
 }

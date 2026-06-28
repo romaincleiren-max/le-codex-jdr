@@ -3941,7 +3941,7 @@
   {
     "id": "cm2629vj30006033b4o3gif83",
     "name": "Carte - Tente Astrale",
-    "category": "Objets magiques",
+    "category": "Le Livre de Tente Astrale",
     "item_type": "Objet magique",
     "dnd_type": null,
     "desc": "",
@@ -3954,7 +3954,7 @@
   {
     "id": "cm27dyfu20003033bi2tecmba",
     "name": "Carte - Tente Astrale - Jour",
-    "category": "Objets magiques",
+    "category": "Le Livre de Tente Astrale",
     "item_type": "Objet magique",
     "dnd_type": null,
     "desc": "",
@@ -3967,7 +3967,7 @@
   {
     "id": "cm27dytoj000a033bcikxej0n",
     "name": "Carte - Tente Astrale - Nuit",
-    "category": "Objets magiques",
+    "category": "Le Livre de Tente Astrale",
     "item_type": "Objet magique",
     "dnd_type": null,
     "desc": "",
@@ -5237,5 +5237,17 @@
     "sprite": "",
     "rarity": "",
     "attunement": false
+  },
+  {
+    "id": "clz2f1lcl0133356lcx8oijdh",
+    "name": "Le Livre de Tente Astrale",
+    "category": "Objets magiques",
+    "desc": "Un livre appartenait autrefois à un membre de la famille Dull.\nPropriétés\nPropriétés : Le Livre Tente Astrale est un livre relié en cuir aux pages infinies et aux motifs cosmiques. En tournant une page spécifique, un vortex astral apparaît, vous permettant de vous y glisser. Vous êtes alors transporté dans une dimension de poche étrange et unique, un repli du . Cette \"poche\" est une micro version de l'astral, bizarrement connectée à cet infini espace tout en étant séparée du reste de ce plan.\nEffet de transport : Lorsque vous ouvrez le livre à une page particulière et vous concentrez pendant 1 minute, vous êtes projeté dans le Plan Astral , dans cette dimension de poche secrète. Une fois à l'intérieur, vous apparaissez dans une grande tente astrale suspendue dans un vide cosmique infini. La tente est dotée de toutes les commodités : des lits confortables, des zones de stockage, une table, des chaises, et même une petite bibliothèque pour les curieux. Ce lieu permet de se reposer en toute sécurité, d'y stocker des objets personnels ou d'effectuer des recherches.\nRepos confortable : Passer un long repos dans la tente astrale compte comme un repos complet pour le personnage, et vous pouvez récupérer l'intégralité de vos points de vie, sorts, et capacités comme lors d'un repos long normal. En outre, les effets de fatigue ou de blessures psychiques sont dissipés par l'ambiance réparatrice du Plan Astral.\nLimites de l'usage : Le Livre Tente Astrale ne peut être utilisé qu'une fois par long repos . Chaque utilisation du livre consomme une page spéciale ... (Dont le compteur est secret).\nHistoire\nX",
+    "citation": "",
+    "image": "https://assets.legendkeeper.com/f94ec3d7-0d18-4782-87ff-97929873dc13.png",
+    "item_type": "",
+    "rarity": "Très rare",
+    "attunement": false,
+    "rarity_raw": "Livre Tente Astrale Objet très rare (livre magique)"
   }
 ]
