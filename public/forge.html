@@ -5231,7 +5231,7 @@ function renderSummary(){
     if(C.equipped?.mainhand) weaponSources.push(C.equipped.mainhand);
     (C.bag||[]).filter(b=>WEAPON_PROPS[b.id]).forEach(w=>{if(!weaponSources.find(x=>x.id===w.id))weaponSources.push(w);});
     const clf=C.cls&&CLS_LVL_FEAT[C.cls.id];
-    const lvl=C.level||1;
+    const lvl=C.cls_lvl||primaryLvl();
     const merged={};
     if(clf) Object.entries(clf).forEach(([l,fs])=>{merged[l]=fs.map(f=>({n:f,d:'',sub:false}));});
     if(C.sub?.fs){
@@ -5763,9 +5763,9 @@ function renderCapacities(){
   if(C.equipped?.mainhand)weaponSources.push(C.equipped.mainhand);
   (C.bag||[]).filter(b=>WEAPON_PROPS[b.id]).forEach(w=>{if(!weaponSources.find(x=>x.id===w.id))weaponSources.push(w);});
 
-  // Features classe + sous-classe mergées
+  // Features classe principale + sous-classe — niveau correct (pas C.level)
   const clf=C.cls&&CLS_LVL_FEAT[C.cls.id];
-  const lvl=C.level||1;
+  const lvl=C.cls_lvl||primaryLvl();
   const merged={};
   if(clf)Object.entries(clf).forEach(([l,fs])=>{merged[l]=fs.map(f=>({n:f,d:'',sub:false}));});
   if(C.sub?.fs){
@@ -5780,6 +5780,23 @@ function renderCapacities(){
     });
   }
   const clsEntries=Object.entries(merged).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
+  // Features multiclasses
+  const mcFeatSections=(C.multiclasses||[]).filter(mc=>mc.cls&&(mc.lvl||0)>0).map(mc=>{
+    const mcClf=CLS_LVL_FEAT[mc.cls.id];
+    if(!mcClf)return'';
+    const mcMerged={};
+    Object.entries(mcClf).forEach(([l,fs])=>{mcMerged[l]=fs.map(f=>({n:f,d:'',sub:false}));});
+    const mcEntries=Object.entries(mcMerged).filter(([l])=>Number(l)<=(mc.lvl||0)).sort((a,b)=>Number(a[0])-Number(b[0]));
+    if(!mcEntries.length)return'';
+    return`\n  \${sect('📖','CAPACITÉS DE CLASSE',mc.cls.n,\`
+    <div class="cls-feat-timeline">
+    \${mcEntries.map(([l,fs])=>\`
+      <div class="cft-row">
+        <div class="cft-lvl">Niv.\${l}</div>
+        <div class="cft-feats">\${fs.map(f=>tag(f.n,f.sub,f.d)).join('')}</div>
+      </div>\`).join('')}
+    </div>\`)}`;
+  }).join('');
 
   const sect=(icon,title,sub,content)=>`
     <div style="margin-bottom:1.1rem;">
@@ -5835,6 +5852,8 @@ function renderCapacities(){
         <div class="cft-feats">${fs.map(f=>tag(f.n,f.sub,f.d)).join('')}</div>
       </div>`).join('')}
     </div>`):''}
+
+  ${mcFeatSections}
 
   ${(C.feats||[]).length?sect('⭐','DONS','',`
     <div style="display:flex;flex-direction:column;gap:.45rem;">
