@@ -758,7 +758,7 @@ body.printing #ps-print{display:block!important;}
 .pill.done::after{content:' ✓';font-size:8px;}
 .pill.active{border-color:rgba(201,168,76,.55);color:var(--gold);background:rgba(201,168,76,.1);box-shadow:0 0 10px rgba(201,168,76,.1);}
 /* Cards dark redesign */
-.card{background:#100C06;border:1px solid #2A1A0A;border-radius:6px;overflow:hidden;transition:.18s;}
+.card{background:#100C06;border:1px solid #2A1A0A;border-radius:6px;overflow:hidden;transition:.18s;contain:layout style;content-visibility:auto;contain-intrinsic-size:0 180px;}
 .card:hover{border-color:rgba(201,168,76,.4);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.5);background:#181008;}
 .card.sel{border-color:rgba(201,168,76,.7);background:#1A1008;}
 .card.sel::after{color:var(--gold);text-shadow:0 0 8px rgba(201,168,76,.5);}
@@ -3444,7 +3444,7 @@ function renderClass(){
   CLASSES.forEach(cl=>{
     const d=document.createElement('div');d.className='card'+(C.cls?.id===cl.id?' sel':'');
     const cs=CLASS_STYLE[cl.id]||{icon:'⚔',color:'var(--gold-d)'};
-    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><div class="card-pdf-icon" id="ci-${cl.id}"><img src="${getClsImgUrl(cl.id)}" alt="${cl.n}" style="max-height:68px;width:auto;max-width:100%;object-fit:contain;" onerror="clsImgFallback(this,'${cl.id}','card')"></div><div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
+    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><div class="card-pdf-icon" id="ci-${cl.id}"><img src="${getClsImgUrl(cl.id)}" alt="${cl.n}" loading="lazy" decoding="async" style="max-height:68px;width:auto;max-width:100%;object-fit:contain;" onerror="clsImgFallback(this,'${cl.id}','card')"></div><div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
     d.onclick=()=>{if(C.cls?.id!==cl.id){C.sub=null;C.skills=[];C.cantrips=[];C.spells=[];}C.cls=cl;renderClass();updateRight();};
     $('cg').appendChild(d);
   });
