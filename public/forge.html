@@ -6371,6 +6371,8 @@ function canEquipInSlot(item, slotId){
     if(/robe|tunique|chemise|vetement|tenue|uniforme|habit/.test(dndT)) return slotId==='clothes';
   }
   // item_type générique (fallback secondaire)
+  if(type==='livre') return slotId==='libram';
+  if(type==='objet magique'&&!dndT) return slotId==='libram';
   if(type&&type!=='objet magique'&&type!=='codex'){
     if(/\barme\b|melee|corps.a.corps/.test(type)) return slotId==='mainhand'||slotId==='offhand';
     if(/\barmure\b/.test(type)) return slotId==='chest';
@@ -6395,7 +6397,8 @@ function canEquipInSlot(item, slotId){
   if(/bouclier|targe|egide/.test(name)) return slotId==='offhand';
   if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(name)) return slotId==='mainhand';
   if(/robe|tunique|chemise|tenue|uniforme|toge|habit[^s]|vetement|veste|pourpoint|gambison|doublet|livrée|livrée/.test(name)) return slotId==='clothes';
-  if(/libram|livre.de.priere|livre sacre|symbole sacre|focus arcanique|orbe arcanique|grimoire|codex sacre/.test(name)) return slotId==='libram'||slotId==='mainhand';
+  if(/libram|livre|grimoire|tome|atlas|codex|traite|parchemin magique|livre.de.sort/.test(name)) return slotId==='libram';
+  if(/focus arcanique|orbe arcanique|symbole sacre|focalise/.test(name)) return slotId==='libram'||slotId==='mainhand';
   return false;
 }
 
