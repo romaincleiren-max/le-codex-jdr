@@ -625,7 +625,7 @@ body.printing #ps-print{display:block!important;}
 /* Doll column */
 #re-doll-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden;padding:clamp(.1rem,.2vh,.2rem) clamp(.4rem,.8vw,.8rem);background-size:cover;background-position:center top;background-repeat:no-repeat;}
 #re-doll-inner{width:100%;max-width:100%;}
-.doll-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(6,clamp(40px,5vh,66px));gap:clamp(3px,0.4vh,7px);margin-top:.15rem;}
+.doll-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(7,clamp(40px,5vh,66px));gap:clamp(3px,0.4vh,7px);margin-top:.15rem;}
 .re-doll-slot{display:flex;align-items:center;gap:clamp(4px,0.5vw,8px);padding:clamp(.2rem,.4vh,.5rem) clamp(.3rem,.5vw,.6rem);border:1px solid #3A2810;background:#130D06;border-radius:4px;cursor:default;transition:.12s;overflow:hidden;min-height:0;border-left-width:3px;}
 .re-doll-slot:hover{border-color:var(--gold-d) !important;background:rgba(201,168,76,.07) !important;}
 .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.5)!important;background:rgba(201,168,76,.06)!important;animation:re-pulse .9s ease-in-out infinite alternate;}
@@ -6652,6 +6652,7 @@ const RE_SLOTS_LEFT = [
   {id:'ring2',   label:'Anneau II',  icon:'💍'},
   {id:'mainhand',label:'M. Princip.',icon:'⚔'},
   {id:'offhand', label:'M. Seconde', icon:'🗡'},
+  {id:'ranged',  label:'À distance', icon:'🏹'},
 ];
 const RE_SLOTS_RIGHT = [
   {id:'chest',   label:'Torse',      icon:'🛡'},
