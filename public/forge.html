@@ -5400,7 +5400,8 @@ function printSheet(){
   setTimeout(()=>{printWin.print();printWin.close();},600);
 }
 function buildPrint(){
-  const s=C.stats;
+  // Stats effectives : base + ASI + bonus équipement (via effStat)
+  const s={};['str','dex','con','int','wis','cha'].forEach(k=>s[k]=effStat(k));
   // Header
   $('pn-name').textContent=C.name||'Héros Sans Nom';
   $('pn-clslvl').textContent=clsLevelStr()+(C.sub?' · '+C.sub.n:'');
