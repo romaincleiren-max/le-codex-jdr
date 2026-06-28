@@ -7348,7 +7348,7 @@ function reBagDragStart(e,idx){
 function reCatDragStart(e,id){
   var it=ITEMS.find(function(x){return x.id===id;});
   if(!it)return;
-  _reBagDragItem={id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null,bonus:it.bonus||null};
+  _reBagDragItem={id:it.id,n:it.n,qty:1,w:it.w,c:it.c,d:it.d,cat:it.cat,rarity:it.rarity||null,sprite:it.sprite||null,bonus:it.bonus||null,ranged:it.ranged||false,thrown:it.thrown||false,slot:it.slot||null};
   e.dataTransfer.effectAllowed='copy';
   var ghost=reCreateDragImage(_reBagDragItem);
   e.dataTransfer.setDragImage(ghost,45,45);
