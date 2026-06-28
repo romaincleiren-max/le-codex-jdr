@@ -2379,15 +2379,15 @@ const CANTRIPS={
 };
 const SPELLS1={
   arcane:['Armure du mage','Projectile magique','Bouclier','Charme-personne','Sommeil','Mains brûlantes','Feuille morte','Nappe de brouillard','Compréhension des langues','Détection de la magie','Déguisement','Couleurs dansantes','Image silencieuse','Saut','Grande foulée','Alarme','Absorption des éléments'],
-  divine:['Soin des blessures','Bénédiction','Bane','Sanctuaire','Bouclier de la foi','Injonction','Détection de la magie','Guérison','Armure spirituelle','Protection contre le mal et le bien','Mot de guérison','Aide'],
-  nature:['Enchevêtrement','Saut','Grande foulée','Marque du chasseur','Baies nourricières','Feuille morte','Nappe de brouillard','Absorption des éléments','Communication avec les animaux','Soin des blessures'],
+  divine:['Soin des blessures','Bénédiction','Bane','Sanctuaire','Bouclier de la foi','Injonction','Détection de la magie','Guérison','Armure spirituelle','Protection contre le mal et le bien','Mot de guérison','Aide','Châtiment calcinant','Châtiment tonitruant','Châtiment courroucé'],
+  nature:['Enchevêtrement','Saut','Grande foulée','Marque du chasseur','Baies nourricières','Feuille morte','Nappe de brouillard','Absorption des éléments','Communication avec les animaux','Soin des blessures','Frappe piégeuse'],
   bard:['Soin des blessures','Charme-personne','Sommeil','Détection de la magie','Déguisement','Héroïsme','Mot de guérison','Compréhension des langues','Nappe de brouillard','Image silencieuse','Frayeur','Couleurs dansantes'],
   warlock:['Armure du mage','Charme-personne','Frayeur','Hexe','Mains brûlantes','Protection contre le mal et le bien','Regain d\'aplomb'],
 };
 const SPELLS2={
   arcane:['Invisibilité','Toile d\'araignée','Flèche acide de Melf','Cécité/Surdité','Verrou d\'Arcane','Projectile enflammé','Force du taureau','Flou','Pas nébuleux','Ténèbres','Détection des pensées','Fracassement','Silence','Immobilisation de personne'],
   divine:['Prière de soins','Arme spirituelle','Restauration partielle','Protection contre le poison','Silence','Immobilisation de personne','Augure','Trouver des pièges','Amélioration de caractéristique'],
-  nature:['Peau d\'écorce','Croissance d\'épines','Localisation d\'animaux','Lien avec un animal','Restauration partielle','Passage sans trace','Fractionnement','Amélioration de caractéristique'],
+  nature:['Peau d\'écorce','Croissance d\'épines','Localisation d\'animaux','Lien avec un animal','Restauration partielle','Passage sans trace','Fractionnement','Amélioration de caractéristique','Bourrasque'],
   bard:['Invisibilité','Silence','Fracassement','Immobilisation de personne','Détection des pensées','Amélioration de caractéristique','Déblocage','Suggestion','Image majeure'],
   warlock:['Invisibilité','Ténèbres','Fracassement','Immobilisation de personne','Suggestion','Couronne de folie','Cécité/Surdité'],
 };
@@ -4090,6 +4090,70 @@ let _invSource='srd',_codexQ='',_codexData=null,_codexLoading=false;
 // état Capacités spéciales
 let _d100Result=null;
 
+
+function addExtraSpell(){
+  var inp=document.getElementById('extra-spell-inp');
+  var sel=document.getElementById('extra-spell-lvl');
+  var name=(inp&&inp.value||'').trim();
+  var lvl=parseInt(sel&&sel.value)||1;
+  if(!name)return;
+  if(!C.extraSpells)C.extraSpells=[];
+  if(!C.extraSpells.find(function(x){return x.name===name&&x.lvl===lvl;})){
+    C.extraSpells.push({name:name,lvl:lvl});
+    saveToRoster();
+  }
+  if(inp)inp.value='';
+  var dd=document.getElementById('extra-spell-dropdown');if(dd)dd.style.display='none';
+  renderExtraSpellsList();
+}
+function removeExtraSpell(idx){
+  if(!C.extraSpells)return;
+  C.extraSpells.splice(idx,1);
+  saveToRoster();
+  renderExtraSpellsList();
+}
+function renderExtraSpellsList(){
+  var el=document.getElementById('extra-spells-list');
+  if(!el)return;
+  var list=C.extraSpells||[];
+  if(!list.length){el.innerHTML='<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucun sort ajouté.</div>';return;}
+  var byLvl={};
+  list.forEach(function(x,i){if(!byLvl[x.lvl])byLvl[x.lvl]=[];byLvl[x.lvl].push({name:x.name,lvl:x.lvl,i:i});});
+  el.innerHTML=Object.keys(byLvl).sort(function(a,b){return a-b;}).map(function(lvl){
+    var items=byLvl[lvl].map(function(x){
+      return '<span style="display:inline-flex;align-items:center;gap:.3rem;background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.15rem .4rem;border-radius:3px;">❆ '+x.name+'<button onclick="removeExtraSpell('+x.i+')" style="background:none;border:none;color:#5A4A6A;cursor:pointer;font-size:10px;padding:0;line-height:1;" title="Retirer">✕</button></span>';
+    }).join('');
+    return '<div style="margin-bottom:.35rem;"><span style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;">NIV.'+lvl+'</span><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-top:.2rem;">'+items+'</div></div>';
+  }).join('');
+}
+function filterExtraSpellList(){
+  var inp2=document.getElementById('extra-spell-inp');
+  var sel2=document.getElementById('extra-spell-lvl');
+  var q=(inp2&&inp2.value||'').toLowerCase();
+  var lvl=parseInt(sel2&&sel2.value)||0;
+  var el=document.getElementById('extra-spell-dropdown');
+  if(!el)return;
+  if(q.length<2){el.innerHTML='';el.style.display='none';return;}
+  var POOLS=[null,SPELLS1,SPELLS2,SPELLS3,SPELLS4,SPELLS5,SPELLS6,SPELLS7,SPELLS8,SPELLS9];
+  var matches=[];
+  POOLS.forEach(function(pool,lvlIdx){
+    if(!pool||(lvl&&lvlIdx!==lvl))return;
+    Object.values(pool).forEach(function(arr){
+      arr.forEach(function(s){
+        if(s.toLowerCase().includes(q)&&!matches.find(function(m){return m.name===s;}))
+          matches.push({name:s,lvl:lvlIdx});
+      });
+    });
+  });
+  if(!matches.length){el.style.display='none';return;}
+  el.innerHTML=matches.slice(0,12).map(function(m){
+    var dn=m.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+    return '<div style="padding:.22rem .5rem;cursor:pointer;font-family:Share Tech Mono,monospace;font-size:9px;color:#80B0E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" onmousedown="document.getElementById(\'extra-spell-inp\').value=this.dataset.n;document.getElementById(\'extra-spell-lvl\').value=this.dataset.l;document.getElementById(\'extra-spell-dropdown\').style.display=\'none\';" data-n="'+dn+'" data-l="'+m.lvl+'">❆ Niv.'+m.lvl+' — '+m.name+'</div>';
+  }).join('');
+  el.style.display='block';
+}
+
+
 // ─── RENDU SORTS PAR NIVEAU ─────────────────────────
 function renderSpellsByLevel(cl, prep, slots){
   const KEY={wizard:'arcane',sorcerer:'arcane',cleric:'divine',paladin:'divine',druid:'nature',ranger:'nature',bard:'bard',warlock:'warlock'};
@@ -4169,7 +4233,27 @@ function renderEquipSpells(){
     }).join('');
     return cantSection+spellSections;
   })()} 
-  <div class="div"></div>
+    <div class="div"></div>
+  <div class="sh" style="font-size:14px;">✦ Sorts à la carte</div>
+  <div class="ss" style="margin-bottom:.6rem;">Ajoutez n'importe quel sort, quel que soit le niveau</div>
+  <div style="display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-bottom:.5rem;position:relative;">
+    <select id="extra-spell-lvl" style="background:#0E0905;border:1px solid #3A2A10;color:var(--gold-d);font-family:'Share Tech Mono',monospace;font-size:10px;padding:.28rem .4rem;outline:none;border-radius:3px;flex-shrink:0;" onchange="filterExtraSpellList()">
+      <option value="1">Niv.1</option><option value="2">Niv.2</option><option value="3">Niv.3</option>
+      <option value="4">Niv.4</option><option value="5">Niv.5</option><option value="6">Niv.6</option>
+      <option value="7">Niv.7</option><option value="8">Niv.8</option><option value="9">Niv.9</option>
+    </select>
+    <div style="flex:1;position:relative;min-width:140px;">
+      <input id="extra-spell-inp" class="inv-search" style="width:100%;margin-bottom:0;box-sizing:border-box;" placeholder="Nom du sort…"
+        oninput="filterExtraSpellList()"
+        onkeydown="if(event.key==='Enter'){addExtraSpell();}"
+        onblur="setTimeout(function(){var d=document.getElementById('extra-spell-dropdown');if(d)d.style.display='none';},200)">
+      <div id="extra-spell-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;z-index:999;background:#0F0A06;border:1px solid rgba(201,168,76,.4);border-top:none;border-radius:0 0 4px 4px;max-height:160px;overflow-y:auto;"></div>
+    </div>
+    <button class="btn btn-p" style="flex-shrink:0;" onclick="addExtraSpell()">+ Ajouter</button>
+  </div>
+  <div id="extra-spells-list"></div>
+
+<div class="div"></div>
   <div class="sh" style="font-size:14px;">✦ Capacités Spéciales</div>
   <div class="ss">Capacités hors SRD · Entrez un nom, saisissez une valeur (1–100) ou lancez le dé</div>
   <div style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap;margin-bottom:.6rem;">
@@ -4184,6 +4268,7 @@ function renderEquipSpells(){
   <div class="btn-row"><button class="btn btn-s" onclick="go(3)">← Background</button><button class="btn btn-p" onclick="go(5)">Suivant : Identité →</button></div>`;
   if(!C.equipped) C.equipped={};
   if(_invSource==='codex'){if(_codexData)renderCodexGrid();}else{renderInvGrid();}renderBagList();renderSpecialAbilities();
+  renderExtraSpellsList();
 }
 
 // ── CAPACITÉS SPÉCIALES ─────────────────────────────
@@ -5100,6 +5185,7 @@ function renderSummary(){
     ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">CANTRIPS</div>
     <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
     ${spellsGroupedHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.4rem;">SORTS CONNUS / PRÉPARÉS</div>${spellsGroupedHtml}`:''}
+${(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin:.45rem 0 .28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">SORTS PERSONNALISÉS</div><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.4rem;">'+(  (C.extraSpells||[]).map(function(x){return '<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;white-space:nowrap;">❋ Niv.'+x.lvl+' — '+x.name+'</span>';}).join('')  )+'</div>':''}
     `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`);
     return;
   }
