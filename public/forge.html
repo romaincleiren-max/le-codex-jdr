@@ -2945,11 +2945,11 @@ const ITEMS=[
   {id:'clothes-traveler',n:'Vêtements de voyageur',cat:'Équipement',d:'Manteau épais, bottes robustes. +1 protection contre le froid naturel.',w:4,c:'2 po'},
   {id:'clothes-fine',n:'Vêtements de qualité',cat:'Équipement',d:'Tenue élégante pour la noblesse et les cercles sociaux raffinés.',w:6,c:'15 po'},
   // ── ARMES ──
-  {id:'dagger',n:'Dague',cat:'Arme',d:'Légère, finesse, lancer (6/18 m). 1d4 perforant. Idéale comme arme de secours.',w:1,c:'2 po'},
+  {id:'dagger',n:'Dague',cat:'Arme',thrown:true,d:'Légère, finesse, lancer (6/18 m). 1d4 perforant. Idéale comme arme de secours.',w:1,c:'2 po'},
   {id:'club',n:'Gourdin',cat:'Arme',d:'Légère. 1d4 contondant. Peut être fabriquée n\'importe où en forêt.',w:2,c:'1 pa'},
-  {id:'handaxe',n:'Hachette',cat:'Arme',d:'Légère, lancer (6/18 m). 1d6 tranchant. Bonne arme secondaire.',w:2,c:'5 po'},
-  {id:'javelin',n:'Javelot',cat:'Arme',d:'Lancer (9/36 m). 1d6 perforant. Arme de jet réutilisable.',w:2,c:'5 pa'},
-  {id:'spear',n:'Lance',cat:'Arme',d:'Lancer (6/18 m), polyvalente (1d8 à 2 mains). 1d6 perforant.',w:3,c:'1 po'},
+  {id:'handaxe',n:'Hachette',cat:'Arme',thrown:true,d:'Légère, lancer (6/18 m). 1d6 tranchant. Bonne arme secondaire.',w:2,c:'5 po'},
+  {id:'javelin',n:'Javelot',cat:'Arme',thrown:true,d:'Lancer (9/36 m). 1d6 perforant. Arme de jet réutilisable.',w:2,c:'5 pa'},
+  {id:'spear',n:'Lance',cat:'Arme',thrown:true,d:'Lancer (6/18 m), polyvalente (1d8 à 2 mains). 1d6 perforant.',w:3,c:'1 po'},
   {id:'mace',n:'Masse d\'armes',cat:'Arme',d:'1d6 contondant. Métal lourd : ignore les armures non-magiques légères.',w:4,c:'5 po'},
   {id:'quarterstaff',n:'Bâton',cat:'Arme',d:'Polyvalent (1d8 à 2 mains). 1d6 contondant. Double usage focalisateur.',w:4,c:'2 pa'},
   {id:'shortsword',n:'Épée courte',cat:'Arme',d:'Finesse, légère. 1d6 perforant. Idéale pour le combat à deux armes.',w:2,c:'10 po'},
@@ -2959,12 +2959,12 @@ const ITEMS=[
   {id:'battleaxe',n:'Hache de guerre',cat:'Arme',d:'Polyvalente (1d10 à 2 mains). 1d8 tranchant. Puissance et rapidité.',w:2,c:'15 po'},
   {id:'greataxe',n:'Grande hache',cat:'Arme',d:'Lourde, à 2 mains. 1d12 tranchant. Arme de prédilection des Barbares.',w:7,c:'30 po'},
   {id:'greatsword',n:'Épée à deux mains',cat:'Arme',d:'Lourde, à 2 mains. 2d6 tranchant. La plus puissante des armes de mêlée.',w:6,c:'50 po'},
-  {id:'shortbow',n:'Arc court',cat:'Arme',d:'Munitions, à 2 mains, portée (24/96 m). 1d6 perforant.',w:2,c:'25 po'},
-  {id:'longbow',n:'Arc long',cat:'Arme',d:'Munitions, lourd, à 2 mains, portée (45/180 m). 1d8 perforant.',w:2,c:'50 po'},
-  {id:'crossbow-light',n:'Arbalète légère',cat:'Arme',d:'Munitions, rechargement, à 2 mains, portée (24/96 m). 1d8 perforant.',w:5,c:'25 po'},
-  {id:'crossbow-heavy',n:'Arbalète lourde',cat:'Arme',d:'Lourde, rechargement, à 2 mains, portée (30/120 m). 1d10 perforant.',w:18,c:'50 po'},
-  {id:'crossbow-hand',n:'Arbalète de poing',cat:'Arme',d:'Légère, munitions, rechargement, portée (9/36 m). 1d6 perforant.',w:3,c:'75 po'},
-  {id:'sling',n:'Fronde',cat:'Arme',d:'Munitions, portée (9/36 m). 1d4 contondant. Arme discrète et silencieuse.',w:0,c:'1 pa'},
+  {id:'shortbow',n:'Arc court',cat:'Arme',ranged:true,d:'Munitions, à 2 mains, portée (24/96 m). 1d6 perforant.',w:2,c:'25 po'},
+  {id:'longbow',n:'Arc long',cat:'Arme',ranged:true,d:'Munitions, lourd, à 2 mains, portée (45/180 m). 1d8 perforant.',w:2,c:'50 po'},
+  {id:'crossbow-light',n:'Arbalète légère',cat:'Arme',ranged:true,d:'Munitions, rechargement, à 2 mains, portée (24/96 m). 1d8 perforant.',w:5,c:'25 po'},
+  {id:'crossbow-heavy',n:'Arbalète lourde',cat:'Arme',ranged:true,d:'Lourde, rechargement, à 2 mains, portée (30/120 m). 1d10 perforant.',w:18,c:'50 po'},
+  {id:'crossbow-hand',n:'Arbalète de poing',cat:'Arme',ranged:true,d:'Légère, munitions, rechargement, portée (9/36 m). 1d6 perforant.',w:3,c:'75 po'},
+  {id:'sling',n:'Fronde',cat:'Arme',ranged:true,d:'Munitions, portée (9/36 m). 1d4 contondant. Arme discrète et silencieuse.',w:0,c:'1 pa'},
   // ── ARMURES ──
   {id:'leather',n:'Armure de cuir',cat:'Armure',d:'CA 11 + mod DEX. Légère. Protection minimale, mobilité maximale.',w:10,c:'10 po'},
   {id:'studded-leather',n:'Armure de cuir clouté',cat:'Armure',d:'CA 12 + mod DEX. Légère. Cuir renforcé de rivets métalliques.',w:13,c:'45 po'},
@@ -3042,20 +3042,20 @@ const ITEMS=[
   {id:'iron-spikes',n:'Pointes en fer (×10)',cat:'Équipement',d:'Bloquer une porte ou ancrer une corde. Plus solides que des pitons.',w:5,c:'1 po'},
   {id:'abacus',n:'Boulier',cat:'Équipement',d:'Outil de calcul. Avantage aux tests d\'Histoire liés aux échanges commerciaux.',w:2,c:'2 po'},
   // ── ARMES COMPLÉMENTAIRES ──
-  {id:'dart',n:'Fléchette',cat:'Arme',d:'Finesse, lancer (6/18 m). 1d4 perforant. Petite, silencieuse et précise.',w:0.25,c:'5 pc'},
-  {id:'light-hammer',n:'Marteau léger',cat:'Arme',d:'Légère, lancer (6/18 m). 1d4 contondant. Arme secondaire idéale.',w:2,c:'2 po'},
+  {id:'dart',n:'Fléchette',cat:'Arme',thrown:true,d:'Finesse, lancer (6/18 m). 1d4 perforant. Petite, silencieuse et précise.',w:0.25,c:'5 pc'},
+  {id:'light-hammer',n:'Marteau léger',cat:'Arme',thrown:true,d:'Légère, lancer (6/18 m). 1d4 contondant. Arme secondaire idéale.',w:2,c:'2 po'},
   {id:'flail',n:'Fléau',cat:'Arme',d:'1d8 contondant. Ignore les bonus de bouclier (contourne la garde).',w:2,c:'10 po'},
   {id:'morningstar',n:'Étoile du matin',cat:'Arme',d:'1d8 perforant. Masse à pointes. Dégâts perforants et contondants.',w:4,c:'15 po'},
   {id:'war-pick',n:'Pic de guerre',cat:'Arme',d:'1d8 perforant. Perce les armures solides. Bonne pénétration.',w:2,c:'5 po'},
   {id:'scimitar',n:'Cimeterre',cat:'Arme',d:'Légère, finesse. 1d6 tranchant. Lame recourbée pour les coups rapides.',w:3,c:'25 po'},
-  {id:'trident',n:'Trident',cat:'Arme',d:'Lancer (6/18 m), polyvalent (1d8 à 2 mains). 1d6 perforant.',w:4,c:'5 po'},
+  {id:'trident',n:'Trident',cat:'Arme',thrown:true,d:'Lancer (6/18 m), polyvalent (1d8 à 2 mains). 1d6 perforant.',w:4,c:'5 po'},
   {id:'whip',n:'Fouet',cat:'Arme',d:'Finesse, allonge. 1d4 tranchant. Portée 3 m, idéal pour désarmer.',w:3,c:'2 po'},
   {id:'pike',n:'Pique',cat:'Arme',d:'Lourde, allonge, à 2 mains. 1d10 perforant. Portée 3 m pour tenir à distance.',w:18,c:'5 po'},
   {id:'glaive',n:'Glaive',cat:'Arme',d:'Lourd, allonge, à 2 mains. 1d10 tranchant. Portée 3 m, dégâts massifs.',w:6,c:'20 po'},
   {id:'halberd',n:'Hallebarde',cat:'Arme',d:'Lourde, allonge, à 2 mains. 1d10 tranchant. Mêle hache et lance en une arme.',w:6,c:'20 po'},
   {id:'maul',n:'Marteau lourd',cat:'Arme',d:'Lourd, à 2 mains. 2d6 contondant. Masses de métal : briser armures et boucliers.',w:10,c:'10 po'},
   {id:'net',n:'Filet',cat:'Arme',d:'Lancer (1,5/4,5 m). Entrave une créature (max Taille G). Force CD 10 pour se libérer.',w:3,c:'1 po'},
-  {id:'blowgun',n:'Sarbacane',cat:'Arme',d:'Munitions, chargement, portée (7,5/30 m). 1 perforant. Silencieuse et discrète.',w:1,c:'10 po'},
+  {id:'blowgun',n:'Sarbacane',cat:'Arme',ranged:true,d:'Munitions, chargement, portée (7,5/30 m). 1 perforant. Silencieuse et discrète.',w:1,c:'10 po'},
   {id:'lance',n:'Lance de cavalerie',cat:'Arme',d:'Allonge, spéciale (désavantage à portée courte). 1d12 perforant. Usage monté.',w:6,c:'10 po'},
   // ── OUTILS D'ARTISAN (détaillés) ──
   {id:'smith-tools',n:'Outils de forgeron',cat:'Outil',d:'Enclume, marteau, pinces. Fabriquer et réparer métal et armures.',w:8,c:'20 po'},
@@ -6187,6 +6187,7 @@ const EQUIP_SLOTS=[
   {id:'feet',    label:'Pieds',        icon:'👢'},
   {id:'mainhand',label:'Main princ.',  icon:'⚔'},
   {id:'offhand', label:'Main second.', icon:'🗡'},
+  {id:'ranged',  label:'Arme à dist.', icon:'🏹'},
   {id:'ring1',   label:'Anneau I',     icon:'💍'},
   {id:'ring2',   label:'Anneau II',    icon:'💍'},
   {id:'amulet',  label:'Amulette',     icon:'📿'},
@@ -6205,7 +6206,11 @@ function canEquipInSlot(item, slotId){
   if(item.cat==='Armure' && !SHIELD_IDS.includes(item.id)) return slotId==='chest';
   // Boucliers SRD → Main secondaire
   if(SHIELD_IDS.includes(item.id)) return slotId==='offhand';
-  // Armes SRD → Main principale ou secondaire
+  // Armes à distance pures SRD (arcs, arbalètes, fronde, sarbacane) → slot ranged uniquement
+  if(item.cat==='Arme' && item.ranged) return slotId==='ranged';
+  // Armes de lancer SRD (dague, javelot, hachette…) → main princ., second., ou ranged
+  if(item.cat==='Arme' && item.thrown) return slotId==='mainhand'||slotId==='offhand'||slotId==='ranged';
+  // Armes de mêlée SRD → Main principale ou secondaire
   if(item.cat==='Arme') return slotId==='mainhand' || slotId==='offhand';
   // Slot explicite défini sur l'item (SRD magic)
   if(item.slot==='ring') return slotId==='ring1' || slotId==='ring2';
