@@ -5335,7 +5335,8 @@ function renderSummary(){
       ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(139,26,26,.2);border:1px solid rgba(139,26,26,.3);color:#E08080;padding:.1rem .35rem;border-radius:20px;">${C.cls.n} Niv.${primaryLvl()}</span>`:''}
       ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(80,40,120,.2);border:1px solid rgba(80,40,120,.3);color:#C0A0E0;padding:.1rem .35rem;border-radius:20px;">${C.sub.n}</span>`:''}
     </div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#4A3A20;">${alignLine}${C.background?' · '+C.background.n:''}</div>
+    <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#4A3A20;">${alignLine}${C.background?' · '+C.background.n:''}${C.deity?' · ⚜ '+C.deity.name:''}</div>
+    ${C.deity?.image?`<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.35rem;" onmouseenter="showDeityCard(event,'${C.deity.id}')" onmouseleave="hideDeityCard()"><img src="${C.deity.image}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;border:1px solid rgba(201,168,76,.4);" onerror="this.style.display='none'"><span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(201,168,76,.6);letter-spacing:.08em;">⚜ ${C.deity.name}</span></div>`:''}
   </div>
 
   <div style="display:flex;gap:.35rem;margin-bottom:.45rem;">
