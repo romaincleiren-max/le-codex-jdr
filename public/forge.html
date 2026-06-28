@@ -5213,6 +5213,7 @@ function renderSummary(){
               const esc=s.replace(/'/g,"\\'");
               out+='<span '+
                 'onclick="'+(canAdd?'toggleSpSorts(\''+esc+'\','+maxN+',\''+sKey+'\')':'')+'" '+
+                'onmouseenter="showSpellTooltip(event,\''+esc+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" '+
                 'style="background:'+(sel?'#0A2015':'#080805')+';border:1px solid '+(sel?'#1A5A30':'#1E1408')+
                 ';color:'+(sel?'#50B070':canAdd?'#5A5040':'#2A2018')+
                 ';font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;'+
@@ -5238,7 +5239,8 @@ function renderSummary(){
             out+='<div style="font-family:Cinzel,serif;font-size:7px;letter-spacing:.14em;color:#7A6040;margin:.3rem 0 .18rem;">NIV.'+(l==99?'?':ROMAN[l-1])+'</div>';
             out+='<div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.35rem;">';
             byLvl[l].forEach(s=>{
-              out+='<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;white-space:nowrap;">⚡ '+s+'</span>';
+              const esc2=s.replace(/'/g,"\\'");
+              out+='<span onmouseenter="showSpellTooltip(event,\''+esc2+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;white-space:nowrap;">⚡ '+s+'</span>';
             });
             out+='</div>';
           });
