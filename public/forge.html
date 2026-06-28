@@ -3102,7 +3102,7 @@ const ITEM_RARITIES=['Tous',..._RARITY_ORDER.filter(r=>ITEMS.some(i=>i.rarity===
 // ═══════════════════════════════════════════════════
 // CHARACTER STATE
 // ═══════════════════════════════════════════════════
-let C={name:'',player:'',age:'',bg_story:'',photo:'',race:null,cls:null,sub:null,background:null,alignment:null,
+let C={name:'',player:'',age:'',bg_story:'',photo:'',langs:[],race:null,cls:null,sub:null,background:null,alignment:null,
   stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
   level:1,xp:0,profBonus:2,traits:[],alive:true,history:[],diceRolls:[],diceAssigned:{},bag:[],specialAbilities:[],scenarioHistory:[],
   asi:{str:0,dex:0,con:0,int:0,wis:0,cha:0},equippedArmorId:null,dice3d6:{},dice3d6RerollUsed:false,
@@ -3296,10 +3296,20 @@ function getSlots(){
 }
 
 // Languages
-function getLanguages(){
+const ALL_LANGS=['Abyssal','Aquan','Auran','Céleste','Commun','Draconique','Elfique','Géant','Gnome','Gobelin','Halfelin','Ignan','Infernal','Nain','Orque','Primordial','Profond','Sylvain','Sous-commun','Terran','Vieil infernal'];
+function getLangChoiceCount(){
+  const raceChoices=(C.race?.langs||[]).reduce((n,l)=>{const m=l.match(/^(\d+)\s*au choix/);return n+(m?parseInt(m[1]):0);},0);
+  const bgChoices=C.background?.langs||0;
+  return raceChoices+bgChoices;
+}
+function getFixedLanguages(){
   const langs=new Set();
-  if(C.race?.langs)C.race.langs.forEach(l=>langs.add(l));
-  if(C.background?.baseLangs)C.background.baseLangs.forEach(l=>langs.add(l));
+  (C.race?.langs||[]).forEach(l=>{if(!/au choix/.test(l))langs.add(l);});
+  (C.background?.baseLangs||[]).forEach(l=>langs.add(l));
+  return [...langs];
+}
+function getLanguages(){
+  const langs=new Set([...getFixedLanguages(),...(C.langs||[])]);
   return [...langs];
 }
 
@@ -3334,7 +3344,7 @@ function showTitle(){
 }
 function showGame(){$('ts').style.display='none';const g=$('gs');g.style.display='flex';g.style.flexDirection='column';setForgeScale();}
 function newChar(){
-  C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',race:null,cls:null,sub:null,multiclasses:[],background:null,alignment:null,
+  C={name:'',player:'',age:'',bg_story:'',photo:'',portrait_url:'',langs:[],race:null,cls:null,sub:null,multiclasses:[],background:null,alignment:null,
     stats:{str:8,dex:8,con:8,int:8,wis:8,cha:8},skills:[],equipment:[],cantrips:[],spells:[],
     level:1,cls_lvl:1,xp:0,profBonus:2,traits:[],ideals:'',bonds:'',flaws:'',
     height:'',weight:'',eyes:'',hair:'',skin:'',
@@ -4505,6 +4515,35 @@ function renderIdentity(){
 
   <label class="ilb">📖 Histoire & Motivations</label>
   <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.bg_story=this.value">${C.bg_story||''}</textarea>
+
+  <div class="div"></div>
+  <div class="sh" style="font-size:14px;">🗣 Langues</div>
+  ${(()=>{
+    const fixed=getFixedLanguages();
+    const nChoices=getLangChoiceCount();
+    if(!C.langs) C.langs=[];
+    while(C.langs.length<nChoices) C.langs.push('');
+    if(C.langs.length>nChoices) C.langs=C.langs.slice(0,nChoices);
+    const fixedHtml=fixed.length
+      ?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.55rem;">${fixed.map(l=>`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;background:#130D06;border:1px solid #2A1A08;color:#8A7A5A;padding:.2rem .5rem;border-radius:3px;">✓ ${l}</span>`).join('')}</div>`
+      :'';
+    if(!nChoices) return fixedHtml+`<div style="font-size:9px;color:#4A3A20;font-style:italic;margin-top:.3rem;">Aucune langue supplémentaire à choisir pour cette combinaison race/historique.</div>`;
+    const choicesHtml=C.langs.map((chosen,i)=>{
+      const taken=new Set([...fixed,...C.langs.filter((_,j)=>j!==i&&_)]);
+      const opts=ALL_LANGS.filter(l=>!taken.has(l)||l===chosen);
+      return`<div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.3rem;">
+        <span style="font-family:'Cinzel',serif;font-size:8px;color:#6A5030;min-width:70px;">Choix ${i+1}</span>
+        <select class="ifl" style="flex:1;font-size:10px;padding:.28rem .5rem;" onchange="C.langs[${i}]=this.value;renderIdentity()">
+          <option value="">— Choisir une langue —</option>
+          ${opts.map(l=>`<option value="${l}"${chosen===l?' selected':''}>${l}</option>`).join('')}
+        </select>
+        ${chosen?`<span style="font-size:10px;color:#6A9A5A;">✓</span>`:''}
+      </div>`;
+    }).join('');
+    const remaining=C.langs.filter(l=>!l).length;
+    const hint=remaining?`<div style="font-size:8px;color:#6A5030;font-style:italic;margin-top:.2rem;">${remaining} langue${remaining>1?'s':''} restante${remaining>1?'s':''} à choisir</div>`:'';
+    return fixedHtml+`<div style="font-size:8px;color:#8A7050;margin-bottom:.4rem;">Vous pouvez choisir <strong style="color:#C9A84C;">${nChoices}</strong> langue${nChoices>1?'s':''} supplémentaire${nChoices>1?'s':''}</div>`+choicesHtml+hint;
+  })()}
 
   <div class="btn-row">
     <button class="btn btn-s" onclick="go(4)">← Équipement</button>
