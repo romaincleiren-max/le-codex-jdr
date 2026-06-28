@@ -5187,7 +5187,9 @@ function renderSummary(){
         const sKey=SPELL_KEY_MAP[sCls.id]||'arcane';
         const isPrepared=sPrep.type==='prepared';
         const maxN=sPrep.n;
-        const totalSel=(C.spells||[]).length;
+        const classPoolAll=[];
+        for(let _lv=1;_lv<=9;_lv++){const _p=POOLS_SUM[_lv];if(_p&&_p[sKey])_p[sKey].forEach(s=>classPoolAll.push(s));}
+        const totalSel=(C.spells||[]).filter(s=>classPoolAll.includes(s)).length;
         if(isPrepared){
           // Classe à préparation : liste complète cliquable
           let out='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #2A1A08;display:flex;justify-content:space-between;">'+
