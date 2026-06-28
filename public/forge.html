@@ -3245,6 +3245,23 @@ function clsShortStr(){
   const mcs=(C.multiclasses||[]).filter(m=>m.cls&&(m.lvl||0)>0);
   return mcs.length?[C.cls.n,...mcs.map(m=>m.cls.n)].join('/'):C.cls.n;
 }
+function calcCarryWeight(){
+  const bagTotal=(C.bag||[]).reduce((s,e)=>s+(e.w||0)*e.qty,0);
+  const cur=C.currency||{};
+  return bagTotal+((cur.pp||0)+(cur.gp||0)+(cur.ep||0)+(cur.sp||0)+(cur.cp||0))/50;
+}
+function calcEncumbrance(){
+  const str=effStat('str');
+  const w=calcCarryWeight();
+  const t1=str*5,t2=str*10,tMax=str*15;
+  if(w>t2)  return{lvl:2,label:'Surchargé',col:'#C0392B',speedPen:-20,w,t1,t2,tMax,pct:Math.min(w/tMax,1)};
+  if(w>t1)  return{lvl:1,label:'Chargé',col:'#E67E22',speedPen:-10,w,t1,t2,tMax,pct:Math.min(w/tMax,1)};
+  return      {lvl:0,label:'Normal',col:'#27AE60',speedPen:0,w,t1,t2,tMax,pct:Math.min(w/tMax,1)};
+}
+function calcEffSpeed(){
+  const base=C.race?.speed||30;
+  return Math.max(0,base+calcEncumbrance().speedPen);
+}
 function calcHP(){
   if(C.hpOverride!=null)return C.hpOverride;
   if(!C.cls)return 0;
@@ -4340,7 +4357,24 @@ function renderBagList(){
   </div>`;
   }).join('');
   const filterNote=filtered.length<C.bag.length?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#6A5030;padding:.2rem .3rem;">${filtered.length}/${C.bag.length} objets affichés</div>`:'';
-  bl.innerHTML=filterNote+bagHtml+`<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)${coinW>0?`<span style="font-size:8px;color:#6A5030;margin-left:.5rem;">dont ${coinW.toFixed(1)} lb pièces</span>`:''}</div>`;
+  const enc=calcEncumbrance();
+  const encBar=`<div style="margin-top:.5rem;background:#0E0A05;border:1px solid ${enc.lvl>0?enc.col:'#2A1A08'};border-radius:4px;padding:.45rem .6rem;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem;">
+      <span style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:${enc.col};">${enc.lvl===0?'⚖ CHARGE NORMALE':enc.lvl===1?'⚠ CHARGÉ':'🔴 SURCHARGÉ'}</span>
+      <span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#8A7050;">${enc.w.toFixed(1)} / ${enc.tMax} lb</span>
+    </div>
+    <div style="height:5px;background:#1A1008;border-radius:3px;overflow:hidden;">
+      <div style="height:100%;width:${Math.round(enc.pct*100)}%;background:${enc.col};border-radius:3px;transition:.3s;"></div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:2px;">
+      <span style="font-size:7px;color:#4A3A20;">│Chargé ${enc.t1}lb</span>
+      <span style="font-size:7px;color:#4A3A20;">│Surchargé ${enc.t2}lb</span>
+      <span style="font-size:7px;color:#4A3A20;">│Max ${enc.tMax}lb</span>
+    </div>
+    ${enc.lvl===1?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#E67E22;margin-top:.3rem;">Vitesse −10 ft</div>`:''}
+    ${enc.lvl===2?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C0392B;margin-top:.3rem;">Vitesse −20 ft · Désavantage FOR / DEX / CON</div>`:''}
+  </div>`;
+  bl.innerHTML=filterNote+bagHtml+`<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)${coinW>0?`<span style="font-size:8px;color:#6A5030;margin-left:.5rem;">dont ${coinW.toFixed(1)} lb pièces</span>`:''}</div>`+encBar;
   if(wh)wh.textContent=`${total.toFixed(1)} lb`;
   renderArmorEquip();
 }
@@ -5240,11 +5274,11 @@ function renderSummary(){
     </div>
     <div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.25rem;margin-bottom:.25rem;">
-        ${[['CA',calcCA(),'#C9983A'],['INIT',mods(effStat('dex')),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
+        ${(()=>{const enc=calcEncumbrance();const spd=calcEffSpeed();const spdCol=enc.lvl===2?'#C0392B':enc.lvl===1?'#E67E22':'#80A0C0';const spdVal=enc.lvl>0?`<span style="font-size:8px;text-decoration:line-through;opacity:.5;">${C.race?.speed||30}</span>${spd}ft`:spd+'ft';return[['CA',calcCA(),'#C9983A'],['INIT',mods(effStat('dex')),'#80C0A0'],['VITESSE',spdVal,spdCol],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
         <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.25rem .32rem;text-align:center;">
           <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.1em;color:#4A3A20;margin-bottom:1px;">${l}</div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:${col};font-weight:bold;">${v}</div>
-        </div>`).join('')}
+        </div>`).join('')})()}
       </div>
       ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.15rem;">${(C.conditions||[]).map((c,i)=>{const info=CONDITIONS_INFO[c];const col=info?info.col:'#E08090';return`<span onclick="removeCondition(${i})" onmouseenter="showCondTooltip(event,'${c.replace(/'/g,"\\'")}');event.stopPropagation()" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="font-family:'Share Tech Mono',monospace;font-size:7.5px;background:${col}18;border:1px solid ${col}66;color:${col};padding:.12rem .38rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`;}).join('')}</div>`:''}
     </div>
@@ -5373,7 +5407,8 @@ function buildPrint(){
   $('pn-combat-top').innerHTML=`
     <div class="ps-cbox"><span class="ps-cbox-l">Classe d'armure</span><div class="ps-cbox-v">${calcCA()}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Initiative</span><div class="ps-cbox-v">${mods(s.dex)}</div></div>
-    <div class="ps-cbox"><span class="ps-cbox-l">Vitesse</span><div class="ps-cbox-v">${C.race?.speed||30} ft</div></div>`;
+    <div class="ps-cbox"><span class="ps-cbox-l">Vitesse</span><div class="ps-cbox-v" style="color:${calcEncumbrance().lvl===2?'#C0392B':calcEncumbrance().lvl===1?'#E67E22':'inherit'};">${calcEffSpeed()} ft${calcEncumbrance().lvl>0?`<span style="font-size:9px;opacity:.55;text-decoration:line-through;margin-left:3px;">${C.race?.speed||30}</span>`:''}</div></div>`+
+    (calcEncumbrance().lvl>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:8.5px;color:${calcEncumbrance().col};margin-top:.2rem;padding:.2rem .4rem;background:${calcEncumbrance().col}18;border-left:2px solid ${calcEncumbrance().col};">⚠ ${calcEncumbrance().label}${calcEncumbrance().lvl===2?' · Désavantage FOR/DEX/CON':''}</div>`:'');
 
   // PV
   $('pn-hp').innerHTML=`<div class="ps-hp-l">Points de vie maximum</div><div class="ps-hp-v">${C.maxHp||calcHP()}</div>`;
