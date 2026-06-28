@@ -3282,10 +3282,8 @@ function calcHP(){
 }
 
 // Spell prep / known
-function calcSpellsPrepared(){
-  const cl=C.cls;
+function calcSpellsPreparedFor(cl, lvl){
   if(!cl||!cl.spellcaster)return{n:0,label:'Non-magicien',type:'none'};
-  const lvl=C.cls_lvl||C.level;
   const m=mod(effStat(cl.spellStat));
   const statLabel=cl.spellStat.toUpperCase();
   if(cl.prepared){
@@ -3301,18 +3299,36 @@ function calcSpellsPrepared(){
     const n=Math.max(1,lvl+m);
     return{n,label:`Sorts préparés = niv (${lvl}) + mod ${statLabel} (${m}) = ${n}`,type:'prepared'};
   }
-  // Sorts connus (liste fixe par niveau)
   if(cl.id==='ranger'&&lvl<2)return{n:0,label:'Sorts disponibles dès le niveau 2',type:'known'};
   const n=getSpellsKnown(cl.id,lvl);
   return{n,label:`Sorts connus à niv.${lvl} = ${n}`,type:'known'};
 }
+function calcSpellsPrepared(){
+  return calcSpellsPreparedFor(C.cls, C.cls_lvl||C.level);
+}
 
-// Slot table
+// Slot table — multiclasse : combine les niveaux via PHB Multiclass Spellcaster table
 function getSlots(){
   const cl=C.cls;
-  if(!cl||!cl.slotsTable)return null;
-  const t=cl.slotsTable==='full'?SLOTS_FULL:cl.slotsTable==='half'?SLOTS_HALF:SLOTS_WARLOCK;
-  return t[C.level]||null;
+  const pLvl=C.cls_lvl||primaryLvl();
+  const mcCasters=(C.multiclasses||[]).filter(m=>m.cls?.spellcaster&&(m.lvl||0)>0&&m.cls.slotsTable!=='warlock');
+  // Classe unique → table propre à la classe
+  if(!mcCasters.length){
+    if(!cl||!cl.slotsTable)return null;
+    const t=cl.slotsTable==='full'?SLOTS_FULL:cl.slotsTable==='half'?SLOTS_HALF:SLOTS_WARLOCK;
+    return t[pLvl]||null;
+  }
+  // Multiclasse → PHB : niveaux combinés dans SLOTS_FULL
+  let combined=0;
+  if(cl?.spellcaster&&cl.slotsTable&&cl.slotsTable!=='warlock'){
+    if(cl.slotsTable==='full')combined+=pLvl;
+    else if(cl.slotsTable==='half')combined+=Math.floor(pLvl/2);
+  }
+  mcCasters.forEach(({cls,lvl})=>{
+    if(cls.slotsTable==='full')combined+=lvl;
+    else if(cls.slotsTable==='half')combined+=Math.floor(lvl/2);
+  });
+  return combined>0?(SLOTS_FULL[combined]||null):null;
 }
 
 // Languages
@@ -4130,14 +4146,25 @@ function renderEquipSpells(){
     <div id="bag-list"></div>
   </div>
   ${(()=>{
-    if(!cl?.spellcaster)return'';
-    const lvl=C.cls_lvl||C.level;
-    const cntK=getCantripsKnown(cl.id,lvl);
-    const cantSection=cntK>0?`<div class="div"></div><div class="sh" style="font-size:14px;">Sorts Mineurs (${cntK})</div><div class="ss">À volonté · Choisissez ${cntK} — Sélectionnés : ${C.cantrips.length}/${cntK}</div>
-  <div class="spg">${cantPool.map(s=>`<div class="spc ${C.cantrips.includes(s)?'sel':''}" onclick="toggleSp('c','${s}',${cntK})"><div class="sp-nm">${s}</div><div class="sp-mt">CANTRIP · À VOLONTÉ</div></div>`).join('')}</div>`:'';
-    const spellSection=prep.n>0?renderSpellsByLevel(cl,prep,slots):(cl.id==='ranger'||cl.id==='paladin'?`<div class="div"></div><div class="notice notice-i">ℹ ${cl.n} obtient ses sorts au niveau 2.</div>`:'');
-    return cantSection+spellSection;
-  })()}
+    // Collecte toutes les classes lanceurs de sorts (principale + multiclasses)
+    const CANT_POOL={wizard:CANTRIPS.arcane,sorcerer:CANTRIPS.arcane,bard:CANTRIPS.arcane,warlock:CANTRIPS.arcane,cleric:CANTRIPS.divine,paladin:CANTRIPS.divine,druid:CANTRIPS.nature,ranger:CANTRIPS.nature};
+    const allCasters=[
+      ...(cl?.spellcaster?[{cls:cl,lvl:C.cls_lvl||C.level}]:[]),
+      ...(C.multiclasses||[]).filter(m=>m.cls?.spellcaster&&(m.lvl||0)>0).map(m=>({cls:m.cls,lvl:m.lvl}))
+    ];
+    if(!allCasters.length)return'';
+    const totalCntK=allCasters.reduce((s,{cls,lvl})=>s+getCantripsKnown(cls.id,lvl),0);
+    const cantPools=[...new Set(allCasters.flatMap(({cls})=>CANT_POOL[cls.id]||[]))];
+    const cantSection=totalCntK>0?`<div class="div"></div><div class="sh" style="font-size:14px;">Sorts Mineurs (${totalCntK} au total)</div><div class="ss">À volonté · Sélectionnés : ${C.cantrips.length}/${totalCntK}</div>
+  <div class="spg">${cantPools.map(s=>`<div class="spc ${C.cantrips.includes(s)?'sel':''}" onclick="toggleSp('c','${s}',${totalCntK})"><div class="sp-nm">${s}</div><div class="sp-mt">CANTRIP · À VOLONTÉ</div></div>`).join('')}</div>`:'';
+    const spellSections=allCasters.map(({cls,lvl})=>{
+      const p=calcSpellsPreparedFor(cls,lvl);
+      const header=allCasters.length>1?`<div class="div"></div><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.18em;color:var(--gold-d);text-transform:uppercase;margin:.4rem 0 .1rem;">${cls.n}</div>`:''
+      const section=p.n>0?renderSpellsByLevel(cls,p,slots):((cls.id==='ranger'||cls.id==='paladin')&&lvl<2?`<div class="div"></div><div class="notice notice-i">ℹ ${cls.n} obtient ses sorts au niveau 2.</div>`:'')
+      return header+section;
+    }).join('');
+    return cantSection+spellSections;
+  })()} 
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">✦ Capacités Spéciales</div>
   <div class="ss">Capacités hors SRD · Entrez un nom, saisissez une valeur (1–100) ou lancez le dé</div>
@@ -4863,7 +4890,7 @@ let _sumTab='fiche';
 function renderSummary(){
   const alignLine=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
   const slots=getSlots();
-  const isCaster=!!C.cls?.spellcaster;
+  const isCaster=!!C.cls?.spellcaster||(C.multiclasses||[]).some(m=>m.cls?.spellcaster&&(m.lvl||0)>0);
   const spStat=C.cls?.spellStat;
   const spMod=spStat?mod(effStat(spStat)):0;
   const spDC=isCaster?8+calcProfBonus()+spMod:null;
@@ -5662,7 +5689,7 @@ function renderCapacities(){
   $('lp').className='lp-scroll-mode';
 
   const pb=calcProfBonus();
-  const isCaster=!!C.cls?.spellcaster;
+  const isCaster=!!C.cls?.spellcaster||(C.multiclasses||[]).some(m=>m.cls?.spellcaster&&(m.lvl||0)>0);
   const spStat=C.cls?.spellStat;
   const spMod=spStat?mod(effStat(spStat)):0;
   const spDC=isCaster?8+pb+spMod:null;
