@@ -628,7 +628,7 @@ body.printing #ps-print{display:block!important;}
 /* Doll column */
 #re-doll-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;overflow:hidden;padding:clamp(.1rem,.2vh,.2rem) clamp(.4rem,.8vw,.8rem);background-size:cover;background-position:center top;background-repeat:no-repeat;}
 #re-doll-inner{width:100%;max-width:100%;}
-.doll-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(7,clamp(40px,5vh,66px));gap:clamp(3px,0.4vh,7px);margin-top:.15rem;}
+.doll-grid{display:grid;grid-template-columns:1fr 2fr 1fr;grid-template-rows:repeat(8,clamp(40px,5vh,66px));gap:clamp(3px,0.4vh,7px);margin-top:.15rem;}
 .re-doll-slot{display:flex;align-items:center;gap:clamp(4px,0.5vw,8px);padding:clamp(.2rem,.4vh,.5rem) clamp(.3rem,.5vw,.6rem);border:1px solid #3A2810;background:#130D06;border-radius:4px;cursor:default;transition:.12s;overflow:hidden;min-height:0;border-left-width:3px;}
 .re-doll-slot:hover{border-color:var(--gold-d) !important;background:rgba(201,168,76,.07) !important;}
 .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.5)!important;background:rgba(201,168,76,.06)!important;animation:re-pulse .9s ease-in-out infinite alternate;}
@@ -1761,6 +1761,8 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
         <div class="ps-hdr-val" id="pn-race">—</div>
         <span class="ps-hdr-lbl" style="margin-top:6px;">Alignement</span>
         <div class="ps-hdr-val" id="pn-align">—</div>
+        <span class="ps-hdr-lbl" style="margin-top:6px;">Divinité</span>
+        <div class="ps-hdr-val" id="pn-deity">—</div>
       </div>
       <div>
         <span class="ps-hdr-lbl">Joueur</span>
@@ -4571,6 +4573,25 @@ function renderIdentity(){
   <div class="ag">${ALIGNS.map(a=>`<div class="ac ${C.alignment===a.id?'sel':''}" onclick="C.alignment='${a.id}';renderIdentity()"><div class="ac-n">${a.n}</div><div class="ac-d">${a.d}</div></div>`).join('')}</div>
 
   <div class="div"></div>
+  <div class="sh" style="font-size:14px;">⚜ Divinité</div>
+  <div class="ss" style="margin-bottom:.6rem;">Quelle divinité votre personnage vénère-t-il&nbsp;? (optionnel)</div>
+  ${(()=>{
+    if(!_codexData){if(!_codexLoading){preloadCodexData();setTimeout(()=>renderIdentity(),600);}return'<div style="font-size:9px;color:#6A5030;font-style:italic;">Chargement du Panthéon...</div>';};
+    const dieux=(_codexData||[]).filter(x=>x.category==='Panthéon des Dieux').sort((a,b)=>a.name.localeCompare(b.name,'fr'));
+    if(!dieux.length)return'';
+    const cur=C.deity||null;
+    const sel=dieux.map(d=>`<option value="${d.id}"${cur&&cur.id===d.id?' selected':''}>${d.name}</option>`).join('');
+    const img=cur?.image?`<img id="deity-img" src="${cur.image}" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #3A2810;" onerror="this.style.display='none'">`:
+      `<img id="deity-img" src="" style="width:42px;height:42px;object-fit:cover;border-radius:4px;border:1px solid #3A2810;display:none;" onerror="this.style.display='none'">`;
+    const nm=cur?`<span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:var(--gold-d);">${cur.name}</span>`:'';
+    return`<div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;">
+      <select class="ifl" style="flex:1;min-width:160px;font-size:11px;padding:.3rem .5rem;" onchange="var d=this.value?(window._codexDataAll||[]).find(x=>x.id===this.value):null;C.deity=d?{id:d.id,name:d.name,image:d.image||''}:null;renderIdentity();">
+        <option value="">— Aucune divinité —</option>
+        ${sel}
+      </select>
+      ${img}${nm}
+    </div>`;
+  })()}  <div class="div"></div>
   <div class="sh" style="font-size:14px;">Personnalité</div>
   <div class="ss" style="margin-bottom:.8rem;">Les quatre piliers du background D&D 5e</div>
 
@@ -5435,6 +5456,7 @@ function buildPrint(){
   $('pn-bg').textContent=C.background?.n||'—';
   $('pn-race').textContent=C.race?.n||'—';
   $('pn-align').textContent=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
+  $('pn-deity').textContent=C.deity?.name||'—';
   $('pn-player').textContent=C.player||'—';
   $('pn-xp').textContent=(C.xp||0)+' XP';
 
@@ -6296,6 +6318,7 @@ const EQUIP_SLOTS=[
   {id:'amulet',  label:'Amulette',     icon:'📿'},
   {id:'back',    label:'Cape / Dos',   icon:'🧣'},
   {id:'clothes', label:'Vêtements',    icon:'👗'},
+  {id:'libram',  label:'Libram / Focus',icon:'📖'},
 ];
 const _ERC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très rare':'#4A1F7A','Légendaire':'#7B4000','Artefact':'#7B1010'};
 
@@ -6344,6 +6367,7 @@ function canEquipInSlot(item, slotId){
     if(/gants?|gantelets?|brassards?/.test(dndT)) return slotId==='hands';
     if(/ceinture/.test(dndT)) return slotId==='belt';
     if(/sceptre|baton|baguette|instrument|grimoire|atlas/.test(dndT)) return slotId==='mainhand';
+    if(/libram|livre de priere|livre sacre|focus|symbole sacre|orbe|baguette magique/.test(dndT)) return slotId==='libram'||slotId==='mainhand';
     if(/robe|tunique|chemise|vetement|tenue|uniforme|habit/.test(dndT)) return slotId==='clothes';
   }
   // item_type générique (fallback secondaire)
@@ -6371,6 +6395,7 @@ function canEquipInSlot(item, slotId){
   if(/bouclier|targe|egide/.test(name)) return slotId==='offhand';
   if(/baguette|orbe|sceptre|focalisateur|fetiche/.test(name)) return slotId==='mainhand';
   if(/robe|tunique|chemise|tenue|uniforme|toge|habit[^s]|vetement|veste|pourpoint|gambison|doublet|livrée|livrée/.test(name)) return slotId==='clothes';
+  if(/libram|livre.de.priere|livre sacre|symbole sacre|focus arcanique|orbe arcanique|grimoire|codex sacre/.test(name)) return slotId==='libram'||slotId==='mainhand';
   return false;
 }
 
@@ -6706,6 +6731,7 @@ const RE_SLOTS_RIGHT = [
   {id:'feet',    label:'Pieds',      icon:'👢'},
   {id:'back',    label:'Cape / Dos', icon:'🧣'},
   {id:'clothes', label:'Vêtements',  icon:'👗'},
+  {id:'libram',  label:'Libram',      icon:'📖'},
 ];
 const RE_HEAD = {id:'head', label:'Tête', icon:'⛑'};
 const _RE_RC={'Commun':'#4A5568','Inhabituel':'#2D5016','Rare':'#1A3A5C','Très rare':'#4A1F7A','Légendaire':'#7B4000','Artefact':'#7B1010'};
@@ -7276,7 +7302,7 @@ function renderSumCenterDoll(){
   var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
   var headSlot=reSlotHtml(RE_HEAD,2,1);
   el.innerHTML=
-    '<style>#sum-doll .doll-grid{grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(7,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);transition:border-color .15s,background .15s;}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(8px,1vh,12px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}#sum-doll .re-doll-slot.equipped:hover{transform:none !important;}#sum-doll .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.55)!important;}#sum-doll .re-doll-slot.drag-over{background:rgba(201,168,76,.15)!important;border-color:rgba(201,168,76,.7)!important;}</style>'+
+    '<style>#sum-doll .doll-grid{grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(8,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);transition:border-color .15s,background .15s;}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(8px,1vh,12px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}#sum-doll .re-doll-slot.equipped:hover{transform:none !important;}#sum-doll .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.55)!important;}#sum-doll .re-doll-slot.drag-over{background:rgba(201,168,76,.15)!important;border-color:rgba(201,168,76,.7)!important;}</style>'+
     '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 25%,transparent 75%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1;"></div>'+
     '<div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(.6rem,2vh,1.2rem) clamp(.5rem,1.5vw,1.5rem) 0;">'+
       '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(r.name||'—')+'</div>'+
@@ -7287,7 +7313,7 @@ function renderSumCenterDoll(){
         ?'<button onclick="openLevelUp()" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.50);color:var(--gold);cursor:pointer;border-radius:12px;text-shadow:0 2px 8px #000;margin-bottom:clamp(.3rem,1vh,.7rem);transition:.15s;animation:lvlup-glow 2s ease-in-out infinite;" onmouseenter="this.style.background=\'rgba(201,168,76,.25)\'" onmouseleave="this.style.background=\'rgba(201,168,76,.10)\'">⬆ Montée de niveau +1</button>'
         :'<button disabled title="L\'admin n\'a pas encore activé la montée de niveau" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(30,20,10,.5);border:1px solid rgba(80,60,30,.3);color:rgba(150,120,60,.3);cursor:not-allowed;border-radius:12px;text-shadow:none;margin-bottom:clamp(.3rem,1vh,.7rem);opacity:.45;filter:grayscale(.7);">⬆ Montée de niveau +1</button>'
       )+
-      '<div class="doll-grid" style="grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(7,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);width:100%;">'+headSlot+leftSlots+rightSlots+'</div>'+
+      '<div class="doll-grid" style="grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(8,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);width:100%;">'+headSlot+leftSlots+rightSlots+'</div>'+
       '<div style="margin-top:clamp(.4rem,1vh,.7rem);font-family:\'Share Tech Mono\',monospace;font-size:8px;color:rgba(201,168,76,.35);letter-spacing:.1em;text-shadow:0 1px 3px #000;">Glisser du sac ou du catalogue ▸ déposer sur un emplacement</div>'+
     '</div>';
 }
