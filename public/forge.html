@@ -4592,14 +4592,14 @@ function getDiceActions(){
     const prof=C.cls?.saves?.includes(k);
     const v=mod(effStat(k))+(prof?pb:0);
     acts.push({tab:'saves',label:STAT_LABELS[k]+(prof?' ✦':''),icon:'🛡',atk:v,dmg:null,
-      detail:`${STAT_LABELS[k]}(${mods(mod(effStat(k)))})${prof?` + Maîtrise(+${pb})`:''}`});
+      detail:`${STAT_LABELS[k]}(${mods(effStat(k))})${prof?` + Maîtrise(+${pb})`:''}`});
   });
   // Compétences
   ALL_SKILLS.forEach(sk=>{
     const prof=C.skills.includes(sk.n)||C.background?.skills?.includes(sk.n);
     const v=mod(effStat(sk.s))+(prof?pb:0);
     acts.push({tab:'skills',label:sk.n+(prof?' ✦':''),icon:'🎯',atk:v,dmg:null,
-      detail:`${STAT_LABELS[sk.s].substring(0,3)}(${mods(mod(effStat(sk.s)))})${prof?` + Maîtrise(+${pb})`:''}`});
+      detail:`${STAT_LABELS[sk.s].substring(0,3)}(${mods(effStat(sk.s))})${prof?` + Maîtrise(+${pb})`:''}`});
   });
   return acts;
 }
@@ -5238,7 +5238,7 @@ function renderSummary(){
     </div>
     <div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.25rem;margin-bottom:.25rem;">
-        ${[['CA',calcCA(),'#C9983A'],['INIT',mods(mod(effStat('dex'))),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
+        ${[['CA',calcCA(),'#C9983A'],['INIT',mods(effStat('dex')),'#80C0A0'],['VITESSE',(C.race?.speed||30)+'ft','#80A0C0'],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
         <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.25rem .32rem;text-align:center;">
           <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.1em;color:#4A3A20;margin-bottom:1px;">${l}</div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:${col};font-weight:bold;">${v}</div>
@@ -5270,7 +5270,7 @@ function renderSummary(){
         const isSave=C.cls?.saves.includes(s);const v=mod(effStat(s))+(isSave?pb:0);
         return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
           <span style="font-family:'Share Tech Mono',monospace;font-size:8.5px;color:${isSave?'#D4A85A':'#6A5A3A'};">${isSave?'✦ ':'   '}${STAT_LABELS[s].substring(0,3)}</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:9.5px;color:${v>=0?'#80C080':'#E08080'};font-weight:bold;">${mods(v)}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:9.5px;color:${v>=0?'#80C080':'#E08080'};font-weight:bold;">${(v>=0?'+':'')+v}</span>
         </div>`;
       }).join('')}`)}
     ${darkCard(`
@@ -5279,7 +5279,7 @@ function renderSummary(){
         const sk=ALL_SKILLS.find(x=>x.n===s);const v=mod(effStat(sk?.s||'str'))+pb;
         return`<div style="display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #1A1008;">
           <span style="font-family:'Share Tech Mono',monospace;font-size:7.5px;color:#C0A860;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:80%;">✦ ${s}</span>
-          <span style="font-family:'Share Tech Mono',monospace;font-size:9.5px;color:#80C080;font-weight:bold;">${mods(v)}</span>
+          <span style="font-family:'Share Tech Mono',monospace;font-size:9.5px;color:#80C080;font-weight:bold;">${(v>=0?'+':'')+v}</span>
         </div>`;
       }).join(''):`<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucune</div>`}`)}
   </div>
@@ -5352,7 +5352,7 @@ function buildPrint(){
     const v=mod(s[k])+(prof?C.profBonus:0);
     return`<div class="ps-save-row">
       <span><span class="ps-save-prof">${prof?'◆':'◇'}</span>${STAT_LABELS[k]}</span>
-      <span class="ps-save-val">${mods(v)}</span>
+      <span class="ps-save-val">${(v>=0?'+':'')+v}</span>
     </div>`;
   }).join('');
 
@@ -5363,7 +5363,7 @@ function buildPrint(){
     const v=mod(s[sk.s])+(prof||bgSkill?C.profBonus:0);
     return`<div class="ps-sk">
       <span><span class="ps-sk-prof">${prof||bgSkill?'◆':'◇'}</span>${sk.n}</span>
-      <span class="ps-sk-val">${mods(v)}</span>
+      <span class="ps-sk-val">${(v>=0?'+':'')+v}</span>
     </div>`;
   }).join('');
 
@@ -5653,7 +5653,7 @@ function renderCapacities(){
       }).join('')}</tbody>
     </table>
     <div style="font-size:8px;color:#4A3A20;font-family:'Share Tech Mono',monospace;margin-top:.4rem;">
-      Prof. +${pb} · FOR ${mods(mod(effStat('str')))} · DEX ${mods(mod(effStat('dex')))}
+      Prof. +${pb} · FOR ${mods(effStat('str'))} · DEX ${mods(effStat('dex'))}
     </div>`):
   sect('⚔','ACTIONS DE COMBAT','',`<div style="font-size:10px;color:#4A3A20;font-style:italic;">Aucune arme — ajoutez des armes à l'inventaire.</div>`)}
 
