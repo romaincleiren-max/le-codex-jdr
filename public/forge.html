@@ -3313,7 +3313,18 @@ function getSlots(){
 }
 
 // Languages
-const ALL_LANGS=['Abyssal','Aquan','Auran','Céleste','Commun','Draconique','Elfique','Géant','Gnome','Gobelin','Halfelin','Ignan','Infernal','Nain','Orque','Primordial','Profond','Sylvain','Sous-commun','Terran','Vieil infernal'];
+const ALL_LANGS=[
+  // Langues standard
+  'Commun','Nain','Elfique','Géant','Gnome','Gobelin','Halfelin','Orque',
+  // Langues exotiques (PHB)
+  'Abyssal','Céleste','Draconique','Infernal','Primordial','Profond','Sylvain','Sous-commun','Vieil infernal',
+  // Dialectes du Primordial
+  'Aquan','Auran','Ignan','Terran',
+  // Langues de races spécifiques
+  'Aarakocra','Gith','Gnoll','Grung','Loxodon','Minotaure','Sahuagin','Troglodyte','Vedalken',
+  // Langues secrètes (classes)
+  'Druidique','Jargon des voleurs',
+];
 function getLangChoiceCount(){
   const raceChoices=(C.race?.langs||[]).reduce((n,l)=>{const m=l.match(/^(\d+)\s*au choix/);return n+(m?parseInt(m[1]):0);},0);
   const bgChoices=C.background?.langs||0;
