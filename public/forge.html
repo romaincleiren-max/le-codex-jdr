@@ -4607,10 +4607,16 @@ function toggleSp(type,s,max){
   else{if(C.spells.includes(s))C.spells=C.spells.filter(x=>x!==s);else if(C.spells.length<max)C.spells.push(s);}
   renderEquipSpells();updateRight();
 }
-function toggleSpSorts(name,maxN){
+function toggleSpSorts(name,maxN,poolKey){
   if(!C.spells)C.spells=[];
   if(C.spells.includes(name)){C.spells=C.spells.filter(x=>x!==name);}
-  else if(C.spells.length<maxN){C.spells.push(name);}
+  else{
+    const POOLS=[null,SPELLS1,SPELLS2,SPELLS3,SPELLS4,SPELLS5,SPELLS6,SPELLS7,SPELLS8,SPELLS9];
+    const poolSpells=POOLS.reduce(function(acc,p){if(p&&p[poolKey])p[poolKey].forEach(function(s){acc.push(s);});return acc;},[]);
+    const classCount=C.spells.filter(function(s){return poolSpells.includes(s);}).length;
+    if(classCount>=maxN)return;
+    C.spells.push(name);
+  }
   saveToRoster();renderSummary();
 }
 function toggleSpLvl(s,lvl,maxAtLvl){
@@ -5206,7 +5212,7 @@ function renderSummary(){
               const canAdd=totalSel<maxN||sel;
               const esc=s.replace(/'/g,"\\'");
               out+='<span '+
-                'onclick="'+(canAdd?'toggleSpSorts(\''+esc+'\','+maxN+')':'')+'" '+
+                'onclick="'+(canAdd?'toggleSpSorts(\''+esc+'\','+maxN+',\''+sKey+'\')':'')+'" '+
                 'style="background:'+(sel?'#0A2015':'#080805')+';border:1px solid '+(sel?'#1A5A30':'#1E1408')+
                 ';color:'+(sel?'#50B070':canAdd?'#5A5040':'#2A2018')+
                 ';font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;'+
