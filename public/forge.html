@@ -3326,7 +3326,7 @@ function getFixedLanguages(){
   return [...langs];
 }
 function getLanguages(){
-  const langs=new Set([...getFixedLanguages(),...(C.langs||[])]);
+  const langs=new Set([...getFixedLanguages(),...(C.langs||[]).filter(Boolean)]);
   return [...langs];
 }
 
@@ -5324,7 +5324,24 @@ function renderSummary(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.45rem;">
       <div>
         ${sh('LANGUES')}
-        <div style="font-family:'Share Tech Mono',monospace;font-size:8.5px;color:#8A7A5A;line-height:1.6;">${getLanguages().join('<br>')||'—'}</div>
+        ${(()=>{
+          if(!C.langs) C.langs=[];
+          const fixed=getFixedLanguages();
+          const nSlots=getLangChoiceCount();
+          // Ajuster le tableau aux slots disponibles (ou laisser les extras du MJ)
+          while(C.langs.length<nSlots) C.langs.push('');
+          const fixedBadges=fixed.map(l=>`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:#1A1208;border:1px solid #2A1A08;color:#6A5A3A;padding:1px 5px;border-radius:3px;display:inline-block;margin:.1rem .15rem .1rem 0;">✓ ${l}</span>`).join('');
+          const chosen=(C.langs||[]).filter(Boolean);
+          const chosenBadges=chosen.map((l,i)=>`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:rgba(201,168,76,.12);border:1px solid rgba(201,168,76,.35);color:#C9A84C;padding:1px 5px;border-radius:3px;display:inline-block;margin:.1rem .15rem .1rem 0;cursor:pointer;" onclick="removeLang(${C.langs.indexOf(l)});renderSummary()">✦ ${l} <span style='opacity:.6;font-size:7px;'>✕</span></span>`).join('');
+          const canAdd=ALL_LANGS.filter(l=>!fixed.includes(l)&&!chosen.includes(l));
+          const remaining=nSlots-chosen.length;
+          const addBtn=`<select style="font-family:'Share Tech Mono',monospace;font-size:8px;background:#0E0A05;border:1px solid #3A2A10;color:#8A7A5A;padding:1px 3px;border-radius:3px;margin-top:.25rem;cursor:pointer;" onchange="addLangChoice(this.value);this.value='';renderSummary()">
+            <option value="">+ Ajouter une langue…</option>
+            ${canAdd.map(l=>`<option value="${l}">${l}</option>`).join('')}
+          </select>`;
+          const hint=remaining>0?`<div style="font-size:7.5px;color:#5A4030;font-style:italic;margin-top:.15rem;">${remaining} choix de race/historique restant${remaining>1?'s':''}</div>`:'';
+          return`<div style="line-height:1.8;">${fixedBadges}${chosenBadges}</div>${hint}${addBtn}`;
+        })()}
       </div>
       <div>
         ${sh('MAÎTRISES')}
@@ -5530,6 +5547,8 @@ function launchAdv(id){
 // ══════════════════════════════════════════════════
 function addCondition(c){if(!c)return;if(!C.conditions)C.conditions=[];if(!C.conditions.includes(c))C.conditions.push(c);renderSummary();}
 function removeCondition(i){if(!C.conditions)return;C.conditions.splice(i,1);renderSummary();}
+function addLangChoice(l){if(!l)return;if(!C.langs)C.langs=[];const nSlots=getLangChoiceCount();const empty=C.langs.indexOf('');if(empty>=0){C.langs[empty]=l;}else if(C.langs.length<nSlots){C.langs.push(l);}else{C.langs.push(l);}saveToRoster();}
+function removeLang(i){if(!C.langs||i<0)return;C.langs.splice(i,1);saveToRoster();}
 
 // ══════════════════════════════════════════════════
 // FAMILIER
