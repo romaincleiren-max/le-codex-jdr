@@ -4607,6 +4607,12 @@ function toggleSp(type,s,max){
   else{if(C.spells.includes(s))C.spells=C.spells.filter(x=>x!==s);else if(C.spells.length<max)C.spells.push(s);}
   renderEquipSpells();updateRight();
 }
+function toggleSpSorts(name,maxN){
+  if(!C.spells)C.spells=[];
+  if(C.spells.includes(name)){C.spells=C.spells.filter(x=>x!==name);}
+  else if(C.spells.length<maxN){C.spells.push(name);}
+  saveToRoster();renderSummary();
+}
 function toggleSpLvl(s,lvl,maxAtLvl){
   if(!C.spells)C.spells=[];
   if(C.spells.includes(s)){C.spells=C.spells.filter(x=>x!==s);}
@@ -5164,21 +5170,76 @@ function renderSummary(){
       slotsHtml=rowsHtml||'<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucun emplacement disponible.</div>';
       if(!hasAny) slotsHtml='<div style="font-size:9px;color:#4A3A20;font-style:italic;">Aucun emplacement disponible à ce niveau.</div>';
     }
-    // ── Sorts groupés par niveau via SPELLS_BY_LEVEL
-    const spellLevelMap={};
-    for(let lvl=1;lvl<=9;lvl++){
-      const pool=SPELLS_BY_LEVEL[lvl];if(!pool)continue;
-      Object.values(pool).forEach(arr=>arr.forEach(s=>{if(!spellLevelMap[s])spellLevelMap[s]=lvl;}));
-    }
-    const spellsByLvl={};
-    (C.spells||[]).forEach(s=>{const lvl=spellLevelMap[s]||99;if(!spellsByLvl[lvl])spellsByLvl[lvl]=[];spellsByLvl[lvl].push(s);});
-    const spellLvlKeys=Object.keys(spellsByLvl).map(Number).sort((a,b)=>a-b);
-    const spellsGroupedHtml=spellLvlKeys.map(lvl=>`
-      <div style="margin-bottom:.55rem;">
-        <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">${lvl===99?'DIVERS':('NIVEAU '+ROMAN[lvl-1])}</div>
-        <div style="display:flex;flex-wrap:wrap;gap:.22rem;">${spellsByLvl[lvl].map(s=>`<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">⚡ ${s}</span>`).join('')}</div>
-      </div>`).join('');
-    const rollDisplay=_capRoll?`<div style="display:flex;align-items:center;gap:.55rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.3);border-radius:5px;padding:.42rem .65rem;margin-bottom:.5rem;animation:re-pulse .5s ease-out;">
+        // ── Sorts par classe : préparés (interactifs) ou connus (lecture seule)
+    const SPELL_KEY_MAP={wizard:'arcane',sorcerer:'arcane',cleric:'divine',paladin:'divine',druid:'nature',ranger:'nature',bard:'bard',warlock:'warlock'};
+    const sumCl=C.cls;
+    const sumPLvl=C.cls_lvl||primaryLvl();
+    const allCastersSum=[
+      ...(sumCl&&sumCl.spellcaster?[{cls:sumCl,lvl:sumPLvl}]:[]),
+      ...(C.multiclasses||[]).filter(m=>m.cls&&m.cls.spellcaster&&(m.lvl||0)>0).map(m=>({cls:m.cls,lvl:m.lvl}))
+    ];
+    const POOLS_SUM=[null,SPELLS1,SPELLS2,SPELLS3,SPELLS4,SPELLS5,SPELLS6,SPELLS7,SPELLS8,SPELLS9];
+    const spellsGroupedHtml=(()=>{
+      if(!allCastersSum.length)return'';
+      return allCastersSum.map(({cls:sCls,lvl:sLvl})=>{
+        const sPrep=calcSpellsPreparedFor(sCls,sLvl);
+        if(!sPrep||sPrep.type==='none'||sPrep.n<=0)return'';
+        const sKey=SPELL_KEY_MAP[sCls.id]||'arcane';
+        const isPrepared=sPrep.type==='prepared';
+        const maxN=sPrep.n;
+        const totalSel=(C.spells||[]).length;
+        if(isPrepared){
+          // Classe à préparation : liste complète cliquable
+          let out='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #2A1A08;display:flex;justify-content:space-between;">'+
+            '<span>PRÉPARATION · '+sCls.n.toUpperCase()+'</span>'+
+            '<span style="color:#8A7050;">'+totalSel+'/'+maxN+'</span></div>';
+          for(let lvl=1;lvl<=9;lvl++){
+            if(!slots||!slots[lvl-1])continue;
+            const p=POOLS_SUM[lvl];if(!p)continue;
+            const pool=p[sKey]||[];if(!pool.length)continue;
+            out+='<div style="font-family:Cinzel,serif;font-size:7px;letter-spacing:.14em;color:#7A6040;margin:.3rem 0 .18rem;">NIV.'+ROMAN[lvl-1]+'</div>';
+            out+='<div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.35rem;">';
+            pool.forEach(s=>{
+              const sel=(C.spells||[]).includes(s);
+              const canAdd=totalSel<maxN||sel;
+              const esc=s.replace(/'/g,"\\'");
+              out+='<span '+
+                'onclick="'+(canAdd?'toggleSpSorts(\''+esc+'\','+maxN+')':'')+'" '+
+                'style="background:'+(sel?'#0A2015':'#080805')+';border:1px solid '+(sel?'#1A5A30':'#1E1408')+
+                ';color:'+(sel?'#50B070':canAdd?'#5A5040':'#2A2018')+
+                ';font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;'+
+                'cursor:'+(canAdd?'pointer':'not-allowed')+';user-select:none;white-space:nowrap;">'+
+                (sel?'✦ ':'')+s+'</span>';
+            });
+            out+='</div>';
+          }
+          return out;
+        } else {
+          // Classe à sorts connus : chips lecture seule
+          const classSpells=(C.spells||[]).filter(s=>{
+            for(let lvl=1;lvl<=9;lvl++){const p=POOLS_SUM[lvl];if(p&&(p[sKey]||[]).includes(s))return true;}
+            return false;
+          });
+          if(!classSpells.length)return'';
+          const lvlMap={};
+          for(let lvl=1;lvl<=9;lvl++){const p=POOLS_SUM[lvl];if(!p)continue;(p[sKey]||[]).forEach(s=>{if(!lvlMap[s])lvlMap[s]=lvl;});}
+          const byLvl={};
+          classSpells.forEach(s=>{const l=lvlMap[s]||99;if(!byLvl[l])byLvl[l]=[];byLvl[l].push(s);});
+          let out='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #2A1A08;">SORTS CONNUS · '+sCls.n.toUpperCase()+'</div>';
+          Object.keys(byLvl).sort((a,b)=>a-b).forEach(l=>{
+            out+='<div style="font-family:Cinzel,serif;font-size:7px;letter-spacing:.14em;color:#7A6040;margin:.3rem 0 .18rem;">NIV.'+(l==99?'?':ROMAN[l-1])+'</div>';
+            out+='<div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.35rem;">';
+            byLvl[l].forEach(s=>{
+              out+='<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;white-space:nowrap;">⚡ '+s+'</span>';
+            });
+            out+='</div>';
+          });
+          return out;
+        }
+      }).join('');
+    })();
+
+        const rollDisplay=_capRoll?`<div style="display:flex;align-items:center;gap:.55rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.3);border-radius:5px;padding:.42rem .65rem;margin-bottom:.5rem;animation:re-pulse .5s ease-out;">
       <div style="font-family:'Share Tech Mono',monospace;font-size:28px;color:#C9A84C;font-weight:bold;min-width:36px;text-align:center;">${_capRoll.total}</div>
       <div><div style="font-family:'Cinzel',serif;font-size:9px;color:#8A7050;">${_capRoll.label}</div>${_capRoll.detail?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;">${_capRoll.detail}</div>`:''}</div>
       <button onclick="_capRoll=null;renderSummary()" style="margin-left:auto;background:none;border:none;color:#4A3A20;cursor:pointer;font-size:14px;">✕</button>
@@ -5201,7 +5262,7 @@ function renderSummary(){
     ${slotsHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">EMPLACEMENTS DE SORTS</div><div style="margin-bottom:.7rem;">${slotsHtml}</div>`:''}
     ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">CANTRIPS</div>
     <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
-    ${spellsGroupedHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.4rem;">SORTS CONNUS / PRÉPARÉS</div>${spellsGroupedHtml}`:''}
+    ${spellsGroupedHtml||''}
 ${(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin:.45rem 0 .28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">SORTS PERSONNALISÉS</div><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.4rem;">'+(  (C.extraSpells||[]).map(function(x){return '<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;white-space:nowrap;">❋ Niv.'+x.lvl+' — '+x.name+'</span>';}).join('')  )+'</div>':''}
     `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`);
     return;
