@@ -5217,7 +5217,7 @@ function renderSummary(){
         const isSave=C.cls?.saves.includes(s);
         return`<div style="background:#130D06;border:1px solid ${isSave?'rgba(192,168,80,.3)':'#1A1008'};border-radius:4px;padding:.32rem .12rem;text-align:center;">
           <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.07em;color:#5A4530;margin-bottom:1px;">${STAT_LABELS[s].substring(0,3).toUpperCase()}</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:17px;color:${m_>=0?'#D4A85A':'#E08080'};font-weight:bold;line-height:1;">${mods(m_)}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:17px;color:${m_>=0?'#D4A85A':'#E08080'};font-weight:bold;line-height:1;">${(m_>=0?'+':'')+m_}</div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-top:1px;">${eff}</div>
           ${asi?`<div style="font-size:6px;color:#6A9A5A;margin-top:1px;">+${asi}ASI</div>`:''}
         </div>`;
