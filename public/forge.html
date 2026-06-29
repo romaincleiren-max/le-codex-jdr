@@ -5349,6 +5349,88 @@ ${(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px
     const fmMod=v=>{const m=Math.floor(((v||10)-10)/2);return(m>=0?'+':'')+m;};
     const statLabels=[['str','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','SAG'],['cha','CHA']];
     $('lp').innerHTML=tabStrip+`
+
+    ${(()=>{
+      // Detect druid level
+      const dLvl=C.cls&&C.cls.id==='druid'?(C.cls_lvl||primaryLvl()):((C.multiclasses||[]).find(m=>m.cls&&m.cls.id==='druid')||{lvl:0}).lvl||0;
+      if(dLvl<2)return'';
+      if(!C.wildShapeUsed)C.wildShapeUsed=0;
+      if(!C.wildForms)C.wildForms=[];
+      const maxUses=2;
+      const crMax=dLvl>=8?'1':dLvl>=4?'1/2':'1/4';
+      const crNote=dLvl<4?' · pas de vol ni nage':dLvl<8?' · pas de vol':'';
+      const dur=Math.max(1,Math.floor(dLvl/2));
+      // Pips
+      const pips=Array.from({length:maxUses},(_,i)=>{
+        const used=i<C.wildShapeUsed;
+        return`<div onclick="wildShapeToggle(${i})" title="${used?'Récupérer':'Utiliser'}" style="width:20px;height:20px;border-radius:50%;border:2px solid ${used?'#7A3030':'#304A70'};background:${used?'#2A0808':'#0A1A2A'};cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;">
+          <div style="width:10px;height:10px;border-radius:50%;background:${used?'#8A2020':'#2060A0'};"></div>
+        </div>`;
+      }).join('');
+      // Forms list
+      const formsHtml=(C.wildForms||[]).map((f,fi)=>`
+        <div style="background:#0A0805;border:1px solid #2A1A08;border-radius:6px;margin-bottom:.4rem;overflow:hidden;">
+          <div style="display:flex;align-items:center;gap:.4rem;padding:.4rem .5rem;cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+            <div style="font-family:'Cinzel',serif;font-size:9px;color:#C9A84C;flex:1;">${f.name||'Forme sans nom'}</div>
+            ${f.cr?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8A7050;">CR ${f.cr}</div>`:''}
+            <button onclick="event.stopPropagation();removeWildForm(${fi})" style="background:none;border:none;color:#5A3A2A;cursor:pointer;font-size:11px;padding:0;">✕</button>
+          </div>
+          <div style="display:none;padding:.35rem .5rem .45rem;border-top:1px solid #1A1208;">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.3rem;">
+              <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">NOM</div>
+                <input type="text" value="${f.name||''}" placeholder="Loup…" oninput="wildFormSet(${fi},'name',this.value)"
+                style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
+              <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">CR</div>
+                <input type="text" value="${f.cr||''}" placeholder="1/4" oninput="wildFormSet(${fi},'cr',this.value)"
+                style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
+              <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">PV</div>
+                <input type="number" value="${f.hp||''}" placeholder="11" oninput="wildFormSet(${fi},'hp',parseInt(this.value)||null)"
+                style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.3rem;">
+              <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">CA</div>
+                <input type="number" value="${f.ac||''}" placeholder="13" oninput="wildFormSet(${fi},'ac',parseInt(this.value)||null)"
+                style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
+              <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">VIT.</div>
+                <input type="text" value="${f.speed||''}" placeholder="12 m" oninput="wildFormSet(${fi},'speed',this.value)"
+                style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
+              <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">SENS</div>
+                <input type="text" value="${f.senses||''}" placeholder="Vision 18m" oninput="wildFormSet(${fi},'senses',this.value)"
+                style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
+            </div>
+            <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:.2rem;margin-bottom:.3rem;">
+              ${[['str','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','SAG'],['cha','CHA']].map(([k,lbl])=>{
+                const v=f[k]||10;const ms=(Math.floor((v-10)/2)>=0?'+':'')+Math.floor((v-10)/2);
+                return`<div style="text-align:center;background:#080605;border:1px solid #1A1208;border-radius:3px;padding:.2rem;">
+                  <div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;">${lbl}</div>
+                  <input type="number" min="1" max="30" value="${v}" oninput="wildFormSet(${fi},'${k}',parseInt(this.value)||10);this.nextElementSibling.textContent=(()=>{const m=Math.floor(((parseInt(this.value)||10)-10)/2);return(m>=0?'+':'')+m;})();"
+                  style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;text-align:center;outline:none;">
+                  <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C9983A;">${ms}</div>
+                </div>`;
+              }).join('')}
+            </div>
+            <textarea style="width:100%;background:#0E0905;border:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;padding:.25rem;outline:none;min-height:50px;resize:vertical;box-sizing:border-box;"
+              placeholder="Attaques, capacités, immunités…" oninput="wildFormSet(${fi},'notes',this.value)">${f.notes||''}</textarea>
+          </div>
+        </div>`).join('');
+      return`<div style="background:#0D0A05;border:1px solid #2A1A08;border-radius:7px;padding:.55rem .65rem;margin-bottom:.55rem;">
+        <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.16em;color:#6A8A50;margin-bottom:.35rem;">🐻 FORME ANIMALE</div>
+        <div style="display:flex;align-items:center;gap:.55rem;margin-bottom:.3rem;">
+          <div style="display:flex;gap:.3rem;">${pips}</div>
+          <div style="flex:1;">
+            <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#5A7040;">${C.wildShapeUsed}/${maxUses} utilisées · <button onclick="C.wildShapeUsed=0;saveToRoster();renderSummary()" style="background:none;border:none;color:#4A6A30;cursor:pointer;font-size:8px;padding:0;text-decoration:underline;">Repos court</button></div>
+          </div>
+        </div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#4A5A38;margin-bottom:.4rem;">
+          Action · CR max ${crMax}${crNote} · ${dur}h · Druide niv.${dLvl}
+        </div>
+        ${formsHtml}
+        <div style="display:flex;gap:.3rem;margin-top:.35rem;">
+          <input id="wf-name-inp" type="text" class="inv-search" style="flex:1;margin-bottom:0;font-size:9px;" placeholder="Nom de la forme (loup, aigle…)" onkeydown="if(event.key==='Enter')addWildForm()">
+          <button class="btn btn-p" style="font-size:8px;padding:.25rem .5rem;flex-shrink:0;" onclick="addWildForm()">+ Forme</button>
+        </div>
+      </div>`;
+    })()}
     <input type="file" id="fm-tab-file" accept="image/*" style="display:none" onchange="handleFamiliarImgFile(this.files[0])">
     <div
       onclick="$('fm-tab-file').click()"
@@ -5887,6 +5969,31 @@ function openFamiliarModal(){
 function closeFamiliarModal(){$('familiar-overlay').style.display='none';renderSummary();}
 function removeFamiliar(){C.familiar=null;closeFamiliarModal();}
 function familiarSet(k,v){if(!C.familiar)C.familiar={};C.familiar[k]=v;}
+function wildShapeToggle(i){
+  if(!C.wildShapeUsed)C.wildShapeUsed=0;
+  const used=i<C.wildShapeUsed;
+  C.wildShapeUsed=used?i:i+1;
+  saveToRoster();renderSummary();
+}
+function addWildForm(){
+  const inp=document.getElementById('wf-name-inp');
+  const name=(inp&&inp.value||'').trim();
+  if(!name)return;
+  if(!C.wildForms)C.wildForms=[];
+  C.wildForms.push({name:name,cr:'',hp:null,ac:null,speed:'',senses:'',str:10,dex:10,con:10,int:2,wis:12,cha:6,notes:''});
+  if(inp)inp.value='';
+  saveToRoster();renderSummary();
+}
+function removeWildForm(idx){
+  if(!C.wildForms)return;
+  C.wildForms.splice(idx,1);
+  saveToRoster();renderSummary();
+}
+function wildFormSet(idx,k,v){
+  if(!C.wildForms||!C.wildForms[idx])return;
+  C.wildForms[idx][k]=v;
+  saveToRoster();
+}
 function renderFamiliarMod(k){
   const v=parseInt($('fm-'+k)?.value)||10;const m=Math.floor((v-10)/2);const el=$('fm-mod-'+k);
   if(el)el.textContent=(m>=0?'+':'')+m;if(C.familiar)C.familiar[k]=v;
