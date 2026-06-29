@@ -2375,7 +2375,7 @@ const ALIGNS=[
 const CANTRIPS={
   arcane:['Trait de feu','Rayon de givre','Décharge électrique','Lumière','Prestidigitation','Illusion mineure','Aspersion acide','Bouffée de poison','Main de mage','Contact glacial','Poigne électrique','Thaumaturgie'],
   divine:['Flamme sacrée','Thaumaturgie','Lumière','Guidance','Résistance','Réparation','Gémissement','Poigne électrique','Assistance'],
-  nature:['Druidisme','Feu follet','Guidance','Résistance','Réparation','Poigne électrique'],
+  nature:['Druidisme','Feu follet','Guidance','Résistance','Réparation','Poigne électrique','Fouet épineux','Jet de poison','Gourdin magique','Flamme gelure'],
 };
 const SPELLS1={
   arcane:['Armure du mage','Projectile magique','Bouclier','Charme-personne','Sommeil','Mains brûlantes','Feuille morte','Nappe de brouillard','Compréhension des langues','Détection de la magie','Déguisement','Couleurs dansantes','Image silencieuse','Saut','Grande foulée','Alarme','Absorption des éléments'],
@@ -2653,6 +2653,11 @@ const SPELL_DESC={
   'Façonnage de la réalité':'Altère la réalité dans 1,5 km rayon (druide épique)',
   'Foresight':'Sens danger · avantage tous jets · impossible d\'être surpris · 8h',
   'Projection astrale':'Voyage sur le plan astral · corps physique endormi',
+  // ── Sorts mineurs Druide (manquants) ──
+  'Fouet épineux':'Attaque de sort au corps à corps · 1d6 perforant (↑ niv.5/11/17) · cible Grande ou plus petite tirée de 3 m vers toi',
+  'Jet de poison':'Attaque de sort à distance (10 m) · 1d12 poison (↑ niv.5/11/17) · CON pas de jet de sauvegarde',
+  'Gourdin magique':'Bonus + arme naturelle (bâton) · MOD SAG au lieu FOR · dégâts 1d8 + SAG · compte comme magique',
+  'Flamme gelure':'Attaque de sort à distance 18 m · 1d6 froid (↑ niv.5/11/17) · cible désavantage au prochain jet d\'attaque avant ton prochain tour',
   // ── Châtiments divins (Paladin) ──
   'Châtiment calcinant':'Bonus · 1 sort niv.1 · prochaine touche +1d6 feu · cible enflammée (CON DD ou 1d6/tour)',
   'Châtiment tonitruant':'Bonus · 1 sort niv.1 · prochaine touche +2d6 tonnerre · cible et créatures adj. repoussées de 3 m (FOR DD)',
