@@ -3072,6 +3072,8 @@ const ITEMS=[
   {id:'necklace-fireballs',n:'Collier de boules de feu',cat:'Magie',slot:'amulet',rarity:'Rare',spells:[{n:'Boule de feu',max:7,resetOn:'never'}],d:'7 boules de feu (1d6 chacune) · se détache une par une · non rechargeable.',w:0,c:'—'},
   {id:'ring-spell-storing',n:'Anneau de sort stocké',cat:'Magie',slot:'ring',rarity:'Rare',spells:[{n:'Sort stocké',max:5,resetOn:'long'}],d:'Stocke jusqu\'à 5 niveaux de sorts. Un lanceur peut y charger un sort que le porteur peut utiliser.',w:0,c:'—'},
   {id:'cloak-bilocation',n:'Cape de prestidigitation',cat:'Magie',slot:'back',rarity:'Inhabituel',spells:[{n:'Prestidigitation',max:3,resetOn:'short'}],d:'3 charges · Prestidigitation à volonté (1 charge/tour) · récupère toutes les charges au repos court.',w:1,c:'—'},
+  {id:'lyre-tempetes',n:'Lyre des tempêtes',cat:'Magie',slot:'mainhand',rarity:'Rare',spells:[{n:'Appel de la foudre',max:1,resetOn:'long'},{n:'Tempête de grêle',max:1,resetOn:'long'},{n:'Vent protecteur',max:1,resetOn:'long'}],d:'Instrument bardique magique · 1×/repos long chacun : Appel de la foudre (niv.3), Tempête de grêle (niv.3), Vent protecteur (niv.1).',w:2,c:'—'},
+  {id:'harpe-fey',n:'Harpe féérique',cat:'Magie',slot:'mainhand',rarity:'Inhabituel',spells:[{n:'Charme-personne',max:2,resetOn:'long'},{n:'Sommeil',max:1,resetOn:'long'}],d:'2× Charme-personne + 1× Sommeil par repos long. Les créatures charmées ne se souviennent pas avoir été enchantées.',w:1,c:'—'},
   {id:'boots-elvenkind',n:'Bottes d\'elfe sylvestre',cat:'Magie',slot:'feet',rarity:'Inhabituel',d:'Déplacement silencieux : avantage aux tests de Discrétion (son des pas uniquement).',w:1,c:'—'},
   // ── ÉQUIPEMENT COMPLÉMENTAIRE ──
   {id:'candles',n:'Bougies (×10)',cat:'Équipement',d:'Éclairent 1,5 m pendant 1 heure. Indispensables pour écrire ou lire dans le noir.',w:0,c:'1 pc/u'},
@@ -5342,26 +5344,8 @@ function renderSummary(){
       <div><div style="font-family:'Cinzel',serif;font-size:9px;color:#8A7050;">${_capRoll.label}</div>${_capRoll.detail?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;">${_capRoll.detail}</div>`:''}</div>
       <button onclick="_capRoll=null;renderSummary()" style="margin-left:auto;background:none;border:none;color:#4A3A20;cursor:pointer;font-size:14px;">✕</button>
     </div>`:'';
-    $('lp').innerHTML=tabStrip+(isCaster?rollDisplay+`
-    <div style="display:flex;gap:.35rem;margin-bottom:.55rem;flex-wrap:wrap;">
-      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
-        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">DD</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--blood);font-weight:bold;">${spDC}</div>
-      </div>
-      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
-        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">ATT.</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:20px;color:#80A0E0;font-weight:bold;">+${spAtk}</div>
-      </div>
-      ${spStat?`<div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
-        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">STAT</div>
-        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:#B090D0;font-weight:bold;">${(STAT_LABELS[spStat]||spStat).substring(0,3).toUpperCase()}</div>
-      </div>`:''}
-    </div>
-    ${slotsHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">EMPLACEMENTS DE SORTS</div><div style="margin-bottom:.7rem;">${slotsHtml}</div>`:''}
-    ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">CANTRIPS</div>
-    <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
-    ${spellsGroupedHtml||''}
-${(()=>{
+    // Sections toujours visibles (objets + sorts perso), indépendamment du statut lanceur
+    const _itemSpellsHtml=(()=>{
       var iSpells=getAllItemSpells();
       if(!iSpells.length)return'';
       if(!C.itemCharges)C.itemCharges={};
@@ -5387,9 +5371,28 @@ ${(()=>{
         html+='</div>';
       });
       return html;
-    })()}
-${(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin:.45rem 0 .28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">SORTS PERSONNALISÉS</div><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.4rem;">'+(  (C.extraSpells||[]).map(function(x){return '<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;white-space:nowrap;">❋ Niv.'+x.lvl+' — '+x.name+'</span>';}).join('')  )+'</div>':''}
-    `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`);
+    })();
+    const _extraSpellsHtml=(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin:.45rem 0 .28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">SORTS PERSONNALISÉS</div><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.4rem;">'+(C.extraSpells||[]).map(function(x){return'<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;white-space:nowrap;">❋ Niv.'+x.lvl+' — '+x.name+'</span>';}).join('')+'</div>':'';
+    $('lp').innerHTML=tabStrip+(isCaster?rollDisplay+`
+    <div style="display:flex;gap:.35rem;margin-bottom:.55rem;flex-wrap:wrap;">
+      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">DD</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:20px;color:var(--blood);font-weight:bold;">${spDC}</div>
+      </div>
+      <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">ATT.</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:20px;color:#80A0E0;font-weight:bold;">+${spAtk}</div>
+      </div>
+      ${spStat?`<div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
+        <div style="font-family:'Cinzel',serif;font-size:7px;color:#6A5A8A;margin-bottom:1px;">STAT</div>
+        <div style="font-family:'Share Tech Mono',monospace;font-size:13px;color:#B090D0;font-weight:bold;">${(STAT_LABELS[spStat]||spStat).substring(0,3).toUpperCase()}</div>
+      </div>`:''}
+    </div>
+    ${slotsHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">EMPLACEMENTS DE SORTS</div><div style="margin-bottom:.7rem;">${slotsHtml}</div>`:''}
+    ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">CANTRIPS</div>
+    <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
+    ${spellsGroupedHtml||''}
+    `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`)+_itemSpellsHtml+_extraSpellsHtml;
     return;
   }
 
