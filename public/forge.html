@@ -3063,8 +3063,15 @@ const ITEMS=[
   {id:'gauntlets-str',n:'Gantelets de puissance d\'ogre',cat:'Magie',slot:'hands',rarity:'Rare',bonus:{str:9},d:'Force fixée à 19 si inférieure. Mains fermes comme du fer.',w:2,c:'—'},
   {id:'belt-giant-str',n:'Ceinturon de force géante',cat:'Magie',slot:'belt',rarity:'Très rare',bonus:{str:10},d:'Force fixée à 21 (colline) ou plus selon variante. Puissance titanesque.',w:4,c:'—'},
   {id:'headband-int',n:'Bandeau d\'intelligence',cat:'Magie',slot:'head',rarity:'Rare',bonus:{int:4},d:'Intelligence fixée à 19 si inférieure. Pensées claires, mémoire parfaite.',w:0,c:'—'},
-  {id:'helm-comprehend',n:'Casque de compréhension',cat:'Magie',slot:'head',rarity:'Inhabituel',d:'1×/jour : comprendre langages (1 h). Aucune langue étrangère ne résiste à cet artefact.',w:2,c:'—'},
-  {id:'boots-speed',n:'Bottes de célérité',cat:'Magie',slot:'feet',rarity:'Rare',d:'Action bonus : vitesse double, Esquive jusqu\'au prochain tour. Rechargement au repos long.',w:1,c:'—'},
+  {id:'helm-comprehend',n:'Casque de compréhension',cat:'Magie',slot:'head',rarity:'Inhabituel',spells:[{n:'Compréhension des langues',max:1,resetOn:'long'}],d:'1×/jour : comprendre langages (1 h). Aucune langue étrangère ne résiste à cet artefact.',w:2,c:'—'},
+  {id:'boots-speed',n:'Bottes de célérité',cat:'Magie',slot:'feet',rarity:'Rare',spells:[{n:'Célérité (Vitesse ×2 + Esquive)',max:1,resetOn:'long'}],d:'Action bonus : vitesse double, Esquive jusqu\'au prochain tour. Rechargement au repos long.',w:1,c:'—'},
+  {id:'wand-magic-missiles',n:'Baguette de projectile magique',cat:'Magie',slot:'mainhand',rarity:'Inhabituel',spells:[{n:'Projectile magique',max:3,resetOn:'long'}],d:'3 charges · Projectile magique (niv.1+/charge) · récupère 1d6+1 charges à l\'aube.',w:1,c:'—'},
+  {id:'wand-fireballs',n:'Baguette de boules de feu',cat:'Magie',slot:'mainhand',rarity:'Rare',spells:[{n:'Boule de feu',max:3,resetOn:'long'}],d:'3 charges · Boule de feu niv.3 (1 charge) · récupère 1d6+1 charges à l\'aube.',w:1,c:'—'},
+  {id:'staff-healing',n:'Bâton de guérison',cat:'Magie',slot:'mainhand',rarity:'Rare',spells:[{n:'Soin des blessures',max:3,resetOn:'long'},{n:'Restauration partielle',max:1,resetOn:'long'}],d:'3 charges Soin des blessures · 1 charge Restauration partielle · récupère 1d6+1 charges au repos long.',w:4,c:'—'},
+  {id:'staff-fire',n:'Bâton de feu',cat:'Magie',slot:'mainhand',rarity:'Très rare',spells:[{n:'Mains brûlantes',max:2,resetOn:'long'},{n:'Projectile enflammé',max:2,resetOn:'long'},{n:'Boule de feu',max:1,resetOn:'long'}],d:'10 charges · Mains brûlantes (niv.1, 1 charge), Projectile enflammé (niv.2, 2c), Boule de feu (niv.3, 3c).',w:4,c:'—'},
+  {id:'necklace-fireballs',n:'Collier de boules de feu',cat:'Magie',slot:'amulet',rarity:'Rare',spells:[{n:'Boule de feu',max:7,resetOn:'never'}],d:'7 boules de feu (1d6 chacune) · se détache une par une · non rechargeable.',w:0,c:'—'},
+  {id:'ring-spell-storing',n:'Anneau de sort stocké',cat:'Magie',slot:'ring',rarity:'Rare',spells:[{n:'Sort stocké',max:5,resetOn:'long'}],d:'Stocke jusqu\'à 5 niveaux de sorts. Un lanceur peut y charger un sort que le porteur peut utiliser.',w:0,c:'—'},
+  {id:'cloak-bilocation',n:'Cape de prestidigitation',cat:'Magie',slot:'back',rarity:'Inhabituel',spells:[{n:'Prestidigitation',max:3,resetOn:'short'}],d:'3 charges · Prestidigitation à volonté (1 charge/tour) · récupère toutes les charges au repos court.',w:1,c:'—'},
   {id:'boots-elvenkind',n:'Bottes d\'elfe sylvestre',cat:'Magie',slot:'feet',rarity:'Inhabituel',d:'Déplacement silencieux : avantage aux tests de Discrétion (son des pas uniquement).',w:1,c:'—'},
   // ── ÉQUIPEMENT COMPLÉMENTAIRE ──
   {id:'candles',n:'Bougies (×10)',cat:'Équipement',d:'Éclairent 1,5 m pendant 1 heure. Indispensables pour écrire ou lire dans le noir.',w:0,c:'1 pc/u'},
@@ -5097,8 +5104,36 @@ function updateHPBar(){
   var bar=$('sum-hp-bar');
   if(bar){bar.style.width=pct+'%';bar.style.background=pct>50?'#3A7A2A':pct>25?'#8A6A10':'#8A1010';}
 }
+function getAllItemSpells(){
+  var seen=new Set();
+  var result=[];
+  var equip=Object.values(C.equipped||{}).filter(Boolean);
+  var bag=(C.bag||[]).filter(function(b){return !b.bank;});
+  equip.concat(bag).forEach(function(e){
+    if(seen.has(e.id))return;
+    var def=ITEMS.find(function(x){return x.id===e.id;});
+    if(def&&def.spells&&def.spells.length){seen.add(e.id);result.push(def);}
+  });
+  return result;
+}
+function toggleItemCharge(itemId,spIdx){
+  if(!C.itemCharges)C.itemCharges={};
+  var key=itemId+':'+spIdx;
+  var def=ITEMS.find(function(x){return x.id===itemId;});
+  if(!def||!def.spells)return;
+  var sp=def.spells[spIdx];if(!sp)return;
+  var cur=C.itemCharges[key]||0;
+  C.itemCharges[key]=cur<sp.max?cur+1:0;
+  saveToRoster();renderSummary();
+}
 function doShortRest(){
   if(C.cls&&C.cls.id==='warlock'){if(_reChar)_reChar.usedSlots={};else C.usedSlots={};}
+  if(!C.itemCharges)C.itemCharges={};
+  getAllItemSpells().forEach(function(def){
+    (def.spells||[]).forEach(function(sp,idx){
+      if(sp.resetOn==='short')C.itemCharges[def.id+':'+idx]=0;
+    });
+  });
   saveToRoster();
   var btn=$('short-rest-btn');
   if(btn){btn.textContent='✓ Repos court !';setTimeout(function(){btn.textContent='⭕ Repos Court';},1500);}
@@ -5106,6 +5141,12 @@ function doShortRest(){
 function doLongRest(){
   C.hp=calcHP(); C.hpTemp=0; C.conditions=[];
   if(_reChar) _reChar.usedSlots={}; else C.usedSlots={};
+  if(!C.itemCharges)C.itemCharges={};
+  getAllItemSpells().forEach(function(def){
+    (def.spells||[]).forEach(function(sp,idx){
+      if(sp.resetOn==='long'||sp.resetOn==='short')C.itemCharges[def.id+':'+idx]=0;
+    });
+  });
   saveToRoster();
   renderSummary();
 }
@@ -5320,6 +5361,33 @@ function renderSummary(){
     ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">CANTRIPS</div>
     <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
     ${spellsGroupedHtml||''}
+${(()=>{
+      var iSpells=getAllItemSpells();
+      if(!iSpells.length)return'';
+      if(!C.itemCharges)C.itemCharges={};
+      var resetLabel=function(r){return r==='short'?'repos court':r==='long'?'repos long':r==='never'?'non rechargeable':'aube';};
+      var html='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#3A6A30;margin:.55rem 0 .3rem;padding-bottom:.18rem;border-bottom:1px solid #1A3A10;">🔮 SORTS D\'OBJETS</div>';
+      iSpells.forEach(function(def){
+        html+='<div style="background:#050E05;border:1px solid #1A3010;border-radius:5px;padding:.35rem .5rem;margin-bottom:.3rem;">';
+        html+='<div style="font-family:Cinzel,serif;font-size:7.5px;color:#4A7A40;margin-bottom:.3rem;letter-spacing:.08em;">'+def.n+'</div>';
+        (def.spells||[]).forEach(function(sp,idx){
+          var key=def.id+':'+idx;
+          var used=C.itemCharges[key]||0;
+          var pips='';
+          for(var j=0;j<sp.max;j++){
+            var isUsed=j<used;
+            pips+='<div onclick="toggleItemCharge(\''+def.id+'\','+idx+')" title="'+(isUsed?'Récupérer charge':'Dépenser charge')+'" style="width:14px;height:14px;border-radius:2px;border:1px solid '+(isUsed?'#2A5020':'#3A7030')+';background:'+(isUsed?'#0A1A08':'#1A4018')+';cursor:pointer;transition:all .15s;flex-shrink:0;"></div>';
+          }
+          html+='<div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.22rem;">';
+          html+='<span style="font-family:Share Tech Mono,monospace;font-size:8px;color:#70A060;flex:1;">'+sp.n+'</span>';
+          html+='<div style="display:flex;gap:3px;align-items:center;">'+pips+'</div>';
+          html+='<span style="font-family:Share Tech Mono,monospace;font-size:7px;color:#2A5020;">'+resetLabel(sp.resetOn)+'</span>';
+          html+='</div>';
+        });
+        html+='</div>';
+      });
+      return html;
+    })()}
 ${(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin:.45rem 0 .28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">SORTS PERSONNALISÉS</div><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.4rem;">'+(  (C.extraSpells||[]).map(function(x){return '<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;white-space:nowrap;">❋ Niv.'+x.lvl+' — '+x.name+'</span>';}).join('')  )+'</div>':''}
     `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`);
     return;
