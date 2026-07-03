@@ -4431,7 +4431,7 @@ function preloadCodexData(){
   _codexLoading=true;
   fetch('codex_index.json')
     .then(function(r){return r.ok?r.json():Promise.reject('HTTP '+r.status);})
-    .then(function(data){_codexData=data;_codexLoading=false;})
+    .then(function(data){_codexData=data;_codexLoading=false;if(_sumTab==='sorts')renderSummary();})
     .catch(function(){_codexLoading=false;});
 }
 async function loadCodexIndex(){
@@ -5106,6 +5106,31 @@ function updateHPBar(){
   var bar=$('sum-hp-bar');
   if(bar){bar.style.width=pct+'%';bar.style.background=pct>50?'#3A7A2A':pct>25?'#8A6A10':'#8A1010';}
 }
+function parseCodexItemSpells(desc){
+  if(!desc)return[];
+  // Ignorer la section Version Mythique et tout ce qui suit
+  var stopIdx=desc.search(/Version Mythique|Effets suppl\xe9mentaires|§HISTOIRE/i);
+  var text=stopIdx>-1?desc.substring(0,stopIdx):desc;
+  var spells=[];
+  // Match "Nom du sort (N/jour)" — uniquement si le nom commence par une majuscule
+  var re=/([A-ZÀ-ß][a-zà-ÿ\s'\-]{2,40}?)\s*\((\d+)\/jour\)/g;
+  var m;
+  while((m=re.exec(text))!==null){
+    var name=m[1].trim();
+    var count=parseInt(m[2]);
+    if(name.length<3)continue;
+    if(!spells.find(function(s){return s.n===name;})){
+      spells.push({n:name,max:count,resetOn:'long'});
+    }
+  }
+  return spells;
+}
+function getCodexDesc(itemId){
+  if(!_codexData)return'';
+  var safeId=itemId.replace(/^codex-/,'');
+  var entry=_codexData.find(function(x){return(x.id||x.name).replace(/['"\\]/g,'_')===safeId;});
+  return entry?entry.desc||'':'';
+}
 function getAllItemSpells(){
   var seen=new Set();
   var result=[];
@@ -5113,17 +5138,33 @@ function getAllItemSpells(){
   var bag=(C.bag||[]).filter(function(b){return !b.bank;});
   equip.concat(bag).forEach(function(e){
     if(seen.has(e.id))return;
+    // 1. Items standards avec spells déclarés
     var def=ITEMS.find(function(x){return x.id===e.id;});
-    if(def&&def.spells&&def.spells.length){seen.add(e.id);result.push(def);}
+    if(def&&def.spells&&def.spells.length){seen.add(e.id);result.push(def);return;}
+    // 2. Items CODEX : parser le desc pour trouver "Sort (N/jour)"
+    if(e.id&&e.id.startsWith('codex-')){
+      var desc=getCodexDesc(e.id)||e.d||'';
+      var parsed=parseCodexItemSpells(desc);
+      if(parsed.length){seen.add(e.id);result.push({id:e.id,n:e.n,spells:parsed});}
+    }
   });
   return result;
 }
 function toggleItemCharge(itemId,spIdx){
   if(!C.itemCharges)C.itemCharges={};
   var key=itemId+':'+spIdx;
+  // Trouver la définition des sorts selon le type d'item
+  var spells=null;
   var def=ITEMS.find(function(x){return x.id===itemId;});
-  if(!def||!def.spells)return;
-  var sp=def.spells[spIdx];if(!sp)return;
+  if(def&&def.spells){spells=def.spells;}
+  else if(itemId.startsWith('codex-')){
+    var desc=getCodexDesc(itemId);
+    var bagItem=(C.bag||[]).find(function(b){return b.id===itemId;});
+    if(!desc&&bagItem)desc=bagItem.d||'';
+    spells=parseCodexItemSpells(desc);
+  }
+  if(!spells||!spells[spIdx])return;
+  var sp=spells[spIdx];
   var cur=C.itemCharges[key]||0;
   C.itemCharges[key]=cur<sp.max?cur+1:0;
   saveToRoster();renderSummary();
@@ -5236,6 +5277,7 @@ function renderSummary(){
 
   // ─── ONGLET SORTS ───
   if(_sumTab==='sorts'){
+    preloadCodexData(); // s'assure que _codexData est chargé pour les sorts d'objets CODEX
     const usedSlots=(_reChar||C).usedSlots||{};
     const ROMAN=['I','II','III','IV','V','VI','VII','VIII','IX'];
     // ── Emplacements : 3 niveaux par ligne, carrés bleu-turquoise
