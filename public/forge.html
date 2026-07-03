@@ -2771,6 +2771,22 @@ const WEAPON_PROPS={
   'longbow':        {dice:'1d8', type:'Perf.',  ranged:true},
   'crossbow-light': {dice:'1d8', type:'Perf.',  ranged:true},
   'crossbow-heavy': {dice:'1d10',type:'Perf.',  ranged:true},
+  'crossbow-hand':  {dice:'1d6', type:'Perf.',  ranged:true},
+  'sling':          {dice:'1d4', type:'Cont.',  ranged:true},
+  'sickle':         {dice:'1d4', type:'Tranch.'},
+  'light-hammer':   {dice:'1d4', type:'Cont.',  thrown:true},
+  'dart':           {dice:'1d4', type:'Perf.',  finesse:true, thrown:true, ranged:true},
+  'flail':          {dice:'1d8', type:'Cont.'},
+  'morningstar':    {dice:'1d8', type:'Perf.'},
+  'war-pick':       {dice:'1d8', type:'Perf.'},
+  'trident':        {dice:'1d6', type:'Perf.',  thrown:true, versatile:'1d8'},
+  'whip':           {dice:'1d4', type:'Tranch.',finesse:true},
+  'glaive':         {dice:'1d10',type:'Tranch.',twohand:true},
+  'halberd':        {dice:'1d10',type:'Tranch.',twohand:true},
+  'maul':           {dice:'2d6', type:'Cont.',  twohand:true},
+  'pike':           {dice:'1d10',type:'Perf.',  twohand:true},
+  'lance':          {dice:'1d12',type:'Perf.'},
+  'net':            {dice:'—',   type:'Entrave',ranged:true},
 };
 function getWeaponAtkBonus(w){
   const pb=calcProfBonus();
@@ -4516,7 +4532,7 @@ function renderBagList(){
     const wStyle=inBank?'opacity:.35;text-decoration:line-through;':'';
     return`<div class="bag-row" draggable="true" ondragstart="bagDragStart(event,${i})" style="${rowStyle}" title="Glissez vers un emplacement d'équipement →">
     <label class="bag-carried" title="${inBank?'Non porté — cocher pour porter':'Porté — décocher si non sur le personnage'}"><input type="checkbox" ${!inBank?'checked':''} onchange="toggleBankItem(${i})"><span>Porté</span></label>
-    <div class="bag-nm" style="${nmStyle}" onclick="showItemPanel(C.bag[${i}])" title="Voir la fiche">${e.n}${rBadge}</div>
+    <div class="bag-nm" style="${nmStyle}" onclick="showItemPanel(C.bag[${i}])" title="Voir la fiche">${e.n}${rBadge}${(()=>{const wp=WEAPON_PROPS[e.id];if(!wp||!C.cls)return'';const wi=getWeaponAtkBonus(e);return wp.dice==='—'?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7.5px;color:#6A5A38;margin-left:5px;">'+wp.type+'</span>':'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7.5px;color:#6A5A38;margin-left:5px;">'+mods(wi.atk)+' · '+wi.dice+mods(wi.dmgMod)+' '+wp.type+'</span>';})()}</div>
     <div class="bag-qty-ctrl">
       <button class="bag-qty-btn" onclick="bagQty(${i},-1)">−</button>
       <div class="bag-qty">${e.qty}</div>
