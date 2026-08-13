@@ -413,6 +413,25 @@ textarea.ifl{min-height:65px;resize:vertical;}
 /* Sorts */
 .ps-spell-tag{font-size:8px;color:#4338CA;margin-right:3px;}
 
+/* Monnaie */
+.ps-coins{display:grid;grid-template-columns:repeat(5,1fr);gap:3px;margin-bottom:4px;}
+.ps-coin{text-align:center;border-radius:5px;padding:3px 2px;border:1.5px solid;}
+.ps-coin-lbl{font-family:'Cinzel',serif;font-size:6px;letter-spacing:.08em;display:block;margin-bottom:1px;}
+.ps-coin-v{font-family:'Cinzel',serif;font-size:13px;font-weight:700;}
+
+/* Familier / Compagnon */
+.ps-familiar-wrap{background:linear-gradient(135deg,#F0F4FA,#EAF0F8);border:1.5px solid #93C5FD;border-radius:6px;padding:7px 8px;}
+.ps-familiar-hdr{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.ps-familiar-portrait{width:36px;height:36px;border-radius:50%;border:1.5px solid #93C5FD;overflow:hidden;background:#DBEAFE;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;}
+.ps-familiar-portrait img{width:100%;height:100%;object-fit:cover;}
+.ps-familiar-name{font-family:'Cinzel',serif;font-size:10px;font-weight:700;color:#1D4ED8;}
+.ps-familiar-type{font-family:'Cinzel',serif;font-size:7px;color:#3B82F6;letter-spacing:.08em;}
+.ps-familiar-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;margin-bottom:5px;}
+.ps-familiar-stat{text-align:center;background:#DBEAFE;border-radius:4px;padding:3px 2px;}
+.ps-familiar-stat-l{font-family:'Cinzel',serif;font-size:5.5px;color:#1D4ED8;display:block;}
+.ps-familiar-stat-v{font-family:'Cinzel',serif;font-size:12px;font-weight:700;color:#1E3A8A;}
+.ps-familiar-traits{font-size:8.5px;line-height:1.5;color:#1e3a8a;}
+
 /* Histoire */
 .ps-story{font-size:9.5px;line-height:1.7;font-style:italic;color:#555;background:#FAF7F0;border:1px solid #E8DEC8;border-left:3px solid #C9A84C;padding:6px 8px;border-radius:0 4px 4px 0;}
 
@@ -1885,8 +1904,10 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
         <ul class="ps-eq-list" id="pn-equip"></ul>
         <div class="ps-sec">Langues &amp; Maîtrises</div>
         <div id="pn-langs"></div>
+        <div class="ps-sec" id="pn-currency-hdr" style="display:none;">Monnaie</div>
+        <div id="pn-currency"></div>
       </div>
-      <!-- COL 3 : Personnalité + Capacités + Sorts + Histoire -->
+      <!-- COL 3 : Personnalité + Capacités + Familier + Sorts + Histoire -->
       <div class="ps-col">
         <div class="ps-sec">Personnalité</div>
         <div id="pn-traits"></div>
@@ -1894,6 +1915,8 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
         <div class="ps-feat-list" id="pn-feats"></div>
         <div class="ps-sec" id="pn-specials-hdr" style="display:none;">✦ Capacités Spéciales</div>
         <div id="pn-specials"></div>
+        <div class="ps-sec" id="pn-familiar-hdr" style="display:none;">Familier / Compagnon</div>
+        <div id="pn-familiar"></div>
         <div class="ps-sec" id="pn-spells-hdr" style="display:none;">Sorts</div>
         <div id="pn-spells"></div>
         <div class="ps-sec">Histoire personnelle</div>
@@ -6147,6 +6170,23 @@ function buildPrint(){
   const armorProf=C.cls?.armor||'—';
   $('pn-langs').innerHTML=`<strong>Langues :</strong> ${langs.join(', ')||'—'}<br><strong>Armures :</strong> ${armorProf}<br><strong>Armes :</strong> ${C.cls?.weapons||'—'}`;
 
+  // Monnaie — n'afficher que si au moins une pièce
+  const cur=C.currency||{};
+  const COINS=[['pp','PP','#A78BFA','#7C3AED'],['gp','PO','#FCD34D','#92400E'],['ep','PE','#6EE7B7','#065F46'],['sp','PA','#94A3B8','#334155'],['cp','PC','#FDBA74','#78350F']];
+  const hasCoin=COINS.some(([k])=>(cur[k]||0)>0);
+  if(hasCoin){
+    $('pn-currency-hdr').style.display='';
+    $('pn-currency').innerHTML=`<div class="ps-coins">${COINS.map(([k,lbl,bg,col])=>`
+      <div class="ps-coin" style="background:${bg}22;border-color:${bg};">
+        <span class="ps-coin-lbl" style="color:${col};">${lbl}</span>
+        <span class="ps-coin-v" style="color:${col};">${cur[k]||0}</span>
+      </div>`).join('')}
+    </div>${cur.other?`<div style="font-size:8.5px;color:#555;margin-top:2px;font-style:italic;">${cur.other}</div>`:''}`;
+  } else {
+    $('pn-currency-hdr').style.display='none';
+    $('pn-currency').innerHTML='';
+  }
+
   // Traits de personnalité (colonne 3)
   const traitLabels=['Personnalité','Idéaux','Liens','Défauts'];
   const traitVals=[...(C.traits||[])];
@@ -6156,22 +6196,61 @@ function buildPrint(){
       <div class="ps-trait-val">${traitVals[i]||C.background?.traits?.[i]||'—'}</div>
     </div>`).join('');
 
-  // Capacités de classe & race
-  const feats=[...(C.cls?.features||[]),...(C.sub?.fs?.slice(0,4)||[]),...(C.race?.traits||[]),...(C.background?[`BG : ${C.background.feat}`]:[])];
+  // Capacités de classe & race — filtrées par niveau actuel
+  const lvl=C.level||1;
+  // Retourne false si le feature mentionne "niv.X" avec X > niveau actuel
+  const featLevelOk=f=>{const m=f.match(/niv\.?\s*(\d+)/i);return !m||parseInt(m[1])<=lvl;};
+  const clsFeats=(C.cls?.features||[]).filter(featLevelOk);
+  // Sous-classe : fs ont la forme "Niv.X — ..." → même filtre
+  const subFeats=(C.sub?.fs||[]).filter(featLevelOk);
+  const feats=[...clsFeats,...subFeats,...(C.race?.traits||[]),...(C.background?[`Background : ${C.background.feat}`]:[])];
   $('pn-feats').innerHTML=feats.map(f=>`<div class="ps-feat-item">${f}</div>`).join('')||'<div class="ps-feat-item">—</div>';
 
-  // ✦ Capacités spéciales (d100)
+  // ✦ Capacités spéciales (d100) — avec score affiché
   const specials=C.specialAbilities||[];
   if(specials.length){
     $('pn-specials-hdr').style.display='';
     $('pn-specials').innerHTML=specials.map(a=>`
       <div class="ps-special-item">
-        <span class="ps-special-name">${a.name||a.n||'Capacité'}</span>
+        <span class="ps-special-name">${a.name||a.n||'Capacité'}${a.roll!=null?`<span style="margin-left:6px;font-family:'Cinzel',serif;font-size:9px;color:#7C3AED;font-weight:700;">${a.roll}/100</span>`:''}</span>
         ${a.desc||a.d||''}
       </div>`).join('');
   } else {
     $('pn-specials-hdr').style.display='none';
     $('pn-specials').innerHTML='';
+  }
+
+  // Familier / Compagnon animal
+  const fm=C.familiar;
+  const hasFm=fm&&(fm.name||fm.type);
+  if(hasFm){
+    $('pn-familiar-hdr').style.display='';
+    const fmMod=v=>{const m=Math.floor(((v||10)-10)/2);return(m>=0?'+':'')+m;};
+    const portraitHtml=fm.img
+      ?`<div class="ps-familiar-portrait"><img src="${fm.img}" alt="${fm.name||'familier'}"></div>`
+      :`<div class="ps-familiar-portrait">🐾</div>`;
+    const combatStats=[
+      fm.hp!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">PV</span><span class="ps-familiar-stat-v">${fm.hp}</span></div>`:'',
+      fm.ac!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">CA</span><span class="ps-familiar-stat-v">${fm.ac}</span></div>`:'',
+      fm.speed!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">VIT.</span><span class="ps-familiar-stat-v">${fm.speed}</span></div>`:'',
+    ].filter(Boolean).join('');
+    const attrStats=[['str','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','SAG'],['cha','CHA']].map(([k,lbl])=>
+      `<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">${lbl}</span><span class="ps-familiar-stat-v">${fmMod(fm[k])}</span></div>`
+    ).join('');
+    const traitsHtml=(fm.traits||[]).length?`<div class="ps-familiar-traits" style="margin-top:4px;"><strong>Traits :</strong> ${fm.traits.join(', ')}</div>`:'';
+    const notesHtml=fm.notes?`<div class="ps-familiar-traits" style="font-style:italic;margin-top:3px;">${fm.notes}</div>`:'';
+    $('pn-familiar').innerHTML=`<div class="ps-familiar-wrap">
+      <div class="ps-familiar-hdr">
+        ${portraitHtml}
+        <div><div class="ps-familiar-name">${fm.name||'Familier'}</div><div class="ps-familiar-type">${fm.type||''}</div></div>
+      </div>
+      ${combatStats?`<div class="ps-familiar-stats">${combatStats}</div>`:''}
+      <div class="ps-familiar-stats">${attrStats}</div>
+      ${traitsHtml}${notesHtml}
+    </div>`;
+  } else {
+    $('pn-familiar-hdr').style.display='none';
+    $('pn-familiar').innerHTML='';
   }
 
   // Sorts — regroupés par catégorie
