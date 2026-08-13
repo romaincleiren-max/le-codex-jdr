@@ -5756,7 +5756,7 @@ function renderSummary(){
     <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;margin-bottom:.28rem;">NOTES & CAPACITÉS</div>
     <textarea class="ifl" style="min-height:90px;font-size:10px;" placeholder="Attaques, capacités spéciales, comportement…"
       oninput="familiarSet('notes',this.value)">${fm.notes||''}</textarea>
-    ${fm.img||fm.name?`<button class="btn btn-s" style="width:100%;font-size:9px;margin-top:.4rem;" onclick="if(confirm('Supprimer ce familier ?')){C.familiar=null;renderSummary();}">✕ Supprimer le familier</button>`:''}
+    ${fm.img||fm.name?`<button class="btn btn-s" style="width:100%;font-size:9px;margin-top:.4rem;" onclick="if(confirm('Supprimer ce familier ?')){C.familiar=null;saveToRoster();renderSummary();}">✕ Supprimer le familier</button>`:''}
     `;
     return;
   }
@@ -6222,7 +6222,11 @@ function buildPrint(){
 
   // Familier / Compagnon animal
   const fm=C.familiar;
-  const hasFm=fm&&(fm.name||fm.type);
+  // Considérer le familier comme existant si n'importe quel champ est rempli
+  const hasFm=fm&&(fm.name||fm.type||fm.img||fm.hp!=null||fm.ac!=null||fm.speed!=null
+    ||(fm.str&&fm.str!==10)||(fm.dex&&fm.dex!==10)||(fm.con&&fm.con!==10)
+    ||(fm.int&&fm.int!==10)||(fm.wis&&fm.wis!==10)||(fm.cha&&fm.cha!==10)
+    ||(fm.traits&&fm.traits.length>0)||fm.notes);
   if(hasFm){
     $('pn-familiar-hdr').style.display='';
     const fmMod=v=>{const m=Math.floor(((v||10)-10)/2);return(m>=0?'+':'')+m;};
@@ -6340,9 +6344,16 @@ function openFamiliarModal(){
   renderFamiliarAttacksList();renderFamiliarTraitsList();
   $('familiar-overlay').style.display='block';
 }
-function closeFamiliarModal(){$('familiar-overlay').style.display='none';renderSummary();}
-function removeFamiliar(){C.familiar=null;closeFamiliarModal();}
-function familiarSet(k,v){if(!C.familiar)C.familiar={};C.familiar[k]=v;}
+function closeFamiliarModal(){$('familiar-overlay').style.display='none';saveToRoster();renderSummary();}
+function removeFamiliar(){C.familiar=null;saveToRoster();closeFamiliarModal();}
+let _fmSaveTimer=null;
+function familiarSet(k,v){
+  if(!C.familiar)C.familiar={};
+  C.familiar[k]=v;
+  // Sauvegarde avec debounce (800ms après la dernière modification)
+  clearTimeout(_fmSaveTimer);
+  _fmSaveTimer=setTimeout(saveToRoster,800);
+}
 function wildShapeToggle(i){
   if(!C.wildShapeUsed)C.wildShapeUsed=0;
   const used=i<C.wildShapeUsed;
