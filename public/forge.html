@@ -8,6 +8,8 @@
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;}
 :root{
@@ -480,10 +482,35 @@ body.printing #ps-print{display:block!important;}
 .rc-share-admin.shared{border-color:#7A50C0;border-style:solid;color:#C090F0;background:rgba(122,80,192,.12);}
 .roster-hdr::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,#3A2810,transparent);}
 /* Carousel wrapper */
-.roster-carousel{position:relative;padding:10px 40px 0;}
-.roster-grid{display:flex;gap:16px;overflow-x:hidden;padding:8px 2px 20px;cursor:grab;-webkit-user-select:none;user-select:none;}
-.roster-grid.dragging{cursor:grabbing;}
-.roster-grid.dragging .rc{pointer-events:none;}
+/* ── Swiper roster ── */
+.roster-swiper{padding:10px 44px 44px!important;overflow:visible;}
+.roster-swiper .swiper-wrapper{align-items:stretch;}
+.roster-swiper .swiper-slide{width:240px!important;height:auto;display:flex;}
+.roster-swiper .swiper-button-prev,
+.roster-swiper .swiper-button-next{
+  width:36px;height:36px;border-radius:50%;
+  background:rgba(10,6,2,.92);border:1px solid rgba(201,168,76,.45);
+  color:var(--gold);top:calc(50% - 22px);
+  --swiper-navigation-size:18px;
+  transition:all .2s;
+}
+.roster-swiper .swiper-button-prev:hover,
+.roster-swiper .swiper-button-next:hover{background:rgba(201,168,76,.14);border-color:var(--gold);}
+.roster-swiper .swiper-button-prev{left:0;}
+.roster-swiper .swiper-button-next{right:0;}
+.roster-swiper .swiper-button-prev::after,
+.roster-swiper .swiper-button-next::after{font-weight:700;}
+/* Pagination bullets */
+.roster-swiper .swiper-pagination{bottom:6px!important;}
+.roster-swiper .swiper-pagination-bullet{
+  width:10px;height:10px;
+  background:#2A1A08;border:1px solid #4A3418;
+  opacity:1;transition:all .28s;
+}
+.roster-swiper .swiper-pagination-bullet-active{
+  background:var(--gold);border-color:var(--gold-d);
+  width:26px;border-radius:4px;
+}
 /* Nav arrows — cercles flottants */
 .rc-nav{position:absolute;top:calc(50% - 18px);transform:translateY(-50%);width:38px;height:38px;border-radius:50%;background:rgba(10,6,2,.92);border:1px solid rgba(201,168,76,.45);color:var(--gold);font-size:22px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:20;transition:all .2s;
   box-shadow:0 4px 16px rgba(0,0,0,.6),0 0 0 0 rgba(201,168,76,0);line-height:1;padding-bottom:1px;}
@@ -1380,14 +1407,14 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
   </div>
   <div id="roster-sec">
     <div class="roster-hdr">✦ Mes Personnages</div>
-    <div class="roster-carousel">
-      <button class="rc-nav prev" id="rc-prev" onclick="rosterScroll(-1)" aria-label="Précédent">‹</button>
-      <div class="roster-grid" id="roster-grid">
-        <div style="font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Aucun personnage sauvegardé.</div>
+    <div class="swiper roster-swiper" id="roster-swiper">
+      <div class="swiper-wrapper" id="roster-grid">
+        <div class="swiper-slide" style="font-family:'IM Fell English',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Aucun personnage sauvegardé.</div>
       </div>
-      <button class="rc-nav next" id="rc-next" onclick="rosterScroll(1)" aria-label="Suivant">›</button>
+      <div class="swiper-pagination" id="roster-dots"></div>
+      <div class="swiper-button-prev" id="rc-prev"></div>
+      <div class="swiper-button-next" id="rc-next"></div>
     </div>
-    <div class="roster-dots" id="roster-dots"></div>
   </div>
   <div id="admin-panel">
     <div class="admin-hdr">👑 Personnages des joueurs <button onclick="syncAllRosterToSupabase().then(loadAdminPanel)" style="font-family:'Cinzel',serif;font-size:7px;padding:.2em .5em;border:1px solid #4A3060;color:#9A70D0;background:none;cursor:pointer;border-radius:3px;margin-left:.5rem;" title="Synchroniser mes personnages locaux vers Supabase puis recharger">↺ Sync</button></div>
@@ -1632,6 +1659,7 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
       <div class="badge" id="badge">CRÉATION</div>
       <button id="forge-music-btn" class="btn btn-s" style="display:none;padding:.25em .6em;font-size:11px;min-width:28px;" title="Couper / Remettre la musique" onclick="var m=$('forge-music');m.muted=!m.muted;this.textContent=m.muted?'🔇':'🔊';">🔊</button>
       <button id="forge-edit-toggle" class="btn btn-s" style="display:none;padding:.25em .8em;font-size:9px;" onclick="toggleForgeEditNav()">✏ Modifier la fiche</button>
+      <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;border-color:#2D5016;color:#9AE6B4;" onclick="exportPDF()">📄 Fiche PDF</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="saveDraft();this.textContent='✓ Sauvegardé';setTimeout(()=>this.textContent='💾 Sauvegarder',1500)">💾 Sauvegarder</button>
       <button class="btn btn-s" style="padding:.25em .8em;font-size:9px;" onclick="showTitle()">↩ Accueil</button>
     </div>
@@ -8068,13 +8096,34 @@ function reAddCodexItem(idx){
   renderReBag();
 }
 
+// Instance Swiper globale pour le roster
+var _rosterSwiper = null;
+
+function initRosterSwiper(){
+  if(_rosterSwiper){ _rosterSwiper.destroy(true,true); _rosterSwiper=null; }
+  const el = document.getElementById('roster-swiper');
+  if(!el) return;
+  _rosterSwiper = new Swiper(el, {
+    slidesPerView: 'auto',
+    spaceBetween: 16,
+    grabCursor: true,
+    freeMode: { enabled: false },
+    pagination: { el: '#roster-dots', clickable: true, dynamicBullets: false },
+    navigation: { prevEl: '#rc-prev', nextEl: '#rc-next' },
+    breakpoints: {
+      0:   { slidesPerView: 1.15 },
+      480: { slidesPerView: 'auto' },
+    }
+  });
+}
+
 function renderRoster(){
   const g = $('roster-grid');
   if(!g) return;
   const roster = getRoster();
   if(!roster.length){
-    g.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Aucun personnage sauvegardé.</div>';
-    updateRosterNav();
+    g.innerHTML='<div class="swiper-slide" style="font-family:\'IM Fell English\',serif;font-size:11px;color:#5A4A2A;font-style:italic;padding:.4rem 0;">Aucun personnage sauvegardé.</div>';
+    initRosterSwiper();
     return;
   }
   const CLASS_ICONS = {guerrier:'⚔',barbare:'🪓',rôdeur:'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮',artificier:'⚙'};
@@ -8098,7 +8147,7 @@ function renderRoster(){
         : clsFallbackHtml;
     const isDraft=r._draft_step!=null&&r._draft_step<6;
     const draftLabel=isDraft?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:#1A1A2A;color:#A080D0;border:1px solid #3A2A6A;padding:2px 5px;border-radius:2px;margin-left:4px;">EN COURS · ${STEP_NAMES[r._draft_step]||''}</span>`:'';
-    return `<div class="rc" style="${isDraft?'border-color:#3A2A6A;':''}opacity:${isDraft?.85:1}" onclick="if(!_rcDrag.moved)openRosterEquip('${safeId}')">
+    return `<div class="swiper-slide"><div class="rc" style="${isDraft?'border-color:#3A2A6A;':''}opacity:${isDraft?.85:1}" onclick="openRosterEquip('${safeId}')">
       <button class="rc-del" onclick="event.stopPropagation();deleteFromRoster('${safeId}')" title="Supprimer">✕</button>
       <div class="rc-portrait" style="${isDraft?'opacity:.7':'}'}">${portrait}</div>
       <div class="rc-body">
@@ -8111,10 +8160,9 @@ function renderRoster(){
         ${r.supabaseId?`<button class="rc-share-admin${r.sharedWithAdmin?' shared':''}" onclick="event.stopPropagation();shareCharWithAdmin('${safeId}')" title="${r.sharedWithAdmin?'Partagé avec l\'Admin — cliquer pour annuler':'Partager avec l\'Admin'}">
           ${r.sharedWithAdmin?'👑 Partagé ✓':'👑 Partager avec l\'Admin'}</button>`:'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#3A2A1A;margin-top:.25rem;">💾 Sauvegardez d\'abord pour partager</div>'}
       </div>
-    </div>`;
+    </div></div>`;
   }).join('');
-  updateRosterNav();
-  initRosterDrag();
+  initRosterSwiper();
 }
 
 // ── Carousel state ──
