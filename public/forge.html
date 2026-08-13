@@ -276,77 +276,154 @@ textarea.ifl{min-height:65px;resize:vertical;}
 .adv-price{font-family:'Cinzel',serif;font-size:10px;color:var(--forest);margin-top:.5rem;padding-top:.35rem;border-top:1px solid var(--parch3);}
 
 /* ── FICHE DE PERSONNAGE OVERLAY ── */
-#ps-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:10000;overflow-y:auto;padding:20px 10px 40px;}
+#ps-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:10000;overflow-y:auto;padding:20px 12px 40px;}
 #ps-overlay.open{display:block;}
-#ps-toolbar{position:sticky;top:0;z-index:2;background:#1A1208;border-bottom:2px solid #8B6914;display:flex;align-items:center;gap:.5rem;padding:.55rem 1rem;margin:-8px -8px 14px;border-radius:4px 4px 0 0;}
-#ps-toolbar span{font-family:'Cinzel',serif;font-size:11px;letter-spacing:.15em;color:#C9A84C;flex:1;text-transform:uppercase;}
-#ps-toolbar button{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.1em;padding:.3em .9em;border:1px solid #5A3810;color:#C9A84C;background:none;cursor:pointer;transition:.15s;}
+
+/* Toolbar */
+#ps-toolbar{position:sticky;top:0;z-index:2;background:#0A0705;border-bottom:1px solid #3A2A10;display:flex;align-items:center;gap:.5rem;padding:.6rem 1rem;border-radius:4px 4px 0 0;}
+#ps-toolbar span{font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:#C9A84C;flex:1;text-transform:uppercase;}
+#ps-toolbar button{font-family:'Cinzel',serif;font-size:9px;letter-spacing:.08em;padding:.35em 1em;border:1px solid #3A2A10;color:#C9A84C;background:none;cursor:pointer;transition:.15s;border-radius:4px;}
 #ps-toolbar button:hover{border-color:#C9A84C;background:rgba(201,168,76,.1);}
-#ps-toolbar .ps-tb-print{border-color:#2D5016;color:#9AE6B4;}
+#ps-toolbar .ps-tb-print{border-color:#2D5016;color:#9AE6B4;font-weight:600;}
 #ps-toolbar .ps-tb-print:hover{background:rgba(45,80,22,.2);border-color:#9AE6B4;}
-#ps{font-family:'IM Fell English',Georgia,serif;color:#1A1208;max-width:900px;margin:0 auto;background:white;padding:14px 16px;border-radius:4px;}
-/* Header */
-.ps-hdr{background:#1A1208;color:#C9A84C;padding:8px 12px;margin:-14px -16px 10px;display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:6px;align-items:end;}
-.ps-hdr-name{font-family:'Cinzel Decorative',serif;font-size:22px;color:#F0D080;grid-column:1;border-bottom:1px solid #5A3810;padding-bottom:3px;}
-.ps-hdr-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#8B6914;display:block;margin-bottom:2px;}
-.ps-hdr-val{font-family:'Cinzel',serif;font-size:11px;color:#E8D090;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-/* Body 3 colonnes */
-.ps-body{display:grid;grid-template-columns:160px 1fr 1fr;gap:10px;align-items:start;}
+
+/* Conteneur fiche */
+#ps{font-family:'IM Fell English',Georgia,serif;color:#1a1a18;max-width:940px;margin:0 auto;background:#fff;border-radius:0 0 6px 6px;overflow:hidden;}
+
+/* ══ HEADER ══ */
+.ps-hdr{
+  background:linear-gradient(135deg,#0F0B06 0%,#1C1408 60%,#0F0B06 100%);
+  padding:16px 20px;
+  display:grid;
+  grid-template-columns:80px 1fr auto;
+  gap:16px;
+  align-items:center;
+  border-bottom:2px solid #C9A84C;
+}
+.ps-hdr-portrait{
+  width:76px;height:76px;border-radius:50%;
+  border:2.5px solid #C9A84C;overflow:hidden;flex-shrink:0;
+  background:#1A1208;display:flex;align-items:center;justify-content:center;
+  font-size:30px;box-shadow:0 0 20px rgba(201,168,76,.25);
+}
+.ps-hdr-portrait img{width:100%;height:100%;object-fit:cover;object-position:center top;}
+.ps-hdr-info{min-width:0;}
+.ps-hdr-name{
+  font-family:'Cinzel Decorative','Cinzel',serif;
+  font-size:24px;color:#F0D080;line-height:1.1;margin-bottom:5px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.ps-hdr-sub{font-family:'Cinzel',serif;font-size:9.5px;color:#C9A84C;letter-spacing:.1em;opacity:.9;}
+.ps-hdr-meta{display:flex;flex-direction:column;gap:7px;align-items:flex-end;flex-shrink:0;}
+.ps-hdr-lbl{font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.18em;color:#6A5020;display:block;text-transform:uppercase;margin-bottom:1px;}
+.ps-hdr-val{font-family:'Cinzel',serif;font-size:11px;color:#E8D090;white-space:nowrap;}
+
+/* ══ BODY 3 cols ══ */
+.ps-body{display:grid;grid-template-columns:152px 1fr 1fr;gap:0;align-items:start;}
+.ps-col{padding:12px 11px;border-right:1px solid #E8DEC8;}
+.ps-col:last-child{border-right:none;}
+
 /* Titres de section */
-.ps-sec{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.2em;color:#8B6914;border-bottom:1.5px solid #D4B870;padding-bottom:2px;margin:8px 0 4px;text-transform:uppercase;}
-/* Stat box */
-.ps-stat-col{display:flex;flex-direction:column;gap:4px;margin-bottom:8px;}
-.ps-stat{border:2px solid #D4B870;background:#F9F3E3;padding:4px 3px;text-align:center;}
-.ps-stat-l{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.06em;color:#8B6914;display:block;}
-.ps-stat-v{font-family:'Cinzel Decorative',serif;font-size:20px;color:#8B1A1A;line-height:1;}
-.ps-stat-m{font-family:'Share Tech Mono',monospace;font-size:11px;color:#1A1208;background:#E8D8A0;border-radius:50%;width:28px;height:28px;line-height:28px;margin:2px auto 0;display:block;}
-/* Saves */
-.ps-save-row{font-size:10px;display:flex;justify-content:space-between;padding:1px 0;border-bottom:1px dotted #E8D0A0;}
-.ps-save-val{font-family:'Share Tech Mono',monospace;color:#2D5016;font-weight:bold;min-width:28px;text-align:right;}
-.ps-save-prof{color:#8B1A1A;margin-right:3px;}
-/* Skills */
-.ps-sk{font-size:9.5px;display:flex;justify-content:space-between;padding:.5px 0;border-bottom:1px dotted #EEE4C0;}
-.ps-sk-val{font-family:'Share Tech Mono',monospace;color:#8B1A1A;min-width:28px;text-align:right;}
-.ps-sk-prof{color:#2D5016;margin-right:3px;font-size:9px;}
-/* Combat stats */
-.ps-combat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px;}
+.ps-sec{
+  font-family:'Cinzel',serif;font-size:7px;letter-spacing:.22em;
+  color:#8B6914;text-transform:uppercase;
+  border-bottom:1.5px solid #C9A84C;
+  padding-bottom:3px;margin:10px 0 6px;
+  display:flex;align-items:center;gap:4px;
+}
+.ps-sec:first-child{margin-top:0;}
+
+/* ══ STATS ══ */
+.ps-stat-col{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;}
+.ps-stat{
+  display:flex;flex-direction:column;align-items:center;
+  background:#F8F4EC;border:1.5px solid #D4B870;border-radius:6px;
+  padding:5px 2px 4px;text-align:center;
+}
+.ps-stat-l{font-family:'Cinzel',serif;font-size:5.5px;letter-spacing:.06em;color:#8B6914;text-transform:uppercase;margin-bottom:2px;}
+.ps-stat-m{
+  font-family:'Cinzel',serif;font-size:15px;font-weight:700;color:#fff;
+  background:#8B1A1A;border-radius:50%;
+  width:26px;height:26px;line-height:26px;
+  margin:0 auto 2px;display:block;text-align:center;
+}
+.ps-stat-v{font-family:'Cinzel',serif;font-size:9px;color:#5A4530;line-height:1;}
+
+/* ══ SAVES ══ */
+.ps-save-row{font-size:9.5px;display:flex;justify-content:space-between;align-items:center;padding:2px 0;border-bottom:1px solid #F0E8CC;}
+.ps-save-row:last-child{border-bottom:none;}
+.ps-save-val{font-family:'Cinzel',serif;font-size:10px;font-weight:700;color:#2D5016;min-width:26px;text-align:right;}
+.ps-save-prof{font-size:9px;margin-right:3px;}
+
+/* ══ COMPÉTENCES ══ */
+.ps-sk{font-size:8.5px;display:flex;justify-content:space-between;align-items:center;padding:1.5px 3px;border-radius:2px;}
+.ps-sk:nth-child(odd){background:#FAF7F0;}
+.ps-sk-val{font-family:'Cinzel',serif;font-size:9.5px;font-weight:700;color:#8B1A1A;min-width:22px;text-align:right;}
+.ps-sk-prof{margin-right:2px;font-size:8px;}
+
+/* ══ COMBAT ══ */
+.ps-combat-row{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-bottom:6px;}
 .ps-combat-row.wide{grid-template-columns:repeat(4,1fr);}
-.ps-cbox{border:1.5px solid #D4B870;background:#F9F3E3;padding:4px;text-align:center;}
-.ps-cbox-l{font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.06em;color:#8B6914;display:block;margin-bottom:1px;}
-.ps-cbox-v{font-family:'Cinzel',serif;font-size:13px;color:#1A1208;}
-.ps-hp-block{border:2.5px solid #8B1A1A;background:#FFF5F0;padding:5px;text-align:center;margin-bottom:6px;}
-.ps-hp-l{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#8B1A1A;}
-.ps-hp-v{font-family:'Cinzel Decorative',serif;font-size:28px;color:#8B1A1A;line-height:1.1;}
-/* Attacks */
-.ps-atk-table{width:100%;border-collapse:collapse;font-size:9.5px;margin-bottom:6px;}
-.ps-atk-table th{background:#1A1208;color:#C9A84C;font-family:'Cinzel',serif;font-size:7px;letter-spacing:.08em;padding:2px 4px;text-align:left;}
-.ps-atk-table td{background:#F9F3E3;border:1px solid #D4B870;padding:2px 5px;}
-/* Equipment / langs */
-.ps-eq-list{font-size:9.5px;line-height:1.65;columns:2;column-gap:8px;}
-.ps-eq-list li{break-inside:avoid;}
-/* Traits */
-.ps-trait-box{background:#F9F3E3;border:1.5px solid #D4B870;padding:5px 7px;margin-bottom:5px;}
-.ps-trait-lbl{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#8B6914;display:block;margin-bottom:2px;}
-.ps-trait-val{font-size:9.5px;line-height:1.5;font-style:italic;}
-/* Features */
-.ps-feat-list{font-size:9.5px;line-height:1.55;}
-.ps-feat-item{padding:2px 0;border-bottom:1px dotted #D4B870;}
-.ps-feat-item:last-child{border-bottom:none;}
-/* Special abilities */
-.ps-special-item{background:#F0EAF8;border-left:3px solid #6A3AAA;padding:4px 6px;margin-bottom:4px;font-size:9px;line-height:1.5;}
-.ps-special-name{font-family:'Cinzel',serif;font-size:8px;color:#4A1F7A;display:block;margin-bottom:1px;}
-/* Spells */
-.ps-spell-tag{font-family:'Share Tech Mono',monospace;font-size:8px;color:#8B6914;margin-right:4px;}
-/* Story */
-.ps-story{font-size:9.5px;line-height:1.6;font-style:italic;background:#F9F3E3;border:1px solid #D4B870;padding:5px 7px;margin-top:4px;}
+.ps-cbox{
+  background:#F8F4EC;border:1.5px solid #D4B870;border-radius:6px;
+  padding:5px 4px;text-align:center;
+}
+.ps-cbox-l{font-family:'Cinzel',serif;font-size:6px;letter-spacing:.05em;color:#8B6914;display:block;margin-bottom:2px;text-transform:uppercase;}
+.ps-cbox-v{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:#1A1208;}
+
+/* HP */
+.ps-hp-block{
+  background:linear-gradient(135deg,#FFF5F5,#FFE8E8);
+  border:2px solid #B91C1C;border-radius:8px;
+  padding:8px 12px;margin-bottom:8px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.ps-hp-l{font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#B91C1C;text-transform:uppercase;}
+.ps-hp-v{font-family:'Cinzel',serif;font-size:38px;font-weight:900;color:#B91C1C;line-height:1;}
+.ps-hp-boxes{display:flex;flex-wrap:wrap;gap:2px;margin-top:4px;max-width:80px;}
+.ps-hp-box{width:11px;height:11px;border:1.5px solid rgba(185,28,28,.5);border-radius:2px;}
+
+/* Attaques */
+.ps-atk-table{width:100%;border-collapse:collapse;font-size:9px;margin-bottom:8px;border-radius:4px;overflow:hidden;}
+.ps-atk-table thead{background:#0F0B06;}
+.ps-atk-table th{color:#C9A84C;font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.1em;padding:4px 6px;text-align:left;text-transform:uppercase;}
+.ps-atk-table td{border-bottom:1px solid #E8DEC8;padding:3.5px 6px;}
+.ps-atk-table tr:nth-child(odd) td{background:#FAF7F0;}
+.ps-atk-table tr:nth-child(even) td{background:#F4F0E4;}
+
+/* Équipement */
+.ps-eq-list{font-size:9px;line-height:1.7;columns:2;column-gap:8px;padding:0;margin:0;list-style:none;}
+.ps-eq-list li{break-inside:avoid;padding:1px 0;border-bottom:1px dotted #E8DEC8;}
+.ps-eq-list li::before{content:'·';margin-right:4px;color:#C9A84C;}
+#pn-langs{font-size:9px;line-height:1.7;background:#FAF7F0;padding:5px 7px;border-radius:4px;border:1px solid #E8DEC8;}
+
+/* Traits de personnalité */
+.ps-trait-box{border-left:3px solid #C9A84C;padding:5px 8px;margin-bottom:6px;background:#FAFAF6;}
+.ps-trait-lbl{font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.14em;color:#8B6914;display:block;margin-bottom:2px;text-transform:uppercase;}
+.ps-trait-val{font-size:9.5px;line-height:1.55;font-style:italic;color:#333;}
+
+/* Capacités */
+.ps-feat-list{margin-bottom:4px;}
+.ps-feat-item{font-size:9px;padding:3px 6px;border-left:2px solid #E8DEC8;margin-bottom:2px;background:#FAFAF6;border-radius:0 3px 3px 0;line-height:1.4;}
+
+/* Spéciaux */
+.ps-special-item{background:linear-gradient(135deg,#F0EAF8,#EDE5F5);border-left:3px solid #7C3AED;padding:5px 7px;margin-bottom:5px;font-size:9px;line-height:1.5;border-radius:0 4px 4px 0;}
+.ps-special-name{font-family:'Cinzel',serif;font-size:8px;color:#5B21B6;display:block;margin-bottom:1px;font-weight:700;}
+
+/* Sorts */
+.ps-spell-tag{font-size:8px;color:#4338CA;margin-right:3px;}
+
+/* Histoire */
+.ps-story{font-size:9.5px;line-height:1.7;font-style:italic;color:#555;background:#FAF7F0;border:1px solid #E8DEC8;border-left:3px solid #C9A84C;padding:6px 8px;border-radius:0 4px 4px 0;}
+
 /* Print */
 @media print{
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
   body{background:white!important;}
   #ts,#gs,#ps-overlay,#ps-toolbar{display:none!important;}
   #ps-print{display:block!important;}
+  @page{margin:1.2cm 1cm;size:A4 portrait;}
 }
-/* Hack print depuis overlay */
 body.printing #ts,body.printing #gs,body.printing #ps-overlay{display:none!important;}
 body.printing #ps-print{display:block!important;}
 
@@ -1767,40 +1844,28 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
   <div id="ps">
     <div id="ps-toolbar">
       <span>✦ Fiche de Personnage</span>
-      <button class="ps-tb-print" onclick="printSheet()">🖨 Imprimer</button>
+      <button class="ps-tb-print" onclick="printSheet()">🖨 Imprimer / PDF</button>
       <button onclick="closeSheet()">✕ Fermer</button>
     </div>
-    <!-- Header -->
+    <!-- Header modernisé : portrait + identité + méta -->
     <div class="ps-hdr">
-      <div>
-        <span class="ps-hdr-lbl">Nom du personnage</span>
+      <div class="ps-hdr-portrait" id="pn-portrait-wrap">
+        <span id="pn-portrait-icon">⚔</span>
+      </div>
+      <div class="ps-hdr-info">
         <div class="ps-hdr-name" id="pn-name">—</div>
+        <div class="ps-hdr-sub" id="pn-sub">—</div>
       </div>
-      <div>
-        <span class="ps-hdr-lbl">Classe & Niveau</span>
-        <div class="ps-hdr-val" id="pn-clslvl">—</div>
-        <span class="ps-hdr-lbl" style="margin-top:6px;">Background</span>
-        <div class="ps-hdr-val" id="pn-bg">—</div>
-      </div>
-      <div>
-        <span class="ps-hdr-lbl">Race</span>
-        <div class="ps-hdr-val" id="pn-race">—</div>
-        <span class="ps-hdr-lbl" style="margin-top:6px;">Alignement</span>
-        <div class="ps-hdr-val" id="pn-align">—</div>
-        <span class="ps-hdr-lbl" style="margin-top:6px;">Divinité</span>
-        <div class="ps-hdr-val" id="pn-deity">—</div>
-      </div>
-      <div>
-        <span class="ps-hdr-lbl">Joueur</span>
-        <div class="ps-hdr-val" id="pn-player">—</div>
-        <span class="ps-hdr-lbl" style="margin-top:6px;">XP</span>
-        <div class="ps-hdr-val" id="pn-xp">0</div>
+      <div class="ps-hdr-meta">
+        <div><span class="ps-hdr-lbl">Joueur</span><div class="ps-hdr-val" id="pn-player">—</div></div>
+        <div><span class="ps-hdr-lbl">Alignement</span><div class="ps-hdr-val" id="pn-align">—</div></div>
+        <div><span class="ps-hdr-lbl">XP</span><div class="ps-hdr-val" id="pn-xp">0</div></div>
       </div>
     </div>
     <!-- Corps 3 colonnes -->
     <div class="ps-body">
-      <!-- COL 1 : Stats + Saves + Skills -->
-      <div>
+      <!-- COL 1 : Caractéristiques + Saves + Compétences -->
+      <div class="ps-col">
         <div class="ps-sec">Caractéristiques</div>
         <div class="ps-stat-col" id="pn-stats"></div>
         <div class="ps-sec">Jets de sauvegarde</div>
@@ -1808,23 +1873,24 @@ button:focus-visible,input:focus-visible{outline:1px solid rgba(201,168,76,.4);o
         <div class="ps-sec">Compétences</div>
         <div id="pn-skills"></div>
       </div>
-      <!-- COL 2 : Combat + Attacks + Equip -->
-      <div>
+      <!-- COL 2 : Combat + Attaques + Équipement -->
+      <div class="ps-col">
+        <div class="ps-sec">Combat</div>
         <div class="ps-combat-row" id="pn-combat-top"></div>
-        <div class="ps-hp-block" id="pn-hp"></div>
+        <div id="pn-hp"></div>
         <div class="ps-combat-row wide" id="pn-combat-bot"></div>
         <div class="ps-sec">Attaques</div>
-        <table class="ps-atk-table"><thead><tr><th>Nom</th><th>Bonus Att.</th><th>Dégâts/Type</th></tr></thead><tbody id="pn-attacks"></tbody></table>
+        <table class="ps-atk-table"><thead><tr><th>Arme / Sort</th><th>Bonus att.</th><th>Dégâts · Type</th></tr></thead><tbody id="pn-attacks"></tbody></table>
         <div class="ps-sec">Équipement</div>
         <ul class="ps-eq-list" id="pn-equip"></ul>
-        <div class="ps-sec">Langues & Maîtrises</div>
-        <div id="pn-langs" style="font-size:9.5px;line-height:1.6;"></div>
+        <div class="ps-sec">Langues &amp; Maîtrises</div>
+        <div id="pn-langs"></div>
       </div>
-      <!-- COL 3 : Personnalité + Capacités + Spéciaux -->
-      <div>
+      <!-- COL 3 : Personnalité + Capacités + Sorts + Histoire -->
+      <div class="ps-col">
         <div class="ps-sec">Personnalité</div>
         <div id="pn-traits"></div>
-        <div class="ps-sec">Capacités de classe & race</div>
+        <div class="ps-sec">Capacités de classe &amp; race</div>
         <div class="ps-feat-list" id="pn-feats"></div>
         <div class="ps-sec" id="pn-specials-hdr" style="display:none;">✦ Capacités Spéciales</div>
         <div id="pn-specials"></div>
@@ -5934,38 +6000,67 @@ function closeSheet(){
   document.body.style.overflow='';
 }
 function printSheet(){
-  const overlay=$('ps-overlay');
   const ps=$('ps');
-  // Détacher temporairement du overlay, imprimer, remettre
-  overlay.classList.remove('open');
-  document.body.style.overflow='';
-  const printWin=window.open('','_blank','width=900,height=700');
-  // Collecter les styles
-  const styles=[...document.querySelectorAll('link[rel=stylesheet],style')].map(s=>s.outerHTML).join('\n');
-  printWin.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">${styles}</head><body style="background:white;">`+ps.outerHTML+`</body></html>`);
+  if(!ps){return;}
+  const printWin=window.open('','_blank','width=980,height=840');
+  if(!printWin){alert('Activez les pop-ups pour générer le PDF.');return;}
+  // Récupérer uniquement le style principal de la forge
+  const mainStyle=document.querySelector('style');
+  // Google Fonts (Cinzel + IM Fell)
+  const fontsHtml=`<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Cinzel:wght@400;600;700&family=IM+Fell+English:ital@0;1&display=swap" rel="stylesheet">`;
+  // Masquer la toolbar dans la fenêtre d'impression
+  const html=ps.outerHTML.replace('id="ps-toolbar"','id="ps-toolbar" style="display:none!important;"');
+  printWin.document.write(`<!DOCTYPE html>
+<html lang="fr"><head>
+<meta charset="UTF-8">
+<title>${(C.name||'Personnage').replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]))} — Fiche D&D 5e</title>
+${fontsHtml}
+${mainStyle?mainStyle.outerHTML:''}
+<style>
+  html,body{margin:0;padding:0;background:#fff;}
+  #ps{max-width:100%!important;border-radius:0!important;box-shadow:none!important;}
+  @page{size:A4 portrait;margin:0.7cm 0.5cm;}
+  @media print{*{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}}
+</style>
+</head>
+<body>${html}
+<script>
+  window.addEventListener('load',function(){setTimeout(function(){window.print();},500);});
+<\/script>
+</body></html>`);
   printWin.document.close();
-  printWin.focus();
-  setTimeout(()=>{printWin.print();printWin.close();},600);
 }
 function buildPrint(){
   // Stats effectives : base + ASI + bonus équipement (via effStat)
   const s={};['str','dex','con','int','wis','cha'].forEach(k=>s[k]=effStat(k));
-  // Header
+
+  // ── Portrait ──────────────────────────────────────────────
+  const pw=$('pn-portrait-wrap');
+  if(C.photo){
+    pw.innerHTML=`<img src="${C.photo}" alt="${(C.name||'').replace(/"/g,'')}" style="width:100%;height:100%;object-fit:cover;object-position:center top;">`;
+  } else {
+    const clsN=(C.cls?.n||'').toLowerCase();
+    const CLS_ICONS={guerrier:'⚔',barbare:'🪓','rôdeur':'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮',artificier:'⚙'};
+    const icon=Object.entries(CLS_ICONS).find(([k])=>clsN.includes(k))?.[1]||'⚔';
+    pw.innerHTML=`<span id="pn-portrait-icon" style="font-size:30px;">${icon}</span>`;
+  }
+
+  // ── Header ────────────────────────────────────────────────
   $('pn-name').textContent=C.name||'Héros Sans Nom';
-  $('pn-clslvl').textContent=clsLevelStr()+(C.sub?' · '+C.sub.n:'');
-  $('pn-bg').textContent=C.background?.n||'—';
-  $('pn-race').textContent=C.race?.n||'—';
+  // Sous-titre : Race · Classe Niv.X — Sous-classe · Background
+  const clsStr=clsLevelStr()+(C.sub?' ('+C.sub.n+')':'');
+  $('pn-sub').textContent=[C.race?.n,clsStr,C.background?.n].filter(Boolean).join(' · ');
   $('pn-align').textContent=ALIGNS.find(a=>a.id===C.alignment)?.n||'—';
-  $('pn-deity').textContent=C.deity?.name||'—';
   $('pn-player').textContent=C.player||'—';
   $('pn-xp').textContent=(C.xp||0)+' XP';
 
-  // Stats (colonne 1)
+  // ── Stats (modif en grand, score en petit) ─────────────────
   $('pn-stats').innerHTML=STAT_KEYS.map(k=>`
     <div class="ps-stat">
       <span class="ps-stat-l">${STAT_LABELS[k]}</span>
-      <div class="ps-stat-v">${s[k]}</div>
       <div class="ps-stat-m">${mods(s[k])}</div>
+      <div class="ps-stat-v">${s[k]}</div>
     </div>`).join('');
 
   // Jets de sauvegarde
@@ -5994,10 +6089,19 @@ function buildPrint(){
     <div class="ps-cbox"><span class="ps-cbox-l">Classe d'armure</span><div class="ps-cbox-v">${calcCA()}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Initiative</span><div class="ps-cbox-v">${mods(s.dex)}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Vitesse</span><div class="ps-cbox-v" style="color:${calcEncumbrance().lvl===2?'#C0392B':calcEncumbrance().lvl===1?'#E67E22':'inherit'};">${calcEffSpeed()} ft${calcEncumbrance().lvl>0?`<span style="font-size:9px;opacity:.55;text-decoration:line-through;margin-left:3px;">${C.race?.speed||30}</span>`:''}</div></div>`+
-    (calcEncumbrance().lvl>0?`<div style="font-family:'Share Tech Mono',monospace;font-size:8.5px;color:${calcEncumbrance().col};margin-top:.2rem;padding:.2rem .4rem;background:${calcEncumbrance().col}18;border-left:2px solid ${calcEncumbrance().col};">⚠ ${calcEncumbrance().label}${calcEncumbrance().lvl===2?' · Désavantage FOR/DEX/CON':''}</div>`:'');
+    (calcEncumbrance().lvl>0?`<div style="grid-column:1/-1;font-family:'Cinzel',serif;font-size:8px;color:${calcEncumbrance().col};padding:.25rem .5rem;background:${calcEncumbrance().col}18;border-left:2px solid ${calcEncumbrance().col};border-radius:0 3px 3px 0;">⚠ ${calcEncumbrance().label}${calcEncumbrance().lvl===2?' · Désavantage FOR/DEX/CON':''}</div>`:'');
 
-  // PV
-  $('pn-hp').innerHTML=`<div class="ps-hp-l">Points de vie maximum</div><div class="ps-hp-v">${C.maxHp||calcHP()}</div>`;
+  // PV — bloc impactant avec cases à cocher
+  const maxHp=C.maxHp||calcHP();
+  const hpBoxes=Math.min(maxHp,30);
+  const hpBoxHtml=Array.from({length:hpBoxes},()=>`<div class="ps-hp-box"></div>`).join('');
+  $('pn-hp').innerHTML=`<div class="ps-hp-block">
+    <div>
+      <div class="ps-hp-l">Points de Vie Max</div>
+      <div class="ps-hp-boxes">${hpBoxHtml}</div>
+    </div>
+    <div class="ps-hp-v">${maxHp}</div>
+  </div>`;
 
   // Combat — ligne basse
   const slots=getSlots();
@@ -6070,11 +6174,24 @@ function buildPrint(){
     $('pn-specials').innerHTML='';
   }
 
-  // Sorts
-  const allSp=[...C.cantrips.map(s=>`<span class="ps-spell-tag">✧</span>${s}`),...C.spells.map(s=>`<span class="ps-spell-tag">⚡</span>${s}`)];
-  if(allSp.length){
+  // Sorts — regroupés par catégorie
+  const hasSp=(C.cantrips?.length||0)+(C.spells?.length||0)+(C.itemSpells?.length||0)>0;
+  if(hasSp){
     $('pn-spells-hdr').style.display='';
-    $('pn-spells').innerHTML='<div style="font-size:9.5px;line-height:1.7;">'+allSp.join('<br>')+'</div>';
+    let spHtml='';
+    if(C.cantrips?.length){
+      spHtml+=`<div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#4338CA;margin:4px 0 2px;border-bottom:1px solid #C7D2FE;padding-bottom:1px;">SORTS MINEURS</div>`;
+      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.cantrips.map(sp=>`<span class="ps-spell-tag">✧</span>${sp}`).join('  ')+`</div>`;
+    }
+    if(C.spells?.length){
+      spHtml+=`<div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#4338CA;margin:4px 0 2px;border-bottom:1px solid #C7D2FE;padding-bottom:1px;">SORTS PRÉPARÉS</div>`;
+      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.spells.map(sp=>`<span class="ps-spell-tag">⚡</span>${sp}`).join('<br>')+`</div>`;
+    }
+    if(C.itemSpells?.length){
+      spHtml+=`<div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#7C3AED;margin:4px 0 2px;border-bottom:1px solid #DDD6FE;padding-bottom:1px;">SORTS D'OBJETS</div>`;
+      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.itemSpells.map(sp=>`<span class="ps-spell-tag" style="color:#7C3AED;">✦</span>${sp.name||sp}`).join('<br>')+`</div>`;
+    }
+    $('pn-spells').innerHTML=spHtml;
   } else {
     $('pn-spells-hdr').style.display='none';
     $('pn-spells').innerHTML='';
