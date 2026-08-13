@@ -31,6 +31,56 @@ function StatBox({ label, value, onChange }) {
   );
 }
 
+const PRINT_STYLE = `
+@media print {
+  /* Cache tout sauf la fiche */
+  body { background: #fff !important; color: #111 !important; }
+  .no-print { display: none !important; }
+
+  /* Réinitialise le fond sombre */
+  .print-root {
+    background: #fff !important;
+    min-height: unset !important;
+    padding: 0 !important;
+  }
+  .print-root > div { max-width: 100% !important; }
+
+  /* Blocs de section */
+  .print-section {
+    background: #fff !important;
+    border: 1.5px solid #bbb !important;
+    border-radius: 6px !important;
+    break-inside: avoid;
+    page-break-inside: avoid;
+    margin-bottom: 12px !important;
+  }
+
+  /* Textes */
+  h1, h2, p, span, li, textarea { color: #111 !important; }
+  .print-muted  { color: #555 !important; }
+  .print-label  { color: #666 !important; font-size: 9px !important; }
+
+  /* Stat boxes */
+  .print-stat {
+    background: #f5f5f5 !important;
+    border: 1px solid #ccc !important;
+    border-radius: 6px !important;
+  }
+  .print-stat span { color: #111 !important; }
+  .print-stat .print-mod { color: #7c4b00 !important; }
+
+  /* PV / CA */
+  .print-hp-cur { color: #b91c1c !important; }
+  .print-hp-max { color: #111 !important; }
+  .print-ac     { color: #1d4ed8 !important; }
+
+  /* Notes */
+  .print-notes { color: #333 !important; white-space: pre-wrap; }
+
+  @page { margin: 1.8cm 1.5cm; size: A4 portrait; }
+}
+`;
+
 export default function CharacterSheetPage() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -40,6 +90,13 @@ export default function CharacterSheetPage() {
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
+
+  const handlePrint = () => {
+    const prev = document.title;
+    document.title = char ? `${char.char_name} — Fiche D&D` : 'Fiche personnage';
+    window.print();
+    document.title = prev;
+  };
 
   // Champs éditables
   const [form, setForm] = useState({});
@@ -132,184 +189,206 @@ export default function CharacterSheetPage() {
   }
 
   return (
-    <div className="min-h-screen px-4 py-10 transition-colors"
-      style={{ background: editing
-        ? 'linear-gradient(135deg, #0a0804 0%, #140e06 60%, #1c1409 100%)'
-        : 'linear-gradient(135deg, #080604 0%, #0F0A06 60%, #160E08 100%)'
-      }}>
-      <div className="max-w-2xl mx-auto">
+    <>
+      {/* CSS d'impression injecté une seule fois */}
+      <style>{PRINT_STYLE}</style>
 
-        {/* Navigation */}
-        <div className="flex items-center justify-between mb-8">
-          <button onClick={() => navigate('/player')}
-            className="flex items-center gap-1.5 text-slate-500 hover:text-amber-400 text-sm transition-colors">
-            ← Mes personnages
-          </button>
-          {editing && (
-            <span className="text-xs text-amber-500/70 border border-amber-700/40 bg-amber-900/20 px-2.5 py-1 rounded-full">
-              ✏ Mode édition
-            </span>
-          )}
-        </div>
+      <div className="print-root min-h-screen px-4 py-10 transition-colors"
+        style={{ background: editing
+          ? 'linear-gradient(135deg, #0a0804 0%, #140e06 60%, #1c1409 100%)'
+          : 'linear-gradient(135deg, #080604 0%, #0F0A06 60%, #160E08 100%)'
+        }}>
+        <div className="max-w-2xl mx-auto">
 
-        {/* Bannière Level Up */}
-        {char.level_up_pending && (
-          <div className="mb-6 bg-yellow-500/10 border-2 border-yellow-500 rounded-2xl p-5 text-center animate-pulse">
-            <div className="text-4xl mb-2">⬆️</div>
-            <h3 className="text-xl font-black text-yellow-300 mb-1"
-              style={{ fontFamily: 'Cinzel, serif' }}>
-              Montée de niveau disponible !
-            </h3>
-            <p className="text-yellow-500 text-sm mb-4">
-              L'admin t'a accordé le niveau {char.level + 1}
-            </p>
-            <button
-              onClick={() => navigate(`/character/${id}/levelup`)}
-              className="px-6 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black text-sm transition-all">
-              ✦ Effectuer la montée de niveau
+          {/* Navigation */}
+          <div className="no-print flex items-center justify-between mb-8">
+            <button onClick={() => navigate('/player')}
+              className="flex items-center gap-1.5 text-slate-500 hover:text-amber-400 text-sm transition-colors">
+              ← Mes personnages
             </button>
-          </div>
-        )}
-
-        {/* Header personnage */}
-        <div className="flex items-center gap-5 mb-8">
-          <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-amber-700 flex items-center justify-center bg-slate-800 flex-shrink-0">
-            {char.portrait_url
-              ? <img src={char.portrait_url} alt={char.char_name} className="w-full h-full object-cover" />
-              : <span className="text-4xl">{char.portrait_emoji || '⚔️'}</span>
-            }
-          </div>
-          <div>
-            <h1 className="text-3xl font-black text-amber-200"
-              style={{ fontFamily: 'Cinzel, serif' }}>
-              {char.char_name}
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              {char.race_name} · {char.class_name} · Niveau {char.level}
-            </p>
-          </div>
-          <div className="ml-auto">
-            {editing ? (
-              <div className="flex gap-2">
-                <button onClick={() => { setEditing(false); loadChar(); }}
-                  className="px-3 py-2 rounded-xl border border-slate-600 text-slate-400 hover:text-slate-200 text-sm transition-all">
-                  Annuler
-                </button>
-                <button onClick={handleSave} disabled={saving}
-                  className="px-4 py-2 rounded-xl text-white font-bold text-sm transition-all disabled:opacity-50 hover:scale-[1.02]"
-                  style={{ background: saving ? '#78350f' : 'linear-gradient(135deg, #b45309, #d97706)' }}>
-                  {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
-                </button>
-              </div>
-            ) : (
-              <button onClick={() => setEditing(true)}
-                className="px-4 py-2 rounded-xl border border-amber-700/60 text-amber-400 hover:bg-amber-900/30 hover:border-amber-600 text-sm font-bold transition-all">
-                ✏ Modifier la fiche
-              </button>
+            {editing && (
+              <span className="text-xs text-amber-500/70 border border-amber-700/40 bg-amber-900/20 px-2.5 py-1 rounded-full">
+                ✏ Mode édition
+              </span>
             )}
           </div>
-        </div>
 
-        {saved && (
-          <div className="mb-4 bg-emerald-900/30 border border-emerald-600 rounded-xl px-4 py-2 text-emerald-300 text-sm text-center">
-            ✓ Sauvegardé
-          </div>
-        )}
-        {error && (
-          <div className="mb-4 bg-red-900/30 border border-red-600 rounded-xl px-4 py-2 text-red-300 text-sm">
-            {error}
-          </div>
-        )}
-
-        <div className="space-y-5">
-
-          {/* Stats de combat */}
-          <div className="bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Combat</h2>
-            <div className="grid grid-cols-3 gap-3">
-
-              <div className="flex flex-col items-center bg-slate-800 border border-red-900/50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase tracking-wider mb-1">PV actuels</span>
-                {editing
-                  ? <input type="number" value={form.current_hp} onChange={e => set('current_hp', parseInt(e.target.value) || 0)}
-                      className="w-16 text-center text-2xl font-black text-red-300 bg-transparent border-b border-red-600 outline-none" />
-                  : <span className="text-2xl font-black text-red-300">{char.current_hp}</span>
-                }
-                <span className="text-xs text-slate-500 mt-1">/ {editing ? form.max_hp : char.max_hp}</span>
-              </div>
-
-              <div className="flex flex-col items-center bg-slate-800 border border-slate-700 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase tracking-wider mb-1">PV max</span>
-                {editing
-                  ? <input type="number" value={form.max_hp} onChange={e => set('max_hp', parseInt(e.target.value) || 1)}
-                      className="w-16 text-center text-2xl font-black text-amber-200 bg-transparent border-b border-amber-600 outline-none" />
-                  : <span className="text-2xl font-black text-amber-200">{char.max_hp}</span>
-                }
-              </div>
-
-              <div className="flex flex-col items-center bg-slate-800 border border-blue-900/50 rounded-xl p-3">
-                <span className="text-xs text-slate-500 uppercase tracking-wider mb-1">Classe d'armure</span>
-                {editing
-                  ? <input type="number" value={form.ac} onChange={e => set('ac', parseInt(e.target.value) || 10)}
-                      className="w-16 text-center text-2xl font-black text-blue-300 bg-transparent border-b border-blue-600 outline-none" />
-                  : <span className="text-2xl font-black text-blue-300">{char.ac}</span>
-                }
-              </div>
-            </div>
-          </div>
-
-          {/* Caractéristiques */}
-          <div className="bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Caractéristiques</h2>
-            <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-              {Object.entries(STAT_NAMES).map(([key, label]) => (
-                editing
-                  ? <StatBox key={key} label={label} value={form.stats[key] || 10} onChange={v => setStat(key, v)} />
-                  : (
-                    <div key={key} className="flex flex-col items-center bg-slate-800 border border-slate-700 rounded-xl p-3 gap-1">
-                      <span className="text-xs text-slate-500 uppercase tracking-wider">{label}</span>
-                      <span className="text-xl font-black text-amber-200">{char.sheet_data?.stats?.[key] ?? 10}</span>
-                      <span className="text-sm font-bold text-amber-400">{modifier(char.sheet_data?.stats?.[key] ?? 10)}</span>
-                    </div>
-                  )
-              ))}
-            </div>
-          </div>
-
-          {/* Notes */}
-          <div className="bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
-            <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Notes & historique</h2>
-            {editing
-              ? <textarea
-                  value={form.notes}
-                  onChange={e => set('notes', e.target.value)}
-                  rows={5}
-                  placeholder="Historique, traits de personnalité, alliés, ennemis..."
-                  className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-amber-500 transition-colors resize-none"
-                />
-              : <p className="text-slate-400 text-sm whitespace-pre-wrap min-h-[60px]">
-                  {char.notes || <span className="text-slate-600 italic">Aucune note.</span>}
-                </p>
-            }
-          </div>
-
-          {/* Équipement (lecture seule pour l'instant) */}
-          {char.sheet_data?.equipment?.length > 0 && (
-            <div className="bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
-              <h2 className="text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Équipement</h2>
-              <ul className="space-y-1">
-                {char.sheet_data.equipment.map((item, i) => (
-                  <li key={i} className="text-slate-300 text-sm flex items-center gap-2">
-                    <span className="text-slate-600">·</span> {item.name || item}
-                    {item.quantity > 1 && <span className="text-slate-500 text-xs">×{item.quantity}</span>}
-                  </li>
-                ))}
-              </ul>
+          {/* Bannière Level Up */}
+          {char.level_up_pending && (
+            <div className="no-print mb-6 bg-yellow-500/10 border-2 border-yellow-500 rounded-2xl p-5 text-center animate-pulse">
+              <div className="text-4xl mb-2">⬆️</div>
+              <h3 className="text-xl font-black text-yellow-300 mb-1"
+                style={{ fontFamily: 'Cinzel, serif' }}>
+                Montée de niveau disponible !
+              </h3>
+              <p className="text-yellow-500 text-sm mb-4">
+                L'admin t'a accordé le niveau {char.level + 1}
+              </p>
+              <button
+                onClick={() => navigate(`/character/${id}/levelup`)}
+                className="px-6 py-2.5 rounded-xl bg-yellow-500 hover:bg-yellow-400 text-slate-900 font-black text-sm transition-all">
+                ✦ Effectuer la montée de niveau
+              </button>
             </div>
           )}
 
+          {/* Header personnage */}
+          <div className="flex items-center gap-5 mb-8">
+            <div className="w-20 h-20 rounded-2xl overflow-hidden border-2 border-amber-700 flex items-center justify-center bg-slate-800 flex-shrink-0">
+              {char.portrait_url
+                ? <img src={char.portrait_url} alt={char.char_name} className="w-full h-full object-cover" />
+                : <span className="text-4xl">{char.portrait_emoji || '⚔️'}</span>
+              }
+            </div>
+            <div>
+              <h1 className="text-3xl font-black text-amber-200"
+                style={{ fontFamily: 'Cinzel, serif' }}>
+                {char.char_name}
+              </h1>
+              <p className="print-muted text-slate-400 text-sm mt-1">
+                {char.race_name} · {char.class_name} · Niveau {char.level}
+              </p>
+            </div>
+
+            {/* Boutons d'action — masqués à l'impression */}
+            <div className="no-print ml-auto flex items-center gap-2">
+              {/* Bouton PDF */}
+              {!editing && (
+                <button onClick={handlePrint}
+                  title="Exporter en PDF"
+                  className="px-3 py-2 rounded-xl border border-slate-600 text-slate-400 hover:text-amber-300 hover:border-amber-700/60 text-sm font-bold transition-all flex items-center gap-1.5">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14,2 14,8 20,8"/>
+                    <line x1="12" y1="18" x2="12" y2="12"/>
+                    <polyline points="9,15 12,18 15,15"/>
+                  </svg>
+                  PDF
+                </button>
+              )}
+
+              {editing ? (
+                <div className="flex gap-2">
+                  <button onClick={() => { setEditing(false); loadChar(); }}
+                    className="px-3 py-2 rounded-xl border border-slate-600 text-slate-400 hover:text-slate-200 text-sm transition-all">
+                    Annuler
+                  </button>
+                  <button onClick={handleSave} disabled={saving}
+                    className="px-4 py-2 rounded-xl text-white font-bold text-sm transition-all disabled:opacity-50 hover:scale-[1.02]"
+                    style={{ background: saving ? '#78350f' : 'linear-gradient(135deg, #b45309, #d97706)' }}>
+                    {saving ? 'Sauvegarde…' : '✓ Sauvegarder'}
+                  </button>
+                </div>
+              ) : (
+                <button onClick={() => setEditing(true)}
+                  className="px-4 py-2 rounded-xl border border-amber-700/60 text-amber-400 hover:bg-amber-900/30 hover:border-amber-600 text-sm font-bold transition-all">
+                  ✏ Modifier
+                </button>
+              )}
+            </div>
+          </div>
+
+          {saved && (
+            <div className="no-print mb-4 bg-emerald-900/30 border border-emerald-600 rounded-xl px-4 py-2 text-emerald-300 text-sm text-center">
+              ✓ Sauvegardé
+            </div>
+          )}
+          {error && (
+            <div className="no-print mb-4 bg-red-900/30 border border-red-600 rounded-xl px-4 py-2 text-red-300 text-sm">
+              {error}
+            </div>
+          )}
+
+          <div className="space-y-5">
+
+            {/* Stats de combat */}
+            <div className="print-section bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
+              <h2 className="print-label text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Combat</h2>
+              <div className="grid grid-cols-3 gap-3">
+
+                <div className="print-stat flex flex-col items-center bg-slate-800 border border-red-900/50 rounded-xl p-3">
+                  <span className="print-label text-xs text-slate-500 uppercase tracking-wider mb-1">PV actuels</span>
+                  {editing
+                    ? <input type="number" value={form.current_hp} onChange={e => set('current_hp', parseInt(e.target.value) || 0)}
+                        className="w-16 text-center text-2xl font-black text-red-300 bg-transparent border-b border-red-600 outline-none" />
+                    : <span className="print-hp-cur text-2xl font-black text-red-300">{char.current_hp}</span>
+                  }
+                  <span className="print-muted text-xs text-slate-500 mt-1">/ {editing ? form.max_hp : char.max_hp}</span>
+                </div>
+
+                <div className="print-stat flex flex-col items-center bg-slate-800 border border-slate-700 rounded-xl p-3">
+                  <span className="print-label text-xs text-slate-500 uppercase tracking-wider mb-1">PV max</span>
+                  {editing
+                    ? <input type="number" value={form.max_hp} onChange={e => set('max_hp', parseInt(e.target.value) || 1)}
+                        className="w-16 text-center text-2xl font-black text-amber-200 bg-transparent border-b border-amber-600 outline-none" />
+                    : <span className="print-hp-max text-2xl font-black text-amber-200">{char.max_hp}</span>
+                  }
+                </div>
+
+                <div className="print-stat flex flex-col items-center bg-slate-800 border border-blue-900/50 rounded-xl p-3">
+                  <span className="print-label text-xs text-slate-500 uppercase tracking-wider mb-1">Classe d'armure</span>
+                  {editing
+                    ? <input type="number" value={form.ac} onChange={e => set('ac', parseInt(e.target.value) || 10)}
+                        className="w-16 text-center text-2xl font-black text-blue-300 bg-transparent border-b border-blue-600 outline-none" />
+                    : <span className="print-ac text-2xl font-black text-blue-300">{char.ac}</span>
+                  }
+                </div>
+              </div>
+            </div>
+
+            {/* Caractéristiques */}
+            <div className="print-section bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
+              <h2 className="print-label text-sm font-bold text-slate-400 uppercase tracking-wider mb-4">Caractéristiques</h2>
+              <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                {Object.entries(STAT_NAMES).map(([key, label]) => (
+                  editing
+                    ? <StatBox key={key} label={label} value={form.stats[key] || 10} onChange={v => setStat(key, v)} />
+                    : (
+                      <div key={key} className="print-stat flex flex-col items-center bg-slate-800 border border-slate-700 rounded-xl p-3 gap-1">
+                        <span className="print-label text-xs text-slate-500 uppercase tracking-wider">{label}</span>
+                        <span className="print-hp-max text-xl font-black text-amber-200">{char.sheet_data?.stats?.[key] ?? 10}</span>
+                        <span className="print-mod print-ac text-sm font-bold text-amber-400">{modifier(char.sheet_data?.stats?.[key] ?? 10)}</span>
+                      </div>
+                    )
+                ))}
+              </div>
+            </div>
+
+            {/* Notes */}
+            <div className="print-section bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
+              <h2 className="print-label text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Notes & historique</h2>
+              {editing
+                ? <textarea
+                    value={form.notes}
+                    onChange={e => set('notes', e.target.value)}
+                    rows={5}
+                    placeholder="Historique, traits de personnalité, alliés, ennemis..."
+                    className="w-full bg-slate-800 border border-slate-600 rounded-xl px-4 py-3 text-slate-200 text-sm focus:outline-none focus:border-amber-500 transition-colors resize-none"
+                  />
+                : <p className="print-notes text-slate-400 text-sm whitespace-pre-wrap min-h-[60px]">
+                    {char.notes || <span className="text-slate-600 italic">Aucune note.</span>}
+                  </p>
+              }
+            </div>
+
+            {/* Équipement */}
+            {char.sheet_data?.equipment?.length > 0 && (
+              <div className="print-section bg-slate-900/80 border border-slate-700 rounded-2xl p-5">
+                <h2 className="print-label text-sm font-bold text-slate-400 uppercase tracking-wider mb-3">Équipement</h2>
+                <ul className="space-y-1">
+                  {char.sheet_data.equipment.map((item, i) => (
+                    <li key={i} className="print-muted text-slate-300 text-sm flex items-center gap-2">
+                      <span className="text-slate-600">·</span> {item.name || item}
+                      {item.quantity > 1 && <span className="text-slate-500 text-xs">×{item.quantity}</span>}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+
+          </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
