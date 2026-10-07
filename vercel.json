@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    { "source": "/mythomancer", "destination": "/mythomancer/index.html" },
+    { "source": "/mythomancer/", "destination": "/mythomancer/index.html" },
+    { "source": "/mythomancer/conditions", "destination": "/mythomancer/conditions.html" },
+    { "source": "/mythomancer/confidentialite", "destination": "/mythomancer/confidentialite.html" },
     {
       "source": "/(.*)",
       "destination": "/index.html"
