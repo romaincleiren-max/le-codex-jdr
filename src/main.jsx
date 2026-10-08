@@ -21,6 +21,7 @@ import { LanguageProvider, useLanguage } from './i18n';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
+import { observeAdminSession } from './lib/adminSession.mjs';
 import ScenarioCarousel from './components/carousel/ScenarioCarousel';
 import { processCheckout } from './services/stripeService';
 import StatsDisplay from './components/StatsDisplay';
@@ -2012,76 +2013,11 @@ export default function App() {
   
   // Vérifier l'authentification Supabase au chargement
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user) {
-          setIsLoggedIn(true);
-          // Vérifier le cache d'abord
-          const cachedAdminStatus = sessionStorage.getItem(`admin_status_${session.user.id}`);
-
-          if (cachedAdminStatus !== null) {
-            // Utiliser le cache pour une réponse instantanée
-            setIsAuthenticated(cachedAdminStatus === 'true');
-            setAuthLoading(false);
-          } else {
-            // Vérifier si l'utilisateur est admin dans la base
-            const { data: adminCheck } = await supabase
-              .from('admin_users')
-              .select('*')
-              .eq('email', session.user.email)
-              .single();
-
-            const isAdmin = !!adminCheck;
-            setIsAuthenticated(isAdmin);
-
-            // Mettre en cache pour 1 heure
-            sessionStorage.setItem(`admin_status_${session.user.id}`, isAdmin.toString());
-            setAuthLoading(false);
-          }
-        } else {
-          setIsLoggedIn(false);
-          setIsAuthenticated(false);
-          setAuthLoading(false);
-        }
-      } catch (error) {
-        console.error('Erreur vérification auth:', error);
-        setIsAuthenticated(false);
-        setAuthLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    // Écouter les changements d'authentification
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (_event === 'SIGNED_OUT') {
-        sessionStorage.clear();
-        setIsAuthenticated(false);
-        setIsLoggedIn(false);
-      } else if (session?.user) {
-        setIsLoggedIn(true);
-        const cachedAdminStatus = sessionStorage.getItem(`admin_status_${session.user.id}`);
-        if (cachedAdminStatus !== null) {
-          setIsAuthenticated(cachedAdminStatus === 'true');
-        } else {
-          const { data: adminCheck } = await supabase
-            .from('admin_users')
-            .select('*')
-            .eq('email', session.user.email)
-            .single();
-          const isAdmin = !!adminCheck;
-          setIsAuthenticated(isAdmin);
-          sessionStorage.setItem(`admin_status_${session.user.id}`, isAdmin.toString());
-        }
-      } else {
-        setIsAuthenticated(false);
-        setIsLoggedIn(false);
-      }
+    return observeAdminSession(supabase, ({ user, isAdmin, loading }) => {
+      setIsLoggedIn(Boolean(user));
+      setIsAuthenticated(isAdmin);
+      setAuthLoading(loading);
     });
-
-    return () => subscription.unsubscribe();
   }, []);
   
   // Utiliser les données Supabase avec fallback

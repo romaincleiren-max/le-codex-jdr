@@ -40,6 +40,11 @@ export const LoginPage = () => {
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
 
     if (authError) {
+      if (authError.code !== 'invalid_credentials') {
+        loginRateLimiter.reset();
+        setError('Connexion impossible pour le moment. Vérifiez votre connexion ou réessayez plus tard.');
+        return;
+      }
       const remaining = attemptResult.remaining;
       setError(`Identifiants incorrects.${remaining > 0 ? ` ${remaining} tentative(s) restante(s).` : ' Compte temporairement bloqué.'}`);
       setPassword('');
@@ -49,7 +54,12 @@ export const LoginPage = () => {
     loginRateLimiter.reset();
 
     const { data: adminCheck, error: adminError } = await supabase
-      .from('admin_users').select('id').eq('email', data.user.email).single();
+      .from('admin_users').select('id').eq('email', data.user.email).maybeSingle();
+
+    if (adminError) {
+      setError('Connexion réussie, mais impossible de vérifier les droits administrateur. Réessayez dans un instant.');
+      return;
+    }
 
     const isAdmin = !adminError && !!adminCheck;
     const defaultDest = isAdmin ? '/admin' : '/';
