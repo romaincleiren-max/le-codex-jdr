@@ -1,3 +1,4 @@
+import PdfAction from "../PdfAction";
 import React, { useState, useRef, useEffect } from 'react';
 import { Star, Clock, Download, ShoppingCart } from 'lucide-react';
 import { useLanguage } from '../../i18n';
@@ -305,56 +306,7 @@ const ScenarioCarousel = ({
             )}
 
             <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
-              {saga.isFree ? (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDownloadFree(saga.pdfUrl, saga.name);
-                  }}
-                  style={{
-                    flex: 1,
-                    background: 'linear-gradient(135deg, #10b981, #059669)',
-                    color: 'white',
-                    padding: '0.75rem 1rem',
-                    borderRadius: '0.5rem',
-                    border: 'none',
-                    fontWeight: 'bold',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.5rem'
-                  }}
-                >
-                  <Download size={18} /> {t('carousel.download')}
-                </button>
-              ) : (
-                <>
-                  <span style={{ fontSize: '1.25rem', fontWeight: 'bold', color: colors.primary }}>
-                    {saga.price.toFixed(2)} €
-                  </span>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onAddToCart({ type: 'saga', item: saga });
-                    }}
-                    style={{
-                      flex: 1,
-                      background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                      color: 'white',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '0.5rem',
-                      border: 'none',
-                      fontWeight: 'bold',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem'
-                    }}
-                  >
-                    <ShoppingCart size={18} /> {t('carousel.add')}
-                  </button>
-                </>
-              )}
+              <PdfAction item={saga} type="saga" onAddToCart={onAddToCart} />
             </div>
           </div>
         </div>
@@ -470,58 +422,7 @@ const ScenarioCarousel = ({
 
               {/* Actions */}
               <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                {scenario.isFree ? (
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDownloadFree(scenario.pdfUrl, scenario.displayName);
-                    }}
-                    style={{
-                      flex: 1,
-                      background: 'linear-gradient(135deg, #10b981, #059669)',
-                      color: 'white',
-                      padding: '0.75rem 1rem',
-                      borderRadius: '0.5rem',
-                      border: 'none',
-                      fontWeight: 'bold',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      gap: '0.5rem',
-                      fontSize: '0.875rem'
-                    }}
-                  >
-                    <Download size={16} /> {t('carousel.download')}
-                  </button>
-                ) : (
-                  <>
-                    <span style={{ fontSize: '1.125rem', fontWeight: 'bold', color: colors.primary }}>
-                      {scenario.price.toFixed(2)} €
-                    </span>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onAddToCart({ type: 'scenario', item: scenario, saga });
-                      }}
-                      style={{
-                        flex: 1,
-                        background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                        color: 'white',
-                        padding: '0.75rem 1rem',
-                        borderRadius: '0.5rem',
-                        border: 'none',
-                        fontWeight: 'bold',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        gap: '0.5rem',
-                        fontSize: '0.875rem'
-                      }}
-                    >
-                      <ShoppingCart size={16} /> {t('carousel.add')}
-                    </button>
-                  </>
-                )}
+                <PdfAction item={scenario} type="scenario" saga={saga} onAddToCart={onAddToCart} />
               </div>
             </div>
           </div>
@@ -726,35 +627,7 @@ const ScenarioCarousel = ({
 
                   {/* Actions */}
                   <div className="scenario-actions">
-                    {saga.isFree ? (
-                      <button 
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onDownloadFree(saga.pdfUrl, saga.name);
-                        }}
-                        className="scenario-button download"
-                        style={{ width: '100%' }}
-                      >
-                        <Download size={18} />
-                        {t('carousel.downloadCampaign')}
-                      </button>
-                    ) : (
-                      <>
-                        <div className="scenario-price" style={{ fontSize: '1.5rem' }}>
-                          {saga.price.toFixed(2)} €
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onAddToCart({ type: 'saga', item: saga });
-                          }}
-                          className="scenario-button cart"
-                        >
-                          <ShoppingCart size={18} />
-                          {t('carousel.add')}
-                        </button>
-                      </>
-                    )}
+                    <PdfAction item={saga} type="saga" onAddToCart={onAddToCart} />
                   </div>
                   
                   {!saga.isFree && (
@@ -912,32 +785,7 @@ const ScenarioCarousel = ({
 
                 {/* Actions */}
                 <div className="scenario-actions">
-                  {scenario.isFree ? (
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onDownloadFree(scenario.pdfUrl, scenario.displayName);
-                      }}
-                      className="scenario-button download"
-                    >
-                      <Download size={18} />
-                      {t('carousel.download')}
-                    </button>
-                  ) : (
-                    <>
-                      <div className="scenario-price">{scenario.price.toFixed(2)} €</div>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onAddToCart({ type: 'scenario', item: scenario, saga });
-                        }}
-                        className="scenario-button cart"
-                      >
-                        <ShoppingCart size={18} />
-                        {t('carousel.add')}
-                      </button>
-                    </>
-                  )}
+                  <PdfAction item={scenario} type="scenario" saga={saga} onAddToCart={onAddToCart} />
                 </div>
               </div>
             </div>

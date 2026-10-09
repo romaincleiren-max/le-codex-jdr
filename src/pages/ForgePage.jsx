@@ -10,7 +10,7 @@ export default function ForgePage({ onNavigate }) {
 
   useEffect(() => {
     const handler = (e) => {
-      if (e.data === 'go:initiative') {
+      if (e.origin === window.location.origin && e.source === iframeRef.current?.contentWindow && e.data === 'go:initiative') {
         onNavigate('initiative');
       }
     };

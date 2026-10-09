@@ -1,0 +1,19 @@
+{
+  "date": "2026-10-09T23:15:07.367Z",
+  "results": [
+    {
+      "width": 390,
+      "pdfDownloaded": true,
+      "adminRequiresLogin": true,
+      "recoveryPages": true,
+      "javascriptErrors": 0
+    },
+    {
+      "width": 1440,
+      "pdfDownloaded": true,
+      "adminRequiresLogin": true,
+      "recoveryPages": true,
+      "javascriptErrors": 0
+    }
+  ]
+}

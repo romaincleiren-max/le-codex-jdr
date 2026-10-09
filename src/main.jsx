@@ -1,3 +1,6 @@
+import PdfAction from "./components/PdfAction";
+import PdfEditionsEditor from "./components/PdfEditionsEditor";
+import { pdfEditions } from "./lib/pdfEditions.mjs";
 // ============================================================================
 // LE CODEX - APPLICATION COMPLÈTE
 // Toutes les pages Admin, Stats, À propos + Gestion Gratuit/Payant
@@ -10,6 +13,7 @@ import { BrowserRouter, Routes, Route, Navigate, useNavigate, useLocation } from
 import { Download, Star, Clock, ChevronLeft, ChevronRight, ShoppingCart, Trash2, CreditCard, Check, Edit, Plus, X, Lock, Menu, User, LogOut } from 'lucide-react';
 import TestSupabase from './pages/TestSupabase';
 import { LoginPage } from './pages/LoginPage';
+import PasswordRecoveryPage from './pages/PasswordRecoveryPage';
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { PlayerRoute } from './components/PlayerRoute';
@@ -145,59 +149,9 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
         </div>
         
         <div className="space-y-3 mb-4">
-          {scenario.isFree ? (
-            <div className="bg-green-100 border-2 border-green-700 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-green-900">📥 {t('book.individualScenario')}</span>
-                <span className="text-2xl font-bold text-green-800">{t('book.free')}</span>
-              </div>
-              <button
-                onClick={() => onDownloadFree(scenario.pdfUrl, scenario.displayName)}
-                className="w-full bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center justify-center gap-2 font-semibold">
-                <Download size={18} />{t('book.downloadPdf')}
-              </button>
-            </div>
-          ) : (
-            <div className="bg-amber-200 border-2 border-amber-800 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-amber-900">🛒 {t('book.individualScenario')}</span>
-                <span className="text-2xl font-bold text-amber-800">{scenario.price.toFixed(2)} €</span>
-              </div>
-              <button 
-                onClick={() => onAddToCart({ type: 'scenario', item: scenario, saga })}
-                className={`w-full ${colors.primary} text-white px-4 py-2 rounded ${colors.hover} flex items-center justify-center gap-2 font-semibold`}>
-                <ShoppingCart size={18} />{t('book.addToCart')}
-              </button>
-            </div>
-          )}
+          <PdfAction item={scenario} type="scenario" saga={saga} onAddToCart={onAddToCart} />
 
-          {saga.isFree ? (
-            <div className="bg-green-100 border-2 border-green-700 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-green-900">📥 {t('book.fullCampaign')}</span>
-                <span className="text-2xl font-bold text-green-800">{t('book.free')}</span>
-              </div>
-              <p className="text-xs text-green-700 mb-2">{saga.scenarios.length} {t('book.scenariosIncluded')}</p>
-              <button
-                onClick={() => onDownloadFree(saga.pdfUrl, saga.name)}
-                className="w-full bg-green-700 text-white px-4 py-2 rounded hover:bg-green-600 flex items-center justify-center gap-2 font-semibold">
-                <Download size={18} />{t('book.downloadPdf')}
-              </button>
-            </div>
-          ) : (
-            <div className="bg-amber-200 border-2 border-amber-800 rounded-lg p-4">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-lg font-bold text-amber-900">🛒 {t('book.fullCampaign')}</span>
-                <span className="text-2xl font-bold text-amber-800">{saga.price.toFixed(2)} €</span>
-              </div>
-              <p className="text-xs text-amber-700 mb-2">{t('book.save')} {((saga.scenarios.filter(s => !s.isFree).reduce((sum, s) => sum + s.price, 0) - saga.price).toFixed(2))} €</p>
-              <button 
-                onClick={() => onAddToCart({ type: 'saga', item: saga })}
-                className={`w-full ${colors.primary} text-white px-4 py-2 rounded ${colors.hover} flex items-center justify-center gap-2 font-semibold`}>
-                <ShoppingCart size={18} />{t('book.addToCart')}
-              </button>
-            </div>
-          )}
+          <PdfAction item={saga} type="saga" onAddToCart={onAddToCart} />
         </div>
 
         {hasNextCampaign && (
@@ -211,6 +165,7 @@ const BookPage = ({ scenario, theme, side, onNextCampaign, onPreviousCampaign, h
 };
 
 const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
+  const [pdfUploading, setPdfUploading] = useState(false);
   const [editedSaga, setEditedSaga] = useState(saga ? {
     ...saga,
     // Mapper les champs snake_case vers camelCase
@@ -240,6 +195,7 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
     e.preventDefault();
     console.log('🔧 CampaignEditModal - handleSubmit appelé avec:', editedSaga);
     try {
+      if (pdfUploading) return;
       await onSave(editedSaga);
       // onSave (saveCampaign) fermera le modal en cas de succès
     } catch (error) {
@@ -324,16 +280,7 @@ const CampaignEditModal = ({ saga, onSave, onClose, themes }) => {
             />
           </div>
 
-          <div>
-            <label className="block text-amber-900 font-bold mb-2">URL du PDF (campagne complète)</label>
-            <input 
-              type="text"
-              value={editedSaga.pdfUrl}
-              onChange={(e) => setEditedSaga({...editedSaga, pdfUrl: e.target.value})}
-              className="w-full px-4 py-2 border-2 border-amber-700 rounded focus:outline-none focus:border-amber-900"
-              placeholder="/pdfs/ma-campagne.pdf"
-            />
-          </div>
+          <PdfEditionsEditor item={editedSaga} onChange={setEditedSaga} onBusyChange={setPdfUploading} />
 
           <div>
             <label className="block text-amber-900 font-bold mb-2">Image d'arrière-plan du livre</label>
@@ -438,10 +385,10 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
   if (!scenario) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-2 md:p-4" onClick={onClose}>
+    <div role="dialog" aria-modal="true" aria-label={tf(scenario, 'displayName')} className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 p-2 md:p-4" onClick={onClose}>
       <div className="relative max-w-6xl w-full max-h-[95vh] md:max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <button
-          onClick={onClose}
+          aria-label="Fermer le détail" onClick={onClose}
           className="fixed top-2 right-2 md:top-4 md:right-4 bg-amber-800 text-white p-2 md:p-3 rounded-full hover:bg-amber-700 shadow-2xl z-50">
           <X size={24} className="md:w-8 md:h-8" />
         </button>
@@ -457,7 +404,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
           </div>
 
           {/* Colonne droite - Détails */}
-          <div className="bg-amber-100 border-2 md:border-4 border-amber-900 rounded-lg p-4 md:p-8 shadow-2xl">
+          <div className="bg-amber-100 text-amber-900 border-2 md:border-4 border-amber-900 rounded-lg p-4 md:p-8 shadow-2xl">
             <h2 className="text-2xl md:text-4xl font-bold text-amber-900 mb-4 font-serif">{tf(scenario, 'displayName')}</h2>
 
             <div className="mb-6">
@@ -540,33 +487,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
               </div>
             </div>
 
-            {scenario.isFree ? (
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDownloadFree(scenario.pdfUrl, scenario.displayName);
-                }}
-                className="w-full bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 flex items-center justify-center gap-2 font-bold text-lg">
-                <Download size={24} />{t('book.downloadPdf')}
-              </button>
-            ) : (
-              <div className="space-y-3">
-                <div className="bg-amber-50 border-2 border-amber-700 rounded-lg p-4">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-lg font-bold text-amber-900">{t('book.individualScenario')}</span>
-                    <span className="text-3xl font-bold text-amber-800">{scenario.price.toFixed(2)} €</span>
-                  </div>
-                </div>
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart({ type: 'scenario', item: scenario, saga });
-                  }}
-                  className="w-full bg-amber-800 text-white px-6 py-4 rounded-lg hover:bg-amber-700 flex items-center justify-center gap-2 font-bold text-lg">
-                  <ShoppingCart size={24} />{t('book.addToCart')}
-                </button>
-              </div>
-            )}
+            <PdfAction item={scenario} type="scenario" saga={saga} onAddToCart={onAddToCart} />
           </div>
         </div>
       </div>
@@ -575,6 +496,7 @@ const ScenarioDetailModal = ({ scenario, saga, onClose, onDownloadFree, onAddToC
 };
 
 const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
+  const [pdfUploading, setPdfUploading] = useState(false);
   const [editedScenario, setEditedScenario] = useState(scenario ? {
     ...scenario,
     displayNameEn: scenario.displayNameEn || scenario.display_name_en || '',
@@ -601,7 +523,7 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSave(editedScenario);
+    if (!pdfUploading) onSave(editedScenario);
   };
 
   const addTag = () => {
@@ -746,16 +668,7 @@ const ScenarioEditModal = ({ scenario, saga, onSave, onClose, tags }) => {
             )}
           </div>
 
-          <div>
-            <label className="block text-amber-900 font-bold mb-2">URL du PDF</label>
-            <input 
-              type="text"
-              value={editedScenario.pdfUrl}
-              onChange={(e) => setEditedScenario({...editedScenario, pdfUrl: e.target.value})}
-              className="w-full px-4 py-2 border-2 border-amber-700 rounded focus:outline-none focus:border-amber-900"
-              placeholder="/pdfs/mon-scenario.pdf"
-            />
-          </div>
+          <PdfEditionsEditor item={editedScenario} onChange={setEditedScenario} onBusyChange={setPdfUploading} />
 
           <div>
             <label className="block text-amber-900 font-bold mb-3">Notations</label>
@@ -1094,166 +1007,31 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
   );
 };
 
-const CheckoutPage = ({ cart, onBack, onOrderComplete }) => {
-  const { t, tf } = useLanguage();
-  const [formData, setFormData] = useState({
-    firstName: '', lastName: '', email: '', confirmEmail: '',
-    address: '', city: '', postalCode: '', country: 'France',
-    cardNumber: '', cardName: '', expiryDate: '', cvv: ''
-  });
-
-  const [formErrors, setFormErrors] = useState({});
-  const [isProcessing, setIsProcessing] = useState(false);
-  const total = cart.reduce((sum, item) => sum + (item.type === 'saga' ? item.item.price : item.item.price), 0);
-
-  const validateForm = () => {
-    const errors = {};
-    if (!formData.firstName.trim()) errors.firstName = t('checkout.firstNameRequired');
-    if (!formData.lastName.trim()) errors.lastName = t('checkout.lastNameRequired');
-    if (!formData.email.trim()) errors.email = t('checkout.emailRequired');
-    if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = t('checkout.emailInvalid');
-    if (formData.email !== formData.confirmEmail) errors.confirmEmail = t('checkout.emailMismatch');
-    if (!formData.cardNumber.trim() || formData.cardNumber.replace(/\s/g, '').length !== 16) errors.cardNumber = t('checkout.cardNumberInvalid');
-    if (!formData.cvv.trim() || formData.cvv.length !== 3) errors.cvv = t('checkout.cvvInvalid');
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+const CheckoutPage = ({ cart, onBack }) => {
+  const { language, tf } = useLanguage(); const en = language === 'en';
+  const [busy, setBusy] = useState(false); const [error, setError] = useState('');
+  const total = cart.reduce((sum, entry) => sum + Number(entry.item.price), 0);
+  const pay = async () => {
+    setBusy(true); setError('');
+    try { await processCheckout(cart); }
+    catch (e) { setError(e.message); setBusy(false); }
   };
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (validateForm()) {
-    setIsProcessing(true);
-    try {
-      // Utiliser le vrai système de paiement Stripe
-      await processCheckout(cart, {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email
-      });
-      // La redirection vers Stripe Checkout se fait automatiquement
-    } catch (error) {
-      console.error('❌ Erreur lors du paiement:', error);
-      alert(t('checkout.sessionError'));
-      setIsProcessing(false);
-    }
-  }
-};
-
-  const handleInputChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
-    if (formErrors[field]) setFormErrors({ ...formErrors, [field]: null });
-  };
-
-  const formatCardNumber = (value) => {
-    if (!value || typeof value !== 'string') return '';
-    const cleaned = value.replace(/\s/g, '');
-    const chunks = cleaned.match(/.{1,4}/g) || [];
-    return chunks.join(' ').substr(0, 19);
-  };
-
-  return (
-    <div className="min-h-screen bg-slate-900 py-8">
-      <div className="max-w-6xl mx-auto px-4">
-        <button onClick={onBack} className="mb-6 bg-amber-800 text-white px-4 py-2 rounded hover:bg-amber-700 flex items-center gap-2">
-          <ChevronLeft size={20} />{t('checkout.back')}
-        </button>
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-amber-100 border-4 border-amber-900 rounded-lg p-8">
-            <h1 className="text-3xl font-bold text-amber-900 mb-6">{t('checkout.payment')}</h1>
-            
-            <form onSubmit={handleSubmit} className="space-y-6">
-              <div>
-                <h2 className="text-xl font-bold text-amber-900 mb-4">{t('checkout.information')}</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.firstName')}</label>
-                    <input type="text" value={formData.firstName} onChange={(e) => handleInputChange('firstName', e.target.value)}
-                      className={`w-full px-4 py-2 border-2 rounded ${formErrors.firstName ? 'border-red-500' : 'border-amber-700'}`} />
-                    {formErrors.firstName && <p className="text-red-600 text-sm mt-1">{formErrors.firstName}</p>}
-                  </div>
-                  <div>
-                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.lastName')}</label>
-                    <input type="text" value={formData.lastName} onChange={(e) => handleInputChange('lastName', e.target.value)}
-                      className={`w-full px-4 py-2 border-2 rounded ${formErrors.lastName ? 'border-red-500' : 'border-amber-700'}`} />
-                    {formErrors.lastName && <p className="text-red-600 text-sm mt-1">{formErrors.lastName}</p>}
-                  </div>
-                </div>
-                
-                <div className="mt-4">
-                  <label className="block text-amber-900 font-bold mb-2">{t('checkout.email')}</label>
-                  <input type="email" value={formData.email} onChange={(e) => handleInputChange('email', e.target.value)}
-                    className={`w-full px-4 py-2 border-2 rounded ${formErrors.email ? 'border-red-500' : 'border-amber-700'}`} />
-                  {formErrors.email && <p className="text-red-600 text-sm mt-1">{formErrors.email}</p>}
-                </div>
-                
-                <div className="mt-4">
-                  <label className="block text-amber-900 font-bold mb-2">{t('checkout.confirmEmail')}</label>
-                  <input type="email" value={formData.confirmEmail} onChange={(e) => handleInputChange('confirmEmail', e.target.value)}
-                    className={`w-full px-4 py-2 border-2 rounded ${formErrors.confirmEmail ? 'border-red-500' : 'border-amber-700'}`} />
-                  {formErrors.confirmEmail && <p className="text-red-600 text-sm mt-1">{formErrors.confirmEmail}</p>}
-                </div>
-              </div>
-
-              <div>
-                <h2 className="text-xl font-bold text-amber-900 mb-4">{t('checkout.payment')}</h2>
-                <div>
-                  <label className="block text-amber-900 font-bold mb-2">{t('checkout.cardNumber')}</label>
-                  <input type="text" value={formData.cardNumber} onChange={(e) => handleInputChange('cardNumber', formatCardNumber(e.target.value))}
-                    placeholder="1234 5678 9012 3456" maxLength="19"
-                    className={`w-full px-4 py-2 border-2 rounded ${formErrors.cardNumber ? 'border-red-500' : 'border-amber-700'}`} />
-                  {formErrors.cardNumber && <p className="text-red-600 text-sm mt-1">{formErrors.cardNumber}</p>}
-                </div>
-                
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.expiration')}</label>
-                    <input type="text" value={formData.expiryDate} onChange={(e) => handleInputChange('expiryDate', e.target.value)}
-                      placeholder="MM/AA" maxLength="5" className="w-full px-4 py-2 border-2 border-amber-700 rounded" />
-                  </div>
-                  <div>
-                    <label className="block text-amber-900 font-bold mb-2">{t('checkout.cvv')}</label>
-                    <input type="text" value={formData.cvv} onChange={(e) => handleInputChange('cvv', e.target.value.replace(/\D/g, '').substr(0, 3))}
-                      placeholder="123" maxLength="3"
-                      className={`w-full px-4 py-2 border-2 rounded ${formErrors.cvv ? 'border-red-500' : 'border-amber-700'}`} />
-                    {formErrors.cvv && <p className="text-red-600 text-sm mt-1">{formErrors.cvv}</p>}
-                  </div>
-                </div>
-              </div>
-
-              <button type="submit" disabled={isProcessing}
-                className="w-full bg-green-700 text-white px-6 py-4 rounded-lg hover:bg-green-600 font-bold text-lg flex items-center justify-center gap-2 disabled:opacity-50">
-                {isProcessing ? <>{t('checkout.processing')}</> : <><CreditCard size={20} />{t('checkout.pay')} {total.toFixed(2)} €</>}
-              </button>
-            </form>
-          </div>
-
-          <div className="lg:col-span-1 bg-amber-100 border-4 border-amber-900 rounded-lg p-6 sticky top-4">
-            <h2 className="text-2xl font-bold text-amber-900 mb-4">📋 {t('checkout.orderSummary')}</h2>
-            <div className="space-y-3 mb-6">
-              {cart.map((item, i) => (
-                <div key={i} className="border-b-2 border-amber-700 pb-3">
-                  <div className="font-bold text-amber-900">{item.type === 'saga' ? tf(item.item, 'name') : tf(item.item, 'displayName')}</div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-amber-700">{item.type === 'saga' ? `${item.item.scenarios.length} ${t('cart.scenariosIncluded')}` : t('checkout.scenario')}</span>
-                    <span className="font-bold text-amber-800">{(item.type === 'saga' ? item.item.price : item.item.price).toFixed(2)} €</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="border-t-2 border-amber-900 pt-4">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-bold text-amber-900">{t('checkout.total')}</span>
-                <span className="text-2xl font-bold text-green-700">{total.toFixed(2)} €</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+  return <main className="min-h-screen bg-slate-900 text-amber-100 px-4 py-12">
+    <div className="max-w-xl mx-auto space-y-5">
+      <button onClick={onBack} className="underline">{en ? 'Back to the catalogue' : 'Retour au catalogue'}</button>
+      <h1 className="text-3xl font-bold">{en ? 'Your order' : 'Votre commande'}</h1>
+      {cart.map(entry => <div key={entry.type + entry.item.id} className="flex justify-between gap-4 border-b border-amber-800 pb-3">
+        <span>{tf(entry.item, entry.type === 'saga' ? 'name' : 'displayName')}</span><span>{Number(entry.item.price).toFixed(2)} €</span>
+      </div>)}
+      <p className="text-xl font-bold">Total : {total.toFixed(2)} €</p>
+      <p>{en ? 'Enter your email and card details on Stripe’s secure page. All available translations are included.' : 'Renseignez votre e-mail et votre carte sur la page sécurisée de Stripe. Toutes les traductions disponibles sont incluses.'}</p>
+      <button onClick={pay} disabled={busy || !cart.length} className="w-full py-4 rounded bg-amber-700 hover:bg-amber-600 font-bold disabled:opacity-50">
+        {busy ? (en ? 'Opening Stripe…' : 'Ouverture de Stripe…') : (en ? 'Continue to secure payment' : 'Continuer vers le paiement sécurisé')}
+      </button>
+      {error && <p role="alert" className="text-red-300">{error}</p>}
     </div>
-  );
+  </main>;
 };
-
 const OrderConfirmationPage = ({ orderData, cart, onBackToHome }) => {
   const { t, tf } = useLanguage();
   const total = cart.reduce((sum, item) => sum + (item.type === 'saga' ? item.item.price : item.item.price), 0);
@@ -1951,7 +1729,7 @@ function AdminGameSystemsTab({ supabase }) {
   );
 }
 
-export default function App() {
+export default function App({ initialPage = 'home' }) {
   // i18n
   const { language, toggleLanguage, t, tTag, tDuration, tf } = useLanguage();
 
@@ -2073,9 +1851,27 @@ export default function App() {
   const [showBook, setShowBook] = useState(false);
   const [currentScenario, setCurrentScenario] = useState(0);
   const [currentSagaIndex, setCurrentSagaIndex] = useState(0);
-  const [currentPage, setCurrentPage] = useState('home');
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [adminTab, setAdminTab] = useState('campagnes');
   const [cart, setCart] = useState([]);
+  const [cartRestored, setCartRestored] = useState(false);
+  useEffect(() => {
+    if (loading || !sagas.length || cartRestored) return;
+    try {
+      const saved = JSON.parse(sessionStorage.getItem('codex-cart-v2') || '[]');
+      const restored = [];
+      for (const entry of Array.isArray(saved) ? saved.slice(0, 20) : []) {
+        const saga = sagas.find(s => entry.type === 'saga' ? String(s.id) === String(entry.id) : s.scenarios.some(c => String(c.id) === String(entry.id)));
+        const item = entry.type === 'saga' ? saga : saga?.scenarios.find(s => String(s.id) === String(entry.id));
+        if (['saga','scenario'].includes(entry.type) && item && !item.isFree && Object.keys(pdfEditions(item)).length && !restored.some(r => r.type === entry.type && r.item.id === item.id)) restored.push({ type: entry.type, item, saga });
+      }
+      setCart(restored);
+    } catch { /* An invalid local basket grants no entitlement. */ }
+    setCartRestored(true);
+  }, [sagas, loading, cartRestored]);
+  useEffect(() => {
+    if (cartRestored) sessionStorage.setItem('codex-cart-v2', JSON.stringify(cart.map(entry => ({ type: entry.type, id: entry.item.id }))));
+  }, [cart, cartRestored]);
   const [showCart, setShowCart] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [orderData, setOrderData] = useState(null);
@@ -2087,6 +1883,27 @@ export default function App() {
   const [clickedButtons, setClickedButtons] = useState({});
   const [viewingScenario, setViewingScenario] = useState(null);
   const [searchTag, setSearchTag] = useState('');
+  const [catalogueLinkLoaded, setCatalogueLinkLoaded] = useState(false);
+  useEffect(() => {
+    if (catalogueLinkLoaded || loading || !sagas.length) return;
+    const params = new URLSearchParams(window.location.search);
+    const index = sagas.findIndex(s => String(s.id) === params.get('campaign'));
+    const campaign = sagas[index];
+    const theme = themes.find(t => t.id === (campaign?.themeId || params.get('theme')));
+    if (theme) {
+      setCurrentTheme(theme); setShowBook(true);
+      setCurrentSagaIndex(index >= 0 ? index : sagas.findIndex(s => s.themeId === theme.id));
+      if (campaign) setViewingScenario(campaign.scenarios.find(s => String(s.id) === params.get('chapter')) || null);
+    }
+    setCatalogueLinkLoaded(true);
+  }, [loading, sagas, themes, catalogueLinkLoaded]);
+  useEffect(() => {
+    if (!showBook || !currentTheme) return;
+    const params = new URLSearchParams({ theme: currentTheme.id });
+    if (sagas[currentSagaIndex]) params.set('campaign', sagas[currentSagaIndex].id);
+    if (viewingScenario) params.set('chapter', viewingScenario.id);
+    window.history.replaceState(window.history.state, '', `${window.location.pathname}?${params}`);
+  }, [showBook, currentTheme, currentSagaIndex, viewingScenario, sagas]);
   
   // Fonction pour obtenir tous les scénarios d'un thème avec leur campagne d'origine
   const getAllScenariosForTheme = (themeId) => {
@@ -2157,6 +1974,7 @@ export default function App() {
   };
 
   const closeBook = () => {
+    window.history.replaceState(window.history.state, '', window.location.pathname);
     setShowBook(false);
     setCurrentPage('home');
   };
@@ -2176,6 +1994,7 @@ export default function App() {
   };
 
   const addToCart = (item) => {
+    if (!Object.keys(pdfEditions(item.item)).length) return;
     // Animation du bouton cliqué
     const buttonId = `${item.type}-${item.item.id}`;
     setClickedButtons(prev => ({ ...prev, [buttonId]: true }));
@@ -2208,74 +2027,7 @@ export default function App() {
   const handleOrderComplete = (formData) => { setOrderData(formData); setCurrentPage('confirmation'); };
   const backToHome = () => { setCart([]); setOrderData(null); setCurrentPage('home'); };
   
-  const handleDownloadFree = async (pdfUrl, name) => {
-    if (!pdfUrl || typeof pdfUrl !== 'string') {
-      alert(t('download.pdfUnavailable'));
-      return;
-    }
-
-    console.log('🔍 Tentative téléchargement:', { pdfUrl, name });
-
-    try {
-      // Si c'est une URL Supabase Storage complète, extraire le chemin
-      let filePath = pdfUrl;
-
-      if (pdfUrl.startsWith('http://') || pdfUrl.startsWith('https://')) {
-        console.log('⚠️ URL complète détectée - extraction du chemin...');
-
-        // Vérifier si c'est une URL Supabase Storage
-        if (pdfUrl.includes('supabase.co/storage/v1/object/')) {
-          // Extraire le chemin après /object/public/bucket-name/ ou /object/sign/bucket-name/
-          const match = pdfUrl.match(/\/object\/(public|sign)\/([^/]+)\/(.+)/);
-          if (match && match[3]) {
-            filePath = match[3].split('?')[0]; // Enlever les query params
-            console.log('📂 Chemin extrait:', filePath);
-          } else {
-            console.error('❌ Format URL Supabase non reconnu:', pdfUrl);
-            alert(t('download.unsupportedUrl'));
-            return;
-          }
-        } else {
-          // Si ce n'est pas une URL Supabase, ouvrir directement (lien externe)
-          console.log('🌐 URL externe, ouverture directe');
-          window.open(pdfUrl, '_blank');
-          return;
-        }
-      }
-
-      console.log('🔐 Génération URL signée depuis bucket "pdfs"...');
-
-      // Générer une URL signée fraîche depuis Supabase Storage
-      const { data, error } = await supabase.storage
-        .from('pdfs')
-        .createSignedUrl(filePath, 300); // 5 minutes
-
-      if (error) {
-        console.error('❌ Erreur génération URL signée:', error);
-        console.error('Details:', { pdfUrl, errorMessage: error.message, errorDetails: error });
-        alert(`Erreur: ${error.message || 'Impossible de générer le lien de téléchargement'}`);
-        return;
-      }
-
-      if (data?.signedUrl) {
-        console.log('✅ URL signée générée:', data.signedUrl);
-        // Créer un lien temporaire et le cliquer pour télécharger
-        const link = document.createElement('a');
-        link.href = data.signedUrl;
-        link.download = `${name}.pdf`;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } else {
-        console.error('❌ Pas de signedUrl dans la réponse:', data);
-        alert(t('download.linkGenerationError'));
-      }
-    } catch (err) {
-      console.error('❌ Exception téléchargement:', err);
-      alert(`Erreur: ${err.message || 'Veuillez réessayer'}`);
-    }
-  };
+  const handleDownloadFree = () => {}; // Downloads are handled by PdfAction.
 
   const saveCampaign = async (campaignData) => {
     // Valider et nettoyer le themeId
@@ -3429,86 +3181,7 @@ export default function App() {
                   <div>
                     <h2 className="text-3xl font-bold mb-6 text-amber-900">⚙️ Paramètres du Site</h2>
                     
-                    <div className="bg-purple-50 border-2 border-purple-700 rounded-lg p-6 mb-6">
-                      <h3 className="text-xl font-bold text-purple-900 mb-4">🔒 Sécurité - Mot de passe Admin</h3>
-                      
-                      <form onSubmit={(e) => {
-                        e.preventDefault();
-                        const currentPass = e.target.currentPassword.value;
-                        const newPass = e.target.newPassword.value;
-                        const confirmPass = e.target.confirmPassword.value;
-                        
-                        const adminPassword = localStorage.getItem('le-codex-admin-password') || 'admin123';
-                        
-                        if (currentPass !== adminPassword) {
-                          alert('❌ Mot de passe actuel incorrect');
-                          return;
-                        }
-                        
-                        if (newPass.length < 6) {
-                          alert('❌ Le nouveau mot de passe doit contenir au moins 6 caractères');
-                          return;
-                        }
-                        
-                        if (newPass !== confirmPass) {
-                          alert('❌ Les nouveaux mots de passe ne correspondent pas');
-                          return;
-                        }
-                        
-                        localStorage.setItem('le-codex-admin-password', newPass);
-                        alert('✅ Mot de passe changé avec succès !');
-                        e.target.reset();
-                      }}>
-                        <div className="space-y-4">
-                          <div>
-                            <label className="block text-purple-900 font-bold mb-2">Mot de passe actuel *</label>
-                            <input 
-                              type="password" 
-                              name="currentPassword"
-                              required
-                              className="w-full px-4 py-3 border-2 border-purple-700 rounded-lg focus:outline-none focus:border-purple-900"
-                              placeholder="Entrez votre mot de passe actuel"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-purple-900 font-bold mb-2">Nouveau mot de passe *</label>
-                            <input 
-                              type="password" 
-                              name="newPassword"
-                              required
-                              minLength="6"
-                              className="w-full px-4 py-3 border-2 border-purple-700 rounded-lg focus:outline-none focus:border-purple-900"
-                              placeholder="Minimum 6 caractères"
-                            />
-                          </div>
-                          
-                          <div>
-                            <label className="block text-purple-900 font-bold mb-2">Confirmer le nouveau mot de passe *</label>
-                            <input 
-                              type="password" 
-                              name="confirmPassword"
-                              required
-                              minLength="6"
-                              className="w-full px-4 py-3 border-2 border-purple-700 rounded-lg focus:outline-none focus:border-purple-900"
-                              placeholder="Retapez le nouveau mot de passe"
-                            />
-                          </div>
-                          
-                          <button 
-                            type="submit"
-                            className="w-full bg-purple-700 text-white px-6 py-3 rounded-lg hover:bg-purple-600 font-bold text-lg">
-                            🔒 Changer le mot de passe
-                          </button>
-                        </div>
-                      </form>
-                      
-                      <div className="mt-4 bg-purple-100 border border-purple-700 rounded-lg p-3">
-                        <p className="text-sm text-purple-900">
-                          <strong>💡 Note :</strong> Le mot de passe par défaut est "admin123". Changez-le dès maintenant pour sécuriser votre site.
-                        </p>
-                      </div>
-                    </div>
+                    <div className="bg-purple-50 border-2 border-purple-700 rounded-lg p-6 mb-6"><h3 className="font-bold">Mot de passe du compte administrateur</h3><p>Utilisez le lien de récupération envoyé à votre adresse e-mail pour changer votre mot de passe Supabase.</p><a className="underline" href="/forgot-password">Changer mon mot de passe</a></div>
                     
                     <div className="bg-blue-50 border-2 border-blue-700 rounded-lg p-6 mb-6">
                       <h3 className="text-xl font-bold text-blue-900 mb-4">🏷️ Identité du Site</h3>
@@ -4165,8 +3838,10 @@ function ForgeRouteWrapper() {
 function AppRouter() {
   return (
     <Routes>
-      <Route path="/test-supabase" element={<TestSupabase />} />
-      <Route path="/login" element={<LoginPage />} />
+      <Route path="/test-supabase" element={<ProtectedRoute><TestSupabase /></ProtectedRoute>} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/forgot-password" element={<PasswordRecoveryPage />} />
+              <Route path="/reset-password" element={<PasswordRecoveryPage update />} />
       <Route path="/payment/success" element={<PaymentSuccessPage />} />
 
       {/* Routes joueurs */}
@@ -4185,7 +3860,7 @@ function AppRouter() {
   );
 }
 
-inject();
+if (window.location.pathname !== '/payment/success') inject();
 
 const rootEl = document.getElementById('root');
 if (rootEl) {

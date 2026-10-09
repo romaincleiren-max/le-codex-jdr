@@ -1,0 +1,12 @@
+.git
+.claude
+.agents
+.codex
+.env*
+node_modules
+dist
+docs
+supabase
+scripts
+data
+*.md

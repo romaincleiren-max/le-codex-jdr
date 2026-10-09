@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { loginRateLimiter } from '../utils/rateLimiter';
@@ -37,7 +37,7 @@ export const LoginPage = () => {
     }
 
     const attemptResult = loginRateLimiter.attempt();
-    const { data, error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
 
     if (authError) {
       if (authError.code !== 'invalid_credentials') {
@@ -169,14 +169,14 @@ export const LoginPage = () => {
 
             <div>
               <label className={labelClass}><Mail size={13} /> Adresse email</label>
-              <input type="email" value={email} required autoFocus
+              <input aria-label="Adresse e-mail" autoComplete="email" type="email" value={email} required autoFocus
                 onChange={e => { setEmail(e.target.value); setError(''); }}
                 className={inputClass} placeholder="vous@exemple.com" />
             </div>
 
             <div>
               <label className={labelClass}><Lock size={13} /> Mot de passe</label>
-              <input type="password" value={password} required
+              <input aria-label="Mot de passe" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} type="password" value={password} required
                 onChange={e => { setPassword(e.target.value); setError(''); }}
                 className={inputClass} placeholder="••••••••"
                 minLength={mode === 'register' ? 6 : undefined} />
@@ -185,7 +185,7 @@ export const LoginPage = () => {
             {mode === 'register' && (
               <div>
                 <label className={labelClass}><Lock size={13} /> Confirmer le mot de passe</label>
-                <input type="password" value={confirmPassword} required
+                <input aria-label="Confirmer le mot de passe" autoComplete="new-password" type="password" value={confirmPassword} required
                   onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
                   className={inputClass} placeholder="••••••••" />
               </div>
@@ -218,6 +218,7 @@ export const LoginPage = () => {
               )}
             </button>
           </form>
+          {mode === 'login' && <Link to="/forgot-password" className="block text-center text-amber-400 underline mt-4">Mot de passe oublié ?</Link>}
 
           {mode === 'login' && (
             <p className="text-center text-slate-600 text-xs mt-5">

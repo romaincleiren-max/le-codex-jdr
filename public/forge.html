@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=IM+Fell+English:ital@0;1&family=Share+Tech+Mono&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js" defer></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.86.2/dist/umd/supabase.js"></script>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"/>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 <style>
@@ -2063,7 +2063,7 @@ async function renderClsPdf(container, pdfUrl, displayPx, fallbackIcon){
   try{
     const lib=window.pdfjsLib;
     lib.GlobalWorkerOptions.workerSrc='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-    const pdf=await lib.getDocument({url:pdfUrl,verbosity:0}).promise;
+    const pdf=await lib.getDocument({url:pdfUrl,verbosity:0,isEvalSupported:false}).promise;
     const page=await pdf.getPage(1);
     const vp1=page.getViewport({scale:1});
     const dpr=Math.min(window.devicePixelRatio||1,2);
@@ -2085,7 +2085,7 @@ function rcClsImgFallback(el){
   const cs=CLASS_STYLE[id]||{icon:'⚔'};
   const cls=CLASSES.find(c=>c.id===id);
   el.onerror=null;
-  el.parentElement.innerHTML=`<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${cs.icon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${cls?.n||id}</span></div>`;
+  el.parentElement.innerHTML=`<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${cs.icon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${esc(cls?.n||id)}</span></div>`;
 }
 function clsImgFallback(el,id,mode){
   el.onerror=null;
@@ -3292,6 +3292,18 @@ let _selectedRaceFamily=null;
 // ═══════════════════════════════════════════════════
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+// For data interpolated inside an inline handler's JavaScript string literal.
+const forgeJs=s=>String(s??'').replace(/[\\'"<>&\r\n\u2028\u2029]/g,c=>'\\u'+c.charCodeAt(0).toString(16).padStart(4,'0'));
+function safeImageUrl(value){
+  const s=String(value||'').trim();
+  if(/^data:image\/(?:png|jpeg|webp|gif);base64,[a-z0-9+/=]+$/i.test(s))return s;
+  try{const u=new URL(s,location.href);return ['https:','http:'].includes(u.protocol)?u.href:'';}catch{return '';}
+}
+function setPortraitPreview(value){
+  const el=$('portrait-preview');if(!el)return;
+  el.replaceChildren();const src=safeImageUrl(value);if(!src)return;
+  const image=document.createElement('img');image.src=src;image.style.cssText='width:100%;height:100%;object-fit:cover;object-position:center top';el.appendChild(image);
+}
 const mod=v=>Math.floor((v-10)/2);
 const mods=v=>{const m=mod(v);return(m>=0?'+':'')+m;};
 const PBC={8:0,9:1,10:2,11:3,12:4,13:5,14:7,15:9};
@@ -3682,7 +3694,7 @@ function renderRace(){
   const tabRaces=_selectedRaceFamily==='unique'?standalones:(famMap[_selectedRaceFamily]||standalones);
   $('lp').className='';
   const lorePanelHtml=C.race
-    ?`<div class="lore-traits">${C.race.traits.map(t=>`<span class="trait-chip">◆ ${t}</span>`).join('')}</div><div class="lore-text">${C.race.desc}</div>`
+    ?`<div class="lore-traits">${C.race.traits.map(t=>`<span class="trait-chip">◆ ${t}</span>`).join('')}</div><div class="lore-text">${esc(C.race.desc)}</div>`
     :`<span class="lore-empty">Cliquez sur une race pour voir ses traits et bonus</span>`;
   $('lp').innerHTML=`<div class="rp-panel-title">1 / 7 — Race</div>
     <div class="family-tabs-wrap" id="ftabs"></div>
@@ -3709,16 +3721,16 @@ function renderRace(){
     const rs=RACE_STYLE[r.id]||RACE_STYLE[r.family]||{icon:'🧝',color:'var(--gold-d)'};
     const isSel=C.race?.id===r.id;
     const imgUrl=getRaceImgUrl(r.id);
-    const statBadges=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>`<span class="race-badge">${k.toUpperCase()}+${v}</span>`).join('');
+    const statBadges=Object.entries(r.bonus).filter(([k])=>k!=='_ch').map(([k,v])=>`<span class="race-badge">${k.toUpperCase()}+${esc(v)}</span>`).join('');
     const freeBadge=r.bonus._ch?`<span class="race-badge race-badge-free">+${r.bonus._ch} au choix</span>`:'';
-    const spdBadge=r.speed&&r.speed!==30?`<span class="race-badge" style="background:#2A1A0A;color:#9A7040;">⚡${r.speed}m</span>`:'';
+    const spdBadge=r.speed&&r.speed!==30?`<span class="race-badge" style="background:#2A1A0A;color:#9A7040;">⚡${esc(r.speed)}m</span>`:'';
     const badges=statBadges+freeBadge+spdBadge;
     const card=document.createElement('div');
     card.className='race-card-mini'+(isSel?' selected':'');
     const portInner=imgUrl
-      ?`<img src="${imgUrl}" alt="${r.n}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'font-size:26px\\'>${rs.icon}</span>'">`
+      ?`<img src="${esc(safeImageUrl(imgUrl))}" alt="${esc(r.n)}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<span style=\\'font-size:26px\\'>${rs.icon}</span>'">`
       :`<span style="font-size:26px">${rs.icon}</span>`;
-    card.innerHTML=`${isSel?'<div class="sel-badge-mini">✓ Sélectionné</div>':''}<div class="race-portrait-mini">${portInner}</div><div class="race-card-foot"><div class="race-card-name">${r.n}</div><div class="race-card-badges">${badges}</div></div>`;
+    card.innerHTML=`${isSel?'<div class="sel-badge-mini">✓ Sélectionné</div>':''}<div class="race-portrait-mini">${portInner}</div><div class="race-card-foot"><div class="race-card-name">${esc(r.n)}</div><div class="race-card-badges">${badges}</div></div>`;
     card.onclick=()=>{C.race=r;applyRace();renderRace();updateRight();};
     rg.appendChild(card);
   });
@@ -3739,7 +3751,7 @@ function renderClass(){
   }).join('');
   $('lp').innerHTML=`<div class="sh">Classe & Archétype</div><div class="ss">Vocation · Style de Jeu · Sous-classe</div>
   <div style="margin-bottom:1.1rem;">
-    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;text-align:center;margin-bottom:.6rem;">⚔ Niveau — ${C.cls?.n||'Classe principale'}</div>
+    <div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.2em;color:var(--gold-d);text-transform:uppercase;text-align:center;margin-bottom:.6rem;">⚔ Niveau — ${esc(C.cls?.n||'Classe principale')}</div>
     <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.3rem;margin-bottom:.6rem;" id="cls-lvl-row">${lvlBtns}</div>
     <div style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:10px;color:#6A5A3A;">Maîtrise : +<span id="pb-disp">${calcProfBonus()}</span> &nbsp;·&nbsp; PV départ : <span id="hp-disp">${calcHP()||'—'}</span> &nbsp;·&nbsp; ASI : <span id="asi-disp">${asiAvailable()}</span></div>
   </div>
@@ -3753,7 +3765,7 @@ function renderClass(){
   CLASSES.forEach(cl=>{
     const d=document.createElement('div');d.className='card'+(C.cls?.id===cl.id?' sel':'');
     const cs=CLASS_STYLE[cl.id]||{icon:'⚔',color:'var(--gold-d)'};
-    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><div class="card-pdf-icon" id="ci-${cl.id}"><img src="${getClsImgUrl(cl.id)}" alt="${cl.n}" loading="lazy" decoding="async" style="max-height:68px;width:auto;max-width:100%;object-fit:contain;" onerror="clsImgFallback(this,'${cl.id}','card')"></div><div class="cn">${cl.n}</div><div class="ct">${cl.tag}</div><div class="cd">${cl.desc}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
+    d.innerHTML=`<div class="card-accent" style="background:${cs.color}"></div><div class="card-pdf-icon" id="ci-${esc(cl.id)}"><img src="${esc(safeImageUrl(getClsImgUrl(cl.id)))}" alt="${esc(cl.n)}" loading="lazy" decoding="async" style="max-height:68px;width:auto;max-width:100%;object-fit:contain;" onerror="clsImgFallback(this,'${forgeJs(cl.id)}','card')"></div><div class="cn">${esc(cl.n)}</div><div class="ct">${cl.tag}</div><div class="cd">${esc(cl.desc)}</div><div class="cb">✦ d${cl.hd} · Saves : ${cl.saves.map(s=>s.toUpperCase()).join('/')}${cl.spellcaster?' · ✧ Sorts':''}</div>`;
     d.onclick=()=>{if(C.cls?.id!==cl.id){C.sub=null;C.skills=[];C.cantrips=[];C.spells=[];}C.cls=cl;renderClass();updateRight();};
     $('cg').appendChild(d);
   });
@@ -3799,7 +3811,7 @@ function renderMulti(){
     }).join('');
     html+=`<div style="background:#1A1710;border:1px solid ${mc.cls?cs.color+'44':'#3A3020'};border-radius:8px;padding:.7rem;margin-bottom:.6rem;transition:.2s;">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;">
-        <span style="font-size:12px;color:var(--gold);">${cs.icon} <b>${mc.cls?mc.cls.n:'— choisir une classe'}</b> <span style="color:#8A7A5A;font-family:'Share Tech Mono',monospace;">Niv.${mc.lvl||1}</span></span>
+        <span style="font-size:12px;color:var(--gold);">${cs.icon} <b>${esc(mc.cls?mc.cls.n:'— choisir une classe')}</b> <span style="color:#8A7A5A;font-family:'Share Tech Mono',monospace;">Niv.${mc.lvl||1}</span></span>
         <button onclick="C.multiclasses.splice(${i},1);recomputeLevel();renderClass();" style="background:#3A1A1A;border:none;color:#CA5A5A;border-radius:4px;padding:2px 7px;cursor:pointer;font-size:11px;" title="Retirer cette classe">✕</button>
       </div>
       <div style="display:grid;grid-template-columns:repeat(10,1fr);gap:.25rem;margin-bottom:.6rem;">${lvlBtns}</div>
@@ -3810,7 +3822,7 @@ function renderMulti(){
           return `<button class="mc-cls-btn${active?' active':''}"
             style="${active?'border-color:'+cst.color+';background:'+cst.color+'33;color:var(--gold);':''}"
             onclick="C.multiclasses[${i}].cls=${JSON.stringify(cl).replace(/"/g,"'")};C.multiclasses[${i}].sub=null;renderClass();">
-            ${cst.icon} ${cl.n}</button>`;
+            ${cst.icon} ${esc(cl.n)}</button>`;
         }).join('')}
       </div>
     </div>`;
@@ -3835,9 +3847,9 @@ function renderSubs(){
   </div>`;
   subs.forEach(s=>{
     const d=document.createElement('div');d.className='subc'+(C.sub?.id===s.id?' sel':'');
-    d.innerHTML=`<div class="subc-n">${s.n}</div><div class="subc-fs">${s.fs[0]}</div>
-    <div class="subc-expand" onclick="event.stopPropagation();toggleSub(this,'${s.id}')">▸ Voir toutes les capacités</div>
-    <div class="subc-full" id="sf-${s.id}" style="display:none;margin-top:.4rem;">${s.fs.slice(1).map(f=>`<div style="font-size:10px;color:#8A7A5A;line-height:1.55;padding:1px 0;">${f}</div>`).join('')}</div>`;
+    d.innerHTML=`<div class="subc-n">${esc(s.n)}</div><div class="subc-fs">${s.fs[0]}</div>
+    <div class="subc-expand" onclick="event.stopPropagation();toggleSub(this,'${forgeJs(s.id)}')">▸ Voir toutes les capacités</div>
+    <div class="subc-full" id="sf-${esc(s.id)}" style="display:none;margin-top:.4rem;">${s.fs.slice(1).map(f=>`<div style="font-size:10px;color:#8A7A5A;line-height:1.55;padding:1px 0;">${f}</div>`).join('')}</div>`;
     d.onclick=()=>{C.sub=s;renderSubs();updateRight();};
     $('sg').appendChild(d);
   });
@@ -3929,7 +3941,7 @@ function renderFeatSection(){
   <div style="margin:.6rem 0 .3rem;font-family:'Cinzel',serif;font-size:11px;letter-spacing:.12em;color:var(--gold-d);">DONS — 1 slot entier par don</div>
   ${C.feats.length?`<div style="display:flex;flex-wrap:wrap;gap:.3rem;margin-bottom:.4rem;">${C.feats.map(fid=>{
     const f=FEATS.find(x=>x.id===fid)||{id:fid,n:fid,d:''};
-    return `<div class="feat-tag" title="${f.d}">${f.n} <button onclick="removeFeat('${fid}')" style="background:none;border:none;color:#CA5A5A;cursor:pointer;padding:0 0 0 4px;font-size:11px;">✕</button></div>`;
+    return `<div class="feat-tag" title="${esc(f.d)}">${esc(f.n)} <button onclick="removeFeat('${fid}')" style="background:none;border:none;color:#CA5A5A;cursor:pointer;padding:0 0 0 4px;font-size:11px;">✕</button></div>`;
   }).join('')}</div>`:''}
   ${canTakeFeat?`<details><summary class="feat-picker-sum">+ Ajouter un don (coûte 1 slot ASI complet)</summary>
   <input type="text" id="feat-search" placeholder="🔍 Rechercher un don…" autocomplete="off"
@@ -3944,9 +3956,9 @@ function renderFeatPicker(q){
   const query=(q||'').toLowerCase().trim();
   const list=FEATS.filter(f=>!taken.has(f.id)&&(!query||f.n.toLowerCase().includes(query)||f.d.toLowerCase().includes(query)));
   g.innerHTML=list.length
-    ?list.map(f=>`<div class="feat-pick-card" onclick="addFeat('${f.id}')" title="${f.d}">
-        <div class="feat-pick-name">${f.n}</div>
-        <div class="feat-pick-desc">${f.d.substring(0,70)}${f.d.length>70?'…':''}</div>
+    ?list.map(f=>`<div class="feat-pick-card" onclick="addFeat('${forgeJs(f.id)}')" title="${esc(f.d)}">
+        <div class="feat-pick-name">${esc(f.n)}</div>
+        <div class="feat-pick-desc">${esc(f.d.substring(0,70))}${esc(f.d.length>70?'…':'')}</div>
       </div>`).join('')
     :`<div style="font-size:10px;color:#5A4A2A;font-style:italic;padding:.3rem;">Aucun don trouvé.</div>`;
 }
@@ -4042,11 +4054,11 @@ function renderDiceArea(){
   const assignedRolls=new Set(Object.keys(C.diceAssigned).map(Number));
   w.innerHTML=`<div class="dice-area">
     <div class="dice-h">Jets de dés — cliquez un jet puis choisissez la caractéristique</div>
-    ${pendingDice!==null?`<div class="assign-mode">✦ Jet sélectionné : ${C.diceRolls[pendingDice].sum} → Cliquez une caractéristique ci-dessous</div>`:'<div class="assign-mode" style="color:var(--gold-d)">Cliquez un jet pour l\'assigner à une caractéristique</div>'}
+    ${pendingDice!==null?`<div class="assign-mode">✦ Jet sélectionné : ${esc(C.diceRolls[pendingDice].sum)} → Cliquez une caractéristique ci-dessous</div>`:'<div class="assign-mode" style="color:var(--gold-d)">Cliquez un jet pour l\'assigner à une caractéristique</div>'}
     <div class="dice-result">
       ${C.diceRolls.map((r,i)=>`<div class="dr-box ${assignedRolls.has(i)?'assigned':''} ${pendingDice===i?'sel':''}" onclick="selectDiceRoll(${i})">
-        <div class="dr-val">${r.sum}</div>
-        <div class="dr-sub">[${r.d.slice(0,3).join('+')}]</div>
+        <div class="dr-val">${esc(r.sum)}</div>
+        <div class="dr-sub">[${esc(r.d.slice(0,3).join('+'))}]</div>
         <div style="font-family:'Cinzel',serif;font-size:8px;color:${assignedRolls.has(i)?'#6BAF4A':'var(--gold-d)'};">${C.diceAssigned[i]?C.diceAssigned[i].toUpperCase():'—'}</div>
       </div>`).join('')}
     </div>
@@ -4115,7 +4127,7 @@ function render3d6Area(){
       return`<div class="d3-row settled${wasRerolled?' rerolled':''}">
         <span class="d3-label">${STAT_LABELS_FR[k]}</span>
         <span class="d3-val">${total}${rb?`<small>+${rb}</small>`:''}</span>
-        <span class="d3-dice">[${r.d.join('+')}]</span>
+        <span class="d3-dice">[${esc(r.d.join('+'))}]</span>
         <span class="d3-mod" style="color:${eff>=0?'#6BAF4A':'#C0392B'}">${modTxt}</span>
         <span class="d3-reroll">${wasRerolled?'<span style="color:#5A9A4A;font-size:9px;">✓ Relancé</span>':canReroll?`<button class="sbtn" onclick="reroll3d6Stat('${k}')" title="Relancer cette stat">↺</button>`:'<span style="color:#3A2A10;font-size:9px;">—</span>'}</span>
       </div>`;
@@ -4228,7 +4240,7 @@ function renderSkillList(){
     row.className='sk-r'+(sel?' sel':'')+((!inClass||full)&&!sel?' locked':'')+(bgSk&&!sel?' sel':'');
     row.style.opacity=(!inClass&&!bgSk)?'.35':'1';
     row.innerHTML=`<div class="sk-chk">${sel||bgSk?'✓':''}</div>
-      <div class="sk-nm">${skill.n}${bgSk&&!sel?' <span style="font-size:8px;color:var(--gold-d);">(BG)</span>':''}</div>
+      <div class="sk-nm">${esc(skill.n)}${bgSk&&!sel?' <span style="font-size:8px;color:var(--gold-d);">(BG)</span>':''}</div>
       <div class="sk-st">${skill.s.toUpperCase()}</div>
       <div class="sk-mod">${(skMod>=0?'+':'')+skMod}</div>`;
     if(inClass&&!bgSk&&(!full||sel)){
@@ -4249,7 +4261,7 @@ function renderBackground(){
   <div class="btn-row"><button class="btn btn-s" onclick="go(2)">← Caractéristiques</button><button class="btn btn-p" onclick="if(C.background)go(4);else alert('Choisissez un background.')">Suivant →</button></div>`;
   BACKGROUNDS.forEach(b=>{
     const d=document.createElement('div');d.className='card'+(C.background?.id===b.id?' sel':'');
-    d.innerHTML=`<div class="cn">${b.n}</div><div class="ct">${b.skills.join(', ')}${b.langs>0?` · +${b.langs} langue(s)`:''}</div><div class="cd">${b.feat}</div><div class="cb">✦ ${b.equipment.at(-1)}</div>`;
+    d.innerHTML=`<div class="cn">${esc(b.n)}</div><div class="ct">${b.skills.join(', ')}${b.langs>0?` · +${b.langs} langue(s)`:''}</div><div class="cd">${b.feat}</div><div class="cb">✦ ${b.equipment.at(-1)}</div>`;
     d.onclick=()=>{C.background=b;C.traits=b.traits.slice();renderBackground();updateRight();};
     $('bg').appendChild(d);
   });
@@ -4294,7 +4306,7 @@ function renderExtraSpellsList(){
   list.forEach(function(x,i){if(!byLvl[x.lvl])byLvl[x.lvl]=[];byLvl[x.lvl].push({name:x.name,lvl:x.lvl,i:i});});
   el.innerHTML=Object.keys(byLvl).sort(function(a,b){return a-b;}).map(function(lvl){
     var items=byLvl[lvl].map(function(x){
-      return '<span style="display:inline-flex;align-items:center;gap:.3rem;background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.15rem .4rem;border-radius:3px;">❆ '+x.name+'<button onclick="removeExtraSpell('+x.i+')" style="background:none;border:none;color:#5A4A6A;cursor:pointer;font-size:10px;padding:0;line-height:1;" title="Retirer">✕</button></span>';
+      return '<span style="display:inline-flex;align-items:center;gap:.3rem;background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.15rem .4rem;border-radius:3px;">❆ '+esc(x.name)+'<button onclick="removeExtraSpell('+x.i+')" style="background:none;border:none;color:#5A4A6A;cursor:pointer;font-size:10px;padding:0;line-height:1;" title="Retirer">✕</button></span>';
     }).join('');
     return '<div style="margin-bottom:.35rem;"><span style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;">NIV.'+lvl+'</span><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-top:.2rem;">'+items+'</div></div>';
   }).join('');
@@ -4321,7 +4333,7 @@ function filterExtraSpellList(){
   if(!matches.length){el.style.display='none';return;}
   el.innerHTML=matches.slice(0,12).map(function(m){
     var dn=m.name.replace(/&/g,'&amp;').replace(/"/g,'&quot;');
-    return '<div style="padding:.22rem .5rem;cursor:pointer;font-family:Share Tech Mono,monospace;font-size:9px;color:#80B0E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" onmousedown="document.getElementById(\'extra-spell-inp\').value=this.dataset.n;document.getElementById(\'extra-spell-lvl\').value=this.dataset.l;document.getElementById(\'extra-spell-dropdown\').style.display=\'none\';" data-n="'+dn+'" data-l="'+m.lvl+'">❆ Niv.'+m.lvl+' — '+m.name+'</div>';
+    return '<div style="padding:.22rem .5rem;cursor:pointer;font-family:Share Tech Mono,monospace;font-size:9px;color:#80B0E0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" onmousedown="document.getElementById(\'extra-spell-inp\').value=this.dataset.n;document.getElementById(\'extra-spell-lvl\').value=this.dataset.l;document.getElementById(\'extra-spell-dropdown\').style.display=\'none\';" data-n="'+esc(dn)+'" data-l="'+m.lvl+'">❆ Niv.'+m.lvl+' — '+esc(m.name)+'</div>';
   }).join('');
   el.style.display='block';
 }
@@ -4350,7 +4362,7 @@ function renderSpellsByLevel(cl, prep, slots){
     const lvlLabel=isPrepared?`Niveau ${lvl} — ${n} emplacement${n>1?'s':''}`:`Niveau ${lvl} — ${chosenAtLvl}/${n} choisi${chosenAtLvl!==1?'s':''}`;
     h+=`<div style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:.15em;color:var(--gold-d);margin:.7rem 0 .3rem;text-transform:uppercase;">${lvlLabel}</div>
     <div class="spg">${pool.map(s=>{
-      const onClick=isPrepared?`toggleSp('s','${s.replace(/'/g,"\\'")}',${prep.n})`:`toggleSpLvl('${s.replace(/'/g,"\\'")}',${lvl},${n})`;
+      const onClick=isPrepared?`toggleSp('s','${forgeJs(s)}',${prep.n})`:`toggleSpLvl('${forgeJs(s)}',${lvl},${n})`;
       return`<div class="spc ${C.spells.includes(s)?'sel':''}" onclick="${onClick}">
       <div class="sp-nm">${s}</div>
       <div class="sp-mt">NIV.${lvl}${isPrepared?'':' · CONNU'}</div>
@@ -4373,10 +4385,10 @@ function renderEquipSpells(){
   const eqs=cl?.equipment||[];
   $('lp').innerHTML=`<div class="sh">Équipement & Sorts</div><div class="ss">Dotation initiale · Sac d'aventurier · Sorts de départ</div>
   ${eqs.map((grp,gi)=>`<div class="eq-grp">Groupe ${gi+1} — Choisissez 1</div>
-  <div class="eql">${grp.map(item=>`<div class="eqi ${C.equipment.includes(item+'_g'+gi)?'sel':''}" onclick="selEq('${item.replace(/'/g,"\\'")}','${gi}','${grp.map(g=>g.replace(/'/g,"\\'")).join('||')}')">
+  <div class="eql">${grp.map(item=>`<div class="eqi ${C.equipment.includes(item+'_g'+gi)?'sel':''}" onclick="selEq('${forgeJs(item)}','${gi}','${grp.map(g=>forgeJs(g)).join('||')}')">
     <div class="eqi-chk">${C.equipment.includes(item+'_g'+gi)?'✓':''}</div><div class="eqi-nm">${item}</div>
   </div>`).join('')}</div>`).join('')}
-  ${C.background?`<div class="eq-grp">Équipement du Background (${C.background.n})</div><div class="eql">${C.background.equipment.map(e=>`<div class="eqi sel"><div class="eqi-chk">✓</div><div class="eqi-nm">${e}</div></div>`).join('')}</div>`:''}
+  ${C.background?`<div class="eq-grp">Équipement du Background (${esc(C.background.n)})</div><div class="eql">${C.background.equipment.map(e=>`<div class="eqi sel"><div class="eqi-chk">✓</div><div class="eqi-nm">${e}</div></div>`).join('')}</div>`:''}
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">🎒 Sac de l'aventurier</div>
   <div class="inv-src" id="inv-src-bar">
@@ -4405,8 +4417,8 @@ function renderEquipSpells(){
   <div class="spg">${cantPools.map(s=>`<div class="spc ${C.cantrips.includes(s)?'sel':''}" onclick="toggleSp('c','${s}',${totalCntK})"><div class="sp-nm">${s}</div><div class="sp-mt">CANTRIP · À VOLONTÉ</div></div>`).join('')}</div>`:'';
     const spellSections=allCasters.map(({cls,lvl})=>{
       const p=calcSpellsPreparedFor(cls,lvl);
-      const header=allCasters.length>1?`<div class="div"></div><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.18em;color:var(--gold-d);text-transform:uppercase;margin:.4rem 0 .1rem;">${cls.n}</div>`:''
-      const section=p.n>0?renderSpellsByLevel(cls,p,slots):(cls.id==='ranger'&&lvl<2?`<div class="div"></div><div class="notice notice-i">ℹ ${cls.n} obtient ses sorts au niveau 2.</div>`:'')
+      const header=allCasters.length>1?`<div class="div"></div><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:.18em;color:var(--gold-d);text-transform:uppercase;margin:.4rem 0 .1rem;">${esc(cls.n)}</div>`:''
+      const section=p.n>0?renderSpellsByLevel(cls,p,slots):(cls.id==='ranger'&&lvl<2?`<div class="div"></div><div class="notice notice-i">ℹ ${esc(cls.n)} obtient ses sorts au niveau 2.</div>`:'')
       return header+section;
     }).join('');
     return cantSection+spellSections;
@@ -4485,7 +4497,7 @@ function renderSpecialAbilities(){
     return;
   }
   el.innerHTML=C.specialAbilities.map((a,i)=>`<div class="cap-item">
-    <div class="cap-item-name">${a.name}</div>
+    <div class="cap-item-name">${esc(a.name)}</div>
     <div style="display:flex;align-items:baseline;gap:3px;">
       <input type="number" min="1" max="100" value="${a.roll??''}"
         style="width:50px;text-align:center;background:transparent;border:none;border-bottom:1px solid #5A3A10;color:var(--blood);font-family:'Cinzel Decorative',serif;font-size:18px;padding:.05rem .2rem;outline:none;-moz-appearance:textfield;"
@@ -4508,12 +4520,12 @@ function renderInvGrid(){
   if(!filtered.length){g.innerHTML='<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#6A5A3A;font-style:italic;padding:.5rem;">Aucun objet trouvé pour cette recherche.</div>';return;}
   g.innerHTML=filtered.map(it=>{
     const rc=it.rarity?(_IP_RARITY[it.rarity]||{badge:'#3A2810',badgeTxt:'#C9A84C'}):null;
-    const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:${rc.badge};color:${rc.badgeTxt};border-radius:2px;padding:1px 5px;margin-left:4px;vertical-align:middle;">${it.rarity}</span>`:'';
-    return`<div class="inv-item" onclick="showItemPanel({id:'${it.id}',name:'${it.n.replace(/'/g,"\\'")}',type:'${it.cat}',rarity:'${it.rarity||''}',description:'${it.d.replace(/'/g,"\\'").substring(0,300)}',weight:${it.w},cost:'${it.c}'},true)" title="Cliquer pour voir la fiche">
-    <button class="inv-item-add" onclick="event.stopPropagation();addToBag('${it.id}')" title="Ajouter au sac">+</button>
-    <div class="inv-item-n">${it.n}${rBadge}</div>
+    const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:8px;background:${rc.badge};color:${rc.badgeTxt};border-radius:2px;padding:1px 5px;margin-left:4px;vertical-align:middle;">${esc(it.rarity)}</span>`:'';
+    return`<div class="inv-item" onclick="showItemPanel({id:'${forgeJs(it.id)}',name:'${forgeJs(forgeJs(it.n))}',type:'${it.cat}',rarity:'${forgeJs(it.rarity||'')}',description:'${forgeJs(forgeJs(it.d).substring(0,300))}',weight:${it.w},cost:'${it.c}'},true)" title="Cliquer pour voir la fiche">
+    <button class="inv-item-add" onclick="event.stopPropagation();addToBag('${forgeJs(it.id)}')" title="Ajouter au sac">+</button>
+    <div class="inv-item-n">${esc(it.n)}${rBadge}</div>
     <div class="inv-item-cat">${it.cat}</div>
-    <div class="inv-item-d">${it.d}</div>
+    <div class="inv-item-d">${esc(it.d)}</div>
     <div class="inv-item-meta">
       <span class="inv-item-cost">⚙ ${it.c}</span>
       <span class="inv-item-w">${it.w>0?it.w+' lb':'—'}</span>
@@ -4586,14 +4598,14 @@ function renderCodexGrid(){
     const safeName=e.name.replace(/['"\\]/g,' ');
     const safeDesc=(e.desc||'').replace(/['"\\]/g,' ').substring(0,400);
     const safeCitation=(e.citation||'').replace(/['"\\]/g,' ');
-    const rBadge = e.rarity ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C9A84C;margin-left:4px;">${e.rarity}</span>` : '';
+    const rBadge = e.rarity ? `<span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C9A84C;margin-left:4px;">${esc(e.rarity)}</span>` : '';
     // Stocker toutes les données dans l'attribut data pour éviter les problèmes d'échappement
     const dataIdx = _codexData.indexOf(e);
     return`<div class="inv-item" onclick="showCodexItem(${dataIdx})" title="Cliquer pour voir la fiche">
     <button class="inv-item-add" onclick="event.stopPropagation();addCodexToBag('${safeId}')" title="Ajouter au sac">+</button>
-    <div class="inv-item-n">${e.name}${rBadge}</div>
+    <div class="inv-item-n">${esc(e.name)}${rBadge}</div>
     <div class="inv-item-cat codex-badge">✦ ${e.item_type||e.category||'Codex'}</div>
-    <div class="inv-item-d">${(e.desc||e.citation||'—').substring(0,120)}</div>
+    <div class="inv-item-d">${esc((e.desc||e.citation||'—').substring(0,120))}</div>
     <div class="inv-item-meta"><span style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8B6FBF;">SIGIL SAGA</span></div>
   </div>`;
   }).join('');
@@ -4654,17 +4666,17 @@ function renderBagList(){
     const inBank=!!e.bank;
     const rowStyle=(rc?`border-left:3px solid ${rc.badge};background:${rc.badge}22;`:'')+(inBank?'opacity:.65;':'');
     const nmStyle=rc?`color:${rc.name};`:'';
-    const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:${rc.badge};color:${rc.badgeTxt};border-radius:2px;padding:1px 4px;margin-left:5px;vertical-align:middle;">${e.rarity}</span>`:'';
+    const rBadge=rc?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:${rc.badge};color:${rc.badgeTxt};border-radius:2px;padding:1px 4px;margin-left:5px;vertical-align:middle;">${esc(e.rarity)}</span>`:'';
     const wStyle=inBank?'opacity:.35;text-decoration:line-through;':'';
     return`<div class="bag-row" draggable="true" ondragstart="bagDragStart(event,${i})" style="${rowStyle}" title="Glissez vers un emplacement d'équipement →">
     <label class="bag-carried" title="${inBank?'Non porté — cocher pour porter':'Porté — décocher si non sur le personnage'}"><input type="checkbox" ${!inBank?'checked':''} onchange="toggleBankItem(${i})"><span>Porté</span></label>
-    <div class="bag-nm" style="${nmStyle}" onclick="showItemPanel(C.bag[${i}])" title="Voir la fiche">${e.n}${rBadge}${(()=>{const wp=WEAPON_PROPS[e.id];if(!wp||!C.cls)return'';const wi=getWeaponAtkBonus(e);return wp.dice==='—'?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7.5px;color:#6A5A38;margin-left:5px;">'+wp.type+'</span>':'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7.5px;color:#6A5A38;margin-left:5px;">'+mods(wi.atk)+' · '+wi.dice+mods(wi.dmgMod)+' '+wp.type+'</span>';})()}</div>
+    <div class="bag-nm" style="${nmStyle}" onclick="showItemPanel(C.bag[${i}])" title="Voir la fiche">${esc(e.n)}${rBadge}${(()=>{const wp=WEAPON_PROPS[e.id];if(!wp||!C.cls)return'';const wi=getWeaponAtkBonus(e);return wp.dice==='—'?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7.5px;color:#6A5A38;margin-left:5px;">'+wp.type+'</span>':'<span style="font-family:\'Share Tech Mono\',monospace;font-size:7.5px;color:#6A5A38;margin-left:5px;">'+mods(wi.atk)+' · '+wi.dice+mods(wi.dmgMod)+' '+wp.type+'</span>';})()}</div>
     <div class="bag-qty-ctrl">
       <button class="bag-qty-btn" onclick="bagQty(${i},-1)">−</button>
-      <div class="bag-qty">${e.qty}</div>
+      <div class="bag-qty">${esc(e.qty)}</div>
       <button class="bag-qty-btn" onclick="bagQty(${i},1)">+</button>
     </div>
-    <div class="bag-w" style="${wStyle}">${e.w>0?(e.w*e.qty)+' lb':'—'}</div>
+    <div class="bag-w" style="${wStyle}">${esc(e.w>0?(e.w*e.qty)+' lb':'—')}</div>
     <button class="bag-del" onclick="bagRemove(${i})" title="Retirer">✕</button>
   </div>`;
   }).join('');
@@ -4705,8 +4717,8 @@ function renderArmorEquip(){
       const dex=mod(effStat('dex'));
       const dexBonus=a.dexCap===null?dex:Math.min(dex,a.dexCap);
       const ca=a.base+(a.type==='heavy'?0:dexBonus);
-      return `<div onclick="equipArmor('${e.id}')" style="cursor:pointer;background:${eq?'#2A3A1A':'#1A1510'};border:1px solid ${eq?'#4A7A2A':'#3A2A10'};border-radius:3px;padding:.4rem .7rem;font-family:'Share Tech Mono',monospace;font-size:10px;color:${eq?'#8ACA5A':'var(--gold-d)'};min-width:110px;">
-        ${eq?'✓ ':''}${e.n}<br><span style="color:#6A9A5A;font-size:9px;">CA ${ca} · ${a.type}</span>
+      return `<div onclick="equipArmor('${forgeJs(e.id)}')" style="cursor:pointer;background:${eq?'#2A3A1A':'#1A1510'};border:1px solid ${eq?'#4A7A2A':'#3A2A10'};border-radius:3px;padding:.4rem .7rem;font-family:'Share Tech Mono',monospace;font-size:10px;color:${eq?'#8ACA5A':'var(--gold-d)'};min-width:110px;">
+        ${eq?'✓ ':''}${esc(e.n)}<br><span style="color:#6A9A5A;font-size:9px;">CA ${ca} · ${a.type}</span>
       </div>`;
     }).join('')}
     ${C.equippedArmorId?`<div onclick="equipArmor(null)" style="cursor:pointer;background:#1A1510;border:1px solid #5A2A10;border-radius:3px;padding:.4rem .7rem;font-family:'Share Tech Mono',monospace;font-size:10px;color:#8A4A2A;min-width:80px;">✕ Déshabiller</div>`:''}
@@ -4823,11 +4835,11 @@ function showDeityCard(evt,id){
     document.body.appendChild(el);
   }
   el.innerHTML=
-    (d.image?'<div style="width:100%;aspect-ratio:9/14;overflow:hidden;background:#0A0705;"><img src="'+d.image+'"'
+    (d.image?'<div style="width:100%;aspect-ratio:9/14;overflow:hidden;background:#0A0705;"><img src="'+esc(safeImageUrl(d.image))+'"'
       +' style="width:100%;height:100%;object-fit:contain;object-position:center top;display:block;" onerror="this.parentElement.style.display=none"></div>':'')+ 
     '<div style="padding:.65rem .8rem;">'+
-    '<div style="font-family:Cinzel,serif;font-size:13px;color:#C9A84C;letter-spacing:.06em;">'+d.name+'</div>'+
-    (d.desc&&d.desc!=='Mythes & actes'?'<div style="font-size:8.5px;color:#8A7050;line-height:1.55;margin-top:.3rem;">'+d.desc+'</div>':'')+
+    '<div style="font-family:Cinzel,serif;font-size:13px;color:#C9A84C;letter-spacing:.06em;">'+esc(d.name)+'</div>'+
+    (d.desc&&d.desc!=='Mythes & actes'?'<div style="font-size:8.5px;color:#8A7050;line-height:1.55;margin-top:.3rem;">'+esc(d.desc)+'</div>':'')+
     '</div>';
   const vw=window.innerWidth,vh=window.innerHeight,ex=evt.clientX,ey=evt.clientY,W=268;
   let left=ex+18;if(left+W>vw-8)left=ex-W-8;
@@ -4855,7 +4867,7 @@ function renderIdentity(){
         align-items:center;justify-content:center;overflow:hidden;position:relative;transition:.2s;"
         onmouseover="this.style.borderColor='rgba(201,168,76,.6)'" onmouseout="this.style.borderColor='rgba(201,168,76,.3)'">
         ${photoSrc
-          ? `<img src="${photoSrc}" style="width:100%;height:100%;object-fit:cover;object-position:center top;">`
+          ? `<img src="${esc(safeImageUrl(photoSrc))}" style="width:100%;height:100%;object-fit:cover;object-position:center top;">`
           : `<span style="font-size:28px;opacity:.25;">🖼</span><span style="font-size:8px;color:#5A4A2A;margin-top:8px;text-align:center;font-family:'Cinzel',serif;letter-spacing:.08em;">Cliquer<br>pour ajouter</span>`}
       </div>
       <input type="file" id="portrait-file" accept="image/*" style="display:none" onchange="loadPortrait(this)">
@@ -4865,34 +4877,34 @@ function renderIdentity(){
       </div>
       <div style="margin-top:.5rem;">
         <label class="ilb" style="font-size:7px;">Ou URL d'image</label>
-        <input class="ifl" style="font-size:10px;padding:.3rem .5rem;" value="${C.portrait_url||''}" placeholder="https://..." oninput="C.portrait_url=this.value;if(this.value){C.photo='';const pp=$('portrait-preview');pp.innerHTML='<img src='+JSON.stringify(this.value)+' style=&quot;width:100%;height:100%;object-fit:cover;object-position:center top;&quot;>';}">
+        <input class="ifl" value="${esc(C.portrait_url||'')}" placeholder="https://..." oninput="C.portrait_url=this.value;C.photo='';setPortraitPreview(this.value)">
       </div>
     </div>
     <div>
       <label class="ilb">Nom du personnage *</label>
-      <input class="ifl" id="fn" value="${C.name}" placeholder="Le nom que portera votre héros..." oninput="C.name=this.value;updateRight()">
+      <input class="ifl" id="fn" value="${esc(C.name)}" placeholder="Le nom que portera votre héros..." oninput="C.name=this.value;updateRight()">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;">
-        <div><label class="ilb">Joueur</label><input class="ifl" value="${C.player||''}" placeholder="Votre prénom" oninput="C.player=this.value"></div>
-        <div><label class="ilb">Âge</label><input class="ifl" value="${C.age||''}" placeholder="Ex : 28 ans" oninput="C.age=this.value"></div>
+        <div><label class="ilb">Joueur</label><input class="ifl" value="${esc(C.player||'')}" placeholder="Votre prénom" oninput="C.player=this.value"></div>
+        <div><label class="ilb">Âge</label><input class="ifl" value="${esc(C.age||'')}" placeholder="Ex : 28 ans" oninput="C.age=this.value"></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.5rem;">
-        <div><label class="ilb">Taille</label><input class="ifl" value="${C.height||''}" placeholder="Ex : 1m75" oninput="C.height=this.value"></div>
-        <div><label class="ilb">Poids</label><input class="ifl" value="${C.weight||''}" placeholder="Ex : 70 kg" oninput="C.weight=this.value"></div>
+        <div><label class="ilb">Taille</label><input class="ifl" value="${esc(C.height||'')}" placeholder="Ex : 1m75" oninput="C.height=this.value"></div>
+        <div><label class="ilb">Poids</label><input class="ifl" value="${esc(C.weight||'')}" placeholder="Ex : 70 kg" oninput="C.weight=this.value"></div>
       </div>
     </div>
   </div>
 
   <div class="sh" style="font-size:14px;">Description physique</div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem;margin:.5rem 0 1rem;">
-    <div><label class="ilb">Yeux</label><input class="ifl" value="${C.eyes||''}" placeholder="Ex : ambre" oninput="C.eyes=this.value"></div>
-    <div><label class="ilb">Cheveux</label><input class="ifl" value="${C.hair||''}" placeholder="Ex : noirs" oninput="C.hair=this.value"></div>
-    <div><label class="ilb">Peau</label><input class="ifl" value="${C.skin||''}" placeholder="Ex : hâlée" oninput="C.skin=this.value"></div>
+    <div><label class="ilb">Yeux</label><input class="ifl" value="${esc(C.eyes||'')}" placeholder="Ex : ambre" oninput="C.eyes=this.value"></div>
+    <div><label class="ilb">Cheveux</label><input class="ifl" value="${esc(C.hair||'')}" placeholder="Ex : noirs" oninput="C.hair=this.value"></div>
+    <div><label class="ilb">Peau</label><input class="ifl" value="${esc(C.skin||'')}" placeholder="Ex : hâlée" oninput="C.skin=this.value"></div>
   </div>
 
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">Alignement</div>
   <div class="ss" style="margin-bottom:.7rem;">Quelle est la boussole morale de votre personnage ?</div>
-  <div class="ag">${ALIGNS.map(a=>`<div class="ac ${C.alignment===a.id?'sel':''}" onclick="C.alignment='${a.id}';renderIdentity()"><div class="ac-n">${a.n}</div><div class="ac-d">${a.d}</div></div>`).join('')}</div>
+  <div class="ag">${ALIGNS.map(a=>`<div class="ac ${esc(C.alignment===a.id?'sel':'')}" onclick="C.alignment='${forgeJs(a.id)}';renderIdentity()"><div class="ac-n">${esc(a.n)}</div><div class="ac-d">${esc(a.d)}</div></div>`).join('')}</div>
 
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">⚜ Divinité</div>
@@ -4902,13 +4914,13 @@ function renderIdentity(){
     const dieux=(_codexData||[]).filter(x=>x.category==='Panthéon des Dieux').sort((a,b)=>a.name.localeCompare(b.name,'fr'));
     if(!dieux.length)return'';
     const cur=C.deity||null;
-    const opts=dieux.map(d=>`<option value="${d.id}"${cur&&cur.id===d.id?' selected':''}>${d.name}</option>`).join('');
+    const opts=dieux.map(d=>`<option value="${esc(d.id)}"${esc(cur&&cur.id===d.id?' selected':'')}>${esc(d.name)}</option>`).join('');
     const card=cur?`
       <div style="display:flex;align-items:center;gap:.7rem;margin-top:.5rem;background:#130D06;border:1px solid #3A2810;border-radius:4px;padding:.5rem .7rem;position:relative;"
-           onmouseenter="showDeityCard(event,'${cur.id}')" onmouseleave="hideDeityCard()">
-        <img src="${cur.image||''}" style="width:48px;height:48px;object-fit:cover;border-radius:3px;border:1px solid #3A2810;flex-shrink:0;${cur.image?'':'display:none'}" onerror="this.style.display='none'">
+           onmouseenter="showDeityCard(event,'${forgeJs(cur.id)}')" onmouseleave="hideDeityCard()">
+        <img src="${esc(safeImageUrl(cur.image||''))}" style="width:48px;height:48px;object-fit:cover;border-radius:3px;border:1px solid #3A2810;flex-shrink:0;${cur.image?'':'display:none'}" onerror="this.style.display='none'">
         <div>
-          <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);">${cur.name}</div>
+          <div style="font-family:'Cinzel',serif;font-size:11px;color:var(--gold);">${esc(cur.name)}</div>
           <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#6A5030;margin-top:2px;">Survol → fiche complète</div>
         </div>
       </div>`:''
@@ -4924,29 +4936,29 @@ function renderIdentity(){
   <div class="sh" style="font-size:14px;">Personnalité</div>
   <div class="ss" style="margin-bottom:.8rem;">Les quatre piliers du background D&D 5e</div>
 
-  ${C.background?.traits?.length?`<div class="notice" style="margin-bottom:.5rem;">💡 Suggestions — background <strong>${C.background.n}</strong> (cliquez pour utiliser) :</div>${C.background.traits.map(t=>`<div class="traitbox" onclick="C.traits=[${JSON.stringify(t)}];$('ft').value=${JSON.stringify(t)};">${t}</div>`).join('')}`:''}
+  ${C.background?.traits?.length?`<div class="notice" style="margin-bottom:.5rem;">💡 Suggestions — background <strong>${esc(C.background.n)}</strong> (cliquez pour utiliser) :</div>${C.background.traits.map(t=>`<div class="traitbox" onclick="C.traits=[${JSON.stringify(t)}];$('ft').value=${JSON.stringify(t)};">${t}</div>`).join('')}`:''}
 
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.7rem;">
     <div>
       <label class="ilb">⚡ Traits de personnalité</label>
-      <textarea class="ifl" id="ft" style="min-height:75px;" placeholder="Ce qui définit votre comportement au quotidien…&#10;Ex : Je ris fort et parle plus fort encore." oninput="C.traits=[this.value]">${C.traits.join('\n')}</textarea>
+      <textarea class="ifl" id="ft" style="min-height:75px;" placeholder="Ce qui définit votre comportement au quotidien…&#10;Ex : Je ris fort et parle plus fort encore." oninput="C.traits=[this.value]">${esc(C.traits.join('\n'))}</textarea>
     </div>
     <div>
       <label class="ilb">🌟 Idéaux</label>
-      <textarea class="ifl" style="min-height:75px;" placeholder="Ce en quoi vous croyez profondément…&#10;Ex : Liberté. Les chaînes, qu'elles soient de fer ou de loi, doivent être brisées." oninput="C.ideals=this.value">${C.ideals||''}</textarea>
+      <textarea class="ifl" style="min-height:75px;" placeholder="Ce en quoi vous croyez profondément…&#10;Ex : Liberté. Les chaînes, qu'elles soient de fer ou de loi, doivent être brisées." oninput="C.ideals=this.value">${esc(C.ideals||'')}</textarea>
     </div>
     <div>
       <label class="ilb">⚓ Liens</label>
-      <textarea class="ifl" style="min-height:75px;" placeholder="Ce qui vous attache au monde…&#10;Ex : Ma famille au village vit sous la menace d'un seigneur." oninput="C.bonds=this.value">${C.bonds||''}</textarea>
+      <textarea class="ifl" style="min-height:75px;" placeholder="Ce qui vous attache au monde…&#10;Ex : Ma famille au village vit sous la menace d'un seigneur." oninput="C.bonds=this.value">${esc(C.bonds||'')}</textarea>
     </div>
     <div>
       <label class="ilb">💀 Défauts</label>
-      <textarea class="ifl" style="min-height:75px;" placeholder="Votre talon d'Achille…&#10;Ex : Je ne résiste pas à l'appel de l'alcool et du jeu." oninput="C.flaws=this.value">${C.flaws||''}</textarea>
+      <textarea class="ifl" style="min-height:75px;" placeholder="Votre talon d'Achille…&#10;Ex : Je ne résiste pas à l'appel de l'alcool et du jeu." oninput="C.flaws=this.value">${esc(C.flaws||'')}</textarea>
     </div>
   </div>
 
   <label class="ilb">📖 Histoire & Motivations</label>
-  <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.bg_story=this.value">${C.bg_story||''}</textarea>
+  <textarea class="ifl" style="min-height:90px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…" oninput="C.bg_story=this.value">${esc(C.bg_story||'')}</textarea>
 
   <div class="div"></div>
   <div class="sh" style="font-size:14px;">🗣 Langues</div>
@@ -5149,7 +5161,7 @@ function openLevelUp(){
       '<button onclick="closeLevelUp()" style="background:none;border:1px solid #3A2A10;color:#6A5A3A;padding:.25rem .7rem;cursor:pointer;border-radius:4px;font-size:20px;line-height:1;">✕</button>'+
     '</div>'+
     '<div style="font-family:\'Cinzel\',serif;font-size:16px;color:var(--parch);letter-spacing:.07em;margin-bottom:1.2rem;padding:.6rem 1rem;background:#0A0805;border-radius:6px;border:1px solid #1E1408;">'+
-      (cl&&cl.n?cl.n:'?')+' &nbsp;·&nbsp; Niveau '+cur+
+      (esc(cl&&cl.n?cl.n:'?'))+' &nbsp;·&nbsp; Niveau '+cur+
       ' &nbsp;<span style="color:#4A3A20;font-size:20px;">→</span>&nbsp; '+
       '<span style="color:var(--gold);font-family:\'Cinzel Decorative\',serif;font-size:28px;vertical-align:middle;">'+nl+'</span>'+
     '</div>'+
@@ -5448,7 +5460,7 @@ function renderSummary(){
         if(isPrepared){
           // Classe à préparation : liste complète cliquable
           let out='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #2A1A08;display:flex;justify-content:space-between;">'+
-            '<span>PRÉPARATION · '+sCls.n.toUpperCase()+'</span>'+
+            '<span>PRÉPARATION · '+esc(sCls.n.toUpperCase())+'</span>'+
             '<span style="color:#8A7050;">'+totalSel+'/'+maxN+'</span></div>';
           for(let lvl=1;lvl<=9;lvl++){
             if(!slots||!slots[lvl-1])continue;
@@ -5459,15 +5471,15 @@ function renderSummary(){
             pool.forEach(s=>{
               const sel=(C.spells||[]).includes(s);
               const canAdd=totalSel<maxN||sel;
-              const esc=s.replace(/'/g,"\\'");
+              const safeSpell=forgeJs(s);
               out+='<span '+
-                'onclick="'+(canAdd?'toggleSpSorts(\''+esc+'\','+maxN+',\''+sKey+'\')':'')+'" '+
-                'onmouseenter="showSpellTooltip(event,\''+esc+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" '+
+                'onclick="'+(canAdd?'toggleSpSorts(\''+safeSpell+'\','+maxN+',\''+sKey+'\')':'')+'" '+
+                'onmouseenter="showSpellTooltip(event,\''+safeSpell+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" '+
                 'style="background:'+(sel?'#0A2015':'#080805')+';border:1px solid '+(sel?'#1A5A30':'#1E1408')+
                 ';color:'+(sel?'#50B070':canAdd?'#5A5040':'#2A2018')+
                 ';font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;'+
                 'cursor:'+(canAdd?'pointer':'not-allowed')+';user-select:none;white-space:nowrap;">'+
-                (sel?'✦ ':'')+s+'</span>';
+                (sel?'✦ ':'')+esc(s)+'</span>';
             });
             out+='</div>';
           }
@@ -5483,13 +5495,13 @@ function renderSummary(){
           for(let lvl=1;lvl<=9;lvl++){const p=POOLS_SUM[lvl];if(!p)continue;(p[sKey]||[]).forEach(s=>{if(!lvlMap[s])lvlMap[s]=lvl;});}
           const byLvl={};
           classSpells.forEach(s=>{const l=lvlMap[s]||99;if(!byLvl[l])byLvl[l]=[];byLvl[l].push(s);});
-          let out='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #2A1A08;">SORTS CONNUS · '+sCls.n.toUpperCase()+'</div>';
+          let out='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.14em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #2A1A08;">SORTS CONNUS · '+esc(sCls.n.toUpperCase())+'</div>';
           Object.keys(byLvl).sort((a,b)=>a-b).forEach(l=>{
             out+='<div style="font-family:Cinzel,serif;font-size:7px;letter-spacing:.14em;color:#7A6040;margin:.3rem 0 .18rem;">NIV.'+(l==99?'?':ROMAN[l-1])+'</div>';
             out+='<div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.35rem;">';
             byLvl[l].forEach(s=>{
-              const esc2=s.replace(/'/g,"\\'");
-              out+='<span onmouseenter="showSpellTooltip(event,\''+esc2+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;white-space:nowrap;">⚡ '+s+'</span>';
+              const esc2=forgeJs(s);
+              out+='<span onmouseenter="showSpellTooltip(event,\''+esc2+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;white-space:nowrap;">⚡ '+esc(s)+'</span>';
             });
             out+='</div>';
           });
@@ -5512,17 +5524,17 @@ function renderSummary(){
       var html='<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#3A6A30;margin:.55rem 0 .3rem;padding-bottom:.18rem;border-bottom:1px solid #1A3A10;">🔮 SORTS D\'OBJETS</div>';
       iSpells.forEach(function(def){
         html+='<div style="background:#050E05;border:1px solid #1A3010;border-radius:5px;padding:.35rem .5rem;margin-bottom:.3rem;">';
-        html+='<div style="font-family:Cinzel,serif;font-size:7.5px;color:#4A7A40;margin-bottom:.3rem;letter-spacing:.08em;">'+def.n+'</div>';
+        html+='<div style="font-family:Cinzel,serif;font-size:7.5px;color:#4A7A40;margin-bottom:.3rem;letter-spacing:.08em;">'+esc(def.n)+'</div>';
         (def.spells||[]).forEach(function(sp,idx){
           var key=def.id+':'+idx;
           var used=C.itemCharges[key]||0;
           var pips='';
           for(var j=0;j<sp.max;j++){
             var isUsed=j<used;
-            pips+='<div onclick="toggleItemCharge(\''+def.id+'\','+idx+')" title="'+(isUsed?'Récupérer charge':'Dépenser charge')+'" style="width:14px;height:14px;border-radius:2px;border:1px solid '+(isUsed?'#2A5020':'#3A7030')+';background:'+(isUsed?'#0A1A08':'#1A4018')+';cursor:pointer;transition:all .15s;flex-shrink:0;"></div>';
+            pips+='<div onclick="toggleItemCharge(\''+forgeJs(def.id)+'\','+idx+')" title="'+(isUsed?'Récupérer charge':'Dépenser charge')+'" style="width:14px;height:14px;border-radius:2px;border:1px solid '+(isUsed?'#2A5020':'#3A7030')+';background:'+(isUsed?'#0A1A08':'#1A4018')+';cursor:pointer;transition:all .15s;flex-shrink:0;"></div>';
           }
           html+='<div style="display:flex;align-items:center;gap:.35rem;margin-bottom:.22rem;">';
-          html+='<span style="font-family:Share Tech Mono,monospace;font-size:8px;color:#70A060;flex:1;">'+sp.n+'</span>';
+          html+='<span style="font-family:Share Tech Mono,monospace;font-size:8px;color:#70A060;flex:1;">'+esc(sp.n)+'</span>';
           html+='<div style="display:flex;gap:3px;align-items:center;">'+pips+'</div>';
           html+='<span style="font-family:Share Tech Mono,monospace;font-size:7px;color:#2A5020;">'+resetLabel(sp.resetOn)+'</span>';
           html+='</div>';
@@ -5531,7 +5543,7 @@ function renderSummary(){
       });
       return html;
     })();
-    const _extraSpellsHtml=(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin:.45rem 0 .28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">SORTS PERSONNALISÉS</div><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.4rem;">'+(C.extraSpells||[]).map(function(x){return'<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;white-space:nowrap;">❋ Niv.'+x.lvl+' — '+x.name+'</span>';}).join('')+'</div>':'';
+    const _extraSpellsHtml=(C.extraSpells||[]).length?'<div style="font-family:Cinzel,serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin:.45rem 0 .28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">SORTS PERSONNALISÉS</div><div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.4rem;">'+(C.extraSpells||[]).map(function(x){return'<span style="background:#080F1A;border:1px solid #1A304A;color:#80B0E0;font-family:Share Tech Mono,monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;white-space:nowrap;">❋ Niv.'+x.lvl+' — '+esc(x.name)+'</span>';}).join('')+'</div>':'';
     $('lp').innerHTML=tabStrip+(isCaster?rollDisplay+`
     <div style="display:flex;gap:.35rem;margin-bottom:.55rem;flex-wrap:wrap;">
       <div style="background:#0D0818;border:1px solid #2A1A3A;border-radius:5px;padding:.3rem .7rem;text-align:center;min-width:48px;">
@@ -5549,9 +5561,9 @@ function renderSummary(){
     </div>
     ${slotsHtml?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">EMPLACEMENTS DE SORTS</div><div style="margin-bottom:.7rem;">${slotsHtml}</div>`:''}
     ${C.cantrips?.length?`<div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.12em;color:#6A5030;margin-bottom:.28rem;padding-bottom:.18rem;border-bottom:1px solid #1E1208;">CANTRIPS</div>
-    <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${s.replace(/'/g,"\\'")}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
+    <div style="display:flex;flex-wrap:wrap;gap:.22rem;margin-bottom:.6rem;">${C.cantrips.map(s=>`<span style="background:#180A12;border:1px solid #4A1A30;color:#E090B0;font-family:'Share Tech Mono',monospace;font-size:8px;padding:.17rem .45rem;border-radius:3px;cursor:default;" onmouseenter="showSpellTooltip(event,'${forgeJs(s)}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">✧ ${s}</span>`).join('')}</div>`:''}
     ${spellsGroupedHtml||''}
-    `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(C.cls?.n||'Ce personnage')} ne lance pas de sorts.</div>`)+_itemSpellsHtml+_extraSpellsHtml;
+    `:`<div style="padding:.7rem 0;font-size:10px;color:#4A3A20;font-style:italic;">${(esc(C.cls?.n||'Ce personnage'))} ne lance pas de sorts.</div>`)+_itemSpellsHtml+_extraSpellsHtml;
     return;
   }
 
@@ -5584,27 +5596,27 @@ function renderSummary(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.4rem;margin-bottom:.5rem;">
       ${C.traits[0]?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;grid-column:1/-1;">
         <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">⚡ TRAITS DE PERSONNALITÉ</div>
-        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.traits.filter(Boolean).join('<br>')}</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.traits.filter(Boolean).map(esc).join('<br>')}</div>
       </div>`:''}
       ${C.ideals?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;">
         <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">🌟 IDÉAUX</div>
-        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.ideals}</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${esc(C.ideals)}</div>
       </div>`:''}
       ${C.bonds?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;">
         <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">⚓ LIENS</div>
-        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.bonds}</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${esc(C.bonds)}</div>
       </div>`:''}
       ${C.flaws?`<div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:5px;padding:.45rem .55rem;">
         <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.16em;color:#6A5030;margin-bottom:.25rem;">💀 DÉFAUTS</div>
-        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${C.flaws}</div>
+        <div style="font-size:9px;color:#8A7A5A;font-style:italic;line-height:1.5;">${esc(C.flaws)}</div>
       </div>`:''}
     </div>
     <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#6A5030;margin-bottom:.3rem;">📝 NOTES LIBRES</div>
     <textarea class="ifl" style="min-height:90px;font-size:11px;" placeholder="Notes, rappels, objectifs…"
-      oninput="C.notes=this.value">${C.notes||''}</textarea>
+      oninput="C.notes=this.value">${esc(C.notes||'')}</textarea>
     <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.18em;color:#6A5030;margin:.45rem 0 .3rem;">📖 HISTOIRE & MOTIVATIONS</div>
     <textarea class="ifl" style="min-height:120px;font-size:10px;" placeholder="Votre passé, ce qui vous a conduit à l'aventure, vos objectifs à long terme…"
-      oninput="C.bg_story=this.value">${C.bg_story||''}</textarea>
+      oninput="C.bg_story=this.value">${esc(C.bg_story||'')}</textarea>
     `;
     return;
   }
@@ -5638,28 +5650,28 @@ function renderSummary(){
       const formsHtml=(C.wildForms||[]).map((f,fi)=>`
         <div style="background:#0A0805;border:1px solid #2A1A08;border-radius:6px;margin-bottom:.4rem;overflow:hidden;">
           <div style="display:flex;align-items:center;gap:.4rem;padding:.4rem .5rem;cursor:pointer;" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
-            <div style="font-family:'Cinzel',serif;font-size:9px;color:#C9A84C;flex:1;">${f.name||'Forme sans nom'}</div>
+            <div style="font-family:'Cinzel',serif;font-size:9px;color:#C9A84C;flex:1;">${esc(f.name||'Forme sans nom')}</div>
             ${f.cr?`<div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#8A7050;">CR ${f.cr}</div>`:''}
             <button onclick="event.stopPropagation();removeWildForm(${fi})" style="background:none;border:none;color:#5A3A2A;cursor:pointer;font-size:11px;padding:0;">✕</button>
           </div>
           <div style="display:none;padding:.35rem .5rem .45rem;border-top:1px solid #1A1208;">
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.3rem;">
               <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">NOM</div>
-                <input type="text" value="${f.name||''}" placeholder="Loup…" oninput="wildFormSet(${fi},'name',this.value)"
+                <input type="text" value="${esc(f.name||'')}" placeholder="Loup…" oninput="wildFormSet(${fi},'name',this.value)"
                 style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
               <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">CR</div>
                 <input type="text" value="${f.cr||''}" placeholder="1/4" oninput="wildFormSet(${fi},'cr',this.value)"
                 style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
               <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">PV</div>
-                <input type="number" value="${f.hp||''}" placeholder="11" oninput="wildFormSet(${fi},'hp',parseInt(this.value)||null)"
+                <input type="number" value="${esc(f.hp||'')}" placeholder="11" oninput="wildFormSet(${fi},'hp',parseInt(this.value)||null)"
                 style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
             </div>
             <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:.3rem;margin-bottom:.3rem;">
               <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">CA</div>
-                <input type="number" value="${f.ac||''}" placeholder="13" oninput="wildFormSet(${fi},'ac',parseInt(this.value)||null)"
+                <input type="number" value="${esc(f.ac||'')}" placeholder="13" oninput="wildFormSet(${fi},'ac',parseInt(this.value)||null)"
                 style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
               <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">VIT.</div>
-                <input type="text" value="${f.speed||''}" placeholder="12 m" oninput="wildFormSet(${fi},'speed',this.value)"
+                <input type="text" value="${esc(f.speed||'')}" placeholder="12 m" oninput="wildFormSet(${fi},'speed',this.value)"
                 style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;outline:none;"></div>
               <div><div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;margin-bottom:2px;">SENS</div>
                 <input type="text" value="${f.senses||''}" placeholder="Vision 18m" oninput="wildFormSet(${fi},'senses',this.value)"
@@ -5670,14 +5682,14 @@ function renderSummary(){
                 const v=f[k]||10;const ms=(Math.floor((v-10)/2)>=0?'+':'')+Math.floor((v-10)/2);
                 return`<div style="text-align:center;background:#080605;border:1px solid #1A1208;border-radius:3px;padding:.2rem;">
                   <div style="font-family:'Cinzel',serif;font-size:6px;color:#5A4530;">${lbl}</div>
-                  <input type="number" min="1" max="30" value="${v}" oninput="wildFormSet(${fi},'${k}',parseInt(this.value)||10);this.nextElementSibling.textContent=(()=>{const m=Math.floor(((parseInt(this.value)||10)-10)/2);return(m>=0?'+':'')+m;})();"
+                  <input type="number" min="1" max="30" value="${esc(v)}" oninput="wildFormSet(${fi},'${k}',parseInt(this.value)||10);this.nextElementSibling.textContent=(()=>{const m=Math.floor(((parseInt(this.value)||10)-10)/2);return(m>=0?'+':'')+m;})();"
                   style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;text-align:center;outline:none;">
                   <div style="font-family:'Share Tech Mono',monospace;font-size:8px;color:#C9983A;">${ms}</div>
                 </div>`;
               }).join('')}
             </div>
             <textarea style="width:100%;background:#0E0905;border:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:9px;padding:.25rem;outline:none;min-height:50px;resize:vertical;box-sizing:border-box;"
-              placeholder="Attaques, capacités, immunités…" oninput="wildFormSet(${fi},'notes',this.value)">${f.notes||''}</textarea>
+              placeholder="Attaques, capacités, immunités…" oninput="wildFormSet(${fi},'notes',this.value)">${esc(f.notes||'')}</textarea>
           </div>
         </div>`).join('');
       return`<div style="background:#0D0A05;border:1px solid #2A1A08;border-radius:7px;padding:.55rem .65rem;margin-bottom:.55rem;">
@@ -5706,13 +5718,13 @@ function renderSummary(){
       ondrop="event.preventDefault();this.style.borderColor='rgba(201,168,76,.2)';if(event.dataTransfer.files[0])handleFamiliarImgFile(event.dataTransfer.files[0]);"
       title="Cliquer ou glisser une image"
       style="border:2px dashed rgba(201,168,76,.22);border-radius:10px;cursor:pointer;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.2);overflow:hidden;position:relative;height:221px;margin-bottom:.6rem;">
-      ${fm.img?`<img src="${fm.img}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">`:''}
+      ${fm.img?`<img src="${esc(safeImageUrl(fm.img))}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0;">`:''}
       <div style="position:relative;text-align:center;padding:1rem;pointer-events:none;">
         ${!fm.img?`<div style="font-size:38px;margin-bottom:.35rem;">🐾</div>
         <div style="font-family:'Cinzel',serif;font-size:9px;color:#4A3A20;">Cliquer ou glisser une image</div>`:''}
       </div>
       ${fm.img?`<div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.75));padding:.4rem .6rem .5rem;pointer-events:none;">
-        <div style="font-family:'Cinzel Decorative',serif;font-size:13px;color:#F0E0C0;text-shadow:0 1px 4px #000;">${fm.name||''}</div>
+        <div style="font-family:'Cinzel Decorative',serif;font-size:13px;color:#F0E0C0;text-shadow:0 1px 4px #000;">${esc(fm.name||'')}</div>
         ${fm.type?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(201,168,76,.75);margin-top:1px;">${fm.type}</div>`:''}
       </div>`:''}
     </div>
@@ -5720,7 +5732,7 @@ function renderSummary(){
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:.35rem;margin-bottom:.35rem;">
       <div>
         <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;margin-bottom:3px;">NOM</div>
-        <input type="text" value="${fm.name||''}" placeholder="Grand Vyre à Cou Clair…"
+        <input type="text" value="${esc(fm.name||'')}" placeholder="Grand Vyre à Cou Clair…"
           oninput="familiarSet('name',this.value)"
           style="width:100%;background:#0E0905;border:none;border-bottom:1px solid #3A2A10;color:var(--parch);font-family:'Cinzel',serif;font-size:10px;padding:.28rem .4rem;outline:none;">
       </div>
@@ -5746,7 +5758,7 @@ function renderSummary(){
       ${statLabels.map(([k,lbl])=>{const v=fm[k]||10;const ms=fmMod(v);return`
       <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.3rem .12rem;text-align:center;">
         <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.07em;color:#5A4530;margin-bottom:2px;">${lbl}</div>
-        <input type="number" min="1" max="30" value="${v}"
+        <input type="number" min="1" max="30" value="${esc(v)}"
           oninput="familiarSet('${k}',parseInt(this.value)||10);this.nextElementSibling.textContent=(()=>{const m=Math.floor(((parseInt(this.value)||10)-10)/2);return m>=0?'+'+m:''+m;})()"
           style="width:100%;background:none;border:none;border-bottom:1px solid #2A1A08;color:var(--parch);font-family:'Share Tech Mono',monospace;font-size:14px;text-align:center;outline:none;padding:0;">
         <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#C9983A;margin-top:2px;">${ms}</div>
@@ -5755,7 +5767,7 @@ function renderSummary(){
 
     <div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4530;margin-bottom:.28rem;">NOTES & CAPACITÉS</div>
     <textarea class="ifl" style="min-height:90px;font-size:10px;" placeholder="Attaques, capacités spéciales, comportement…"
-      oninput="familiarSet('notes',this.value)">${fm.notes||''}</textarea>
+      oninput="familiarSet('notes',this.value)">${esc(fm.notes||'')}</textarea>
     ${fm.img||fm.name?`<button class="btn btn-s" style="width:100%;font-size:9px;margin-top:.4rem;" onclick="if(confirm('Supprimer ce familier ?')){C.familiar=null;saveToRoster();renderSummary();}">✕ Supprimer le familier</button>`:''}
     `;
     return;
@@ -5783,11 +5795,11 @@ function renderSummary(){
     }
     const clsEntries=Object.entries(merged).filter(([l])=>Number(l)<=lvl).sort((a,b)=>Number(a[0])-Number(b[0]));
     const tag=(txt,isSub,desc)=>{
-      const safe=txt.replace(/'/g,"\\'");const safeD=(desc||'').replace(/'/g,"\\'").replace(/\n/g,'\\n');
+      const safe=forgeJs(txt);const safeD=forgeJs(desc||'').replace(/\n/g,'\\n');
       const evts=`onmouseenter="showCapTooltip(event,'${safe}','${safeD}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"`;
       return isSub
-        ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.12rem;cursor:default;" ${evts}>${txt}</span>`
-        :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.12rem;cursor:default;" ${evts}>${txt}</span>`;
+        ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.12rem;cursor:default;" ${evts}>${esc(txt)}</span>`
+        :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.18rem .42rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.12rem;cursor:default;" ${evts}>${esc(txt)}</span>`;
     };
     const capRollDisplay=_capRoll?`<div style="display:flex;align-items:center;gap:.55rem;background:rgba(201,168,76,.07);border:1px solid rgba(201,168,76,.3);border-radius:5px;padding:.42rem .65rem;margin-bottom:.5rem;">
       <div style="font-family:'Share Tech Mono',monospace;font-size:30px;color:#C9A84C;font-weight:bold;min-width:38px;text-align:center;">${_capRoll.total}</div>
@@ -5797,7 +5809,7 @@ function renderSummary(){
       </div>
       <button onclick="_capRoll=null;renderSummary()" style="margin-left:auto;background:none;border:none;color:#4A3A20;cursor:pointer;font-size:14px;">✕</button>
     </div>`:'';
-    const rbtn=(label,formula,bonus)=>`<button onclick="rollCap('${label.replace(/'/g,"\\'")}','${formula}',${bonus||0})" style="font-family:'Share Tech Mono',monospace;font-size:8px;padding:.15rem .38rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);color:#C9983A;cursor:pointer;border-radius:3px;white-space:nowrap;" title="Lancer ${formula}${bonus?'+'+bonus:''}">🎲${formula}${bonus?mods(bonus):''}</button>`;
+    const rbtn=(label,formula,bonus)=>`<button onclick="rollCap('${forgeJs(label)}','${formula}',${bonus||0})" style="font-family:'Share Tech Mono',monospace;font-size:8px;padding:.15rem .38rem;background:rgba(201,168,76,.08);border:1px solid rgba(201,168,76,.25);color:#C9983A;cursor:pointer;border-radius:3px;white-space:nowrap;" title="Lancer ${formula}${bonus?'+'+bonus:''}">🎲${formula}${bonus?mods(bonus):''}</button>`;
     $('lp').innerHTML=tabStrip+capRollDisplay+`<div style="padding:.1rem 0 2rem;">
     ${weaponSources.length?`
     <div style="margin-bottom:.75rem;">
@@ -5808,7 +5820,7 @@ function renderSummary(){
           const atkLabel=`ATQ ${w.n}`;const dmgLabel=`DGT ${w.n}`;
           return`<div style="background:#0E0A05;border:1px solid #2A1A08;border-left:2px solid #5A3A10;border-radius:0 4px 4px 0;padding:.32rem .55rem;">
             <div style="display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;">
-              <span style="font-size:10px;color:var(--parch);flex:1;">${w.n}${w.bonus?`<span style="font-size:7px;color:#80D080;margin-left:3px;">+${w.bonus}</span>`:''}</span>
+              <span style="font-size:10px;color:var(--parch);flex:1;">${esc(w.n)}${w.bonus?`<span style="font-size:7px;color:#80D080;margin-left:3px;">+${w.bonus}</span>`:''}</span>
               <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:#D4A85A;min-width:28px;text-align:right;">${mods(info.atk)}</span>
               <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blood);min-width:46px;">${info.dice}${mods(info.dmgMod)}</span>
             </div>
@@ -5821,16 +5833,16 @@ function renderSummary(){
     </div>`:`<div style="font-size:9px;color:#4A3A20;font-style:italic;margin-bottom:.55rem;">Aucune arme équipée ou dans le sac.</div>`}
     ${C.race?.traits?.length?`
     <div style="margin-bottom:.75rem;">
-      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">🧬 TRAITS RACIAUX · ${C.race.n}</div>
-      <div style="display:flex;flex-direction:column;gap:.28rem;">${C.race.traits.map(t=>{const nm=t.split(':')[0].trim();const desc=t.includes(':')?t.split(':').slice(1).join(':').trim():'';const diceMatch=desc.match(/(\d+d\d+)/i);const rollBtn=diceMatch?rbtn(nm,diceMatch[1],0):'';const safe=nm.replace(/'/g,"\\'");const safeD=desc.replace(/'/g,"\\'").replace(/\n/g,'\\n');return`<div style="display:flex;align-items:center;gap:.35rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.27rem .5rem;" onmouseenter="showCapTooltip(event,'${safe}','${safeD}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"><span style="flex:1;font-family:'Share Tech Mono',monospace;font-size:8.5px;color:var(--parch2);cursor:default;">${nm}</span>${rollBtn}</div>`;}).join('')}</div>
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">🧬 TRAITS RACIAUX · ${esc(C.race.n)}</div>
+      <div style="display:flex;flex-direction:column;gap:.28rem;">${C.race.traits.map(t=>{const nm=t.split(':')[0].trim();const desc=t.includes(':')?t.split(':').slice(1).join(':').trim():'';const diceMatch=desc.match(/(\d+d\d+)/i);const rollBtn=diceMatch?rbtn(nm,diceMatch[1],0):'';const safe=forgeJs(nm);const safeD=forgeJs(desc).replace(/\n/g,'\\n');return`<div style="display:flex;align-items:center;gap:.35rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.27rem .5rem;" onmouseenter="showCapTooltip(event,'${safe}','${safeD}')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"><span style="flex:1;font-family:'Share Tech Mono',monospace;font-size:8.5px;color:var(--parch2);cursor:default;">${esc(nm)}</span>${rollBtn}</div>`;}).join('')}</div>
     </div>`:''}
     ${(clf||C.sub)?`
     <div style="margin-bottom:.75rem;">
-      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">📖 CAPACITÉS DE CLASSE · ${C.cls?.n||''}${C.sub?' — '+C.sub.n:''}</div>
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">📖 CAPACITÉS DE CLASSE · ${esc(C.cls?.n||'')}${esc(C.sub?' — '+C.sub.n:'')}</div>
       <div class="cls-feat-timeline">${clsEntries.map(([l,fs])=>`
         <div class="cft-row">
           <div class="cft-lvl">Niv.${l}</div>
-          <div class="cft-feats" style="display:flex;flex-wrap:wrap;gap:.22rem;align-items:center;">${fs.map(f=>{const dm=f.d&&f.d.match(/(\d+d\d+)/i);const rb=dm?rbtn(f.n,dm[1],0):'';return`<span>${tag(f.n,f.sub,f.d)}</span>${rb}`;}).join('')}</div>
+          <div class="cft-feats" style="display:flex;flex-wrap:wrap;gap:.22rem;align-items:center;">${fs.map(f=>{const dm=f.d&&f.d.match(/(\d+d\d+)/i);const rb=dm?rbtn(f.n,dm[1],0):'';return`<span>${esc(tag(f.n,f.sub,f.d))}</span>${rb}`;}).join('')}</div>
         </div>`).join('')}
       </div>
     </div>`:''}
@@ -5840,10 +5852,10 @@ function renderSummary(){
       const mcE=Object.entries(mcMrg).filter(([l])=>Number(l)<=(mc.lvl||0)).sort((a,b)=>Number(a[0])-Number(b[0]));
       if(!mcE.length)return'';
       return`<div style="margin-bottom:.75rem;">
-      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">📖 CAPACITÉS DE CLASSE · ${mc.cls.n}</div>
+      <div style="font-family:'Cinzel',serif;font-size:8px;letter-spacing:.15em;color:#6A5030;margin-bottom:.35rem;">📖 CAPACITÉS DE CLASSE · ${esc(mc.cls.n)}</div>
       <div class="cls-feat-timeline">${mcE.map(([l,fs])=>
         `<div class="cft-row"><div class="cft-lvl">Niv.${l}</div>
-        <div class="cft-feats" style="display:flex;flex-wrap:wrap;gap:.22rem;align-items:center;">${fs.map(f=>{const dm=f.d&&f.d.match(/(\d+d\d+)/i);const rb=dm?rbtn(f.n,dm[1],0):'';return`<span>${tag(f.n,f.sub,f.d)}</span>${rb}`;}).join('')}</div>
+        <div class="cft-feats" style="display:flex;flex-wrap:wrap;gap:.22rem;align-items:center;">${fs.map(f=>{const dm=f.d&&f.d.match(/(\d+d\d+)/i);const rb=dm?rbtn(f.n,dm[1],0):'';return`<span>${esc(tag(f.n,f.sub,f.d))}</span>${rb}`;}).join('')}</div>
         </div>`).join('')}
       </div></div>`;
     }).join('')}
@@ -5853,8 +5865,8 @@ function renderSummary(){
       <div style="display:flex;flex-direction:column;gap:.38rem;">
         ${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid,d:''};return`
         <div style="background:#0E0A05;border:1px solid #2A1A08;border-left:2px solid var(--gold-d);border-radius:0 4px 4px 0;padding:.32rem .55rem;">
-          <div style="font-family:'Cinzel',serif;font-size:9.5px;color:var(--gold-d);margin-bottom:2px;">${f.n}</div>
-          ${f.d?`<div style="font-size:8.5px;color:#8A7A5A;line-height:1.5;">${f.d}</div>`:''}
+          <div style="font-family:'Cinzel',serif;font-size:9.5px;color:var(--gold-d);margin-bottom:2px;">${esc(f.n)}</div>
+          ${f.d?`<div style="font-size:8.5px;color:#8A7A5A;line-height:1.5;">${esc(f.d)}</div>`:''}
         </div>`;}).join('')}
       </div>
     </div>`:''}
@@ -5864,7 +5876,7 @@ function renderSummary(){
       <div style="display:flex;flex-wrap:wrap;gap:.3rem;">
         ${(C.specialAbilities||[]).map(a=>`
         <div style="display:flex;align-items:center;gap:.4rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.28rem .55rem;">
-          <span style="font-size:10px;color:var(--parch);">${a.name}</span>
+          <span style="font-size:10px;color:var(--parch);">${esc(a.name)}</span>
           ${a.roll!=null?`<span style="font-family:'Share Tech Mono',monospace;font-size:13px;color:var(--blood);font-weight:bold;">${a.roll}</span>`:''}
         </div>`).join('')}
       </div>
@@ -5878,14 +5890,14 @@ function renderSummary(){
   <div style="background:linear-gradient(135deg,#120808 0%,#080518 50%,#060408 100%);border:1px solid #2A1A08;border-radius:6px;padding:.65rem .85rem .55rem;margin-bottom:.45rem;text-align:center;position:relative;">
     <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,.3),transparent);"></div>
     <div style="font-size:26px;margin-bottom:.15rem;">${_clsIconSum}</div>
-    <div style="font-family:'Cinzel Decorative',serif;font-size:clamp(11px,2.5vw,15px);color:#E8D5A0;letter-spacing:.04em;">${C.name||'Héros Sans Nom'}</div>
+    <div style="font-family:'Cinzel Decorative',serif;font-size:clamp(11px,2.5vw,15px);color:#E8D5A0;letter-spacing:.04em;">${esc(C.name||'Héros Sans Nom')}</div>
     <div style="display:flex;justify-content:center;flex-wrap:wrap;gap:.18rem;margin:.25rem 0;">
-      ${C.race?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(139,90,26,.2);border:1px solid rgba(139,90,26,.3);color:#C8A060;padding:.1rem .35rem;border-radius:20px;">${C.race.n}</span>`:''}
-      ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(139,26,26,.2);border:1px solid rgba(139,26,26,.3);color:#E08080;padding:.1rem .35rem;border-radius:20px;">${C.cls.n} Niv.${primaryLvl()}</span>`:''}
-      ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(80,40,120,.2);border:1px solid rgba(80,40,120,.3);color:#C0A0E0;padding:.1rem .35rem;border-radius:20px;">${C.sub.n}</span>`:''}
+      ${C.race?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(139,90,26,.2);border:1px solid rgba(139,90,26,.3);color:#C8A060;padding:.1rem .35rem;border-radius:20px;">${esc(C.race.n)}</span>`:''}
+      ${C.cls?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(139,26,26,.2);border:1px solid rgba(139,26,26,.3);color:#E08080;padding:.1rem .35rem;border-radius:20px;">${esc(C.cls.n)} Niv.${primaryLvl()}</span>`:''}
+      ${C.sub?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:rgba(80,40,120,.2);border:1px solid rgba(80,40,120,.3);color:#C0A0E0;padding:.1rem .35rem;border-radius:20px;">${esc(C.sub.n)}</span>`:''}
     </div>
-    <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#4A3A20;">${alignLine}${C.background?' · '+C.background.n:''}${C.deity?' · ⚜ '+C.deity.name:''}</div>
-    ${C.deity?.image?`<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.35rem;" onmouseenter="showDeityCard(event,'${C.deity.id}')" onmouseleave="hideDeityCard()"><img src="${C.deity.image}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;border:1px solid rgba(201,168,76,.4);" onerror="this.style.display='none'"><span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(201,168,76,.6);letter-spacing:.08em;">⚜ ${C.deity.name}</span></div>`:''}
+    <div style="font-family:'Share Tech Mono',monospace;font-size:7px;color:#4A3A20;">${alignLine}${esc(C.background?' · '+C.background.n:'')}${esc(C.deity?' · ⚜ '+C.deity.name:'')}</div>
+    ${C.deity?.image?`<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;margin-top:.35rem;" onmouseenter="showDeityCard(event,'${forgeJs(C.deity.id)}')" onmouseleave="hideDeityCard()"><img src="${esc(safeImageUrl(C.deity.image))}" style="width:28px;height:28px;object-fit:cover;border-radius:50%;border:1px solid rgba(201,168,76,.4);" onerror="this.style.display='none'"><span style="font-family:'Cinzel',serif;font-size:8px;color:rgba(201,168,76,.6);letter-spacing:.08em;">⚜ ${esc(C.deity.name)}</span></div>`:''}
   </div>
 
   <div style="display:flex;gap:.35rem;margin-bottom:.45rem;">
@@ -5930,13 +5942,13 @@ function renderSummary(){
     </div>
     <div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.25rem;margin-bottom:.25rem;">
-        ${(()=>{const enc=calcEncumbrance();const spd=calcEffSpeed();const spdCol=enc.lvl===2?'#C0392B':enc.lvl===1?'#E67E22':'#80A0C0';const spdVal=enc.lvl>0?`<span style="font-size:8px;text-decoration:line-through;opacity:.5;">${C.race?.speed||30}</span>${spd}ft`:spd+'ft';return[['CA',calcCA(),'#C9983A'],['INIT',mods(effStat('dex')),'#80C0A0'],['VITESSE',spdVal,spdCol],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
+        ${(()=>{const enc=calcEncumbrance();const spd=calcEffSpeed();const spdCol=enc.lvl===2?'#C0392B':enc.lvl===1?'#E67E22':'#80A0C0';const spdVal=enc.lvl>0?`<span style="font-size:8px;text-decoration:line-through;opacity:.5;">${esc(C.race?.speed||30)}</span>${spd}ft`:spd+'ft';return[['CA',calcCA(),'#C9983A'],['INIT',mods(effStat('dex')),'#80C0A0'],['VITESSE',spdVal,spdCol],['PERC. PAS.',calcPassivePerc(),'#C080C0']].map(([l,v,col])=>`
         <div style="background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.25rem .32rem;text-align:center;">
           <div style="font-family:'Cinzel',serif;font-size:6.5px;letter-spacing:.1em;color:#4A3A20;margin-bottom:1px;">${l}</div>
-          <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:${col};font-weight:bold;">${v}</div>
+          <div style="font-family:'Share Tech Mono',monospace;font-size:14px;color:${col};font-weight:bold;">${esc(v)}</div>
         </div>`).join('')})()}
       </div>
-      ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.15rem;">${(C.conditions||[]).map((c,i)=>{const info=CONDITIONS_INFO[c];const col=info?info.col:'#E08090';return`<span onclick="removeCondition(${i})" onmouseenter="showCondTooltip(event,'${c.replace(/'/g,"\\'")}');event.stopPropagation()" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="font-family:'Share Tech Mono',monospace;font-size:7.5px;background:${col}18;border:1px solid ${col}66;color:${col};padding:.12rem .38rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`;}).join('')}</div>`:''}
+      ${(C.conditions||[]).length?`<div style="display:flex;flex-wrap:wrap;gap:.15rem;">${(C.conditions||[]).map((c,i)=>{const info=CONDITIONS_INFO[c];const col=info?info.col:'#E08090';return`<span onclick="removeCondition(${i})" onmouseenter="showCondTooltip(event,'${forgeJs(c)}');event.stopPropagation()" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="font-family:'Share Tech Mono',monospace;font-size:7.5px;background:${col}18;border:1px solid ${col}66;color:${col};padding:.12rem .38rem;border-radius:12px;cursor:pointer;">⚠ ${c} ✕</span>`;}).join('')}</div>`:''}
     </div>
   </div>
 
@@ -6061,7 +6073,7 @@ function buildPrint(){
   // ── Portrait ──────────────────────────────────────────────
   const pw=$('pn-portrait-wrap');
   if(C.photo){
-    pw.innerHTML=`<img src="${C.photo}" alt="${(C.name||'').replace(/"/g,'')}" style="width:100%;height:100%;object-fit:cover;object-position:center top;">`;
+    pw.innerHTML=`<img src="${esc(safeImageUrl(C.photo))}" alt="${esc((C.name||'').replace(/"/g,''))}" style="width:100%;height:100%;object-fit:cover;object-position:center top;">`;
   } else {
     const clsN=(C.cls?.n||'').toLowerCase();
     const CLS_ICONS={guerrier:'⚔',barbare:'🪓','rôdeur':'🏹',paladin:'🛡',roublard:'🗡',magicien:'✦',sorcier:'🌑',druide:'🌿',clerc:'☩',barde:'🎶',moine:'👁',ensorceleur:'🔮',artificier:'⚙'};
@@ -6102,7 +6114,7 @@ function buildPrint(){
     const bgSkill=C.background?.skills?.includes(sk.n);
     const v=mod(s[sk.s])+(prof||bgSkill?C.profBonus:0);
     return`<div class="ps-sk">
-      <span><span class="ps-sk-prof">${prof||bgSkill?'◆':'◇'}</span>${sk.n}</span>
+      <span><span class="ps-sk-prof">${prof||bgSkill?'◆':'◇'}</span>${esc(sk.n)}</span>
       <span class="ps-sk-val">${(v>=0?'+':'')+v}</span>
     </div>`;
   }).join('');
@@ -6111,7 +6123,7 @@ function buildPrint(){
   $('pn-combat-top').innerHTML=`
     <div class="ps-cbox"><span class="ps-cbox-l">Classe d'armure</span><div class="ps-cbox-v">${calcCA()}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Initiative</span><div class="ps-cbox-v">${mods(s.dex)}</div></div>
-    <div class="ps-cbox"><span class="ps-cbox-l">Vitesse</span><div class="ps-cbox-v" style="color:${calcEncumbrance().lvl===2?'#C0392B':calcEncumbrance().lvl===1?'#E67E22':'inherit'};">${calcEffSpeed()} ft${calcEncumbrance().lvl>0?`<span style="font-size:9px;opacity:.55;text-decoration:line-through;margin-left:3px;">${C.race?.speed||30}</span>`:''}</div></div>`+
+    <div class="ps-cbox"><span class="ps-cbox-l">Vitesse</span><div class="ps-cbox-v" style="color:${calcEncumbrance().lvl===2?'#C0392B':calcEncumbrance().lvl===1?'#E67E22':'inherit'};">${calcEffSpeed()} ft${calcEncumbrance().lvl>0?`<span style="font-size:9px;opacity:.55;text-decoration:line-through;margin-left:3px;">${esc(C.race?.speed||30)}</span>`:''}</div></div>`+
     (calcEncumbrance().lvl>0?`<div style="grid-column:1/-1;font-family:'Cinzel',serif;font-size:8px;color:${calcEncumbrance().col};padding:.25rem .5rem;background:${calcEncumbrance().col}18;border-left:2px solid ${calcEncumbrance().col};border-radius:0 3px 3px 0;">⚠ ${calcEncumbrance().label}${calcEncumbrance().lvl===2?' · Désavantage FOR/DEX/CON':''}</div>`:'');
 
   // PV — bloc impactant avec cases à cocher
@@ -6133,7 +6145,7 @@ function buildPrint(){
   const spAtk=spStat?C.profBonus+mod(effStat(spStat)):null;
   $('pn-combat-bot').innerHTML=`
     <div class="ps-cbox"><span class="ps-cbox-l">Bonus maîtrise</span><div class="ps-cbox-v">+${C.profBonus}</div></div>
-    <div class="ps-cbox"><span class="ps-cbox-l">Dé de vie</span><div class="ps-cbox-v">${C.level||1}d${C.cls?.hd||'?'}</div></div>
+    <div class="ps-cbox"><span class="ps-cbox-l">Dé de vie</span><div class="ps-cbox-v">${esc(C.level||1)}d${C.cls?.hd||'?'}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Perc. passive</span><div class="ps-cbox-v">${calcPassivePerc()}</div></div>
     ${spDC?`<div class="ps-cbox"><span class="ps-cbox-l">DD sorts</span><div class="ps-cbox-v">${spDC}</div></div>
     <div class="ps-cbox"><span class="ps-cbox-l">Att. magique</span><div class="ps-cbox-v">+${spAtk}</div></div>`
@@ -6149,9 +6161,9 @@ function buildPrint(){
   } else {
     $('pn-attacks').innerHTML=weapons.map(w=>{
       const p=WEAPON_PROPS[w.id];
-      if(!p){const atk=mod(s.str)+C.profBonus;return`<tr><td>${w.n}</td><td>${mods(atk)}</td><td>1d6 —</td></tr>`;}
+      if(!p){const atk=mod(s.str)+C.profBonus;return`<tr><td>${esc(w.n)}</td><td>${mods(atk)}</td><td>1d6 —</td></tr>`;}
       const info=getWeaponAtkBonus(w);
-      return`<tr><td>${w.n}</td><td>${mods(info.atk)}</td><td>${info.dice}+${info.dmgMod} ${info.type}</td></tr>`;
+      return`<tr><td>${esc(w.n)}</td><td>${mods(info.atk)}</td><td>${info.dice}+${info.dmgMod} ${info.type}</td></tr>`;
     }).join('');
   }
 
@@ -6160,9 +6172,9 @@ function buildPrint(){
   const equippedItems=Object.entries(C.equipped||{}).map(([slot,item])=>{
     const rc=item.rarity?_ERC[item.rarity]:null;
     const slotLabel=EQUIP_SLOTS.find(s=>s.id===slot)?.label||slot;
-    return`<li style="${rc?`color:${rc};`:''}"><strong>${slotLabel}:</strong> ${item.n}${item.rarity?` <span style="font-size:7px;font-family:'Share Tech Mono',monospace;">[${item.rarity}]</span>`:''}</li>`;
+    return`<li style="${rc?`color:${rc};`:''}"><strong>${slotLabel}:</strong> ${esc(item.n)}${item.rarity?` <span style="font-size:7px;font-family:'Share Tech Mono',monospace;">[${esc(item.rarity)}]</span>`:''}</li>`;
   });
-  const allEq=[...C.equipment.map(e=>`<li>${e.replace(/_g\d+$/,'')}</li>`),...(C.background?.equipment||[]).map(e=>`<li>${e}</li>`),...(C.bag||[]).map(e=>`<li>${e.n+(e.qty>1?' ×'+e.qty:'')}</li>`)];
+  const allEq=[...C.equipment.map(e=>`<li>${e.replace(/_g\d+$/,'')}</li>`),...(C.background?.equipment||[]).map(e=>`<li>${e}</li>`),...(C.bag||[]).map(e=>`<li>${esc(e.n+(e.qty>1?' ×'+e.qty:''))}</li>`)];
   $('pn-equip').innerHTML=[...equippedItems,...allEq].join('')||'<li>—</li>';
 
   // Langues & maîtrises
@@ -6193,7 +6205,7 @@ function buildPrint(){
   $('pn-traits').innerHTML=traitLabels.map((lbl,i)=>`
     <div class="ps-trait-box">
       <span class="ps-trait-lbl">${lbl}</span>
-      <div class="ps-trait-val">${traitVals[i]||C.background?.traits?.[i]||'—'}</div>
+      <div class="ps-trait-val">${esc(traitVals[i]||C.background?.traits?.[i]||'—')}</div>
     </div>`).join('');
 
   // Capacités de classe & race — filtrées par niveau actuel
@@ -6212,8 +6224,8 @@ function buildPrint(){
     $('pn-specials-hdr').style.display='';
     $('pn-specials').innerHTML=specials.map(a=>`
       <div class="ps-special-item">
-        <span class="ps-special-name">${a.name||a.n||'Capacité'}${a.roll!=null?`<span style="margin-left:6px;font-family:'Cinzel',serif;font-size:9px;color:#7C3AED;font-weight:700;">${a.roll}/100</span>`:''}</span>
-        ${a.desc||a.d||''}
+        <span class="ps-special-name">${esc(a.name||a.n||'Capacité')}${a.roll!=null?`<span style="margin-left:6px;font-family:'Cinzel',serif;font-size:9px;color:#7C3AED;font-weight:700;">${a.roll}/100</span>`:''}</span>
+        ${esc(a.desc||a.d||'')}
       </div>`).join('');
   } else {
     $('pn-specials-hdr').style.display='none';
@@ -6231,22 +6243,22 @@ function buildPrint(){
     $('pn-familiar-hdr').style.display='';
     const fmMod=v=>{const m=Math.floor(((v||10)-10)/2);return(m>=0?'+':'')+m;};
     const portraitHtml=fm.img
-      ?`<div class="ps-familiar-portrait"><img src="${fm.img}" alt="${fm.name||'familier'}"></div>`
+      ?`<div class="ps-familiar-portrait"><img src="${esc(safeImageUrl(fm.img))}" alt="${esc(fm.name||'familier')}"></div>`
       :`<div class="ps-familiar-portrait">🐾</div>`;
     const combatStats=[
-      fm.hp!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">PV</span><span class="ps-familiar-stat-v">${fm.hp}</span></div>`:'',
-      fm.ac!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">CA</span><span class="ps-familiar-stat-v">${fm.ac}</span></div>`:'',
-      fm.speed!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">VIT.</span><span class="ps-familiar-stat-v">${fm.speed}</span></div>`:'',
+      fm.hp!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">PV</span><span class="ps-familiar-stat-v">${esc(fm.hp)}</span></div>`:'',
+      fm.ac!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">CA</span><span class="ps-familiar-stat-v">${esc(fm.ac)}</span></div>`:'',
+      fm.speed!=null?`<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">VIT.</span><span class="ps-familiar-stat-v">${esc(fm.speed)}</span></div>`:'',
     ].filter(Boolean).join('');
     const attrStats=[['str','FOR'],['dex','DEX'],['con','CON'],['int','INT'],['wis','SAG'],['cha','CHA']].map(([k,lbl])=>
       `<div class="ps-familiar-stat"><span class="ps-familiar-stat-l">${lbl}</span><span class="ps-familiar-stat-v">${fmMod(fm[k])}</span></div>`
     ).join('');
-    const traitsHtml=(fm.traits||[]).length?`<div class="ps-familiar-traits" style="margin-top:4px;"><strong>Traits :</strong> ${fm.traits.join(', ')}</div>`:'';
-    const notesHtml=fm.notes?`<div class="ps-familiar-traits" style="font-style:italic;margin-top:3px;">${fm.notes}</div>`:'';
+    const traitsHtml=(fm.traits||[]).length?`<div class="ps-familiar-traits" style="margin-top:4px;"><strong>Traits :</strong> ${esc(fm.traits.join(', '))}</div>`:'';
+    const notesHtml=fm.notes?`<div class="ps-familiar-traits" style="font-style:italic;margin-top:3px;">${esc(fm.notes)}</div>`:'';
     $('pn-familiar').innerHTML=`<div class="ps-familiar-wrap">
       <div class="ps-familiar-hdr">
         ${portraitHtml}
-        <div><div class="ps-familiar-name">${fm.name||'Familier'}</div><div class="ps-familiar-type">${fm.type||''}</div></div>
+        <div><div class="ps-familiar-name">${esc(fm.name||'Familier')}</div><div class="ps-familiar-type">${fm.type||''}</div></div>
       </div>
       ${combatStats?`<div class="ps-familiar-stats">${combatStats}</div>`:''}
       <div class="ps-familiar-stats">${attrStats}</div>
@@ -6264,15 +6276,15 @@ function buildPrint(){
     let spHtml='';
     if(C.cantrips?.length){
       spHtml+=`<div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#4338CA;margin:4px 0 2px;border-bottom:1px solid #C7D2FE;padding-bottom:1px;">SORTS MINEURS</div>`;
-      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.cantrips.map(sp=>`<span class="ps-spell-tag">✧</span>${sp}`).join('  ')+`</div>`;
+      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.cantrips.map(sp=>`<span class="ps-spell-tag">✧</span>${esc(sp)}`).join('  ')+`</div>`;
     }
     if(C.spells?.length){
       spHtml+=`<div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#4338CA;margin:4px 0 2px;border-bottom:1px solid #C7D2FE;padding-bottom:1px;">SORTS PRÉPARÉS</div>`;
-      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.spells.map(sp=>`<span class="ps-spell-tag">⚡</span>${sp}`).join('<br>')+`</div>`;
+      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.spells.map(sp=>`<span class="ps-spell-tag">⚡</span>${esc(sp)}`).join('<br>')+`</div>`;
     }
     if(C.itemSpells?.length){
       spHtml+=`<div style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.1em;color:#7C3AED;margin:4px 0 2px;border-bottom:1px solid #DDD6FE;padding-bottom:1px;">SORTS D'OBJETS</div>`;
-      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.itemSpells.map(sp=>`<span class="ps-spell-tag" style="color:#7C3AED;">✦</span>${sp.name||sp}`).join('<br>')+`</div>`;
+      spHtml+=`<div style="font-size:9px;line-height:1.7;">`+C.itemSpells.map(sp=>`<span class="ps-spell-tag" style="color:#7C3AED;">✦</span>${esc(sp.name||sp)}`).join('<br>')+`</div>`;
     }
     $('pn-spells').innerHTML=spHtml;
   } else {
@@ -6293,14 +6305,14 @@ function renderAdventure(){
     {id:'forge',n:'La Forge des Anciens',tag:'NIV.3–5 · EXPLORATION',price:'2,50 €',desc:'Une forge naine abandonnée s\'est rallumée seule. Quelque chose de très ancien y travaille.',icon:'⚒️',ok:false},
   ];
   $('lp').innerHTML=`<div class="sh">Choisir une Aventure</div>
-  <div class="ss">${C.name?`${C.name} — ${C.race?.n||'?'} ${C.cls?.n||'?'} · Niv.${C.level}`:'Créez ou chargez un personnage d\'abord'}</div>
+  <div class="ss">${esc(C.name?`${C.name} — ${C.race?.n||'?'} ${C.cls?.n||'?'} · Niv.${C.level}`:'Créez ou chargez un personnage d\'abord')}</div>
   ${!C.name?'<div class="notice notice-w">Créez ou chargez un personnage pour débloquer les aventures.</div>':''}
-  <div class="adv-grid">${ADVS.map(a=>`<div class="advc ${!a.ok?'locked':''}" onclick="${a.ok&&C.name?`launchAdv('${a.id}')`:!C.name?'alert(\'Créez un personnage.\')':'alert(\'Bientôt disponible !\')'}">
+  <div class="adv-grid">${ADVS.map(a=>`<div class="advc ${!a.ok?'locked':''}" onclick="${forgeJs(a.ok&&C.name?`launchAdv('${a.id}')`:!C.name?'alert(\'Créez un personnage.\')':'alert(\'Bientôt disponible !\')')}">
     <div class="adv-img">${a.icon}</div>
     <div class="adv-body">
-      <div class="adv-name">${a.n}</div>
+      <div class="adv-name">${esc(a.n)}</div>
       <div class="adv-tag">${a.tag}</div>
-      <div class="adv-desc">${a.desc}</div>
+      <div class="adv-desc">${esc(a.desc)}</div>
       <div class="adv-price">${a.ok?`✦ ${a.price} — Disponible`:'⧖ Bientôt disponible'}</div>
     </div>
   </div>`).join('')}</div>
@@ -6409,7 +6421,7 @@ function renderFamiliarAttacksList(){
   const atks=C.familiar?.attacks||[];
   el.innerHTML=atks.length?atks.map((a,i)=>`
     <div style="display:flex;align-items:center;gap:.4rem;margin-bottom:.25rem;background:#0A0705;border:1px solid #2A1A08;border-radius:3px;padding:.25rem .4rem;">
-      <span style="flex:1;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--parch);">${a.n}</span>
+      <span style="flex:1;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--parch);">${esc(a.n)}</span>
       <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);">${a.atk}</span>
       <span style="font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--blood-l);">${a.dmg}</span>
       <span style="font-size:9px;color:#6A5A3A;">${a.type}</span>
@@ -6429,7 +6441,7 @@ function renderFamiliarTraitsList(){
   const traits=C.familiar?.traits||[];
   el.innerHTML=traits.length?traits.map((t,i)=>`
     <div style="background:#0A0705;border:1px solid #2A1A08;border-radius:3px;padding:.3rem .5rem;margin-bottom:.25rem;display:flex;align-items:start;gap:.4rem;">
-      <div style="flex:1;"><div style="font-family:'Cinzel',serif;font-size:9px;color:var(--gold-d);">${t.n}</div>${t.d?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-top:1px;">${t.d}</div>`:''}
+      <div style="flex:1;"><div style="font-family:'Cinzel',serif;font-size:9px;color:var(--gold-d);">${esc(t.n)}</div>${t.d?`<div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#6A5A3A;margin-top:1px;">${esc(t.d)}</div>`:''}
       </div>
       <button onclick="removeFamiliarTrait(${i})" style="background:none;border:none;color:#6A3A3A;cursor:pointer;font-size:11px;">✕</button>
     </div>`).join(''):'<div style="font-size:9px;color:#4A3A20;font-style:italic;padding:.2rem 0;">Aucun trait.</div>';
@@ -6501,8 +6513,8 @@ function renderCapacities(){
     </div>`;
 
   const tag=(txt,isSubclass,title)=>isSubclass
-    ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .45rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.15rem;" title="${title||''}">${txt}</span>`
-    :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .45rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.15rem;" title="${txt}">${txt}</span>`;
+    ?`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .45rem;border-radius:3px;border:1px solid rgba(160,128,208,.4);color:#C0A0E0;background:rgba(80,40,120,.12);margin:.15rem;" title="${title||''}">${esc(txt)}</span>`
+    :`<span style="display:inline-block;font-family:'Share Tech Mono',monospace;font-size:9px;padding:.2rem .45rem;border-radius:3px;border:1px solid #2A1A08;color:var(--parch2);background:#130D06;margin:.15rem;" title="${esc(txt)}">${esc(txt)}</span>`;
 
   $('lp').innerHTML=`<div style="padding:.5rem 0 2.5rem;">
 
@@ -6516,10 +6528,10 @@ function renderCapacities(){
       </tr></thead>
       <tbody>${weaponSources.map(w=>{
         const p=WEAPON_PROPS[w.id];
-        if(!p){const a=mod(effStat('str'))+pb;return`<tr><td style="padding:3px 6px;font-size:10px;">${w.n}</td><td style="text-align:center;color:#D4A85A;">${mods(a)}</td><td style="text-align:center;color:var(--blood);">1d4${mods(a)}</td><td style="font-size:9px;color:#6A5A3A;">—</td></tr>`;}
+        if(!p){const a=mod(effStat('str'))+pb;return`<tr><td style="padding:3px 6px;font-size:10px;">${esc(w.n)}</td><td style="text-align:center;color:#D4A85A;">${mods(a)}</td><td style="text-align:center;color:var(--blood);">1d4${mods(a)}</td><td style="font-size:9px;color:#6A5A3A;">—</td></tr>`;}
         const info=getWeaponAtkBonus(w);
         return`<tr style="border-top:1px solid #1A1008;">
-          <td style="padding:4px 6px;font-size:10px;color:var(--parch);">${w.n}${w.bonus?`<span style="font-size:8px;color:#80D080;"> +${w.bonus}</span>`:''}</td>
+          <td style="padding:4px 6px;font-size:10px;color:var(--parch);">${esc(w.n)}${w.bonus?`<span style="font-size:8px;color:#80D080;"> +${w.bonus}</span>`:''}</td>
           <td style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:12px;color:#D4A85A;">${mods(info.atk)}</td>
           <td style="text-align:center;font-family:'Share Tech Mono',monospace;font-size:11px;color:var(--blood);">${info.dice}${mods(info.dmgMod)}</td>
           <td style="font-size:9px;color:#6A5A3A;">${info.type}</td>
@@ -6551,8 +6563,8 @@ function renderCapacities(){
     <div style="display:flex;flex-direction:column;gap:.45rem;">
       ${(C.feats||[]).map(fid=>{const f=FEATS.find(x=>x.id===fid)||{n:fid,d:''};return`
       <div style="background:#0E0A05;border:1px solid #2A1A08;border-left:2px solid var(--gold-d);border-radius:0 4px 4px 0;padding:.4rem .7rem;">
-        <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold-d);margin-bottom:2px;">${f.n}</div>
-        <div style="font-size:9px;color:#8A7A5A;line-height:1.55;">${f.d}</div>
+        <div style="font-family:'Cinzel',serif;font-size:10px;color:var(--gold-d);margin-bottom:2px;">${esc(f.n)}</div>
+        <div style="font-size:9px;color:#8A7A5A;line-height:1.55;">${esc(f.d)}</div>
       </div>`;}).join('')}
     </div>`):''}
 
@@ -6560,7 +6572,7 @@ function renderCapacities(){
     <div style="display:flex;flex-wrap:wrap;gap:.4rem;">
       ${(C.specialAbilities||[]).map(a=>`
       <div style="display:flex;align-items:center;gap:.5rem;background:#0E0A05;border:1px solid #2A1A08;border-radius:4px;padding:.35rem .6rem;">
-        <span style="font-size:10px;color:var(--parch);">${a.name}</span>
+        <span style="font-size:10px;color:var(--parch);">${esc(a.name)}</span>
         ${a.roll!=null?`<span style="font-family:'Share Tech Mono',monospace;font-size:14px;color:var(--blood);font-weight:bold;">${a.roll}</span>`:''}
       </div>`).join('')}
     </div>`):''}
@@ -6890,7 +6902,7 @@ function renderScenario(locId){
   let html = `<div id="scn-wrap">
     <div class="scn-loc-hdr">
       <div class="scn-loc-tag">${loc.act||''}</div>
-      <div class="scn-loc-name">${loc.name}</div>
+      <div class="scn-loc-name">${esc(loc.name)}</div>
     </div>`;
 
   // Intro
@@ -6927,7 +6939,7 @@ function renderScenario(locId){
       const id=`sk_${locId}_${i}`;
       const canRoll = sk.dc > 0;
       html += `<div class="scn-sk" id="${id}">
-        <div class="scn-sk-h"><span>${sk.title}</span>${canRoll?`<button class="scn-sk-roll" onclick="rollCheck('${locId}',${i})">🎲 Lancer</button>`:''}</div>
+        <div class="scn-sk-h"><span>${esc(sk.title)}</span>${canRoll?`<button class="scn-sk-roll" onclick="rollCheck('${locId}',${i})">🎲 Lancer</button>`:''}</div>
         <div class="scn-sk-body">
           <div class="scn-sk-s"><span class="scn-sk-lbl">✅ SUCCÈS</span>${sk.s}</div>
           <div class="scn-sk-f"><span class="scn-sk-lbl">❌ ÉCHEC</span>${sk.f}</div>
@@ -6942,7 +6954,7 @@ function renderScenario(locId){
   if(loc.items?.length){
     html += `<div class="scn-section"><div class="scn-section-t">Objets disponibles</div>`;
     loc.items.forEach(it=>{
-      html += `<div class="scn-item"><span class="scn-item-t">OBJET — ${it.n}</span>${it.d}</div>`;
+      html += `<div class="scn-item"><span class="scn-item-t">OBJET — ${esc(it.n)}</span>${esc(it.d)}</div>`;
     });
     html += `</div>`;
   }
@@ -6964,7 +6976,7 @@ function renderScenario(locId){
     html += `<div class="scn-nav"><div class="scn-nav-t">Transitions →</div><div class="scn-nav-btns">`;
     loc.nav.forEach(lid=>{
       const dest = MDG.locations[lid];
-      if(dest) html += `<button class="scn-nb" onclick="renderScenario('${lid}')">${dest.name.split('—')[0].trim()}</button>`;
+      if(dest) html += `<button class="scn-nb" onclick="renderScenario('${lid}')">${esc(dest.name.split('—')[0].trim())}</button>`;
     });
     html += `</div></div>`;
   }
@@ -6977,7 +6989,7 @@ function renderScenario(locId){
                  'La nuit reste permanente. Port-de-Souche ne sera jamais sauvé sans retrouver Milo.';
     html += `<div class="scn-end">
       <div class="scn-end-t">FIN ${fin}</div>
-      <div class="scn-end-sub">${desc}</div>
+      <div class="scn-end-sub">${esc(desc)}</div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#6BAF4A;margin-bottom:1rem;">XP total : ${MDG.xp}</div>
       <button class="btn btn-p" onclick="endScenario()">Terminer & Sauvegarder →</button>
     </div>`;
@@ -7019,7 +7031,7 @@ function rollCheck(locId, idx){
   if(success && sk.xp) addScnXP(sk.xp);
   if(success && sk.flag) MDG.flags[sk.flag]=true;
   res.innerHTML = `<div class="scn-sk-result ${success?'success':'fail'}">
-    🎲 ${roll} + ${mod>=0?'+':''}${mod} (bonus) = <strong>${total}</strong> vs DD${sk.dc} → <strong>${label}</strong><br>
+    🎲 ${roll} + ${mod>=0?'+':''}${mod} (bonus) = <strong>${total}</strong> vs DD${sk.dc} → <strong>${esc(label)}</strong><br>
     <span style="font-family:'IM Fell English',serif;font-style:italic;">${text}</span>
   </div>`;
   // Remove roll button
@@ -7198,19 +7210,19 @@ function renderEquipPanel(){
     var borderCol=item?(rc||'#8B6914'):'#4A3820';
     var bgCol=item?(rc?rc+'22':'#1E1408'):'#130D06';
     var nmCol=item?(rc||'#C9A84C'):'#6A5A3A';
-    return '<div id="equip-slot-'+slot.id+'" class="equip-slot"'+
-      ' ondragover="slotDragOver(event,\''+slot.id+'\')"'+
+    return '<div id="equip-slot-'+esc(slot.id)+'" class="equip-slot"'+
+      ' ondragover="slotDragOver(event,\''+forgeJs(slot.id)+'\')"'+
       ' ondragleave="this.classList.remove(\'drag-over\')"'+
-      ' ondrop="slotDrop(event,\''+slot.id+'\')"'+
+      ' ondrop="slotDrop(event,\''+forgeJs(slot.id)+'\')"'+
       ' style="border-color:'+borderCol+';'+(item?'border-style:solid;':'')+'background:'+bgCol+';"'+
-      ' title="'+(item?item.n:slot.label+' \u2014 glissez un objet ici')+'">'+
+      ' title="'+(esc(item?item.n:slot.label+' \u2014 glissez un objet ici'))+'">'+
       '<span class="equip-slot-icon">'+slot.icon+'</span>'+
       '<div style="flex:1;min-width:0;overflow:hidden;">'+
         '<span class="equip-slot-lbl">'+slot.label+'</span>'+
-        '<div class="equip-slot-nm" style="color:'+nmCol+';">'+(item?item.n:'vide')+'</div>'+
-        (item&&item.rarity?'<div class="equip-slot-rar" style="color:'+(rc||'#8B6914')+';">'+item.rarity+'</div>':'')+
+        '<div class="equip-slot-nm" style="color:'+nmCol+';">'+(esc(item?item.n:'vide'))+'</div>'+
+        (item&&item.rarity?'<div class="equip-slot-rar" style="color:'+(rc||'#8B6914')+';">'+esc(item.rarity)+'</div>':'')+
       '</div>'+
-      (item?'<button class="equip-slot-del" onclick="slotUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
+      (item?'<button class="equip-slot-del" onclick="slotUnequip(\''+forgeJs(slot.id)+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
     '</div>';
   }).join('');
   sec.innerHTML=
@@ -7260,7 +7272,7 @@ function updateRight(){
   const clsPortEl=$('rp-cls-portrait');
   if(clsPortEl){
     if(C.cls){
-      clsPortEl.innerHTML=`<img src="${getClsImgUrl(C.cls.id)}" alt="${C.cls.n}" onerror="clsImgFallback(this,'${C.cls.id}','port')">`;
+      clsPortEl.innerHTML=`<img src="${esc(safeImageUrl(getClsImgUrl(C.cls.id)))}" alt="${esc(C.cls.n)}" onerror="clsImgFallback(this,'${forgeJs(C.cls.id)}','port')">`;
     }else{clsPortEl.innerHTML='<div class="rp-phl">✕</div>';}
   }
   if($('rhp'))$('rhp').textContent=calcHP()||'—';
@@ -7287,7 +7299,7 @@ function updateCenterBand(){
   }
   if(badgesEl&&C.race?.bonus){
     badgesEl.innerHTML=Object.entries(C.race.bonus).filter(([k,v])=>k!=='_ch'&&v>0)
-      .map(([k,v])=>`<span class="bonus-badge-c">${k.toUpperCase()} +${v}</span>`).join('');
+      .map(([k,v])=>`<span class="bonus-badge-c">${k.toUpperCase()} +${esc(v)}</span>`).join('');
     if(C.race.bonus._ch)badgesEl.innerHTML+=`<span class="bonus-badge-c">+${C.race.bonus._ch} ✦</span>`;
   }else if(badgesEl)badgesEl.innerHTML='';
   if(bgEl){
@@ -7412,9 +7424,9 @@ function openBagFromRoster(id){
       const total = bagTotal2+coinW2;
       bmoBag.innerHTML = entry.bag.map(e=>`
         <div class="bag-row">
-          <div class="bag-nm" onclick="showItemPanel(${JSON.stringify(e).replace(/"/g,"'")})" title="Voir la fiche">${e.n}</div>
-          <div class="bag-qty" style="min-width:auto;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);">${e.qty>1?'×'+e.qty:''}</div>
-          <div class="bag-w">${e.w>0?(e.w*e.qty)+' lb':'—'}</div>
+          <div class="bag-nm" onclick="showItemPanel(${JSON.stringify(e).replace(/"/g,"'")})" title="Voir la fiche">${esc(e.n)}</div>
+          <div class="bag-qty" style="min-width:auto;font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold);">${esc(e.qty>1?'×'+e.qty:'')}</div>
+          <div class="bag-w">${esc(e.w>0?(e.w*e.qty)+' lb':'—')}</div>
         </div>`).join('')+
         `<div class="bag-total">Poids total : ${total.toFixed(1)} lb (${(total*0.453).toFixed(1)} kg)${coinW2>0?`<span style="font-size:8px;color:#6A5030;margin-left:.5rem;">dont ${coinW2.toFixed(1)} lb pièces</span>`:''}</div>`;
     }
@@ -7428,7 +7440,7 @@ function openBagFromRoster(id){
     } else {
       bmoHist.innerHTML = hist.slice().reverse().map(s=>`
         <div class="hist-row">
-          <div class="hist-name">${s.name}</div>
+          <div class="hist-name">${esc(s.name)}</div>
           <div class="hist-date">${s.date||''}</div>
           <span class="hist-status ${s.status==='fail'?'fail':'done'}">${s.status==='fail'?'✗ Échec':'✓ Terminé'}</span>
         </div>`).join('');
@@ -7583,7 +7595,7 @@ function renderReSpells(){
   var panel=$('re-spell-panel'); if(!panel)return;
   var r=_reChar; if(!r){panel.innerHTML='<div class="re-sp-notice">Aucun personnage chargé.</div>';return;}
   var info=getReSpellInfo();
-  if(!info){panel.innerHTML='<div class="re-sp-notice">'+((r.cls&&r.cls.n)||'Ce personnage')+' ne lance pas de sorts.</div>';return;}
+  if(!info){panel.innerHTML='<div class="re-sp-notice">'+(esc((r.cls&&r.cls.n)||'Ce personnage'))+' ne lance pas de sorts.</div>';return;}
   var cants=r.cantrips||[];
   var spells=r.spells||[];
   var cantPool=CANTRIPS[info.key==='arcane'||info.key==='bard'||info.key==='warlock'?'arcane':info.key==='divine'?'divine':'nature']||[];
@@ -7596,7 +7608,7 @@ function renderReSpells(){
   var html='<div class="re-sp-summary">';
   if(info.cntMax>0)html+='<span class="re-sp-badge'+(cntFull?' full':'')+'">🌀 Sorts mineurs : '+cants.length+'/'+info.cntMax+'</span>';
   html+='<span class="re-sp-badge'+(spFull?' full':'')+'">✦ '+typeLabel+' : '+spells.length+'/'+info.spellMax+'</span>';
-  html+='<span class="re-sp-badge" style="color:#5A7AA0;">📖 '+info.cls.n+' · Niv.'+info.lvl+'</span>';
+  html+='<span class="re-sp-badge" style="color:#5A7AA0;">📖 '+esc(info.cls.n)+' · Niv.'+info.lvl+'</span>';
   html+='</div>';
   // Cantrips
   if(info.cntMax>0&&cantPool.length){
@@ -7606,9 +7618,9 @@ function renderReSpells(){
       var active=cants.includes(s);
       var disabled=!active&&cntFull;
       html+='<div class="re-sp-card'+(active?' active':'')+(disabled?' grayed':'')+'"'
-        +' onclick="reToggleSpell(\'c\',\''+s.replace(/'/g,"\\'")+'\')"'
-        +' onmouseenter="showSpellTooltip(event,\''+s.replace(/'/g,"\\'")+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'
-        +(active?'✓ ':'')+'<span>'+s+'</span>'
+        +' onclick="reToggleSpell(\'c\',\''+forgeJs(s)+'\')"'
+        +' onmouseenter="showSpellTooltip(event,\''+forgeJs(s)+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'
+        +(active?'✓ ':'')+'<span>'+esc(s)+'</span>'
         +(active?'<span style="color:#8A3A3A;font-size:10px;margin-left:2px;">✕</span>':'')+'</div>';
     });
     html+='</div>';
@@ -7628,15 +7640,15 @@ function renderReSpells(){
         var disabled=!active&&spFull;
         var cls=info.isPrepared?(active?'active prepared-cls':''):(active?'active':'');
         html+='<div class="re-sp-card '+cls+(disabled?' grayed':'')+'"'
-          +' onclick="reToggleSpell(\'s\',\''+s.replace(/'/g,"\\'")+'\')"'
-          +' onmouseenter="showSpellTooltip(event,\''+s.replace(/'/g,"\\'")+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'
-          +(active?(info.isPrepared?'✓ ':'✓ '):'')+'<span>'+s+'</span>'
+          +' onclick="reToggleSpell(\'s\',\''+forgeJs(s)+'\')"'
+          +' onmouseenter="showSpellTooltip(event,\''+forgeJs(s)+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()">'
+          +(active?(info.isPrepared?'✓ ':'✓ '):'')+'<span>'+esc(s)+'</span>'
           +(active?'<span style="color:#8A3A3A;font-size:10px;margin-left:2px;">✕</span>':'')+'</div>';
       });
       html+='</div>';
     });
   }else if(!info.isPrepared&&info.lvl<2&&(info.cls.id==='ranger'||info.cls.id==='paladin')){
-    html+='<div class="re-sp-notice">'+info.cls.n+' obtient ses sorts au niveau 2.</div>';
+    html+='<div class="re-sp-notice">'+esc(info.cls.n)+' obtient ses sorts au niveau 2.</div>';
   }
   panel.innerHTML=html;
 }
@@ -7675,7 +7687,7 @@ function renderReBag(){
     var cats=['Tous'];
     (r.bag||[]).forEach(function(e){if(e.cat&&!cats.includes(e.cat))cats.push(e.cat);});
     fEl.innerHTML=cats.map(function(c){
-      return '<button class="re-bag-cat'+(c===_reBagCat?' active':'')+'" onclick="_reBagCat=\''+c.replace(/'/g,'\\\'')+ '\';renderReBag()">'+c+'</button>';
+      return '<button class="re-bag-cat'+(c===_reBagCat?' active':'')+'" onclick="_reBagCat=\''+forgeJs(c)+ '\';renderReBag()">'+c+'</button>';
     }).join('');
   }
   var el=$('re-bag-list2'); if(!el)return;
@@ -7692,8 +7704,8 @@ function renderReBag(){
   el.innerHTML=visible.map(function(e){
     var i=r.bag.indexOf(e);
     var rc=e.rarity?_RE_RC[e.rarity]:null;
-    var rBadge=rc?'<span class="re-rarity" style="background:'+rc+'33;color:'+rc+';border:1px solid '+rc+'55;">'+e.rarity+'</span>':'';
-    var qty=e.qty>1?' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);">\xd7'+e.qty+'</span>':'';
+    var rBadge=rc?'<span class="re-rarity" style="background:'+rc+'33;color:'+rc+';border:1px solid '+rc+'55;">'+esc(e.rarity)+'</span>':'';
+    var qty=e.qty>1?' <span style="font-family:\'Share Tech Mono\',monospace;font-size:9px;color:var(--gold-d);">\xd7'+esc(e.qty)+'</span>':'';
     var eqBadge=equippedIds.includes(e.id)?'<span class="re-equipped-badge" title="Équipé">✓</span>':'';
     var inBank=!!e.bank;
     var nmStyle=inBank?'color:#5A4A3A;text-decoration:line-through;':'';
@@ -7702,7 +7714,7 @@ function renderReBag(){
     return '<div class="re-bag-row" draggable="true" ondragstart="reBagDragStart(event,'+i+')" onmouseenter="showBagTooltip(event,'+i+')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()" style="'+(inBank?'opacity:.55;':'')+'">'+
       bankCb+
       '<span style="font-size:10px;color:#5A4A3A;cursor:grab;">&#x2837;</span>'+
-      '<div style="flex:1;font-family:\'IM Fell English\',serif;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+nmStyle+'">'+e.n+rBadge+qty+'</div>'+
+      '<div style="flex:1;font-family:\'IM Fell English\',serif;font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;'+nmStyle+'">'+esc(e.n)+rBadge+qty+'</div>'+
       eqBadge+
       '<button class="re-bag-del" onclick="reBagRemove('+i+')" title="Retirer un">&#8722;</button>'+
       '<button class="re-bag-del" onclick="reBagDelete('+i+')" title="Tout retirer">\u2715</button>'+
@@ -7730,7 +7742,7 @@ function renderReStats(){
       var m=Math.floor((v-10)/2);
       return '<div style="background:#1A1208;border:1px solid #2A1808;border-radius:4px;padding:.3rem .2rem;text-align:center;">'+
         '<div style="font-family:\'Cinzel\',serif;font-size:9px;color:var(--gold-d);letter-spacing:.06em;margin-bottom:1px;">'+lbl[i]+'</div>'+
-        '<div style="font-family:\'Cinzel Decorative\',serif;font-size:18px;line-height:1;color:var(--blood);">'+v+'</div>'+
+        '<div style="font-family:\'Cinzel Decorative\',serif;font-size:18px;line-height:1;color:var(--blood);">'+esc(v)+'</div>'+
         '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#8A9080;margin-top:1px;">'+(m>=0?'+':'')+m+'</div>'+
       '</div>';
     }).join('')+
@@ -7739,14 +7751,14 @@ function renderReStats(){
     '<div style="text-align:center;grid-column:1;position:relative;">'+
       '<div style="display:flex;align-items:center;justify-content:center;gap:2px;">'+
         '<button onclick="reChangeHp(-1)" style="background:none;border:none;color:#8A3A3A;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;">\u2212</button>'+
-        '<input id="re-hp-input" type="number" value="'+curHP+'" min="0" max="'+maxHP+'" onchange="reSetHp(this.value)" style="width:36px;background:none;border:none;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.6vh,16px);color:var(--blood);text-align:center;padding:0;">'+
+        '<input id="re-hp-input" type="number" value="'+esc(curHP)+'" min="0" max="'+esc(maxHP)+'" onchange="reSetHp(this.value)" style="width:36px;background:none;border:none;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.6vh,16px);color:var(--blood);text-align:center;padding:0;">'+
         '<button onclick="reChangeHp(1)" style="background:none;border:none;color:#3A7A3A;font-size:14px;cursor:pointer;padding:0 2px;line-height:1;">+</button>'+
       '</div>'+
-      '<span style="'+S+'">/ '+maxHP+' PV</span>'+
+      '<span style="'+S+'">/ '+esc(maxHP)+' PV</span>'+
     '</div>'+
-    '<div style="text-align:center;"><span style="'+V+'">\uD83D\uDEE1 '+dispCA+'</span><span style="'+S+'">CA</span></div>'+
+    '<div style="text-align:center;"><span style="'+V+'">\uD83D\uDEE1 '+esc(dispCA)+'</span><span style="'+S+'">CA</span></div>'+
     '<div style="text-align:center;"><span style="'+V+'">'+(dispInit>=0?'+':'')+dispInit+'</span><span style="'+S+'">Init</span></div>'+
-    '<div style="text-align:center;"><span style="'+V+'">'+dispSpd+'</span><span style="'+S+'">Vitesse</span></div>'+
+    '<div style="text-align:center;"><span style="'+V+'">'+esc(dispSpd)+'</span><span style="'+S+'">Vitesse</span></div>'+
   '</div>'+
   renderReSlots()+
   '<div style="display:flex;gap:.3rem;padding:.4rem .3rem .2rem;justify-content:center;">'+
@@ -7801,13 +7813,13 @@ function showItemTooltip(ev, item){
   var d=_getFullItemData(item);
   var rc=d.rarity&&_RE_RC?_RE_RC[d.rarity]:null;
   var colN=rc||'#C9A84C';
-  var sprH=d.sprite?'<img src="'+d.sprite+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;border:1px solid #3A2810;background:#0D0805;flex-shrink:0;">':'';
-  var hdr='<div class="rst-name" style="color:'+colN+';">'+d.name+'</div>';
-  if(d.type) hdr+='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+d.type+'</div>';
-  if(d.rarity) hdr+='<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+colN+';">'+d.rarity+'</div>';
-  if(d.attunement) hdr+='<div style="font-family:\'Cinzel\',serif;font-size:12px;color:#A080D0;margin-top:6px;">⧁ Harmonisation requise'+(d.attunement_note?' — '+d.attunement_note:'')+'</div>';
+  var sprH=d.sprite?'<img src="'+esc(safeImageUrl(d.sprite))+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;border:1px solid #3A2810;background:#0D0805;flex-shrink:0;">':'';
+  var hdr='<div class="rst-name" style="color:'+colN+';">'+esc(d.name)+'</div>';
+  if(d.type) hdr+='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+esc(d.type)+'</div>';
+  if(d.rarity) hdr+='<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+colN+';">'+esc(d.rarity)+'</div>';
+  if(d.attunement) hdr+='<div style="font-family:\'Cinzel\',serif;font-size:12px;color:#A080D0;margin-top:6px;">⧁ Harmonisation requise'+(esc(d.attunement_note?' — '+d.attunement_note:''))+'</div>';
   var filtered=d.desc?_filterItemDesc(d.desc):'';
-  var descH=filtered?'<div class="rst-desc" style="max-height:none;font-size:13px;white-space:pre-line;">'+filtered+'</div>':'';
+  var descH=filtered?'<div class="rst-desc" style="max-height:none;font-size:13px;white-space:pre-line;">'+esc(filtered)+'</div>':'';
   var textBlock=hdr+descH;
   tt.innerHTML=sprH
     ?'<div style="display:flex;gap:16px;align-items:flex-start;">'+sprH+'<div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
@@ -7819,14 +7831,14 @@ function showSpellTooltip(ev, name){
   var tt=$('re-slot-tooltip'); if(!tt)return;
   tt.classList.add('spell-tt');
   var desc=SPELL_DESC[name]||'';
-  tt.innerHTML='<div class="rst-name" style="font-size:26px;margin-bottom:10px;">'+name+'</div>'+(desc?'<div class="rst-desc" style="font-size:18px;margin-top:0;max-height:none;border-top:none;padding-top:0;color:#B0A07A;line-height:1.6;">'+desc+'</div>':'');
+  tt.innerHTML='<div class="rst-name" style="font-size:26px;margin-bottom:10px;">'+esc(name)+'</div>'+(desc?'<div class="rst-desc" style="font-size:18px;margin-top:0;max-height:none;border-top:none;padding-top:0;color:#B0A07A;line-height:1.6;">'+esc(desc)+'</div>':'');
   posSlotTooltip(ev);
   tt.classList.add('visible');
 }
 function showCapTooltip(ev, name, desc){
   var tt=$('re-slot-tooltip'); if(!tt)return;
   tt.classList.add('spell-tt');
-  tt.innerHTML='<div class="rst-name" style="font-size:22px;margin-bottom:8px;">'+name+'</div>'+(desc?'<div class="rst-desc" style="font-size:16px;margin-top:0;max-height:none;border-top:none;padding-top:0;color:#B0A07A;line-height:1.6;">'+desc.replace(/\\n/g,'<br>')+'</div>':'<div style="font-size:14px;color:#4A3A20;font-style:italic;">Aucune description disponible.</div>');
+  tt.innerHTML='<div class="rst-name" style="font-size:22px;margin-bottom:8px;">'+esc(name)+'</div>'+(desc?'<div class="rst-desc" style="font-size:16px;margin-top:0;max-height:none;border-top:none;padding-top:0;color:#B0A07A;line-height:1.6;">'+esc(desc).replace(/\\n/g,'<br>')+'</div>':'<div style="font-size:14px;color:#4A3A20;font-style:italic;">Aucune description disponible.</div>');
   posSlotTooltip(ev);
   tt.classList.add('visible');
 }
@@ -7906,7 +7918,7 @@ function showCondTooltip(ev,cond){
       '<span style="font-size:28px;line-height:1;">'+info.icon+'</span>'+
       '<div class="rst-name" style="color:'+info.col+';font-size:20px;margin-bottom:0;">'+cond+'</div>'+
     '</div>'+
-    '<div style="font-size:13px;color:#9A8A6A;margin-bottom:10px;font-style:italic;line-height:1.5;">'+info.desc+'</div>'+
+    '<div style="font-size:13px;color:#9A8A6A;margin-bottom:10px;font-style:italic;line-height:1.5;">'+esc(info.desc)+'</div>'+
     '<div style="display:flex;flex-direction:column;gap:1px;">'+effectsHtml+'</div>'+
     '<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#4A3A20;margin-top:10px;padding-top:6px;border-top:1px solid #2A1A08;">Cliquer sur l\'état pour le retirer</div>';
   posSlotTooltip(ev);
@@ -7920,15 +7932,15 @@ function showSlotTooltip(ev, slotId){
   var rc=d.rarity&&_RE_RC?_RE_RC[d.rarity]:null;
   var colN=rc||'#C9A84C';
   // Sprite uniquement (pas image)
-  var sprH=d.sprite?'<img src="'+d.sprite+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;border:1px solid #3A2810;background:#0D0805;flex-shrink:0;">':'';
+  var sprH=d.sprite?'<img src="'+esc(safeImageUrl(d.sprite))+'" style="width:180px;height:180px;object-fit:contain;border-radius:8px;border:1px solid #3A2810;background:#0D0805;flex-shrink:0;">':'';
   // En-tête
-  var hdr='<div class="rst-name" style="color:'+colN+';">'+d.name+'</div>';
-  if(d.type) hdr+='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+d.type+'</div>';
-  if(d.rarity) hdr+='<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+colN+';">'+d.rarity+'</div>';
-  if(d.attunement) hdr+='<div style="font-family:\'Cinzel\',serif;font-size:12px;color:#A080D0;margin-top:6px;">⧁ Harmonisation requise'+(d.attunement_note?' — '+d.attunement_note:'')+'</div>';
+  var hdr='<div class="rst-name" style="color:'+colN+';">'+esc(d.name)+'</div>';
+  if(d.type) hdr+='<div style="font-family:\'Share Tech Mono\',monospace;font-size:10px;color:#6A5A3A;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;">'+esc(d.type)+'</div>';
+  if(d.rarity) hdr+='<div class="rst-rarity" style="background:'+(rc||'#3A2810')+'33;color:'+colN+';">'+esc(d.rarity)+'</div>';
+  if(d.attunement) hdr+='<div style="font-family:\'Cinzel\',serif;font-size:12px;color:#A080D0;margin-top:6px;">⧁ Harmonisation requise'+(esc(d.attunement_note?' — '+d.attunement_note:''))+'</div>';
   // Description filtrée
   var filtered=d.desc?_filterItemDesc(d.desc):'';
-  var descH=filtered?'<div class="rst-desc" style="max-height:none;font-size:13px;white-space:pre-line;">'+filtered+'</div>':'';
+  var descH=filtered?'<div class="rst-desc" style="max-height:none;font-size:13px;white-space:pre-line;">'+esc(filtered)+'</div>':'';
   var textBlock=hdr+descH;
   tt.innerHTML=sprH
     ?'<div style="display:flex;gap:16px;align-items:flex-start;">'+sprH+'<div style="flex:1;min-width:0;">'+textBlock+'</div></div>'
@@ -7959,11 +7971,11 @@ function reSlotHtml(slot, col, row){
   var leftBorder=item?(rc||'#8B6914'):'#3A2810';
   var bg=item?(rc?rc+'44':'#1C1408'):'#130D06';
   var nmCol=item?(rc||'#C9A84C'):'#5A4A2A';
-  var rarTag=item&&item.rarity&&rc?'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:'+rc+';margin-top:1px;">'+item.rarity+'</div>':'';
+  var rarTag=item&&item.rarity&&rc?'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:'+rc+';margin-top:1px;">'+esc(item.rarity)+'</div>':'';
   var hoverAttrs=item?' onmouseenter="showSlotTooltip(event,\''+slot.id+'\')" onmousemove="posSlotTooltip(event)" onmouseleave="hideSlotTooltip()"':'';
   var iconHtml=(CUR===6)
-    ?(item&&item.sprite?'<div class="re-doll-slot-icon"><img src="'+item.sprite+'" onerror="this.style.display=\'none\'"></div>':'')
-    :('<div class="re-doll-slot-icon">'+(item&&item.sprite?'<img src="'+item.sprite+'" onerror="this.style.display=\'none\'">':slot.icon)+'</div>');
+    ?(item&&item.sprite?'<div class="re-doll-slot-icon"><img src="'+esc(safeImageUrl(item.sprite))+'" onerror="this.style.display=\'none\'"></div>':'')
+    :('<div class="re-doll-slot-icon">'+(item&&item.sprite?'<img src="'+esc(safeImageUrl(item.sprite))+'" onerror="this.style.display=\'none\'">':slot.icon)+'</div>');
   var gridCol=(CUR===6&&col===2)?'1/-1':String(col);
   var fullSpan=(CUR===6&&col===2)?'data-fullspan="1" ':'';
   if(CUR===6){
@@ -7975,30 +7987,30 @@ function reSlotHtml(slot, col, row){
     var sRar=rarTag.replace(/color:[^;'"]+/g,'color:'+(rc||'rgba(201,168,76,.5)'));
     return '<div class="re-doll-slot'+(item?' equipped':'')+'" '+fullSpan+
       ' style="grid-column:'+gridCol+';grid-row:'+row+';background:'+sBg+';border:1px solid '+sBd+';border-left:2px solid '+sBd+';border-radius:6px;"'+
-      ' ondragover="reDollDragOver(event,\''+slot.id+'\')"'+
+      ' ondragover="reDollDragOver(event,\''+forgeJs(slot.id)+'\')"'+
       ' ondragleave="this.classList.remove(\'drag-over\',\'drag-invalid\')"'+
-      ' ondrop="reDollDrop(event,\''+slot.id+'\')"'+hoverAttrs+'>'+
+      ' ondrop="reDollDrop(event,\''+forgeJs(slot.id)+'\')"'+hoverAttrs+'>'+
       iconHtml+
       '<div class="re-doll-slot-info">'+
         '<span class="re-doll-slot-lbl" style="color:'+sLbl+';">'+slot.label+'</span>'+
-        '<div class="re-doll-slot-nm" style="color:'+sNm+';font-size:clamp(8px,1vh,12px);">'+(item?item.n:'&#8212;')+'</div>'+
+        '<div class="re-doll-slot-nm" style="color:'+sNm+';font-size:clamp(8px,1vh,12px);">'+(esc(item?item.n:'&#8212;'))+'</div>'+
         sRar+
       '</div>'+
-      (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper" style="color:rgba(201,168,76,0.4);">\u2715</button>':'')+
+      (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+forgeJs(slot.id)+'\')" title="D\u00e9s\u00e9quiper" style="color:rgba(201,168,76,0.4);">\u2715</button>':'')+
     '</div>';
   }
   return '<div class="re-doll-slot'+(item?' equipped':'')+'" '+fullSpan+
     ' style="grid-column:'+gridCol+';grid-row:'+row+';border-left-color:'+leftBorder+';border-color:#2A1A08;border-left-color:'+leftBorder+';background:'+bg+';"'+
-    ' ondragover="reDollDragOver(event,\''+slot.id+'\')"'+
+    ' ondragover="reDollDragOver(event,\''+forgeJs(slot.id)+'\')"'+
     ' ondragleave="this.classList.remove(\'drag-over\',\'drag-invalid\')"'+
-    ' ondrop="reDollDrop(event,\''+slot.id+'\')"'+hoverAttrs+'>'+
+    ' ondrop="reDollDrop(event,\''+forgeJs(slot.id)+'\')"'+hoverAttrs+'>'+
     iconHtml+
     '<div class="re-doll-slot-info">'+
       '<span class="re-doll-slot-lbl">'+slot.label+'</span>'+
-      '<div class="re-doll-slot-nm" style="color:'+nmCol+';">'+(item?item.n:'&#8212; vide')+'</div>'+
+      '<div class="re-doll-slot-nm" style="color:'+nmCol+';">'+(esc(item?item.n:'&#8212; vide'))+'</div>'+
       rarTag+
     '</div>'+
-    (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+slot.id+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
+    (item?'<button class="re-doll-slot-del" onclick="reDollUnequip(\''+forgeJs(slot.id)+'\')" title="D\u00e9s\u00e9quiper">\u2715</button>':'')+
   '</div>';
 }
 
@@ -8059,9 +8071,9 @@ function renderSumCenterDoll(){
     '<style>#sum-doll .doll-grid{grid-template-columns:1.15fr 1.7fr 1.15fr;grid-template-rows:repeat(8,clamp(52px,7vh,80px));gap:clamp(4px,.55vh,9px);}#sum-doll .re-doll-slot{padding:clamp(.35rem,.7vh,.8rem) clamp(.4rem,.7vw,.8rem);transition:border-color .15s,background .15s;}#sum-doll .re-doll-slot-lbl{font-size:clamp(7px,.85vh,11px);}#sum-doll .re-doll-slot-nm{font-size:clamp(8px,1vh,12px);}#sum-doll .re-doll-slot-del{font-size:clamp(13px,1.8vh,20px);}#sum-doll [data-fullspan]{grid-column:1/-1 !important;}#sum-doll .re-doll-slot.equipped:hover{transform:none !important;}#sum-doll .re-doll-slot.drop-ready{border-color:rgba(201,168,76,.55)!important;}#sum-doll .re-doll-slot.drag-over{background:rgba(201,168,76,.15)!important;border-color:rgba(201,168,76,.7)!important;}</style>'+
     '<div style="position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,.3) 0%,transparent 25%,transparent 75%,rgba(0,0,0,.55) 100%);pointer-events:none;z-index:1;"></div>'+
     '<div style="position:relative;z-index:2;width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:clamp(.6rem,2vh,1.2rem) clamp(.5rem,1.5vw,1.5rem) 0;">'+
-      '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(r.name||'—')+'</div>'+
+      '<div style="text-align:center;font-family:\'Cinzel Decorative\',serif;font-size:clamp(11px,1.4vh,20px);color:var(--gold);text-shadow:0 2px 10px #000,0 0 20px rgba(201,168,76,.3);margin-bottom:.15rem;">'+(esc(r.name||'—'))+'</div>'+
       '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.15em;color:var(--gold-d);text-shadow:0 1px 5px #000;margin-bottom:.2rem;">'+
-        (r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+
+        (esc(r.cls&&r.cls.n?r.cls.n.toUpperCase():'—'))+' · '+(esc(r.race&&r.race.n?r.race.n.toUpperCase():'—'))+' · NIV.'+(esc(r.level||1))+
       '</div>'+
       (r.levelUpEnabled
         ?'<button onclick="openLevelUp()" style="font-family:\'Cinzel\',serif;font-size:clamp(7px,.75vh,9px);letter-spacing:.08em;padding:.18rem .7rem;background:rgba(201,168,76,.10);border:1px solid rgba(201,168,76,.50);color:var(--gold);cursor:pointer;border-radius:12px;text-shadow:0 2px 8px #000;margin-bottom:clamp(.3rem,1vh,.7rem);transition:.15s;animation:lvlup-glow 2s ease-in-out infinite;" onmouseenter="this.style.background=\'rgba(201,168,76,.25)\'" onmouseleave="this.style.background=\'rgba(201,168,76,.10)\'">⬆ Montée de niveau +1</button>'
@@ -8088,13 +8100,13 @@ function renderReDoll(){
       col.style.backgroundImage='none';
     }
   }
-  var initiale='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:\'Cinzel Decorative\',serif;font-size:60px;color:var(--gold);">'+((r.name||'?')[0].toUpperCase())+'</div>';
+  var initiale='<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:\'Cinzel Decorative\',serif;font-size:60px;color:var(--gold);">'+(esc((r.name||'?')[0].toUpperCase()))+'</div>';
   var leftSlots=RE_SLOTS_LEFT.map(function(s,i){return reSlotHtml(s,1,i+2);}).join('');
   var rightSlots=RE_SLOTS_RIGHT.map(function(s,i){return reSlotHtml(s,3,i+2);}).join('');
   var headSlot=reSlotHtml(RE_HEAD,2,1);
   el.innerHTML=
-    '<div style="text-align:center;padding:clamp(.05rem,.15vh,.15rem) 0 0;font-family:\'Cinzel Decorative\',serif;font-size:clamp(12px,1.6vh,20px);color:var(--gold);text-shadow:0 1px 6px #000;">'+r.name+'</div>'+
-    '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.12em;color:var(--gold-d);margin-bottom:clamp(.05rem,.15vh,.15rem);text-shadow:0 1px 4px #000;">'+(r.cls&&r.cls.n?r.cls.n.toUpperCase():'—')+' · '+(r.race&&r.race.n?r.race.n.toUpperCase():'—')+' · NIV.'+(r.level||1)+'</div>'+
+    '<div style="text-align:center;padding:clamp(.05rem,.15vh,.15rem) 0 0;font-family:\'Cinzel Decorative\',serif;font-size:clamp(12px,1.6vh,20px);color:var(--gold);text-shadow:0 1px 6px #000;">'+esc(r.name)+'</div>'+
+    '<div style="text-align:center;font-family:\'Cinzel\',serif;font-size:clamp(6px,.7vh,9px);letter-spacing:.12em;color:var(--gold-d);margin-bottom:clamp(.05rem,.15vh,.15rem);text-shadow:0 1px 4px #000;">'+(esc(r.cls&&r.cls.n?r.cls.n.toUpperCase():'—'))+' · '+(esc(r.race&&r.race.n?r.race.n.toUpperCase():'—'))+' · NIV.'+(esc(r.level||1))+'</div>'+
     '<div class="doll-grid">'+
       headSlot+
       leftSlots+
@@ -8152,13 +8164,13 @@ function reCreateDragImage(item){
   var inner='';
   var imgSrc=item.sprite||item.image||null;
   if(imgSrc){
-    inner='<img class="re-drag-ghost-img" src="'+imgSrc+'" alt="">';
+    inner='<img class="re-drag-ghost-img" src="'+esc(safeImageUrl(imgSrc))+'" alt="">';
   } else {
     var emoji=_RE_CAT_EMOJI[item.cat]||'⚙';
     inner='<div style="font-size:clamp(28px,4vw,40px);line-height:1;margin-bottom:4px;">'+emoji+'</div>';
   }
-  inner+='<div class="re-drag-ghost-nm">'+item.n+'</div>';
-  if(rc) inner+='<div style="font-size:7px;color:'+rc+';margin-top:2px;">'+item.rarity+'</div>';
+  inner+='<div class="re-drag-ghost-nm">'+esc(item.n)+'</div>';
+  if(rc) inner+='<div style="font-size:7px;color:'+rc+';margin-top:2px;">'+esc(item.rarity)+'</div>';
   el.innerHTML=inner;
   document.body.appendChild(el);
   return el;
@@ -8259,12 +8271,12 @@ function renderReInv(){
     el.innerHTML=filtered.map(function(e){
       var idx2=_codexData.indexOf(e);
       var rc=e.rarity?(_IP_RARITY[e.rarity]||null):null;
-      var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+e.rarity+'</span>':'';
+      var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+esc(e.rarity)+'</span>':'';
       return'<div class="inv-item" onclick="showCodexItem('+idx2+')">'+
         '<button class="inv-item-add" onclick="event.stopPropagation();reAddCodexItem('+idx2+')" title="Ajouter au sac">+</button>'+
-        '<div class="inv-item-n">'+e.name+rBadge+'</div>'+
+        '<div class="inv-item-n">'+esc(e.name)+rBadge+'</div>'+
         '<div class="inv-item-cat codex-badge">\u2726 '+(e.item_type||e.category||'Codex')+'</div>'+
-        '<div class="inv-item-d">'+(e.desc||'').substring(0,100)+'</div>'+
+        '<div class="inv-item-d">'+esc((e.desc||'').substring(0,100))+'</div>'+
       '</div>';
     }).join('');
     return;
@@ -8273,13 +8285,13 @@ function renderReInv(){
   var filtered=ITEMS.filter(function(it){return !q||it.n.toLowerCase().includes(q)||it.cat.toLowerCase().includes(q);}).slice(0,80);
   el.innerHTML=filtered.length?filtered.map(function(it){
     var rc=it.rarity?(_IP_RARITY[it.rarity]||null):null;
-    var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+it.rarity+'</span>':'';
-    var safeN=it.n.replace(/'/g,"\\'"); var safeD=it.d.replace(/'/g,"\\'").substring(0,300);
-    return'<div class="inv-item" draggable="true" ondragstart="reCatDragStart(event,\''+it.id+'\')" onclick="showItemPanel({id:\''+it.id+'\',name:\''+safeN+'\',type:\''+it.cat+'\',rarity:\''+( it.rarity||'')+'\',description:\''+safeD+'\',weight:'+it.w+',cost:\''+it.c+'\'},true)">'+
-      '<button class="inv-item-add" onclick="event.stopPropagation();reAddItem(\''+it.id+'\')" title="Ajouter au sac">+</button>'+
-      '<div class="inv-item-n">'+it.n+rBadge+'</div>'+
+    var rBadge=rc?'<span style="font-family:\'Share Tech Mono\',monospace;font-size:8px;background:'+rc.badge+';color:'+rc.badgeTxt+';padding:1px 4px;margin-left:4px;">'+esc(it.rarity)+'</span>':'';
+    var safeN=forgeJs(it.n); var safeD=forgeJs(it.d).substring(0,300);
+    return'<div class="inv-item" draggable="true" ondragstart="reCatDragStart(event,\''+forgeJs(it.id)+'\')" onclick="showItemPanel({id:\''+forgeJs(it.id)+'\',name:\''+safeN+'\',type:\''+it.cat+'\',rarity:\''+( forgeJs(it.rarity||''))+'\',description:\''+safeD+'\',weight:'+it.w+',cost:\''+it.c+'\'},true)">'+
+      '<button class="inv-item-add" onclick="event.stopPropagation();reAddItem(\''+forgeJs(it.id)+'\')" title="Ajouter au sac">+</button>'+
+      '<div class="inv-item-n">'+esc(it.n)+rBadge+'</div>'+
       '<div class="inv-item-cat">'+it.cat+'</div>'+
-      '<div class="inv-item-d">'+it.d+'</div>'+
+      '<div class="inv-item-d">'+esc(it.d)+'</div>'+
       '<div class="inv-item-meta"><span class="inv-item-cost">\u2699 '+it.c+'</span><span class="inv-item-w">'+(it.w>0?it.w+' lb':'&#8212;')+'</span></div>'+
     '</div>';
   }).join(''):'<div style="font-family:\'IM Fell English\',serif;font-size:11px;color:#6A5A3A;padding:.5rem;">Tapez pour chercher...</div>';
@@ -8343,14 +8355,14 @@ function renderRoster(){
     const histCount = r.scenarioHistory?.length||0;
     const bagCount = r.bag?.length||0;
     const clsImgUrl = r.cls?.id ? getClsImgUrl(r.cls.id) : null;
-    const clsFallbackHtml = `<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${clsIcon}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${clsName}</span></div>`;
+    const clsFallbackHtml = `<div class="rc-portrait-bg"></div><div class="rc-portrait-placeholder"><span class="rc-portrait-icon">${esc(clsIcon)}</span><span style="font-family:'Cinzel',serif;font-size:7px;letter-spacing:.12em;color:#5A4A2A;text-transform:uppercase;">${esc(clsName)}</span></div>`;
     const safeName = esc(r.name);
-    const safePhoto = r.photo ? esc(r.photo) : null;
-    const safeId = esc(r.id);
+    const safePhoto = r.photo ? safeImageUrl(r.photo) : null;
+    const safeId = forgeJs(r.id);
     const portrait = safePhoto
-      ? `<img src="${safePhoto}" alt="${safeName}">`
+      ? `<img src="${esc(safeImageUrl(safePhoto))}" alt="${safeName}">`
       : clsImgUrl
-        ? `<img src="${esc(clsImgUrl)}" alt="${clsName}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" data-cls-id="${esc(r.cls.id)}" onerror="rcClsImgFallback(this);">`
+        ? `<img src="${esc(clsImgUrl)}" alt="${esc(clsName)}" style="width:100%;height:100%;object-fit:cover;object-position:center top;" data-cls-id="${esc(r.cls.id)}" onerror="rcClsImgFallback(this);">`
         : clsFallbackHtml;
     const isDraft=r._draft_step!=null&&r._draft_step<6;
     const draftLabel=isDraft?`<span style="font-family:'Share Tech Mono',monospace;font-size:7px;background:#1A1A2A;color:#A080D0;border:1px solid #3A2A6A;padding:2px 5px;border-radius:2px;margin-left:4px;">EN COURS · ${STEP_NAMES[r._draft_step]||''}</span>`:'';
@@ -8359,7 +8371,7 @@ function renderRoster(){
       <div class="rc-portrait" style="${isDraft?'opacity:.7':'}'}">${portrait}</div>
       <div class="rc-body">
         <div class="rc-name">${safeName}${draftLabel}</div>
-        <div class="rc-sub">${clsName} · ${raceName} · Niv ${r.level||1}</div>
+        <div class="rc-sub">${esc(clsName)} · ${esc(raceName)} · Niv ${esc(r.level||1)}</div>
         <div class="rc-scenarios">${lastScen||(!histCount?'Aucun scénario':'')}</div>
         <div class="rc-btns">
           <button class="rc-btn" onclick="event.stopPropagation();openShareModal('${safeId}')" style="border-color:#4A2A8A;color:#A080D0;flex:0 0 auto;padding:.45em .7em;" title="Partager sur le site">📤</button>
@@ -8504,14 +8516,14 @@ function hideSysSel(){ $('sys-sel').classList.remove('open'); }
 function renderSysTiles(){
   const c=$('sys-tiles'); if(!c) return;
   c.innerHTML=_gameSystems.filter(s=>!s.disabled).map(s=>`
-    <div class="sys-tile" onclick="selectSystem('${s.id}')" style="border-color:${s.color}60;">
+    <div class="sys-tile" onclick="selectSystem('${forgeJs(s.id)}')" style="border-color:${s.color}60;">
       ${s.image_url
-        ? `<img src="${s.image_url}" class="sys-tile-img" alt="${s.name}">`
+        ? `<img src="${esc(safeImageUrl(s.image_url))}" class="sys-tile-img" alt="${esc(s.name)}">`
         : `<div class="sys-tile-ph">${s.emoji}</div>`}
       <div class="sys-tile-body">
-        <div class="sys-tile-name" style="color:${s.color}">${s.name}</div>
+        <div class="sys-tile-name" style="color:${s.color}">${esc(s.name)}</div>
         <div class="sys-tile-sub">${s.subtitle}</div>
-        <div class="sys-tile-desc">${s.description}</div>
+        <div class="sys-tile-desc">${esc(s.description)}</div>
       </div>
     </div>`).join('');
 }
@@ -8643,12 +8655,12 @@ function renderDHHomeworld(){
   DH_HOMEWORLDS.forEach(hw=>{
     const d=document.createElement('div'); d.className='card'+(C.dh.homeworld?.id===hw.id?' sel':'');
     const bonusLine=(hw.bonusStat?`+${hw.bonusVal} ${DH_STAT_LABELS[hw.bonusStat]||hw.bonusStat}`:'')+(hw.malusStat?` / −${hw.malusVal} ${DH_STAT_LABELS[hw.malusStat]||hw.malusStat}`:'');
-    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${hw.n}</div><div class="ct" style="color:#8B0000;">${hw.tag}</div>
-      <div class="cd">${hw.desc}</div>
+    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${esc(hw.n)}</div><div class="ct" style="color:#8B0000;">${hw.tag}</div>
+      <div class="cd">${esc(hw.desc)}</div>
       <div style="margin-top:.4rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:#7A5A2A;">
         ${bonusLine?`<span style="color:#C9A84C;">Modif. : </span>${bonusLine}<br>`:''}
         <span style="color:#8B4040;">Compétences : </span>${hw.skills.join(', ')}<br>
-        <span style="color:#6A5A3A;">Traits : </span>${hw.traits.join(', ')}
+        <span style="color:#6A5A3A;">Traits : </span>${esc(hw.traits.join(', '))}
       </div>`;
     d.onclick=()=>{C.dh.homeworld=hw; applyDHHomeworld(hw); renderDHHomeworld();};
     $('dh-hwg').appendChild(d);
@@ -8678,8 +8690,8 @@ function renderDHCareer(){
     </div>`;
   DH_CAREERS.forEach(career=>{
     const d=document.createElement('div'); d.className='card'+(C.dh.career?.id===career.id?' sel':'');
-    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${career.n}</div><div class="ct" style="color:#8B0000;">${career.tag}</div>
-      <div class="cd">${career.desc}</div>
+    d.innerHTML=`<div class="cn" style="color:#C9A84C;">${esc(career.n)}</div><div class="ct" style="color:#8B0000;">${career.tag}</div>
+      <div class="cd">${esc(career.desc)}</div>
       <div style="margin-top:.4rem;font-family:'Share Tech Mono',monospace;font-size:9px;color:#7A5A2A;">
         <span style="color:#8B4040;">Compétences : </span>${career.skills.join(' · ')}<br>
         <span style="color:#6A5A3A;">Talents : </span>${career.talents.join(' · ')}<br>
@@ -8691,15 +8703,15 @@ function renderDHCareer(){
 }
 function renderDHIdentity(){
   $('lp').innerHTML=`<div class="sh" style="color:#8B0000;">Identité</div><div class="ss">Qui êtes-vous, serviteur de l'Imperium ?</div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Nom de l'acolyte</label><input class="inp" value="${C.name||''}" oninput="C.name=this.value" placeholder="Nom de l'acolyte"></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${C.player||''}" oninput="C.player=this.value" placeholder="Votre nom"></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${C.age||''}" oninput="C.age=this.value" placeholder="Âge"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Nom de l'acolyte</label><input class="inp" value="${esc(C.name||'')}" oninput="C.name=this.value" placeholder="Nom de l'acolyte"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${esc(C.player||'')}" oninput="C.player=this.value" placeholder="Votre nom"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${esc(C.age||'')}" oninput="C.age=this.value" placeholder="Âge"></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Portrait (URL)</label><input class="inp" value="${C.photo||''}" oninput="C.photo=this.value" placeholder="https://..."></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Genre</label>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
         ${['Masculin','Féminin','Non-binaire','Autre'].map(g=>`<button class="btn btn-s" onclick="C.dh.gender='${g}';renderDHIdentity()" style="${(C.dh.gender||'')=== g?'background:#8B0000;color:#fff;':''}">${g}</button>`).join('')}
       </div></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, motivations, secrets impériaux...">${C.bg_story||''}</textarea></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, motivations, secrets impériaux...">${esc(C.bg_story||'')}</textarea></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goDH(2)">← Carrière</button>
       <button class="btn btn-p" onclick="dhNav(4)" style="background:linear-gradient(135deg,#6B0000,#8B0000);">Suivant : Résumé →</button>
@@ -8721,7 +8733,7 @@ function renderDHSummary(){
     <div style="display:flex;flex-wrap:wrap;gap:.3rem;">${st.traits.map(t=>`<span style="background:#0A1A08;border:1px solid #2A4A1A;color:#6A9A3A;font-size:9px;padding:2px 6px;border-radius:3px;">${t}</span>`).join('')}</div></div>`:'';
   $('lp').innerHTML=`
     <div class="sh" style="color:#8B0000;">Résumé</div>
-    <div class="ss">${C.name||'Acolyte'} · ${st.career?.n||'—'} · ${st.homeworld?.n||'—'} · Dark Heresy</div>
+    <div class="ss">${esc(C.name||'Acolyte')} · ${esc(st.career?.n||'—')} · ${esc(st.homeworld?.n||'—')} · Dark Heresy</div>
     <div style="display:flex;gap:.7rem;flex-wrap:wrap;margin-bottom:.8rem;padding:.6rem;background:#120608;border:1px solid #3A1208;border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#C9A84C;">
       <span>❤ Blessures : ${st.wounds||'—'}</span>
       <span>✦ Destin : ${st.fatePoints||'—'}</span>
@@ -8875,7 +8887,7 @@ function renderCTOccupation(){
   CT_OCCUPATIONS.forEach(occ=>{
     const pts=Math.floor((C.ct.edu||60)/5)*4;
     const d=document.createElement('div'); d.className='card'+(C.ct.occupation?.id===occ.id?' sel':'');
-    d.innerHTML=`<div class="cn" style="color:#4AB880;">${occ.n}</div>
+    d.innerHTML=`<div class="cn" style="color:#4AB880;">${esc(occ.n)}</div>
       <div style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#3A6A4A;margin:.2rem 0;">Crédit : ${occ.creditMin}–${occ.creditMax}% · Points : EDU×4 (≈${pts})</div>
       <div class="cd" style="color:#5A7A6A;font-size:10px;">Compétences : ${occ.skills.slice(0,4).join(', ')}${occ.skills.length>4?'…':''}</div>`;
     d.onclick=()=>{C.ct.occupation=occ; C.ct.skills={}; renderCTOccupation();};
@@ -8929,10 +8941,10 @@ function renderCTSkills(){
     const max=isOcc?occMax:intMax;
     const canAdd=used<max && total<99;
     return `<div style="display:flex;align-items:center;gap:.4rem;padding:.25rem 0;border-bottom:1px solid ${isOcc?'#0F2818':'#1A2810'};">
-      <span style="flex:1;font-size:10px;color:${isOcc?'#4AB880':'#8AB870'};">${sk.n}</span>
+      <span style="flex:1;font-size:10px;color:${isOcc?'#4AB880':'#8AB870'};">${esc(sk.n)}</span>
       <span style="font-family:'Share Tech Mono',monospace;font-size:11px;color:${isOcc?'#4AB880':'#6A9A5A'};min-width:28px;text-align:right;">${total}%</span>
-      <button onclick="ctAddSkill('${sk.id}',-5,'${pool}')" style="background:#0A1A10;border:1px solid #1A3A1A;color:#4AB880;padding:1px 5px;cursor:pointer;border-radius:3px;font-size:10px;">−</button>
-      <button onclick="ctAddSkill('${sk.id}',5,'${pool}')" style="background:${canAdd?'#1A4A2A':'#0A0A0A'};border:1px solid ${canAdd?'#2A6A4A':'#1A1A1A'};color:${canAdd?'#4AB880':'#2A3A2A'};padding:1px 5px;cursor:pointer;border-radius:3px;font-size:10px;">+</button>
+      <button onclick="ctAddSkill('${forgeJs(sk.id)}',-5,'${pool}')" style="background:#0A1A10;border:1px solid #1A3A1A;color:#4AB880;padding:1px 5px;cursor:pointer;border-radius:3px;font-size:10px;">−</button>
+      <button onclick="ctAddSkill('${forgeJs(sk.id)}',5,'${pool}')" style="background:${canAdd?'#1A4A2A':'#0A0A0A'};border:1px solid ${canAdd?'#2A6A4A':'#1A1A1A'};color:${canAdd?'#4AB880':'#2A3A2A'};padding:1px 5px;cursor:pointer;border-radius:3px;font-size:10px;">+</button>
     </div>`;
   };
 
@@ -8942,7 +8954,7 @@ function renderCTSkills(){
 
   $('lp').innerHTML=`
     <div class="sh" style="color:#2A6A4A;">Compétences</div>
-    <div class="ss">${st.occupation?.n||'—'} · Répartissez les points d'occupation et d'intérêt</div>
+    <div class="ss">${esc(st.occupation?.n||'—')} · Répartissez les points d'occupation et d'intérêt</div>
     <div style="display:flex;gap:.7rem;margin-bottom:1rem;flex-wrap:wrap;">
       <div style="flex:1;padding:.5rem .7rem;background:#060E0A;border:1px solid #0F2818;border-radius:6px;min-width:140px;">
         <div style="font-family:'Cinzel',serif;font-size:9px;color:#2A6A4A;letter-spacing:.1em;margin-bottom:.2rem;">POINTS D'OCCUPATION</div>
@@ -8973,9 +8985,9 @@ function renderCTSkills(){
 }
 function renderCTIdentity(){
   $('lp').innerHTML=`<div class="sh" style="color:#2A6A4A;">Identité</div><div class="ss">Qui êtes-vous, enquêteur des mystères ?</div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Nom de l'enquêteur</label><input class="inp" value="${C.name||''}" oninput="C.name=this.value" placeholder="Nom complet"></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${C.player||''}" oninput="C.player=this.value" placeholder="Votre nom"></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${C.age||''}" oninput="C.age=this.value" placeholder="Âge (modificateurs à 40+ et 50+)"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Nom de l'enquêteur</label><input class="inp" value="${esc(C.name||'')}" oninput="C.name=this.value" placeholder="Nom complet"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Joueur</label><input class="inp" value="${esc(C.player||'')}" oninput="C.player=this.value" placeholder="Votre nom"></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Âge</label><input class="inp" type="number" value="${esc(C.age||'')}" oninput="C.age=this.value" placeholder="Âge (modificateurs à 40+ et 50+)"></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Genre</label>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;">
         ${['Masculin','Féminin','Non-binaire','Autre'].map(g=>`<button class="btn btn-s" onclick="C.ct.gender='${g}';renderCTIdentity()" style="${(C.ct?.gender||'')=== g?'background:#2A6A4A;color:#fff;':''}">${g}</button>`).join('')}
@@ -8983,7 +8995,7 @@ function renderCTIdentity(){
     <div style="margin-bottom:.8rem;"><label class="ilb">Portrait (URL)</label><input class="inp" value="${C.photo||''}" oninput="C.photo=this.value" placeholder="https://..."></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Idéologie / Croyances</label><input class="inp" value="${C.ct?.beliefs||''}" oninput="C.ct.beliefs=this.value" placeholder="Ce en quoi vous croyez fermement..."></div>
     <div style="margin-bottom:.8rem;"><label class="ilb">Personne significative</label><input class="inp" value="${C.ct?.keyPerson||''}" oninput="C.ct.keyPerson=this.value" placeholder="Qui compte le plus pour vous ?"></div>
-    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, traumas, connexions avec l'occulte...">${C.bg_story||''}</textarea></div>
+    <div style="margin-bottom:.8rem;"><label class="ilb">Historique</label><textarea class="inp" rows="4" oninput="C.bg_story=this.value" placeholder="Passé, traumas, connexions avec l'occulte...">${esc(C.bg_story||'')}</textarea></div>
     <div class="btn-row">
       <button class="btn btn-s" onclick="goCT(2)">← Compétences</button>
       <button class="btn btn-p" onclick="ctNav(4)" style="background:linear-gradient(135deg,#1A4A2A,#2A6A4A);">Suivant : Résumé →</button>
@@ -9007,11 +9019,11 @@ function renderCTSummary(){
       if(!sk)return'';
       const total=sk.base+v;
       const isOcc=occNames.includes(sk.n);
-      return `<span style="background:#060E0A;border:1px solid ${isOcc?'#1A5A2A':'#0F3A18'};color:${isOcc?'#4AB880':'#6A9A5A'};font-size:9px;padding:2px 7px;border-radius:3px;">${sk.n} ${total}%</span>`;
+      return `<span style="background:#060E0A;border:1px solid ${isOcc?'#1A5A2A':'#0F3A18'};color:${isOcc?'#4AB880':'#6A9A5A'};font-size:9px;padding:2px 7px;border-radius:3px;">${esc(sk.n)} ${total}%</span>`;
     }).join('')}</div></div>`:'';
   $('lp').innerHTML=`
     <div class="sh" style="color:#2A6A4A;">Résumé</div>
-    <div class="ss">${C.name||'Enquêteur'} · ${st.occupation?.n||'—'} · Call of Cthulhu 7e</div>
+    <div class="ss">${esc(C.name||'Enquêteur')} · ${esc(st.occupation?.n||'—')} · Call of Cthulhu 7e</div>
     <div style="display:flex;flex-wrap:wrap;gap:.6rem;margin-bottom:.8rem;padding:.6rem;background:#060E0A;border:1px solid #0F2818;border-radius:6px;font-family:'Share Tech Mono',monospace;font-size:11px;color:#4AB880;">
       <span>❤ PV : ${pv}</span><span>✦ PM : ${pm}</span>
       <span>🧠 SAN : ${st.san||0}</span><span>🍀 LUCK : ${st.luck||0}</span>
@@ -9047,7 +9059,7 @@ function _forgeCharPayload(entry,userId){
     user_id:userId,char_name:entry.name||'—',race_name:raceName,class_name:className,
     level:entry.level||1,current_hp:entry.hp||0,max_hp:entry.hp||0,ac:entry.ac||10,
     portrait_url:entry.photo||null,portrait_emoji:SYS_EMOJI[sys]||'⚔',
-    status:'approved',is_in_session:false
+    // Review/session permissions are controlled by the administrator.
   };
 }
 
@@ -9076,7 +9088,7 @@ async function syncCharToSupabase(entry){
       if(error) console.error('Sync update error:',error);
     } else {
       const {data,error}=await sc.from('characters')
-        .insert({...payload,sheet_data:entry})
+        .insert({...payload,status:'pending',is_in_session:false,sheet_data:entry})
         .select('id').single();
       if(error){ console.error('Sync insert error:',error); return; }
       const roster=getRoster();
@@ -9104,7 +9116,7 @@ async function loadForgeFromSupabase(){
   const sc=getSupaClient();
   try{
     const {data,error}=await sc.from('characters')
-      .select('id,sheet_data,char_name,shared_with_admin,level_up_enabled').eq('user_id',session.user.id).eq('status','approved');
+      .select('id,sheet_data,char_name,shared_with_admin,level_up_enabled').eq('user_id',session.user.id);
     if(error||!data) return;
     const roster=getRoster();
     let changed=false;
@@ -9140,7 +9152,7 @@ async function updateLoginStatus(){
       _isAdmin=!!data;
     }catch(e){}
     const adminBadge=_isAdmin?` <span style="font-family:'Cinzel',serif;font-size:8px;background:rgba(122,80,192,.2);border:1px solid #6A40A0;color:#C090F0;padding:1px 6px;border-radius:3px;letter-spacing:.06em;">👑 ADMIN</span>`:'';
-    el.innerHTML=`<span style="color:#6ABF6A;">● Connecté</span> <span style="color:#7A6A4A;font-size:9px;">${session.user.email}</span>${adminBadge}`;
+    el.innerHTML=`<span style="color:#6ABF6A;">● Connecté</span> <span style="color:#7A6A4A;font-size:9px;">${esc(session.user.email)}</span>${adminBadge}`;
     if(_isAdmin){
       await syncAllRosterToSupabase(); // attend que les persos soient en base avant d'afficher le panel
       loadAdminPanel();
@@ -9182,7 +9194,7 @@ async function loadAdminPanel(){
       var sid=esc(row.id);
       var lvlEnabled=!!row.level_up_enabled;
       return '<div class="admin-card" onclick="adminOpenChar(\''+sid+'\')" title="Ouvrir la fiche">'
-        +'<div class="admin-card-name">'+name+'</div>'
+        +'<div class="admin-card-name">'+esc(name)+'</div>'
         +'<div class="admin-card-sub">'+cls+' · '+race+' · Niv.'+lvl+'</div>'
         +(player?'<div class="admin-card-player">Joueur : '+player+'</div>':'')
         +'<div style="font-family:\'Share Tech Mono\',monospace;font-size:7px;color:#5A4A70;margin-top:.3rem;">Cliquer pour ouvrir la fiche</div>'
@@ -9318,38 +9330,38 @@ function showItemPanel(item, addable){
 
   // Illustration
   const illusInner = d.image
-    ? `<img src="${d.image}" alt="${d.image_alt||d.name}">`
+    ? `<img src="${esc(safeImageUrl(d.image))}" alt="${esc(d.image_alt||d.name)}">`
     : `<div class="ip-illus-icon">${icon}</div><div class="ip-illus-hint">Illustration à venir</div>`;
-  const rBadge = d.rarity ? `<div class="ip-rbadge" style="background:${rc.badge};color:${rc.badgeTxt};">${d.rarity}</div>` : '';
-  const locBadge = d.found_at ? `<div class="ip-illus-loc" style="color:${rc.name};">${d.found_at}</div>` : '';
+  const rBadge = d.rarity ? `<div class="ip-rbadge" style="background:${rc.badge};color:${rc.badgeTxt};">${esc(d.rarity)}</div>` : '';
+  const locBadge = d.found_at ? `<div class="ip-illus-loc" style="color:${esc(rc.name)};">${esc(d.found_at)}</div>` : '';
 
   // Quick props
   let qps = `<div class="ip-qp"><span class="ip-qp-l">Type</span><span class="ip-qp-v">${subLabel}</span></div>`;
-  if(d.rarity) qps += `<div class="ip-qp"><span class="ip-qp-l">Rareté</span><span class="ip-qp-v" style="color:${rc.name}">${d.rarity}</span></div>`;
+  if(d.rarity) qps += `<div class="ip-qp"><span class="ip-qp-l">Rareté</span><span class="ip-qp-v" style="color:${esc(rc.name)}">${esc(d.rarity)}</span></div>`;
   if(d.attunement) qps += `<div class="ip-qp"><span class="ip-qp-l">Accordage</span><span class="ip-qp-v rd">Requis</span></div>`;
   if(d.cost && d.cost !== '—') qps += `<div class="ip-qp"><span class="ip-qp-l">Valeur</span><span class="ip-qp-v">${d.cost}</span></div>`;
-  if(d.weight > 0) qps += `<div class="ip-qp"><span class="ip-qp-l">Poids</span><span class="ip-qp-v">${d.weight} lb</span></div>`;
+  if(d.weight > 0) qps += `<div class="ip-qp"><span class="ip-qp-l">Poids</span><span class="ip-qp-v">${esc(d.weight)} lb</span></div>`;
 
   // Propriétés
   const propsH = d.properties?.length ? `<div class="ip-sec"><div class="ip-sec-t">Propriétés</div><div style="display:flex;flex-wrap:wrap;gap:4px;">${d.properties.map(p=>`<span style="background:#160E06;border:1px solid #3A2810;color:#C9A84C;font-family:'Share Tech Mono',monospace;font-size:9px;padding:2px 7px;">${p}</span>`).join('')}</div></div>` : '';
 
   // Stats
-  const statsH = d.stats?.length ? `<div class="ip-sec"><div class="ip-sec-t">Statistiques</div>${d.stats.map(s=>`<div class="ip-str"><span class="ip-stn">${s.name}</span><span class="ip-stv ${s.class||''}">${s.value}</span></div>`).join('')}</div>` : '';
+  const statsH = d.stats?.length ? `<div class="ip-sec"><div class="ip-sec-t">Statistiques</div>${d.stats.map(s=>`<div class="ip-str"><span class="ip-stn">${esc(s.name)}</span><span class="ip-stv ${s.class||''}">${s.value}</span></div>`).join('')}</div>` : '';
 
   // Capacités
-  const abilH = d.abilities?.length ? `<div class="ip-sec"><div class="ip-sec-t">Capacités</div>${d.abilities.map(a=>`<div class="ip-ab"><div class="ip-ab-nm">${a.name}<span class="ip-ab-cost">${a.cost}</span></div><div class="ip-ab-tx">${a.text}</div></div>`).join('')}</div>` : '';
+  const abilH = d.abilities?.length ? `<div class="ip-sec"><div class="ip-sec-t">Capacités</div>${d.abilities.map(a=>`<div class="ip-ab"><div class="ip-ab-nm">${esc(a.name)}<span class="ip-ab-cost">${a.cost}</span></div><div class="ip-ab-tx">${a.text}</div></div>`).join('')}</div>` : '';
 
   // Accordage note
-  const attuneH = (d.attunement && d.attunement_note) ? `<div class="ip-sec" style="padding-top:.3rem;padding-bottom:.3rem;"><span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#C0392B;letter-spacing:.06em;">⚠ ACCORDAGE : </span><span style="font-size:11px;color:#9A8A6A;">${d.attunement_note}</span></div>` : '';
+  const attuneH = (d.attunement && d.attunement_note) ? `<div class="ip-sec" style="padding-top:.3rem;padding-bottom:.3rem;"><span style="font-family:'Share Tech Mono',monospace;font-size:9px;color:#C0392B;letter-spacing:.06em;">⚠ ACCORDAGE : </span><span style="font-size:11px;color:#9A8A6A;">${esc(d.attunement_note)}</span></div>` : '';
 
   // Malédiction
   const curseH = d.cursed ? `<div><span class="ip-curse">☠ OBJET MAUDIT</span></div>` : '';
 
   // Source
-  const srcH = (d.found_at||d.source) ? `<div class="ip-src"><span>${d.found_at||''}</span><span>${d.source||''}</span></div>` : '';
+  const srcH = (d.found_at||d.source) ? `<div class="ip-src"><span>${esc(d.found_at||'')}</span><span>${d.source||''}</span></div>` : '';
 
   // Bouton ajouter (mode preview grid)
-  const addH = addable ? `<div class="ip-addrow"><button class="btn btn-s" style="width:100%;" onclick="addToBag('${item.id}');closeItemPanel()">+ Ajouter au sac</button></div>` : '';
+  const addH = addable ? `<div class="ip-addrow"><button class="btn btn-s" style="width:100%;" onclick="addToBag('${forgeJs(item.id)}');closeItemPanel()">+ Ajouter au sac</button></div>` : '';
 
   const c = document.getElementById('ip-content');
   if(c) c.innerHTML = `
@@ -9360,11 +9372,11 @@ function showItemPanel(item, addable){
     <div style="position:relative;">
       <div class="ip-illus" style="border-bottom-color:${rc.border}">${illusInner}${rBadge}${locBadge}</div>
       <div class="ip-hd" style="border-bottom-color:${rc.border}30;">
-        <div class="ip-nm" style="color:${rc.name}">${d.name}</div>
+        <div class="ip-nm" style="color:${esc(rc.name)}">${esc(d.name)}</div>
         <div class="ip-tp">${icon} ${subLabel}</div>
       </div>
       <div class="ip-qps">${qps}</div>
-      <div class="ip-desc">${d.description}</div>
+      <div class="ip-desc">${esc(d.description)}</div>
       ${propsH}${statsH}${abilH}${attuneH}${curseH}${srcH}${addH}
     </div>`;
   const ov = document.getElementById('ip-overlay');
@@ -10390,8 +10402,8 @@ function renderBstList(){
     html+='<div class="bst-monster-list" style="display:'+(open?'block':'none')+';" data-fam="'+fam+'">';
     items.sort(function(a,b){var ca=crSort(a.cr),cb=crSort(b.cr);return ca-cb||a.n.localeCompare(b.n);});
     items.forEach(function(m){
-      html+='<div class="bst-monster-item'+(_bstMonster&&_bstMonster.id===m.id?' active':'')+'" onclick="bstSelectMonster(\''+m.id+'\',\''+m.src+'\')">'+
-        '<span>'+m.n+'</span><span class="bst-cr-badge">IC '+m.cr+'</span></div>';
+      html+='<div class="bst-monster-item'+(esc(_bstMonster&&_bstMonster.id===m.id?' active':''))+'" onclick="bstSelectMonster(\''+forgeJs(m.id)+'\',\''+m.src+'\')">'+
+        '<span>'+esc(m.n)+'</span><span class="bst-cr-badge">IC '+m.cr+'</span></div>';
     });
     html+='</div>';
   });
@@ -10432,7 +10444,7 @@ function bstApplyImage(id){
   var frame=$('bst-img-frame-'+id);
   if(frame){
     frame.innerHTML=url.trim()
-      ?'<img src="'+url.trim()+'" onerror="this.parentNode.innerHTML=\'<div class=bst-img-placeholder><div class=bst-img-placeholder-icon>🖼</div><span>Image introuvable</span></div>\'">'
+      ?'<img src="'+esc(safeImageUrl(url.trim()))+'" onerror="this.parentNode.innerHTML=\'<div class=bst-img-placeholder><div class=bst-img-placeholder-icon>🖼</div><span>Image introuvable</span></div>\'">'
       :'<div class="bst-img-placeholder"><div class="bst-img-placeholder-icon">🖼</div><span>FORMAT 9:16</span></div>';
   }
 }
@@ -10445,7 +10457,7 @@ function renderBstSheet(m){
 
   // ── Colonne image (droite) ──
   var imgFrameContent=imgUrl
-    ?'<img src="'+imgUrl+'" onerror="this.parentNode.innerHTML=\'<div class=bst-img-placeholder><div class=bst-img-placeholder-icon>🖼</div><span>Image introuvable</span></div>\'">'
+    ?'<img src="'+esc(safeImageUrl(imgUrl))+'" onerror="this.parentNode.innerHTML=\'<div class=bst-img-placeholder><div class=bst-img-placeholder-icon>🖼</div><span>Image introuvable</span></div>\'">'
     :'<div class="bst-img-placeholder"><div class="bst-img-placeholder-icon">🖼</div><span>FORMAT 9:16</span></div>';
   var safeId=m.id.replace(/[^a-zA-Z0-9_]/g,'_');
   var imgColHtml=
@@ -10454,7 +10466,7 @@ function renderBstSheet(m){
       '<div class="bst-img-url-wrap">'+
         '<div class="bst-img-url-lbl">Image URL</div>'+
         '<div class="bst-img-url-row">'+
-          '<input class="bst-img-url-input" id="bst-img-input-'+safeId+'" placeholder="https://…" value="'+imgUrl+'" onkeydown="if(event.key===\'Enter\')bstApplyImage(\''+safeId+'\')">'+
+          '<input class="bst-img-url-input" id="bst-img-input-'+safeId+'" placeholder="https://…" value="'+esc(imgUrl)+'" onkeydown="if(event.key===\'Enter\')bstApplyImage(\''+safeId+'\')">'+
           '<button class="bst-img-url-btn" onclick="bstApplyImage(\''+safeId+'\')">✓</button>'+
         '</div>'+
       '</div>'+
@@ -10464,8 +10476,8 @@ function renderBstSheet(m){
   var actionBtns='';
   if(custom){
     actionBtns='<div class="bst-sheet-actions">'+
-      '<button class="bst-sheet-btn" onclick="bstEditMonster(\''+m.id+'\')">✎ Modifier</button>'+
-      '<button class="bst-sheet-btn danger" onclick="bstDeleteMonster(\''+m.id+'\')">✕ Supprimer</button>'+
+      '<button class="bst-sheet-btn" onclick="bstEditMonster(\''+forgeJs(m.id)+'\')">✎ Modifier</button>'+
+      '<button class="bst-sheet-btn danger" onclick="bstDeleteMonster(\''+forgeJs(m.id)+'\')">✕ Supprimer</button>'+
     '</div>';
   }
   // If homebrew raw text exists, render parchment view
@@ -10475,13 +10487,13 @@ function renderBstSheet(m){
   }
   // Header
   var html=actionBtns;
-  html+='<div class="bst-sheet-name">'+m.n+'</div>';
+  html+='<div class="bst-sheet-name">'+esc(m.n)+'</div>';
   var szMap={TP:'Très petite',P:'Petite',M:'Moyenne',G:'Grande',TG:'Très grande',Gig:'Gigantesque',Colo:'Colossale'};
   html+='<div class="bst-sheet-sub">'+(szMap[m.sz]||m.sz)+' '+m.type+' · '+m.al+'</div>';
   // Vitals
   html+='<div class="bst-vitals">'+
-    '<div class="bst-vital-box"><span class="bst-vital-lbl">Classe d\'armure</span><span class="bst-vital-val">'+m.ac+(m.acN?' <span style="font-size:9px;color:#6A5A3A;">'+m.acN+'</span>':'')+'</span></div>'+
-    '<div class="bst-vital-box"><span class="bst-vital-lbl">Points de vie</span><span class="bst-vital-val">'+m.hp+' <span style="font-size:10px;color:#6A5A3A;">('+m.hpD+')</span></span></div>'+
+    '<div class="bst-vital-box"><span class="bst-vital-lbl">Classe d\'armure</span><span class="bst-vital-val">'+esc(m.ac)+(m.acN?' <span style="font-size:9px;color:#6A5A3A;">'+m.acN+'</span>':'')+'</span></div>'+
+    '<div class="bst-vital-box"><span class="bst-vital-lbl">Points de vie</span><span class="bst-vital-val">'+esc(m.hp)+' <span style="font-size:10px;color:#6A5A3A;">('+m.hpD+')</span></span></div>'+
     '<div class="bst-vital-box"><span class="bst-vital-lbl">Vitesse</span><span class="bst-vital-val" style="font-size:11px;">'+m.spd+'</span></div>'+
     '<div class="bst-vital-box"><span class="bst-vital-lbl">Indice de danger</span><span class="bst-vital-val">'+m.cr+'</span></div>'+
   '</div>';
@@ -10491,7 +10503,7 @@ function renderBstSheet(m){
   html+='<div class="bst-stats-row">';
   skeys.forEach(function(k,i){
     var v=m[k]||10;
-    html+='<div class="bst-stat-box"><span class="bst-stat-lbl">'+slbl[i]+'</span><span class="bst-stat-val">'+v+'</span><span class="bst-stat-mod">'+statMod(v)+'</span></div>';
+    html+='<div class="bst-stat-box"><span class="bst-stat-lbl">'+slbl[i]+'</span><span class="bst-stat-val">'+esc(v)+'</span><span class="bst-stat-mod">'+statMod(v)+'</span></div>';
   });
   html+='</div>';
   // Saves & Skills
@@ -10522,7 +10534,7 @@ function renderBstSheet(m){
   if(m.spe&&m.spe.length){
     html+='<div class="bst-section">';
     m.spe.forEach(function(t){
-      html+='<div class="bst-trait"><span class="bst-trait-name">'+t.n+'.</span> <span class="bst-trait-desc">'+t.d+'</span></div>';
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+esc(t.n)+'.</span> <span class="bst-trait-desc">'+esc(t.d)+'</span></div>';
     });
     html+='</div>';
   }
@@ -10530,14 +10542,14 @@ function renderBstSheet(m){
   if(m.act&&m.act.length){
     html+='<div class="bst-action-section-title">Actions</div>';
     m.act.forEach(function(a){
-      html+='<div class="bst-trait"><span class="bst-trait-name">'+a.n+'.</span> <span class="bst-trait-desc">'+a.d+'</span></div>';
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+esc(a.n)+'.</span> <span class="bst-trait-desc">'+esc(a.d)+'</span></div>';
     });
   }
   // Reactions
   if(m.rea&&m.rea.length){
     html+='<div class="bst-action-section-title">Réactions</div>';
     m.rea.forEach(function(a){
-      html+='<div class="bst-trait"><span class="bst-trait-name">'+a.n+'.</span> <span class="bst-trait-desc">'+a.d+'</span></div>';
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+esc(a.n)+'.</span> <span class="bst-trait-desc">'+esc(a.d)+'</span></div>';
     });
   }
   // Legendary
@@ -10545,7 +10557,7 @@ function renderBstSheet(m){
     html+='<div class="bst-action-section-title">Actions légendaires</div>';
     if(m.lgD)html+='<div class="bst-trait-desc" style="margin-bottom:.4rem;">'+m.lgD+'</div>';
     m.leg.forEach(function(a){
-      html+='<div class="bst-trait"><span class="bst-trait-name">'+a.n+'.</span> <span class="bst-trait-desc">'+a.d+'</span></div>';
+      html+='<div class="bst-trait"><span class="bst-trait-name">'+esc(a.n)+'.</span> <span class="bst-trait-desc">'+esc(a.d)+'</span></div>';
     });
   }
   el.innerHTML='<div id="bestiary-sheet-stats">'+html+'</div>'+imgColHtml;
@@ -10647,7 +10659,7 @@ function openAddMonster(id){
   modal.querySelector('#bst-modal-inner').innerHTML=
     '<button class="bst-modal-close" onclick="closeBstModal()">✕</button>'+
     '<div class="bst-modal-title">'+(existing?'Modifier':'Ajouter un monstre')+'</div>'+
-    '<input type="hidden" id="bst-edit-id" value="'+(existing?e.id:'')+'">'+
+    '<input type="hidden" id="bst-edit-id" value="'+(esc(existing?e.id:''))+'">'+
     '<div class="bst-modal-tabs">'+
       '<button class="bst-modal-tab'+(isHb?'':' active')+'" id="bst-tab-btn-form" onclick="bstModalSwitchTab(\'form\')">📋 Formulaire</button>'+
       '<button class="bst-modal-tab'+(isHb?' active':'')+'" id="bst-tab-btn-hb" onclick="bstModalSwitchTab(\'hb\')">📜 Homebrew</button>'+
@@ -10655,7 +10667,7 @@ function openAddMonster(id){
     /* ── Formulaire tab ── */
     '<div id="bst-tab-form" style="display:'+(isHb?'none':'block')+'">'+
       '<div class="bst-form-row">'+
-        '<div class="bst-form-group" style="flex:3"><label>Nom</label><input id="be-n" value="'+e.n+'"></div>'+
+        '<div class="bst-form-group" style="flex:3"><label>Nom</label><input id="be-n" value="'+esc(e.n)+'"></div>'+
         '<div class="bst-form-group"><label>Famille</label><select id="be-fam">'+famOpts+'</select></div>'+
       '</div>'+
       '<div class="bst-form-row">'+
@@ -10665,9 +10677,9 @@ function openAddMonster(id){
         '<div class="bst-form-group" style="flex:2"><label>Alignement</label><input id="be-al" value="'+e.al+'"></div>'+
       '</div>'+
       '<div class="bst-form-row">'+
-        '<div class="bst-form-group"><label>CA</label><input id="be-ac" type="number" value="'+e.ac+'"></div>'+
+        '<div class="bst-form-group"><label>CA</label><input id="be-ac" type="number" value="'+esc(e.ac)+'"></div>'+
         '<div class="bst-form-group" style="flex:2"><label>Note CA</label><input id="be-acn" value="'+e.acN+'"></div>'+
-        '<div class="bst-form-group"><label>PV</label><input id="be-hp" type="number" value="'+e.hp+'"></div>'+
+        '<div class="bst-form-group"><label>PV</label><input id="be-hp" type="number" value="'+esc(e.hp)+'"></div>'+
         '<div class="bst-form-group"><label>Dés PV</label><input id="be-hpd" value="'+e.hpD+'"></div>'+
         '<div class="bst-form-group"><label>Vitesse</label><input id="be-spd" value="'+e.spd+'"></div>'+
       '</div>'+
@@ -10684,13 +10696,13 @@ function openAddMonster(id){
         '<div class="bst-form-group" style="flex:1"><label>Vulnérabilités</label><input id="be-vul" value="'+e.vul.join(', ')+'"></div>'+
       '</div>'+
       '<div class="bst-form-row">'+
-        '<div class="bst-form-group"><label>Traits spéciaux (nom | description, un par ligne)</label><textarea id="be-spe">'+e.spe.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+        '<div class="bst-form-group"><label>Traits spéciaux (nom | description, un par ligne)</label><textarea id="be-spe">'+esc(e.spe.map(function(t){return t.n+'|'+t.d;}).join('\n'))+'</textarea></div>'+
       '</div>'+
       '<div class="bst-form-row">'+
-        '<div class="bst-form-group"><label>Actions (nom | description, un par ligne)</label><textarea id="be-act">'+e.act.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+        '<div class="bst-form-group"><label>Actions (nom | description, un par ligne)</label><textarea id="be-act">'+esc(e.act.map(function(t){return t.n+'|'+t.d;}).join('\n'))+'</textarea></div>'+
       '</div>'+
       '<div class="bst-form-row">'+
-        '<div class="bst-form-group"><label>Réactions (nom | description, un par ligne)</label><textarea id="be-rea">'+e.rea.map(function(t){return t.n+'|'+t.d;}).join('\n')+'</textarea></div>'+
+        '<div class="bst-form-group"><label>Réactions (nom | description, un par ligne)</label><textarea id="be-rea">'+esc(e.rea.map(function(t){return t.n+'|'+t.d;}).join('\n'))+'</textarea></div>'+
       '</div>'+
     '</div>'+
     /* ── Homebrew tab ── */
@@ -10819,13 +10831,13 @@ function renderInitResults(q){
   el.innerHTML=results.map(function(r){
     var icon=r.type==='player'?'🧑':'🐉';
     var sid=r.id.replace(/[^a-zA-Z0-9_]/g,'_');
-    return '<div class="init-result-item" onclick="initAdd(\''+r.type+'\',\''+r.id+'\')">'+
+    return '<div class="init-result-item" onclick="initAdd(\''+r.type+'\',\''+forgeJs(r.id)+'\')">'+
       '<span style="font-size:13px;flex-shrink:0;">'+icon+'</span>'+
       '<div style="flex:1;min-width:0;">'+
-        '<div class="init-result-name">'+r.name+'</div>'+
+        '<div class="init-result-name">'+esc(r.name)+'</div>'+
         '<div class="init-result-sub">'+r.sub+'</div>'+
       '</div>'+
-      '<button class="init-add-btn" onclick="event.stopPropagation();initAdd(\''+r.type+'\',\''+r.id+'\')">+ Ajouter</button>'+
+      '<button class="init-add-btn" onclick="event.stopPropagation();initAdd(\''+r.type+'\',\''+forgeJs(r.id)+'\')">+ Ajouter</button>'+
     '</div>';
   }).join('');
 }
@@ -10882,7 +10894,7 @@ function renderInitList(){
     var barColor=pct>50?'#2A7A3A':pct>25?'#7A6A1A':'#8A2A2A';
     var initFirst=(c.name[0]||'?').toUpperCase();
     var portraitHtml=c.portrait
-      ?'<img src="'+c.portrait+'" onerror="this.style.display=\'none\';this.parentNode.insertAdjacentHTML(\'beforeend\',\''+initFirst+'\')">'
+      ?'<img src="'+esc(safeImageUrl(c.portrait))+'" onerror="this.style.display=\'none\';this.parentNode.insertAdjacentHTML(\'beforeend\',\''+initFirst+'\')">'
       :initFirst;
     var isDead=c.hpCur<=0;
     return '<div class="init-combatant'+(isCur?' current':'')+' '+c.side+(isDead?' dead':'')+'" id="icc-'+c.uid+'">'+
@@ -10892,7 +10904,7 @@ function renderInitList(){
         '<input class="init-init-input" type="number" value="'+c.initVal+'" onchange="initSetInit(\''+c.uid+'\',+this.value)" onclick="this.select()">'+
       '</div>'+
       '<div class="init-info">'+
-        '<div class="init-name">'+c.name+'</div>'+
+        '<div class="init-name">'+esc(c.name)+'</div>'+
         '<div class="init-hp-row">'+
           '<button class="init-hp-btn" onclick="initChgHP(\''+c.uid+'\',-1)">−</button>'+
           '<span class="init-hp-cur" onclick="initEditHP(\''+c.uid+'\')">'+c.hpCur+'</span>'+
@@ -10903,7 +10915,7 @@ function renderInitList(){
         '</div>'+
       '</div>'+
       '<div class="init-badges">'+
-        '<span class="init-ac">CA '+c.ac+'</span>'+
+        '<span class="init-ac">CA '+esc(c.ac)+'</span>'+
         '<button class="init-side-btn '+c.side+'" onclick="initToggleSide(\''+c.uid+'\')">'+
           (c.side==='ally'?'ALLIÉ':'ENNEMI')+
         '</button>'+

@@ -1,5 +1,7 @@
 {
   "rewrites": [
+    { "source": "/api/download/:token", "destination": "/api/download" },
+    { "source": "/api/:path*", "destination": "/api/:path*" },
     { "source": "/mythomancer", "destination": "/mythomancer/index.html" },
     { "source": "/mythomancer/", "destination": "/mythomancer/index.html" },
     { "source": "/mythomancer/conditions", "destination": "/mythomancer/conditions.html" },
@@ -35,7 +37,7 @@
         },
         {
           "key": "Referrer-Policy",
-          "value": "strict-origin-when-cross-origin"
+          "value": "no-referrer"
         },
         {
           "key": "Permissions-Policy",

@@ -1,82 +1,15 @@
-// API Serverless Vercel pour vérifier le statut d'un paiement Stripe
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_ROLE_KEY
-);
-
+const c = require('../server/commerce.cjs');
 module.exports = async (req, res) => {
-  // Configuration CORS
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
-
-  if (req.method === 'OPTIONS') {
-    res.status(200).end();
-    return;
-  }
-
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Méthode non autorisée' });
-  }
-
+  c.headers(res);
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Méthode non autorisée.' });
   try {
-    const { sessionId } = req.body;
-
-    if (!sessionId) {
-      return res.status(400).json({ error: 'Session ID requis' });
+    if (!req.body?.sessionId) return res.status(400).json({ error: 'Référence manquante.' });
+    const { stripe, db } = c.clients();
+    const data = await c.receipt(stripe, req.body.sessionId);
+    for (const item of data.items) {
+      const product = await c.catalogItem(db, item.type, item.id);
+      item.languages = Object.keys(product.files);
     }
-
-    // Récupérer la session Stripe
-    const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-    if (session.payment_status === 'paid') {
-      // Récupérer les line items pour savoir ce qui a été acheté
-      const lineItems = await stripe.checkout.sessions.listLineItems(sessionId);
-
-      // Récupérer le purchase depuis Supabase pour obtenir le download token
-      const { data: purchase, error: purchaseError } = await supabase
-        .from('purchases')
-        .select('download_token, expires_at, download_count')
-        .eq('stripe_session_id', sessionId)
-        .single();
-
-      if (purchaseError) {
-        console.error('⚠️ Purchase non trouvé dans Supabase:', purchaseError);
-      }
-
-      res.status(200).json({
-        success: true,
-        paid: true,
-        email: session.customer_email,
-        customerName: session.metadata?.customerName,
-        amount: session.amount_total / 100,
-        currency: session.currency,
-        items: lineItems.data,
-        paymentIntent: session.payment_intent,
-        downloadToken: purchase?.download_token,
-        expiresAt: purchase?.expires_at,
-        downloadCount: purchase?.download_count || 0
-      });
-    } else {
-      res.status(200).json({
-        success: false,
-        paid: false,
-        status: session.payment_status
-      });
-    }
-
-  } catch (error) {
-    console.error('❌ Erreur vérification paiement:', error);
-    res.status(500).json({ 
-      error: 'Erreur lors de la vérification du paiement',
-      details: error.message 
-    });
-  }
+    return res.status(200).json(data);
+  } catch (error) { return c.errorResponse(res, error); }
 };

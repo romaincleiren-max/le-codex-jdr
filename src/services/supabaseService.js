@@ -120,6 +120,7 @@ export const createCampaign = async (campaign) => {
       price: campaign.price || 0,
       is_free: campaign.isFree || false,
       pdf_url: campaign.pdfUrl || null,
+      ...(campaign.pdfFiles !== undefined ? { pdf_files: campaign.pdfFiles } : {}),
       background_image_url: campaign.backgroundImageUrl || null,
       background_video_url: campaign.backgroundVideoUrl || null
     }])
@@ -142,6 +143,7 @@ export const updateCampaign = async (id, updates) => {
       price: updates.price || 0,
       is_free: updates.isFree || false,
       pdf_url: updates.pdfUrl || null,
+      ...(updates.pdfFiles !== undefined ? { pdf_files: updates.pdfFiles } : {}),
       background_image_url: updates.backgroundImageUrl || null,
       background_video_url: updates.backgroundVideoUrl || null
     })
@@ -214,6 +216,7 @@ export const createScenario = async (campaignId, scenario) => {
       price: scenario.price || 0,
       is_free: scenario.isFree || false,
       pdf_url: scenario.pdfUrl || null,
+      ...(scenario.pdfFiles !== undefined ? { pdf_files: scenario.pdfFiles } : {}),
       ratings: scenario.ratings || { ambiance: 3, complexite: 3, combat: 3, enquete: 3 },
       tags: scenario.tags || [],
       position: nextPosition
@@ -240,6 +243,7 @@ export const updateScenario = async (id, updates) => {
     price: updates.price || 0,
     is_free: updates.isFree || false,
     pdf_url: updates.pdfUrl || null,
+    ...(updates.pdfFiles !== undefined ? { pdf_files: updates.pdfFiles } : {}),
     ratings: updates.ratings,
     tags: updates.tags || []
   };
@@ -722,9 +726,7 @@ export const createSubmission = async (submissionData, pdfFile) => {
       pdf_filename: pdfFile.name,
       pdf_url: url,
       status: 'pending'
-    }])
-    .select()
-    .single();
+    }]);
 
   if (error) {
     // Si erreur, supprimer le fichier uploadé

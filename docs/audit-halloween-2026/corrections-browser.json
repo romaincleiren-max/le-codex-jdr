@@ -1,0 +1,22 @@
+[
+  {
+    "test": "Forge identity, portrait and tooltip injection",
+    "identitySafe": true,
+    "executed": false,
+    "tooltipText": true
+  },
+  {
+    "test": "PDF languages, unavailable items, retry, recovery, unpaid receipt",
+    "width": 390,
+    "passed": true
+  },
+  {
+    "test": "Administrator uploads English PDF and retains French edition",
+    "passed": true
+  },
+  {
+    "test": "PDF languages, unavailable items, retry, recovery, unpaid receipt",
+    "width": 1440,
+    "passed": true
+  }
+]

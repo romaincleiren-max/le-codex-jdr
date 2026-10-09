@@ -1,6 +1,5 @@
 # Dépendances
 node_modules/
-package-lock.json
 
 # Build
 dist/
@@ -33,3 +32,6 @@ Thumbs.db
 
 # CODEX source (42 MB, géré manuellement)
 data/CODEX.json
+.vercel
+.env*
+!.env.example

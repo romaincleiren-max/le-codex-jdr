@@ -55,6 +55,7 @@ export const useSupabaseData = () => {
         price: parseFloat(campaign.price),
         isFree: campaign.is_free,
         pdfUrl: campaign.pdf_url,
+        pdfFiles: campaign.pdf_files,
         backgroundImageUrl: campaign.background_image_url,
         scenarios: (campaign.scenarios || [])
           .map(scenario => ({
@@ -71,6 +72,7 @@ export const useSupabaseData = () => {
             price: parseFloat(scenario.price),
             isFree: scenario.is_free,
             pdfUrl: scenario.pdf_url,
+            pdfFiles: scenario.pdf_files,
             ratings: scenario.ratings,
             tags: scenario.tags || [],
             position: scenario.position || 0
