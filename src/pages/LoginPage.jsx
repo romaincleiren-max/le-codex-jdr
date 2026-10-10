@@ -3,8 +3,8 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Lock, Mail, ArrowLeft, UserPlus, LogIn } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { loginRateLimiter } from '../utils/rateLimiter';
-import RateLimiter from '../utils/rateLimiter';
 import { useLanguage } from '../i18n';
+import LanguageSelector from '../components/LanguageSelector';
 
 const inputClass = "w-full px-4 py-3 border border-slate-700 bg-slate-800/80 text-amber-100 rounded-xl focus:outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500/20 transition-all placeholder-slate-600 text-sm";
 const labelClass = "flex items-center gap-2 text-amber-400/80 font-semibold mb-2 text-xs uppercase tracking-widest";
@@ -32,21 +32,20 @@ export const LoginPage = () => {
   const handleLogin = async () => {
     const rateLimitCheck = loginRateLimiter.check();
     if (!rateLimitCheck.allowed) {
-      setError(`Trop de tentatives. Réessayez dans ${RateLimiter.formatTime(rateLimitCheck.resetIn)}.`);
+      setError(t('account.limited'));
       return;
     }
 
-    const attemptResult = loginRateLimiter.attempt();
+    loginRateLimiter.attempt();
     const { data, error: authError } = await supabase.auth.signInWithPassword({ email: email.trim(), password });
 
     if (authError) {
       if (authError.code !== 'invalid_credentials') {
         loginRateLimiter.reset();
-        setError('Connexion impossible pour le moment. Vérifiez votre connexion ou réessayez plus tard.');
+        setError(t('account.unavailable'));
         return;
       }
-      const remaining = attemptResult.remaining;
-      setError(`Identifiants incorrects.${remaining > 0 ? ` ${remaining} tentative(s) restante(s).` : ' Compte temporairement bloqué.'}`);
+      setError(t('account.invalid'));
       setPassword('');
       return;
     }
@@ -57,7 +56,7 @@ export const LoginPage = () => {
       .from('admin_users').select('id').eq('email', data.user.email).maybeSingle();
 
     if (adminError) {
-      setError('Connexion réussie, mais impossible de vérifier les droits administrateur. Réessayez dans un instant.');
+      setError(t('account.adminError'));
       return;
     }
 
@@ -69,11 +68,11 @@ export const LoginPage = () => {
 
   const handleRegister = async () => {
     if (password !== confirmPassword) {
-      setError('Les mots de passe ne correspondent pas.');
+      setError(t('account.mismatch'));
       return;
     }
     if (password.length < 6) {
-      setError('Le mot de passe doit contenir au moins 6 caractères.');
+      setError(t('account.short'));
       return;
     }
 
@@ -81,7 +80,7 @@ export const LoginPage = () => {
 
     if (signUpError) {
       if (signUpError.message.includes('already registered')) {
-        setError('Cette adresse est déjà utilisée. Connectez-vous.');
+        setError(t('account.used'));
       } else {
         setError(signUpError.message);
       }
@@ -94,7 +93,7 @@ export const LoginPage = () => {
       navigate(location.state?.from?.pathname || '/', { replace: true });
     } else {
       // Confirmation email requise
-      setSuccess('Compte créé ! Vérifiez votre boîte mail pour confirmer votre adresse.');
+      setSuccess(t('account.created'));
       setEmail(''); setPassword(''); setConfirmPassword('');
     }
   };
@@ -109,7 +108,7 @@ export const LoginPage = () => {
       else await handleRegister();
     } catch (err) {
       console.error('Auth error:', err);
-      setError('Une erreur est survenue. Réessayez.');
+      setError(t('account.error'));
     } finally {
       setIsLoading(false);
     }
@@ -121,6 +120,7 @@ export const LoginPage = () => {
 
       <div className="w-full max-w-sm">
 
+        <div className="flex justify-end mb-4"><LanguageSelector /></div>
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-5">
@@ -137,15 +137,15 @@ export const LoginPage = () => {
             style={{ fontFamily: 'Cinzel Decorative, Cinzel, serif', fontSize: '1.4rem' }}>
             Le Codex
           </h1>
-          <p className="text-slate-500 text-xs tracking-widest uppercase">Espace Aventurier</p>
+          <p className="text-slate-500 text-xs tracking-widest uppercase">{t('account.area')}</p>
         </div>
 
         {/* Toggle connexion / inscription */}
         <div className="flex rounded-xl overflow-hidden border border-slate-700 mb-6"
           style={{ background: '#0d0a06' }}>
           {[
-            { id: 'login',    label: 'Se connecter', icon: <LogIn size={14} /> },
-            { id: 'register', label: 'S\'inscrire',   icon: <UserPlus size={14} /> },
+            { id: 'login',    label: t('account.login'), icon: <LogIn size={14} /> },
+            { id: 'register', label: t('account.register'),   icon: <UserPlus size={14} /> },
           ].map(tab => (
             <button key={tab.id} onClick={() => reset(tab.id)}
               className="flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-all"
@@ -168,15 +168,15 @@ export const LoginPage = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
 
             <div>
-              <label className={labelClass}><Mail size={13} /> Adresse email</label>
-              <input aria-label="Adresse e-mail" autoComplete="email" type="email" value={email} required autoFocus
+              <label className={labelClass}><Mail size={13} /> {t('account.email')}</label>
+              <input aria-label={t('account.email')} autoComplete="email" type="email" value={email} required autoFocus
                 onChange={e => { setEmail(e.target.value); setError(''); }}
                 className={inputClass} placeholder="vous@exemple.com" />
             </div>
 
             <div>
-              <label className={labelClass}><Lock size={13} /> Mot de passe</label>
-              <input aria-label="Mot de passe" autoComplete={mode === 'login' ? 'current-password' : 'new-password'} type="password" value={password} required
+              <label className={labelClass}><Lock size={13} /> {t('account.password')}</label>
+              <input aria-label={t('account.password')} autoComplete={mode === 'login' ? 'current-password' : 'new-password'} type="password" value={password} required
                 onChange={e => { setPassword(e.target.value); setError(''); }}
                 className={inputClass} placeholder="••••••••"
                 minLength={mode === 'register' ? 6 : undefined} />
@@ -184,8 +184,8 @@ export const LoginPage = () => {
 
             {mode === 'register' && (
               <div>
-                <label className={labelClass}><Lock size={13} /> Confirmer le mot de passe</label>
-                <input aria-label="Confirmer le mot de passe" autoComplete="new-password" type="password" value={confirmPassword} required
+                <label className={labelClass}><Lock size={13} /> {t('account.confirm')}</label>
+                <input aria-label={t('account.confirm')} autoComplete="new-password" type="password" value={confirmPassword} required
                   onChange={e => { setConfirmPassword(e.target.value); setError(''); }}
                   className={inputClass} placeholder="••••••••" />
               </div>
@@ -209,32 +209,32 @@ export const LoginPage = () => {
               {isLoading ? (
                 <span className="flex items-center justify-center gap-2">
                   <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                  {mode === 'login' ? 'Connexion…' : 'Création du compte…'}
+                  {mode === 'login' ? t('account.connecting') : t('account.creating')}
                 </span>
               ) : (
                 <span className="flex items-center justify-center gap-2">
-                  {mode === 'login' ? <><LogIn size={15} /> Entrer dans le Codex</> : <><UserPlus size={15} /> Créer mon compte</>}
+                  {mode === 'login' ? <><LogIn size={15} /> {t('account.enter')}</> : <><UserPlus size={15} /> {t('account.create')}</>}
                 </span>
               )}
             </button>
           </form>
-          {mode === 'login' && <Link to="/forgot-password" className="block text-center text-amber-400 underline mt-4">Mot de passe oublié ?</Link>}
+          {mode === 'login' && <Link to="/forgot-password" className="block text-center text-amber-400 underline mt-4">{t('account.forgot')}</Link>}
 
           {mode === 'login' && (
             <p className="text-center text-slate-600 text-xs mt-5">
-              Pas encore de compte ?{' '}
+              {t('account.noAccount')}{' '}
               <button onClick={() => reset('register')}
                 className="text-amber-600 hover:text-amber-400 font-semibold transition-colors">
-                S'inscrire gratuitement
+                {t('account.freeRegister')}
               </button>
             </p>
           )}
           {mode === 'register' && (
             <p className="text-center text-slate-600 text-xs mt-5">
-              Déjà un compte ?{' '}
+              {t('account.existing')}{' '}
               <button onClick={() => reset('login')}
                 className="text-amber-600 hover:text-amber-400 font-semibold transition-colors">
-                Se connecter
+                {t('account.login')}
               </button>
             </p>
           )}
@@ -243,7 +243,7 @@ export const LoginPage = () => {
         <button onClick={() => navigate('/')}
           className="w-full mt-4 text-slate-600 hover:text-amber-500 py-3 rounded-xl flex items-center justify-center gap-2 transition-all text-sm">
           <ArrowLeft size={15} />
-          Retour à l'accueil
+          {t('account.back')}
         </button>
       </div>
     </div>

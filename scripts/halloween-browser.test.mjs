@@ -84,7 +84,7 @@ try{
       await page.getByLabel('Mot de passe',{exact:true}).fill('local-test-password');
       await page.getByRole('button',{name:'Entrer dans le Codex'}).click();
       await page.getByRole('button',{name:'📖 Scénarios',exact:true}).click();
-      await page.locator('select').first().selectOption('13');
+      await page.locator('select').filter({has:page.locator('option[value="13"]')}).selectOption('13');
       await page.getByRole('button',{name:'Modifier',exact:true}).first().click();
       const group=page.getByRole('group',{name:'PDF disponibles par langue'});
       await group.getByLabel('Importer un PDF (English)',{exact:true}).setInputFiles({name:'english.pdf',mimeType:'application/pdf',buffer:Buffer.from('%PDF-1.7\n%%EOF')});

@@ -22,6 +22,7 @@ import CharacterSheetPage from './pages/CharacterSheetPage';
 import LevelUpWizardPage from './pages/LevelUpWizardPage';
 import { inject } from '@vercel/analytics';
 import { LanguageProvider, useLanguage } from './i18n';
+import LanguageSelector from './components/LanguageSelector';
 import { useSupabaseData } from './hooks/useSupabaseData';
 import { supabaseService } from './services/supabaseService';
 import { supabase } from './lib/supabase';
@@ -1008,7 +1009,7 @@ const ShoppingCartPanel = ({ cart, onRemoveItem, onClose, onGoToCheckout }) => {
 };
 
 const CheckoutPage = ({ cart, onBack }) => {
-  const { language, tf } = useLanguage(); const en = language === 'en';
+  const { t, tf } = useLanguage();
   const [busy, setBusy] = useState(false); const [error, setError] = useState('');
   const total = cart.reduce((sum, entry) => sum + Number(entry.item.price), 0);
   const pay = async () => {
@@ -1018,15 +1019,15 @@ const CheckoutPage = ({ cart, onBack }) => {
   };
   return <main className="min-h-screen bg-slate-900 text-amber-100 px-4 py-12">
     <div className="max-w-xl mx-auto space-y-5">
-      <button onClick={onBack} className="underline">{en ? 'Back to the catalogue' : 'Retour au catalogue'}</button>
-      <h1 className="text-3xl font-bold">{en ? 'Your order' : 'Votre commande'}</h1>
+      <button onClick={onBack} className="underline">{t('receipt.back')}</button>
+      <h1 className="text-3xl font-bold">{t('receipt.order')}</h1>
       {cart.map(entry => <div key={entry.type + entry.item.id} className="flex justify-between gap-4 border-b border-amber-800 pb-3">
         <span>{tf(entry.item, entry.type === 'saga' ? 'name' : 'displayName')}</span><span>{Number(entry.item.price).toFixed(2)} €</span>
       </div>)}
       <p className="text-xl font-bold">Total : {total.toFixed(2)} €</p>
-      <p>{en ? 'Enter your email and card details on Stripe’s secure page. All available translations are included.' : 'Renseignez votre e-mail et votre carte sur la page sécurisée de Stripe. Toutes les traductions disponibles sont incluses.'}</p>
+      <p>{t('receipt.instructions')}</p>
       <button onClick={pay} disabled={busy || !cart.length} className="w-full py-4 rounded bg-amber-700 hover:bg-amber-600 font-bold disabled:opacity-50">
-        {busy ? (en ? 'Opening Stripe…' : 'Ouverture de Stripe…') : (en ? 'Continue to secure payment' : 'Continuer vers le paiement sécurisé')}
+        {busy ? (t('receipt.opening')) : (t('receipt.continue'))}
       </button>
       {error && <p role="alert" className="text-red-300">{error}</p>}
     </div>
@@ -1731,7 +1732,7 @@ function AdminGameSystemsTab({ supabase }) {
 
 export default function App({ initialPage = 'home' }) {
   // i18n
-  const { language, toggleLanguage, t, tTag, tDuration, tf } = useLanguage();
+  const { language, t, tTag, tDuration, tf } = useLanguage();
 
   // État pour le preloader
   const [showPreloader, setShowPreloader] = useState(true);
@@ -1937,7 +1938,7 @@ export default function App({ initialPage = 'home' }) {
     const searchTerm = tag.trim().toLowerCase();
     return scenarios.filter(scenario => {
       if (!scenario.tags || scenario.tags.length === 0) return false;
-      return scenario.tags.some(t => t.toLowerCase().includes(searchTerm));
+      return scenario.tags.some(tag => tag.toLowerCase().includes(searchTerm) || tTag(tag).toLowerCase().includes(searchTerm));
     });
   };
   
@@ -2254,7 +2255,7 @@ export default function App({ initialPage = 'home' }) {
                   </span>
                   {siteSettings.tagline && (
                     <span className="text-xs md:text-sm text-amber-500/80 group-hover:text-amber-400/90 transition-colors duration-300 font-medium hidden md:block">
-                      {siteSettings.tagline}
+                      {siteSettings.tagline === 'Bibliothèque de scénarios JDR' ? t('home.defaultTagline') : siteSettings.tagline}
                     </span>
                   )}
                 </div>
@@ -2272,9 +2273,9 @@ export default function App({ initialPage = 'home' }) {
                     const labels = {
                       home: t('nav.home'),
                       submit: t('nav.submit'),
-                      forge: 'Forge',
-                      bestiaire: 'Bestiaire',
-                      initiative: 'Initiative',
+                      forge: t('nav.forge'),
+                      bestiaire: t('nav.bestiary'),
+                      initiative: t('nav.initiative'),
                       admin: t('nav.admin'),
                       stats: t('nav.stats'),
                       about: t('nav.about'),
@@ -2311,27 +2312,7 @@ export default function App({ initialPage = 'home' }) {
               {/* Boutons d'action à droite */}
               <div className="flex gap-1.5 md:gap-3 items-center flex-shrink-0">
                 {/* Bouton Langue */}
-                <button
-                  onClick={toggleLanguage}
-                  className="px-2 py-1.5 md:px-3 md:py-2 rounded-lg md:rounded-xl bg-slate-800/60 hover:bg-slate-700/80 border border-amber-600/30 hover:border-amber-400/50 transition-all duration-300 transform hover:scale-105"
-                  title={language === 'fr' ? 'Switch to English' : 'Passer en français'}
-                >
-                  {language === 'fr' ? (
-                    <svg viewBox="0 0 30 20" className="w-6 h-4 md:w-7 md:h-5 rounded-sm" style={{display:'block'}}>
-                      <rect width="30" height="20" fill="#012169"/>
-                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#fff" strokeWidth="4"/>
-                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#C8102E" strokeWidth="2"/>
-                      <path d="M15,0 V20 M0,10 H30" stroke="#fff" strokeWidth="6"/>
-                      <path d="M15,0 V20 M0,10 H30" stroke="#C8102E" strokeWidth="3"/>
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 30 20" className="w-6 h-4 md:w-7 md:h-5 rounded-sm" style={{display:'block'}}>
-                      <rect width="10" height="20" fill="#002395"/>
-                      <rect x="10" width="10" height="20" fill="#fff"/>
-                      <rect x="20" width="10" height="20" fill="#ED2939"/>
-                    </svg>
-                  )}
-                </button>
+                <LanguageSelector />
                 {/* Panier */}
                 <button
                   onClick={() => setShowCart(!showCart)}
@@ -2350,7 +2331,7 @@ export default function App({ initialPage = 'home' }) {
                   <a
                     href="/login"
                     className="hidden md:flex p-2 rounded-lg text-amber-100/60 hover:text-amber-300 transition-colors duration-200"
-                    title={isLoggedIn ? 'Mon profil' : 'Se connecter'}
+                    title={isLoggedIn ? t('account.area') : t('account.login')}
                     style={{ textDecoration: 'none' }}>
                     <User size={18} />
                   </a>
@@ -2377,6 +2358,7 @@ export default function App({ initialPage = 'home' }) {
                 {/* Bouton Menu Hamburger - visible sur mobile uniquement */}
                 <button
                   onClick={() => setMobileMenuOpen(true)}
+                  aria-label={t('nav.menu')}
                   className="md:hidden p-1.5 rounded-lg bg-gradient-to-r from-amber-600 to-amber-700 hover:from-amber-500 hover:to-amber-600 text-white transition-all duration-300">
                   <Menu size={20} />
                 </button>
@@ -2404,27 +2386,7 @@ export default function App({ initialPage = 'home' }) {
             <div className="flex items-center justify-between p-4 border-b border-amber-600/30">
               <div className="flex items-center gap-3">
                 <span className="text-xl font-bold text-amber-300" style={{ fontFamily: "'Cinzel', serif" }}>{t('nav.menu')}</span>
-                <button
-                  onClick={toggleLanguage}
-                  className="px-2 py-1 rounded-lg bg-slate-700 hover:bg-slate-600 transition-colors"
-                  title={language === 'fr' ? 'Switch to English' : 'Passer en français'}
-                >
-                  {language === 'fr' ? (
-                    <svg viewBox="0 0 30 20" className="w-6 h-4 rounded-sm" style={{display:'block'}}>
-                      <rect width="30" height="20" fill="#012169"/>
-                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#fff" strokeWidth="4"/>
-                      <path d="M0,0 L30,20 M30,0 L0,20" stroke="#C8102E" strokeWidth="2"/>
-                      <path d="M15,0 V20 M0,10 H30" stroke="#fff" strokeWidth="6"/>
-                      <path d="M15,0 V20 M0,10 H30" stroke="#C8102E" strokeWidth="3"/>
-                    </svg>
-                  ) : (
-                    <svg viewBox="0 0 30 20" className="w-6 h-4 rounded-sm" style={{display:'block'}}>
-                      <rect width="10" height="20" fill="#002395"/>
-                      <rect x="10" width="10" height="20" fill="#fff"/>
-                      <rect x="20" width="10" height="20" fill="#ED2939"/>
-                    </svg>
-                  )}
-                </button>
+                <LanguageSelector />
               </div>
               <button
                 onClick={() => setMobileMenuOpen(false)}
@@ -2457,8 +2419,8 @@ export default function App({ initialPage = 'home' }) {
                   const labels = {
                     home: t('nav.home'),
                     submit: t('nav.submit'),
-                    forge: '✦ Forge',
-                    bestiaire: '🐉 Bestiaire',
+                    forge: '✦ ' + t('nav.forge'),
+                    bestiaire: '🐉 ' + t('nav.bestiary'),
                     initiative: '⚔️ Initiative',
                     admin: t('nav.admin'),
                     stats: t('nav.statistics'),

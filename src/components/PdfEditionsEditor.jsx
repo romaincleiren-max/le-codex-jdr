@@ -6,7 +6,7 @@ export default function PdfEditionsEditor({ item, onChange, onBusyChange = () =>
   const files = pdfEditions(item);
   const [extra, setExtra] = useState([]); const [newLang, setNewLang] = useState('');
   const [busy, setBusy] = useState(''); const [error, setError] = useState('');
-  const languages = [...new Set(['fr', 'en', ...Object.keys(files), ...extra])];
+  const languages = [...new Set(['fr', 'en', 'es', 'pt', 'de', ...Object.keys(files), ...extra])];
   const update = (lang, path) => {
     // Catalogue fields must never store a signed URL's bearer token.
     if (/^https?:\/\//i.test(path.trim())) path = path.trim().split(/[?#]/)[0];

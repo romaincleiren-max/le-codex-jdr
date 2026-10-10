@@ -12,6 +12,8 @@ Le catalogue actif a été vérifié en lecture seule : seul le scénario 10, «
 
 ## Téléchargements et traductions
 
+- Interface publique : Français, English, Español, Português et Deutsch dans le sélecteur ; le choix est mémorisé sur l’appareil. Le catalogue, les tags, le panier, les téléchargements, la connexion et la récupération de mot de passe utilisent ces modes. Portugais européen (`pt`). Les contenus rédigés, les PDF, les outils de jeu historiques et l’administration ne sont pas traduits automatiquement ; les erreurs renvoyées par des services externes peuvent conserver leur langue d’origine.
+- Vérifications linguistiques : `node scripts/languages-browser.test.mjs`, cinq langues sur mobile et ordinateur, persistance après rechargement, récupération de compte, repli en français pour une préférence invalide et absence de faux PDF traduit.
 - Administration → Scénarios → Modifier → **PDF disponibles par langue** : choisir un fichier pour Français, English ou une langue ajoutée avec son code (`es`, `de`, `it`, `pt-BR`…). Enregistrer après la fin de l’import.
 - Chaque langue possède son fichier indépendant. Une langue sans fichier n’apparaît pas dans la liste proposée au visiteur. Retirer une traduction ne supprime pas le fichier du stockage, afin de préserver les données.
 - La langue proposée par défaut suit la langue de l’interface si sa traduction existe ; sinon, elle utilise la première édition disponible. Le visiteur peut toujours changer ce choix.

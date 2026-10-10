@@ -1,5 +1,8 @@
 const fr = {
   nav: {
+    forge: 'Forge',
+    bestiary: 'Bestiaire',
+    initiative: 'Initiative',
     home: 'Accueil',
     submit: 'Proposer',
     admin: 'Admin',
